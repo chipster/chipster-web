@@ -416,21 +416,54 @@ test("the page follows the width of the viewer", async ({ page }) => {
   });
   await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.pageWidth)).toBe(original.pageWidth);
   expect(await expectHeightFitsPages(page, 1)).toBe(original.viewer);
+});
 
-  // when the width keeps going back and forth, like when a scrollbar of the panel comes and goes
-  // with the height of the page, the page stays at the narrower width after the second return
-  for (let i = 0; i < 3; i++) {
-    for (const width of ["400px", ""]) {
-      await visualization.evaluate((element, value) => {
-        element.style.display = value ? "block" : "";
-        element.style.width = value;
-        // the viewer notices the width before the next frame
-        return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      }, width);
+test("the width of the session view doesn't change with the height of the pages", async ({ page }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+
+  // the width inside the panel around the visualization, when there's something to scroll and when there isn't
+  const widths = await viewer(page).evaluate((element) => {
+    let panel = element.parentElement;
+    while (panel && !/auto|scroll/.test(getComputedStyle(panel).overflowY)) {
+      panel = panel.parentElement;
     }
-  }
-  await page.waitForTimeout(500);
-  expect((await viewerAndPageHeights(page)).pageWidth).toBeLessThanOrEqual(400);
+    const children = Array.from(panel.children) as HTMLElement[];
+    for (const child of children) {
+      child.style.display = "none";
+    }
+    const spacer = document.createElement("div");
+    panel.append(spacer);
+    spacer.style.height = panel.clientHeight * 2 + "px";
+    const scrolling = { scrolls: panel.scrollHeight > panel.clientHeight, width: panel.clientWidth };
+    spacer.style.height = "10px";
+    const notScrolling = { scrolls: panel.scrollHeight > panel.clientHeight, width: panel.clientWidth };
+    spacer.remove();
+    for (const child of children) {
+      child.style.display = "";
+    }
+    return { scrolling, notScrolling };
+  });
+  expect(widths.scrolling.scrolls).toBe(true);
+  expect(widths.notScrolling.scrolls).toBe(false);
+  expect(widths.notScrolling.width).toBe(widths.scrolling.width);
+});
+
+test("all pages can be shown only up to a limit", async ({ page }) => {
+  const pages = Array.from({ length: 51 }, (_, i) => ({ text: `Page ${i + 1}`, width: 612, height: 792 }));
+  const datasetId = await createDataset(api, sessionId, { name: "long.pdf", x: 100, y: 100 }, createPdfPages(pages));
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+
+  await expect(visualization.getByText("Page 1 / 51")).toBeVisible();
+  await expect(visualization.getByTitle("Next page")).toBeEnabled();
+  await expect(visualization.getByTitle("Show all pages")).toHaveCount(0);
 });
 
 test("a link to a web page opens it in a new tab", async ({ page, context }) => {

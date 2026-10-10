@@ -61,9 +61,12 @@ function loadPdfjs(): Promise<Pdfjs> {
 
 /*
  * One worker for all pdf files, so that its script isn't downloaded and
- * started again for each file. A worker that failed to start, for example
- * because its script couldn't be downloaded, would fail every file after it,
- * so the next file gets a new one.
+ * started again for each file.
+ *
+ * When the worker fails to start, pdf.js parses the files on the main thread
+ * instead, until the page is reloaded. Only when that fails too, for example
+ * because the script couldn't be downloaded at all, the worker fails, and it
+ * would fail every file after it, so the next file gets a new one.
  */
 function getWorker(lib: PdfjsLib): PDFWorker {
   if (!sharedWorker || sharedWorker.destroyed) {
@@ -87,6 +90,11 @@ function assetUrl(path: string): string {
 // the images of the stylesheet are next to it in the assets
 function loadStylesheet(href: string): Promise<void> {
   return new Promise((resolve, reject) => {
+    // loaded already, when loading the viewer failed after it and is tried again
+    if (Array.from(document.head.querySelectorAll("link")).some((existing) => existing.href === href)) {
+      resolve();
+      return;
+    }
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = href;
@@ -172,8 +180,6 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   private abortController = new AbortController();
   private resizeObserver: ResizeObserver;
   private hostWidth: number;
-  // the widths of the last second, to notice going back and forth
-  private recentWidths: { width: number; time: number }[] = [];
   private pagesHeight = 0;
   private pendingProgress: OnProgressParameters;
   private progressTimeout: ReturnType<typeof setTimeout>;
@@ -314,6 +320,8 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     );
     // until then, the other pages have the size of the first page
     eventBus.on("pagesloaded", () => this.updateScale(), { signal });
+    // a page that pdf.js fetches only for rendering it gets its own size then
+    eventBus.on("pagerendered", () => this.updateScale(), { signal });
     eventBus.on(
       "pagechanging",
       ({ pageNumber }) => {
@@ -325,29 +333,17 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     );
     // the width changes also without a window resize, for example when a panel next to the viewer is opened
     this.ngZone.runOutsideAngular(() => {
+      /*
+       * The height of the pages mustn't change the width, or this could go back
+       * and forth: the session view keeps the space of its scrollbar for that.
+       */
       this.resizeObserver = new ResizeObserver(() => {
-        const width = this.host.nativeElement.clientWidth;
+        const width = this.measureWidth();
         // not for the height, which follows the pages
-        if (width === this.hostWidth) {
-          return;
+        if (width !== this.hostWidth) {
+          this.hostWidth = width;
+          this.updateScale();
         }
-        /*
-         * A scrollbar of a panel around the viewer can appear because of the
-         * height of the pages, and disappear when the pages are made narrower
-         * for it, so the width could go back and forth without end. The pages
-         * are left at the narrower width then, but only after the width has
-         * come back twice, because a panel next to the viewer may be opened
-         * and closed too.
-         */
-        const now = Date.now();
-        this.recentWidths = this.recentWidths.filter((entry) => now - entry.time < 1000);
-        const timesAtWidth = this.recentWidths.filter((entry) => entry.width === width).length;
-        this.recentWidths.push({ width, time: now });
-        if (width > this.hostWidth && timesAtWidth >= 2) {
-          return;
-        }
-        this.hostWidth = width;
-        this.updateScale();
       });
       this.resizeObserver.observe(this.host.nativeElement);
     });
@@ -367,6 +363,15 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     }
   }
 
+  /*
+   * The width of this element, because a scrollbar of the container would
+   * take from its width. Rounded down, because clientWidth could be rounded
+   * up from a fraction, and a page that wide wouldn't fit.
+   */
+  private measureWidth(): number {
+    return Math.floor(this.host.nativeElement.getBoundingClientRect().width);
+  }
+
   private updateScrollMode() {
     const { ScrollMode } = this.pdfjs.viewer;
     this.pdfViewer.scrollMode = this.showAll ? ScrollMode.VERTICAL : ScrollMode.PAGE;
@@ -382,12 +387,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
    * when the scale changes the pages that fit in the viewer.
    */
   private updateScale() {
-    /*
-     * The width of this element, because a scrollbar of the container would
-     * take from its width. The width that the resize observer accepted, so
-     * that the pages stay at the narrower width when it refused a wider one.
-     */
-    const viewerWidth = this.hostWidth ?? this.host.nativeElement.clientWidth;
+    const viewerWidth = this.hostWidth ?? this.measureWidth();
     if (!this.pdfViewer?.pdfDocument || this.pdfViewer.pagesCount === 0 || viewerWidth === 0) {
       return;
     }

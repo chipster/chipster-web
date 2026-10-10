@@ -4,6 +4,15 @@
   height: calc(~"100vh - 66px");
 }
 
+/*
+The visualizations follow the width of this area, the pdf pages for example, and
+their height mustn't change it, so the space of the scrollbar is kept also when
+there's nothing to scroll.
+*/
+#myDiv {
+  scrollbar-gutter: stable;
+}
+
 .close-well-button {
   position: relative;
   right: -10px;

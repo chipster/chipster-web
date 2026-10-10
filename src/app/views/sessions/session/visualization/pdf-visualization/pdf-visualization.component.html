@@ -33,7 +33,7 @@
         </button>
 
         <button
-          *ngIf="!showAll"
+          *ngIf="!showAll && totalPages <= maxShowAllPages"
           class="btn btn-secondary btn-sm tool-bar-button ms-2"
           (click)="toggleShowAll()"
           [title]="showAllButtonText">
