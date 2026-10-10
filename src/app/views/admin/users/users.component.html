@@ -12,7 +12,7 @@
     </tr>
   </thead>
   <tbody>
-    @for (user of users; track user) {
+    @for (user of users; track user.auth + "/" + user.username) {
       <tr>
         <td>{{ user.auth }}</td>
         <td>{{ user.username }}</td>

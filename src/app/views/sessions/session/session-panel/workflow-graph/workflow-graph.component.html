@@ -11,7 +11,7 @@
       <div class="label-legend-body">
         <span class="label-legend-title">Labels</span>
         <span class="label-legend-items">
-          @for (label of labelLegend; track label) {
+          @for (label of labelLegend; track label.labelId) {
             <button
               type="button"
               class="label-legend-item"

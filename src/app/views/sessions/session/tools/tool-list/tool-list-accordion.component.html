@@ -4,7 +4,7 @@
   <div class="row">
     <div class="col">
       <div class="btn-group">
-        @for (module of modules | modulepipe: searchTool; track module) {
+        @for (module of modules | modulepipe: searchTool; track module.moduleId) {
           <button
             type="button"
             class="btn btn-sm"
@@ -38,7 +38,7 @@
     <div class="col">
       <ch-scroller>
         <div class="tool-list list-group-sm" id="category-tool-list">
-          @for (category of selectedModule.categories | categorypipe: searchTool; track category) {
+          @for (category of selectedModule.categories | categorypipe: searchTool; track category.name) {
             <div>
               <button
                 type="button"

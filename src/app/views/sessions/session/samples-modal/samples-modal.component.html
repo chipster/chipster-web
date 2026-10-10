@@ -85,7 +85,7 @@
           </div>
           <hr class="mt-1 mb-1" />
           <div class="limit-height">
-            @for (dataset of unpairedFiles; track dataset) {
+            @for (dataset of unpairedFiles; track dataset.datasetId) {
               <div class="">{{ dataset.name }}</div>
             }
           </div>
@@ -105,7 +105,7 @@
           <div class="limit-height">
             <table class="table table-sm table-striped table-bordered">
               <tbody>
-                @for (singleEndSample of singleEndSamples; track singleEndSample) {
+                @for (singleEndSample of singleEndSamples; track singleEndSample.sampleId) {
                   <tr>
                     <td>{{ singleEndSample.file.name }}</td>
                   </tr>
@@ -137,7 +137,7 @@
                   <th><i class="far fa-arrow-alt-circle-left"></i></th>
                 </thead>
                 <tbody>
-                  @for (pairedEndSample of pairedEndSamples; track pairedEndSample) {
+                  @for (pairedEndSample of pairedEndSamples; track pairedEndSample.sampleId) {
                     <tr>
                       <td>{{ pairedEndSample.pairs[0].r1File.name }}</td>
                       <td>{{ pairedEndSample.pairs[0].r2File.name }}</td>
@@ -167,7 +167,7 @@
                 <th class="w-50"><i class="far fa-arrow-alt-circle-left"></i></th>
               </thead>
               <tbody>
-                @for (pairedEndSample of pairMissingSamples; track pairedEndSample) {
+                @for (pairedEndSample of pairMissingSamples; track pairedEndSample.sampleId) {
                   <tr>
                     @if (pairedEndSample.pairs[0].r1File != null) {
                       <td>{{ pairedEndSample.pairs[0].r1File.name }}</td>

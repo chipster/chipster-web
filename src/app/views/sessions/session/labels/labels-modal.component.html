@@ -27,7 +27,7 @@
   @if (rows.length > 0) {
     <table class="table table-sm align-middle mb-0">
       <tbody>
-        @for (row of rows; track row) {
+        @for (row of rows; track row.label.labelId) {
           <tr>
             @if (hasSelection()) {
               <td style="width: 2.5rem">

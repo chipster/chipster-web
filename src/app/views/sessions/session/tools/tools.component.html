@@ -35,7 +35,7 @@
           <!-- Old module selection tabs -->
           @if (moduleSelectionMode === ModuleSelectionMode.Tabs) {
             <div class="btn-group" id="moduleBtnGroup">
-              @for (module of modules; track module) {
+              @for (module of modules; track module.moduleId) {
                 <button
                   type="button"
                   class="btn"
@@ -114,7 +114,7 @@
         <!-- category list -->
         <div class="col col-left">
           <div class="list-group" id="category-list">
-            @for (category of selectedModule.categories; track category) {
+            @for (category of selectedModule.categories; track category.name) {
               <button
                 type="button"
                 class="list-group-item list-group-item-action tool-list-item"
@@ -135,7 +135,7 @@
           <div style="position: relative; height: 100%">
             @if (selectedCategory) {
               <div class="list-group" id="tool-list" style="position: absolute; height: 100%; width: 100%">
-                @for (tool of selectedCategory.tools; track tool) {
+                @for (tool of selectedCategory.tools; track tool.name.id) {
                   <button
                     type="button"
                     class="list-group-item list-group-item-action tool-list-item"

@@ -44,7 +44,12 @@
         @if (validatedTool.tool.parameters.length > 0) {
           <table class="table table-sm">
             <tbody>
-              @for (parameter of validatedTool.tool.parameters; track parameter; let i = $index; let isLast = $last) {
+              @for (
+                parameter of validatedTool.tool.parameters;
+                track parameter.name.id;
+                let i = $index;
+                let isLast = $last
+              ) {
                 <tr>
                   <td style="width: 60%" [class.no-bottom-border]="isLast">
                     <!-- parameter name -->
@@ -67,7 +72,7 @@
                         name="parameter_{{ i }}"
                         [(ngModel)]="parameter.value"
                         (ngModelChange)="onParametersChanged()">
-                        @for (option of parameter.selectionOptions; track option) {
+                        @for (option of parameter.selectionOptions; track option.id) {
                           <option value="{{ option.id }}">
                             {{ option.displayName || option.id }}
                           </option>

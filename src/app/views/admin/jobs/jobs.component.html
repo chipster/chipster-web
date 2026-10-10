@@ -10,7 +10,7 @@
     </tr>
   </thead>
   <tbody>
-    @for (job of jobs; track job) {
+    @for (job of jobs; track job.jobId) {
       <tr>
         <th scope="row">{{ job.toolName }}</th>
         <td>{{ job.createdBy }}</td>

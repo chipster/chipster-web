@@ -53,7 +53,7 @@
             <td class="lighter">Labels:</td>
             <td>
               @if (getDatasetLabels(); as labels) {
-                @for (label of labels; track label) {
+                @for (label of labels; track label.labelId) {
                   <ch-link-button (click)="editLabels()">
                     <ch-label-pill [label]="label"></ch-label-pill>
                   </ch-link-button>

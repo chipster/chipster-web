@@ -277,7 +277,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (session of sessions; track session) {
+              @for (session of sessions; track session.sessionId) {
                 <tr>
                   @if (showSessionNames) {
                     <td>{{ session.name }}</td>

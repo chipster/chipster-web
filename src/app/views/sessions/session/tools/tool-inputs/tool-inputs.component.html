@@ -9,7 +9,7 @@
     @if (bindingModels.length > 0) {
       <table class="table table-sm">
         <tbody>
-          @for (bindingModel of bindingModels; track bindingModel; let isLast = $last) {
+          @for (bindingModel of bindingModels; track bindingModel.input.name.id; let isLast = $last) {
             <tr>
               <td style="width: 60%" [class.no-bottom-border]="isLast">
                 <!-- input name -->
@@ -32,7 +32,7 @@
                     class="w-100"
                     [(ngModel)]="bindingModel.boundDatasets[0]"
                     (ngModelChange)="inputSelected(bindingModel)">
-                    @for (dataset of bindingModel.compatibleDatasets; track dataset) {
+                    @for (dataset of bindingModel.compatibleDatasets; track dataset.datasetId) {
                       <option [ngValue]="dataset">
                         {{ dataset.name }}
                       </option>
@@ -48,7 +48,7 @@
                     multiple
                     [(ngModel)]="bindingModel.boundDatasets"
                     (ngModelChange)="inputSelected(bindingModel)">
-                    @for (dataset of bindingModel.compatibleDatasets; track dataset) {
+                    @for (dataset of bindingModel.compatibleDatasets; track dataset.datasetId) {
                       <option [ngValue]="dataset">
                         {{ dataset.name }}
                       </option>

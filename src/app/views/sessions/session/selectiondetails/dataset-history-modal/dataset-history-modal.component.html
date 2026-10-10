@@ -8,7 +8,7 @@
 
   <div class="form-group">
     <div class="row">
-      @for (option of historyOptions; track option; let i = $index) {
+      @for (option of historyOptions; track option.id; let i = $index) {
         <div class="col-sm">
           <label class="no-break">
             <input
@@ -47,7 +47,7 @@
     </div>
   </h2>
 
-  @for (step of datasetHistorySteps; track step; let i = $index) {
+  @for (step of datasetHistorySteps; track $index; let i = $index) {
     <div class="step">
       <table class="table table-sm text-sm align-top mb-0">
         <tbody>
@@ -90,7 +90,7 @@
                   <!-- imported files don't have a sourceJob -->
                   @if (step.sourceJob != null) {
                     <tbody>
-                      @for (input of step.sourceJob.inputs; track input) {
+                      @for (input of step.sourceJob.inputs; track input.inputId) {
                         <tr>
                           <!-- old jobs (until 11/2023) have datasetName in input.displayName -->
                           @if (input.datasetName == null) {

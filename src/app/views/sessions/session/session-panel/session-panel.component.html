@@ -163,7 +163,7 @@
 
         <div id="file-list" class="p-0">
           <div class="list-group dataset-list list-group-sm pt-0">
-            @for (dataset of getDatasetListSorted() | datasetsearch: datasetSearch; track dataset) {
+            @for (dataset of getDatasetListSorted() | datasetsearch: datasetSearch; track dataset.datasetId) {
               <button
                 type="button "
                 class="dataset-list-button list-group-item list-group-item-action"
