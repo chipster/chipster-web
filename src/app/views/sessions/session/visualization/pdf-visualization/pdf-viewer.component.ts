@@ -30,6 +30,7 @@ interface Pdfjs {
 const pdfjsAssets = "assets/pdfjs/";
 
 let pdfjsPromise: Promise<Pdfjs>;
+let stylesheetPromise: Promise<void>;
 let sharedWorker: PDFWorker;
 
 /*
@@ -87,14 +88,13 @@ function assetUrl(path: string): string {
   return new URL(pdfjsAssets + path, document.baseURI).href;
 }
 
-// the images of the stylesheet are next to it in the assets
+/*
+ * The images of the stylesheet are next to it in the assets. Loaded once,
+ * also when loading the viewer failed after it and is tried again, but again
+ * when the stylesheet itself failed.
+ */
 function loadStylesheet(href: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    // loaded already, when loading the viewer failed after it and is tried again
-    if (Array.from(document.head.querySelectorAll("link")).some((existing) => existing.href === href)) {
-      resolve();
-      return;
-    }
+  stylesheetPromise ??= new Promise<void>((resolve, reject) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = href;
@@ -105,6 +105,10 @@ function loadStylesheet(href: string): Promise<void> {
     };
     document.head.append(link);
   });
+  stylesheetPromise.catch(() => {
+    stylesheetPromise = undefined;
+  });
+  return stylesheetPromise;
 }
 
 /*
@@ -180,6 +184,8 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   private abortController = new AbortController();
   private resizeObserver: ResizeObserver;
   private hostWidth: number;
+  private hostHeight: number;
+  private scaleFrame: number;
   private pagesHeight = 0;
   private pendingProgress: OnProgressParameters;
   private progressTimeout: ReturnType<typeof setTimeout>;
@@ -213,6 +219,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this.destroyed = true;
+    cancelAnimationFrame(this.scaleFrame);
     this.clear();
     this.abortController.abort();
     this.resizeObserver?.disconnect();
@@ -286,6 +293,17 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
         super.goToPage(val);
         scrollToCurrentPage();
       }
+
+      override goToXY(pageNumber: number, x: number, y: number, options?: object) {
+        super.goToXY(pageNumber, x, y, options);
+        scrollToCurrentPage();
+      }
+
+      // for the buttons in a pdf that go to the next, previous, first or last page
+      override executeNamedAction(action: string) {
+        super.executeNamedAction(action);
+        scrollToCurrentPage();
+      }
     }
     this.linkService = new LinkService({
       eventBus,
@@ -321,7 +339,19 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     // until then, the other pages have the size of the first page
     eventBus.on("pagesloaded", () => this.updateScale(), { signal });
     // a page that pdf.js fetches only for rendering it gets its own size then
-    eventBus.on("pagerendered", () => this.updateScale(), { signal });
+    // once per frame, because pdf.js may render many pages in a row
+    eventBus.on(
+      "pagerendered",
+      () => {
+        this.scaleFrame ??= requestAnimationFrame(() => {
+          this.scaleFrame = null;
+          if (!this.destroyed) {
+            this.updateScale();
+          }
+        });
+      },
+      { signal },
+    );
     eventBus.on(
       "pagechanging",
       ({ pageNumber }) => {
@@ -339,10 +369,22 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
        */
       this.resizeObserver = new ResizeObserver(() => {
         const width = this.measureWidth();
-        // not for the height, which follows the pages
         if (width !== this.hostWidth) {
           this.hostWidth = width;
           this.updateScale();
+        }
+        /*
+         * The height follows the pages, so it doesn't change the scale. But
+         * pdf.js renders only the pages that fit in the container, and decides
+         * that when the pages change, before the height is given to this
+         * element, so it has to look again when all pages are shown.
+         */
+        const height = this.host.nativeElement.clientHeight;
+        if (height !== this.hostHeight) {
+          this.hostHeight = height;
+          if (this.pdfViewer.pagesCount > 0) {
+            this.pdfViewer.update();
+          }
         }
       });
       this.resizeObserver.observe(this.host.nativeElement);

@@ -316,6 +316,32 @@ test("the height follows the pages of a pdf file with pages of different sizes",
   await expect(visualization.locator(".page canvas")).toHaveCount(6, { timeout: 30_000 });
 });
 
+test("all pages are rendered when they are shown, also when they have the same size", async ({ page }) => {
+  // pages of the same size don't need a new scale, which would render them again
+  const pages = Array.from({ length: 6 }, (_, i) => ({ text: `Page ${i + 1}`, width: 612, height: 792 }));
+  const datasetId = await createDataset(api, sessionId, { name: "same.pdf", x: 100, y: 100 }, createPdfPages(pages));
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+
+  await visualization.getByTitle("Show all pages").click();
+  await expectHeightFitsPages(page, 6);
+  await expect(visualization.locator(".page canvas")).toHaveCount(6, { timeout: 30_000 });
+});
+
+test("a pdf doesn't change the color scheme of the app", async ({ page }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
+  await page.emulateMedia({ colorScheme: "dark" });
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe("normal");
+});
+
 test("the height follows the pages when switching between one and all pages", async ({ page }) => {
   const datasetId = await createDataset(api, sessionId, { name: "multipage.pdf", x: 100, y: 100 }, MULTI_PAGE_PDF);
 
