@@ -5,7 +5,7 @@
   </div>
   <div class="modal-body">
     <dl>
-      @for (shortcut of shortcuts; track $index) {
+      @for (shortcut of shortcuts; track shortcut.keys[0]) {
         <dt>
           @for (key of shortcut.keys; track key; let last = $last) {
             <kbd>{{ key }}</kbd>

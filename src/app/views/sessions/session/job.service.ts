@@ -263,7 +263,7 @@ export class JobService {
   }
 
   getApplicationVersions(job: Job) {
-    const applicationVersionFiles = job.metadataFiles.filter(
+    const applicationVersionFiles = (job.metadataFiles ?? []).filter(
       (metadataFile: MetadataFile) => metadataFile.name === this.APPLICATION_VERSIONS_FILENAME,
     );
 
@@ -274,12 +274,15 @@ export class JobService {
       log.warn("more than one applicaton versions file in job", job.jobId, job.toolId);
     }
 
-    const applicationVersionsString = applicationVersionFiles[0].content;
-    const applicationVersions = JSON.parse(applicationVersionsString);
-
-    return applicationVersions.map((appVersion) => ({
-      application: appVersion.application,
-      version: appVersion.version.trim(),
-    }));
+    try {
+      const applicationVersions = JSON.parse(applicationVersionFiles[0].content);
+      return applicationVersions.map((appVersion) => ({
+        application: appVersion.application,
+        version: String(appVersion.version ?? "").trim(),
+      }));
+    } catch (err) {
+      log.warn("malformed application versions file in job", job.jobId, job.toolId, err);
+      return [];
+    }
   }
 }

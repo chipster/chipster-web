@@ -3,10 +3,25 @@ import { Injectable } from "@angular/core";
 @Injectable({ providedIn: "root" })
 export class HotkeyService {
   private readonly shortcuts = new Map<string, { callback: () => void; description: string }>();
+  // bumped on every change so that views can cache what they derive from the shortcuts
+  private version = 0;
 
   register(key: string, description: string, callback: () => void): () => void {
-    this.shortcuts.set(key.toLowerCase(), { callback, description });
-    return () => this.shortcuts.delete(key.toLowerCase());
+    const lowerKey = key.toLowerCase();
+    const entry = { callback, description };
+    this.shortcuts.set(lowerKey, entry);
+    this.version++;
+    return () => {
+      // a later registration of the same key may have replaced this entry, leave that one alone
+      if (this.shortcuts.get(lowerKey) === entry) {
+        this.shortcuts.delete(lowerKey);
+        this.version++;
+      }
+    };
+  }
+
+  getVersion(): number {
+    return this.version;
   }
 
   getShortcuts(): Array<{ key: string; description: string }> {

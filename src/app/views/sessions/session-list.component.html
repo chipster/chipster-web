@@ -350,7 +350,7 @@
               <th></th>
             </tr>
           }
-          @for (session of sessionShares; track session.sessionId) {
+          @for (session of sessionShares; track session.rules[0].ruleId) {
             <tr [ngClass]="{ highlight: rowHighlighted(session) }" class="session-list-item">
               <td>
                 <span>{{ session.rules[0].username }}</span>

@@ -25,9 +25,8 @@
                 triggers="mouseenter:mouseleave">
                 {{ getStatusValuesCount(service) }} values
               </span>
-            }
-            <!-- show http error codes directly -->
-            @if (getStatusString(service).length <= 10) {
+            } @else {
+              <!-- show http error codes directly -->
               <span>
                 {{ getStatusString(service) }}
               </span>

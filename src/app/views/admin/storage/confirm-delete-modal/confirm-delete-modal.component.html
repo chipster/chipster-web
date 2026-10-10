@@ -21,8 +21,7 @@
       (click)="onDelete()">
       Delete
     </button>
-  }
-  @if (!deleteVisible) {
+  } @else {
     <button type="button" class="btn btn-sm btn-secondary mt-3 mb-3 w-100" (click)="onCancelDelete()">Cancel</button>
   }
 </div>

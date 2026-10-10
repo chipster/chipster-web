@@ -34,8 +34,7 @@ Added:
     }
     @if (message && options.enableHtml) {
       <div role="alertdialog" aria-live="polite" [class]="options.messageClass" [innerHTML]="message"></div>
-    }
-    @if (message && !options.enableHtml) {
+    } @else if (message) {
       <div role="alertdialog" aria-live="polite" [class]="options.messageClass" [attr.aria-label]="message">
         {{ message }}
       </div>
