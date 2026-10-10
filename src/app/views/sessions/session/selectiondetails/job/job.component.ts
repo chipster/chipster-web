@@ -128,6 +128,9 @@ export class JobComponent implements OnInit, OnDestroy {
 
   // get job from session data and update state fields
   update(jobId: string) {
+    // rebuilt from the job below; job events call this again for the same job
+    this.outputListForView = [];
+
     if (jobId) {
       const job = this.sessionDataService.getJobById(jobId, this.sessionData.jobsMap);
       if (job) {

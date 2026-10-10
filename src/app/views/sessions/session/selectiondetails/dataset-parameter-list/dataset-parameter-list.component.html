@@ -1,6 +1,6 @@
 <table class="table table-sm text-sm">
   <tbody>
-    @for (param of parameterListForView; track param; let i = $index) {
+    @for (param of parameterListForView; track param.parameterId; let i = $index) {
       <tr>
         @if (i < limit) {
           <td style="width: 60%" [ngClass]="{ 'no-top-border': i === 0, 'no-horizontal-padding': historyMode }">
