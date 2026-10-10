@@ -136,7 +136,7 @@
             <td class="p-0">
               <table class="table table-sm">
                 <tbody>
-                  @for (appVersion of getApplicationVersions(); track $index) {
+                  @for (appVersion of applicationVersions; track appVersion.application) {
                     <tr>
                       @if (appVersion.application !== "R Session Info") {
                         <td class="label-td">
@@ -155,8 +155,7 @@
                             <ch-link-button class="no-underline-link-button ms-2" (click)="toggleRSessionInfo()">
                               @if (rSessionInfoVisible) {
                                 <span>Hide</span>
-                              }
-                              @if (!rSessionInfoVisible) {
+                              } @else {
                                 <span>Show</span>
                               }
                               R session info
@@ -164,7 +163,7 @@
                           </span>
 
                           @if (rSessionInfoVisible) {
-                            <pre class="mt-2">{{ getRSessionInfo() }}</pre>
+                            <pre class="mt-2">{{ rSessionInfo }}</pre>
                           }
                         </td>
                       }
