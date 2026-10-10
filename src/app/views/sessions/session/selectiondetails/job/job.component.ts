@@ -86,7 +86,6 @@ export class JobComponent implements OnInit, OnDestroy {
         this.isDefaultValueMap.clear();
         this.parameterListForView = [];
         this.inputListForView = [];
-        this.outputListForView = [];
         this.hideInputLines = true;
         let jobId = null;
 

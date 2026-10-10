@@ -44,12 +44,7 @@
         @if (validatedTool.tool.parameters.length > 0) {
           <table class="table table-sm">
             <tbody>
-              @for (
-                parameter of validatedTool.tool.parameters;
-                track parameter.name.id;
-                let i = $index;
-                let isLast = $last
-              ) {
+              @for (parameter of validatedTool.tool.parameters; track parameter.name.id; let isLast = $last) {
                 <tr>
                   <td style="width: 60%" [class.no-bottom-border]="isLast">
                     <!-- parameter name -->
@@ -69,7 +64,7 @@
                     @if (toolService.isSelectionParameter(parameter)) {
                       <select
                         class="w-100"
-                        name="parameter_{{ i }}"
+                        name="parameter_{{ parameter.name.id }}"
                         [(ngModel)]="parameter.value"
                         (ngModelChange)="onParametersChanged()">
                         @for (option of parameter.selectionOptions; track option.id) {
@@ -86,7 +81,7 @@
                         class="w-100"
                         type="number"
                         [(ngModel)]="parameter.value"
-                        name="parameter_{{ i }}"
+                        name="parameter_{{ parameter.name.id }}"
                         min="{{ parameter.from }}"
                         max="{{ parameter.to }}"
                         step="{{ toolService.getStepSize(parameter) }}"
@@ -99,7 +94,7 @@
                       <input
                         type="text"
                         class="w-100"
-                        name="parameter_{{ i }}"
+                        name="parameter_{{ parameter.name.id }}"
                         [(ngModel)]="parameter.value"
                         required="{{ !parameter.optional }}"
                         (ngModelChange)="onParametersChanged()" />
