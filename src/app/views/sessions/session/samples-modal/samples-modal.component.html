@@ -105,7 +105,7 @@
           <div class="limit-height">
             <table class="table table-sm table-striped table-bordered">
               <tbody>
-                @for (singleEndSample of singleEndSamples; track singleEndSample.sampleId) {
+                @for (singleEndSample of singleEndSamples; track singleEndSample.file.datasetId) {
                   <tr>
                     <td>{{ singleEndSample.file.name }}</td>
                   </tr>

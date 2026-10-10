@@ -9,7 +9,11 @@
     @if (bindingModels.length > 0) {
       <table class="table table-sm">
         <tbody>
-          @for (bindingModel of bindingModels; track bindingModel.input.name.id; let isLast = $last) {
+          @for (
+            bindingModel of bindingModels;
+            track bindingModel.input.name.id || bindingModel.input.name.prefix + bindingModel.input.name.postfix;
+            let isLast = $last
+          ) {
             <tr>
               <td style="width: 60%" [class.no-bottom-border]="isLast">
                 <!-- input name -->

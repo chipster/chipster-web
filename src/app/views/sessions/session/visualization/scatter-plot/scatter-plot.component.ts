@@ -43,6 +43,8 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
   }
 
   checkTSVHeaders() {
+    // called again for every dataset and "Show anyway", don't keep the headers of the previous one
+    this.chipHeaders = [];
     if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
       // Extracting header name without chip prefix
       this.visualizationTSVService.getChipHeaders(this.tsv).forEach((chipHeader) => {
