@@ -525,6 +525,26 @@ test("the progress of the download is shown", async ({ page }) => {
   await expectRendered(page);
 });
 
+/*
+ * Where a page is in the scrolling panel of the session view around the
+ * visualization: how far its top is from the top of the visible part of the
+ * panel, and the height of that visible part.
+ */
+async function pageInPanel(page: Page, pageNumber: number) {
+  return viewer(page)
+    .locator(`.page[data-page-number="${pageNumber}"]`)
+    .evaluate((pageDiv) => {
+      let panel = pageDiv.parentElement;
+      while (panel && !/auto|scroll/.test(getComputedStyle(panel).overflowY)) {
+        panel = panel.parentElement;
+      }
+      return {
+        top: pageDiv.getBoundingClientRect().top - panel.getBoundingClientRect().top - panel.clientTop,
+        panelHeight: panel.clientHeight,
+      };
+    });
+}
+
 test("the links in a pdf file work when all pages are shown", async ({ page }) => {
   const datasetId = await createDataset(api, sessionId, { name: "links.pdf", x: 100, y: 100 }, WIDE_PAGE_LINKS_PDF);
   // Angular reports its errors to the console, and the app shows them in a toast too
@@ -544,10 +564,22 @@ test("the links in a pdf file work when all pages are shown", async ({ page }) =
   await expect(visualization.getByText("All 3 pages")).toBeVisible();
   const allPages = await expectHeightFitsPages(page, 3);
 
-  // to the wide page and back
-  for (const link of [0, 1]) {
+  // to the wide page and back, and the page comes into view in the panel around the viewer
+  const before = await pageInPanel(page, 3);
+  expect(before.top).toBeGreaterThan(before.panelHeight);
+  for (const [link, target] of [
+    [0, 3],
+    [1, 1],
+  ]) {
     await viewer(page).locator(".linkAnnotation a").nth(link).click();
     expect(await expectHeightFitsPages(page, 3)).toBe(allPages);
+    // at the top of the panel, or as near as the panel scrolls: the last page can't go higher than the end
+    await expect
+      .poll(async () => {
+        const { top, panelHeight } = await pageInPanel(page, target);
+        return top > -2 && top < panelHeight / 4;
+      })
+      .toBe(true);
   }
   // the link on a single page goes to the wide page too
   await visualization.getByTitle("Show single page").click();
