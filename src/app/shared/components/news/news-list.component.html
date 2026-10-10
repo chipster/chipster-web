@@ -8,7 +8,7 @@
   <div>
     <table class="table table">
       <tbody>
-        @for (n of news; track n) {
+        @for (n of news; track n.newsId) {
           <tr>
             <td>
               <ch-news-item

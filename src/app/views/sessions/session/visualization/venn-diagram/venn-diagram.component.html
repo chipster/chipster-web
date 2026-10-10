@@ -36,7 +36,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (item of diagramSelection.values; track item) {
+              @for (item of diagramSelection.values; track $index) {
                 <tr>
                   <td>{{ item[0] }}</td>
                   <td>{{ item[1] }}</td>

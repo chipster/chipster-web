@@ -10,7 +10,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (dataset of datasets; track dataset) {
+      @for (dataset of datasets; track dataset.datasetId) {
         <tr>
           <td class="">{{ dataset.name }}</td>
           <td class="text-muted">{{ dataset.size | bytes: 0 }}</td>
@@ -18,7 +18,7 @@
             <td class="text-muted">{{ dataset.created | localDate }}</td>
           }
           <td>
-            @for (label of labelsFor(dataset); track label) {
+            @for (label of labelsFor(dataset); track label.labelId) {
               <ch-label-pill [label]="label"></ch-label-pill>
             }
           </td>

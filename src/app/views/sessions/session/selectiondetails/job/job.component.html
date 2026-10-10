@@ -81,7 +81,7 @@
             <td class="table-td">
               <table class="table table-sm mb-0">
                 <tbody>
-                  @for (input of inputListForView; track input) {
+                  @for (input of inputListForView; track input.inputId) {
                     <tr>
                       <td style="width: 60%; white-space: nowrap">
                         {{ input.displayName || input.inputId }}
@@ -108,7 +108,7 @@
             <td class="table-td">
               <table class="table table-sm mb-0">
                 <tbody>
-                  @for (output of outputListForView; track output) {
+                  @for (output of outputListForView; track output.outputId || output.datasetId) {
                     <tr>
                       <td style="width: 60%; white-space: nowrap">
                         {{ output.displayName || output.outputId }}

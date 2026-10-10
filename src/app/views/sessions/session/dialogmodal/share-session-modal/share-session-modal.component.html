@@ -24,7 +24,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (rule of rules; track rule) {
+      @for (rule of rules; track rule.ruleId) {
         <tr>
           <th scope="row">{{ rule.username }}</th>
           <td>{{ rule.readWrite ? "read-write" : "read-only" }}</td>
