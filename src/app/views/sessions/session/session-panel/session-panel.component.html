@@ -87,16 +87,14 @@
                 aria-expanded="false"
                 title="Labels menu"></button>
               <div ngbDropdownMenu>
-                <ng-container *ngIf="labelMenuItems.length > 0">
-                  <button
-                    *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
-                    ngbDropdownItem
-                    [disabled]="!isDatasetsSelected()"
-                    (click)="toggleLabel(item)">
-                    <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
-                  </button>
+                @if (labelMenuItems.length > 0) {
+                  @for (item of labelMenuItems; track item.label.labelId) {
+                    <button ngbDropdownItem [disabled]="!isDatasetsSelected()" (click)="toggleLabel(item)">
+                      <ch-label-menu-item-content [item]="item"></ch-label-menu-item-content>
+                    </button>
+                  }
                   <div class="dropdown-divider"></div>
-                </ng-container>
+                }
                 <button ngbDropdownItem (click)="manageLabels()">Edit labels&hellip;</button>
                 <div
                   class="dropdown-submenu position-relative"
@@ -109,22 +107,22 @@
                     <span>Select files by label</span>
                     <span aria-hidden="true" class="ms-3">&rsaquo;</span>
                   </button>
-                  <div
-                    *ngIf="selectByLabelOpen"
-                    class="dropdown-menu show"
-                    style="position: absolute; left: 100%; top: 0; margin-left: 0">
-                    <button
-                      *ngFor="let item of labelMenuItems; trackBy: trackLabelMenuItem"
-                      ngbDropdownItem
-                      [disabled]="!item.inUseInSession"
-                      (click)="selectFilesWithLabel(item); labelsDropdown.close()">
-                      <span
-                        class="d-inline-block align-middle"
-                        style="width: 0.6em; height: 0.6em; border-radius: 50%; margin-right: 0.5em"
-                        [style.background]="item.colorBg"></span>
-                      <span>{{ item.label.name }}</span>
-                    </button>
-                  </div>
+                  @if (selectByLabelOpen) {
+                    <div class="dropdown-menu show" style="position: absolute; left: 100%; top: 0; margin-left: 0">
+                      @for (item of labelMenuItems; track item.label.labelId) {
+                        <button
+                          ngbDropdownItem
+                          [disabled]="!item.inUseInSession"
+                          (click)="selectFilesWithLabel(item); labelsDropdown.close()">
+                          <span
+                            class="d-inline-block align-middle"
+                            style="width: 0.6em; height: 0.6em; border-radius: 50%; margin-right: 0.5em"
+                            [style.background]="item.colorBg"></span>
+                          <span>{{ item.label.name }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
                 </div>
                 <div class="dropdown-divider"></div>
                 <button ngbDropdownItem (click)="workflowGraph.toggleLabelDisplayMode()">
@@ -165,16 +163,17 @@
 
         <div id="file-list" class="p-0">
           <div class="list-group dataset-list list-group-sm pt-0">
-            <button
-              type="button "
-              class="dataset-list-button list-group-item list-group-item-action"
-              [ngClass]="{
-                active: selectionService.isSelectedDatasetById(dataset.datasetId),
-              }"
-              (click)="toggleDatasetSelection($event, dataset)"
-              *ngFor="let dataset of getDatasetListSorted() | datasetsearch: datasetSearch">
-              {{ dataset.name }}
-            </button>
+            @for (dataset of getDatasetListSorted() | datasetsearch: datasetSearch; track dataset.datasetId) {
+              <button
+                type="button "
+                class="dataset-list-button list-group-item list-group-item-action"
+                [ngClass]="{
+                  active: selectionService.isSelectedDatasetById(dataset.datasetId),
+                }"
+                (click)="toggleDatasetSelection($event, dataset)">
+                {{ dataset.name }}
+              </button>
+            }
           </div>
         </div>
       </ng-template>

@@ -122,6 +122,7 @@ export class VisualizationTSVService {
     const symbolIndex = tsv.getColumnIndex("symbol");
     const identifierIndex = tsv.getColumnIndex("identifier");
     return rows.map((row: TSVRow) => ({
+      rowId: row.id,
       symbol: symbolIndex !== -1 ? row.row[symbolIndex] : null,
       identifier: identifierIndex !== -1 ? row.row[identifierIndex] : row.row[0],
     }));

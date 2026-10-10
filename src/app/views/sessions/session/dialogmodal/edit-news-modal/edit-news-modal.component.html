@@ -25,24 +25,26 @@
         <textarea style="height: 20em" formControlName="body" class="form-control form-control-sm"></textarea>
       </div>
 
-      <div *ngIf="newsItem != null" class="form-row mt-3">
-        <table class="table table-sm text-sm table-condensed table-borderless">
-          <tbody>
-            <tr>
-              <td>Created</td>
-              <td>{{ created | localDate }}</td>
-            </tr>
-            <tr>
-              <td>Modified</td>
-              <td>{{ modified | localDate }}</td>
-            </tr>
-            <tr>
-              <td>Id</td>
-              <td>{{ id }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      @if (newsItem != null) {
+        <div class="form-row mt-3">
+          <table class="table table-sm text-sm table-condensed table-borderless">
+            <tbody>
+              <tr>
+                <td>Created</td>
+                <td>{{ created | localDate }}</td>
+              </tr>
+              <tr>
+                <td>Modified</td>
+                <td>{{ modified | localDate }}</td>
+              </tr>
+              <tr>
+                <td>Id</td>
+                <td>{{ id }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      }
     </div>
   </form>
 </div>

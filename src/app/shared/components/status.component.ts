@@ -5,9 +5,11 @@ import { LoadState } from "../../model/loadstate";
   selector: "ch-status",
   template: `
     <div>{{ state.message }}</div>
-    <button *ngIf="state.buttonText" class="btn btn-info btn-sm mt-3" (click)="onButton()">
-      {{ state.buttonText }}
-    </button>
+    @if (state.buttonText) {
+      <button class="btn btn-info btn-sm mt-3" (click)="onButton()">
+        {{ state.buttonText }}
+      </button>
+    }
   `,
   styles: [
     `

@@ -33,6 +33,8 @@ export class JobComponent implements OnInit, OnDestroy {
   tool: Tool;
   parameterLimit = 12;
   rSessionInfoVisible = false;
+  applicationVersions: Array<{ application: string; version: string }> = [];
+  rSessionInfo: string = null;
   hideInputLines = true;
   filteredScreenOutput: string = null;
   hasInputLines = false;
@@ -84,7 +86,6 @@ export class JobComponent implements OnInit, OnDestroy {
         this.isDefaultValueMap.clear();
         this.parameterListForView = [];
         this.inputListForView = [];
-        this.outputListForView = [];
         this.hideInputLines = true;
         let jobId = null;
 
@@ -126,6 +127,9 @@ export class JobComponent implements OnInit, OnDestroy {
 
   // get job from session data and update state fields
   update(jobId: string) {
+    // rebuilt from the job below; job events call this again for the same job
+    this.outputListForView = [];
+
     if (jobId) {
       const job = this.sessionDataService.getJobById(jobId, this.sessionData.jobsMap);
       if (job) {
@@ -138,6 +142,8 @@ export class JobComponent implements OnInit, OnDestroy {
         this.hasInputLines = this.screenOutput?.split("\n").some((line) => line.startsWith(">")) ?? false;
         this.filteredScreenOutput = this.filterScreenOutput();
         this.duration = JobService.getDuration(job);
+        this.applicationVersions = this.jobService.getApplicationVersions(job);
+        this.rSessionInfo = this.applicationVersions.find((v) => v.application === "R Session Info")?.version ?? null;
 
         if (job.outputs != null) {
           this.outputListForView = job.outputs;
@@ -167,6 +173,8 @@ export class JobComponent implements OnInit, OnDestroy {
     this.failed = false;
     this.screenOutput = null;
     this.duration = EMPTY;
+    this.applicationVersions = [];
+    this.rSessionInfo = null;
   }
 
   close() {
@@ -270,16 +278,6 @@ export class JobComponent implements OnInit, OnDestroy {
       .forEach((i) => {
         i.displayName = i.inputId;
       });
-  }
-
-  getApplicationVersions() {
-    return this.jobService.getApplicationVersions(this.job);
-  }
-
-  getRSessionInfo() {
-    return this.jobService
-      .getApplicationVersions(this.job)
-      .filter((appVersion) => appVersion.application === "R Session Info")[0]?.version;
   }
 
   toggleRSessionInfo() {

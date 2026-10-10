@@ -1,64 +1,75 @@
-<div *ngIf="!state.isReady(); then statusTemplate"></div>
+@if (!state.isReady()) {
+  <ch-status [state]="state" (buttonEvent)="showAnyway()"></ch-status>
+}
 
 <div class="row">
   <div class="col-md-8">
     <div id="volcanoplot"></div>
   </div>
-  <div class="col-md-4" *ngIf="state.isReady()" id="setting">
-    <h6 class="lighter mb-0">Parameters</h6>
-    <label for="selectXaxis" class="text-sm">Fold Change</label>
-    <select
-      class="form-control"
-      id="selectXaxis"
-      [(ngModel)]="selectedXAxisHeader"
-      (ngModelChange)="setXAxisHeader($event)">
-      <option *ngFor="let fcHeader of volcanoPlotFCHeaders">{{ fcHeader }}</option>
-    </select>
+  @if (state.isReady()) {
+    <div class="col-md-4" id="setting">
+      <h6 class="lighter mb-0">Parameters</h6>
+      <label for="selectXaxis" class="text-sm">Fold Change</label>
+      <select
+        class="form-control"
+        id="selectXaxis"
+        [(ngModel)]="selectedXAxisHeader"
+        (ngModelChange)="setXAxisHeader($event)">
+        @for (fcHeader of volcanoPlotFCHeaders; track $index) {
+          <option>{{ fcHeader }}</option>
+        }
+      </select>
 
-    <label for="selectYaxis" class="text-sm">P Value</label>
-    <select
-      class="form-control"
-      id="selectYaxis"
-      [(ngModel)]="selectedYAxisHeader"
-      (ngModelChange)="setYAxisHeader($event)">
-      <option *ngFor="let pheader of volcanoPlotPHeaders">{{ pheader }}</option>
-    </select>
+      <label for="selectYaxis" class="text-sm">P Value</label>
+      <select
+        class="form-control"
+        id="selectYaxis"
+        [(ngModel)]="selectedYAxisHeader"
+        (ngModelChange)="setYAxisHeader($event)">
+        @for (pheader of volcanoPlotPHeaders; track $index) {
+          <option>{{ pheader }}</option>
+        }
+      </select>
 
-    <div class="alert alert-primary mt-3" role="alert" *ngIf="showZeroWarning">
-      -log(p) values displayed at the upper y axis limit correspond to features with padj values rounded to zero by
-      edgeR / DESeq2
-    </div>
-
-    <div id="selectedGeneList">
-      <h6 class="lighter mt-4">Selection</h6>
-      <ng-container *ngIf="selectedDataRows && selectedDataRows.length > 0; else noSelection">
-        <div class="d-flex align-items-center mb-3">
-          <p class="text-sm mb-0">{{ selectedDataRows.length }}/{{ plotData.length }} features</p>
-          <button class="btn btn-primary btn-sm ms-auto" (click)="createDatasetFromSelected()">Create file</button>
+      @if (showZeroWarning) {
+        <div class="alert alert-primary mt-3" role="alert">
+          -log(p) values displayed at the upper y axis limit correspond to features with padj values rounded to zero by
+          edgeR / DESeq2
         </div>
-        <hr class="mt-1 mb-2" />
-        <table class="table table-sm text-sm">
-          <thead>
-            <tr>
-              <th scope="col" *ngIf="showSymbolColumn">Symbol</th>
-              <th scope="col">Identifier</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let selection of viewSelectionList">
-              <td *ngIf="showSymbolColumn">{{ selection.symbol }}</td>
-              <td>{{ selection.identifier }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </ng-container>
-      <ng-template #noSelection>
-        <p class="fst-italic text-smaller">Select features by clicking or drawing a rectangle</p>
-      </ng-template>
-    </div>
-  </div>
-</div>
+      }
 
-<ng-template #statusTemplate>
-  <ch-status [state]="state" (buttonEvent)="showAnyway()"></ch-status>
-</ng-template>
+      <div id="selectedGeneList">
+        <h6 class="lighter mt-4">Selection</h6>
+        @if (selectedDataRows && selectedDataRows.length > 0) {
+          <div class="d-flex align-items-center mb-3">
+            <p class="text-sm mb-0">{{ selectedDataRows.length }}/{{ plotData.length }} features</p>
+            <button class="btn btn-primary btn-sm ms-auto" (click)="createDatasetFromSelected()">Create file</button>
+          </div>
+          <hr class="mt-1 mb-2" />
+          <table class="table table-sm text-sm">
+            <thead>
+              <tr>
+                @if (showSymbolColumn) {
+                  <th scope="col">Symbol</th>
+                }
+                <th scope="col">Identifier</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (selection of viewSelectionList; track selection.rowId) {
+                <tr>
+                  @if (showSymbolColumn) {
+                    <td>{{ selection.symbol }}</td>
+                  }
+                  <td>{{ selection.identifier }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="fst-italic text-smaller">Select features by clicking or drawing a rectangle</p>
+        }
+      </div>
+    </div>
+  }
+</div>

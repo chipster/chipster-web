@@ -13,21 +13,17 @@
     class="ag-theme-alpine"
     [gridOptions]="gridOptions"></ag-grid-angular>
 
-  <button
-    *ngIf="deleteVisible"
-    [disabled]="!deleteEnabled"
-    type="button"
-    class="btn btn-sm btn-danger mt-3 mb-3 w-100"
-    (click)="onDelete()">
-    Delete
-  </button>
-  <button
-    *ngIf="!deleteVisible"
-    type="button"
-    class="btn btn-sm btn-secondary mt-3 mb-3 w-100"
-    (click)="onCancelDelete()">
-    Cancel
-  </button>
+  @if (deleteVisible) {
+    <button
+      [disabled]="!deleteEnabled"
+      type="button"
+      class="btn btn-sm btn-danger mt-3 mb-3 w-100"
+      (click)="onDelete()">
+      Delete
+    </button>
+  } @else {
+    <button type="button" class="btn btn-sm btn-secondary mt-3 mb-3 w-100" (click)="onCancelDelete()">Cancel</button>
+  }
 </div>
 
 <div class="modal-footer">

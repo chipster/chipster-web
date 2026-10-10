@@ -42,17 +42,19 @@ describe("VisualizationTSVService", () => {
   describe("getSelectionRows", () => {
     it("should return the symbol and identifier of the given rows", () => {
       expect(service.getSelectionRows(withSymbol, ["0", "2"])).toEqual([
-        { symbol: "symbol1", identifier: "id1" },
-        { symbol: "symbol3", identifier: "id3" },
+        { rowId: "0", symbol: "symbol1", identifier: "id1" },
+        { rowId: "2", symbol: "symbol3", identifier: "id3" },
       ]);
     });
 
     it("should leave the symbol empty in a file without a symbol column", () => {
-      expect(service.getSelectionRows(withoutSymbol, ["1"])).toEqual([{ symbol: null, identifier: "id2" }]);
+      expect(service.getSelectionRows(withoutSymbol, ["1"])).toEqual([{ rowId: "1", symbol: null, identifier: "id2" }]);
     });
 
     it("should fall back to the first column when the identifier column isn't named", () => {
-      expect(service.getSelectionRows(withoutIdentifier, ["0"])).toEqual([{ symbol: null, identifier: "id1" }]);
+      expect(service.getSelectionRows(withoutIdentifier, ["0"])).toEqual([
+        { rowId: "0", symbol: null, identifier: "id1" },
+      ]);
     });
 
     it("should return nothing when nothing is selected", () => {
@@ -71,8 +73,8 @@ describe("VisualizationTSVService", () => {
     it("should keep the order of the given rows", () => {
       const reversed = withSymbol.body.getTSVRows(["0", "1"]).reverse();
       expect(service.getSelectionRowsFromTSVRows(withSymbol, reversed)).toEqual([
-        { symbol: "symbol2", identifier: "id2" },
-        { symbol: "symbol1", identifier: "id1" },
+        { rowId: "1", symbol: "symbol2", identifier: "id2" },
+        { rowId: "0", symbol: "symbol1", identifier: "id1" },
       ]);
     });
   });

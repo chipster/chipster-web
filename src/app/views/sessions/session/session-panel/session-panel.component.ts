@@ -69,10 +69,6 @@ export class SessionPanelComponent {
       .subscribe();
   }
 
-  trackLabelMenuItem(_index: number, item: LabelMenuItem): string {
-    return item.label.labelId;
-  }
-
   toggleLabel(item: LabelMenuItem): void {
     this.labelsContextMenuService
       .toggleLabel(this.selectionService.selectedDatasets, item.label, this.sessionData)

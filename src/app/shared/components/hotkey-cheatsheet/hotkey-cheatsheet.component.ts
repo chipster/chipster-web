@@ -13,6 +13,8 @@ export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
 
   private readonly unregister: Array<() => void> = [];
   private modalRef: NgbModalRef | null = null;
+  private shortcutRows: Array<{ keys: string[]; description: string }> = [];
+  private shortcutRowsVersion = -1;
 
   constructor(
     private readonly hotkeyService: HotkeyService,
@@ -37,6 +39,17 @@ export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
   }
 
   get shortcuts(): Array<{ keys: string[]; description: string }> {
+    // Rebuild the rows only when the registered shortcuts have changed, so that
+    // change detection doesn't recreate the list on every pass while the modal is open.
+    const version = this.hotkeyService.getVersion();
+    if (version !== this.shortcutRowsVersion) {
+      this.shortcutRows = this.buildShortcutRows();
+      this.shortcutRowsVersion = version;
+    }
+    return this.shortcutRows;
+  }
+
+  private buildShortcutRows(): Array<{ keys: string[]; description: string }> {
     // "h" and "?" both open this modal; show them as a single "H / ?" row last,
     // with each key in its own <kbd> and the "/" separator left unstyled.
     const helpKeys = new Set(["h", "?"]);
