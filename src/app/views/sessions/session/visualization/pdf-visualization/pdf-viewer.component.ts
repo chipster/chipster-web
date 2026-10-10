@@ -24,14 +24,13 @@ type PdfjsViewer = typeof import("pdfjs-dist/legacy/web/pdf_viewer.mjs");
 interface Pdfjs {
   lib: PdfjsLib;
   viewer: PdfjsViewer;
-  // one worker for all pdf files, so that its script isn't downloaded and started again for each file
-  worker: PDFWorker;
 }
 
 // the worker, the stylesheet and the files that pdf.js loads when a pdf needs them, copied to the assets in angular.json
 const pdfjsAssets = "assets/pdfjs/";
 
 let pdfjsPromise: Promise<Pdfjs>;
+let sharedWorker: PDFWorker;
 
 /*
  * pdf.js is loaded only when a pdf file is shown, its stylesheet too, so that
@@ -50,7 +49,7 @@ function loadPdfjs(): Promise<Pdfjs> {
         import("pdfjs-dist/legacy/web/pdf_viewer.mjs"),
         loadStylesheet(assetUrl("pdf_viewer.css") + version),
       ]);
-      return { lib, viewer, worker: new lib.PDFWorker() };
+      return { lib, viewer };
     })();
     // try again next time, for example when the chunk failed to download
     pdfjsPromise.catch(() => {
@@ -58,6 +57,26 @@ function loadPdfjs(): Promise<Pdfjs> {
     });
   }
   return pdfjsPromise;
+}
+
+/*
+ * One worker for all pdf files, so that its script isn't downloaded and
+ * started again for each file. A worker that failed to start, for example
+ * because its script couldn't be downloaded, would fail every file after it,
+ * so the next file gets a new one.
+ */
+function getWorker(lib: PdfjsLib): PDFWorker {
+  if (!sharedWorker || sharedWorker.destroyed) {
+    const worker = new lib.PDFWorker();
+    worker.promise.catch(() => {
+      worker.destroy();
+      if (sharedWorker === worker) {
+        sharedWorker = undefined;
+      }
+    });
+    sharedWorker = worker;
+  }
+  return sharedWorker;
 }
 
 // relative to the app, not to the address of the current view
@@ -92,6 +111,7 @@ function loadStylesheet(href: string): Promise<void> {
  * page. The container has nothing to scroll, so pdf.js goes on to the nearest
  * positioned ancestor that has, and none of them may have (now the search ends
  * without one), or the panel around the visualization would jump on each zoom.
+ * A link in the pdf scrolls the panel itself, see scrollToCurrentPage().
  */
 @Component({
   selector: "ch-pdf-viewer",
@@ -173,12 +193,15 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     if (!this.pdfViewer || this.pdfViewer.pagesCount === 0) {
       return;
     }
-    if (changes.showAll) {
-      this.updateScrollMode();
-    }
-    if (changes.page && this.page !== this.pdfViewer.currentPageNumber) {
-      this.pdfViewer.currentPageNumber = this.page;
-    }
+    // pdf.js starts rendering, which mustn't run the change detection
+    this.ngZone.runOutsideAngular(() => {
+      if (changes.showAll) {
+        this.updateScrollMode();
+      }
+      if (changes.page && this.page !== this.pdfViewer.currentPageNumber) {
+        this.pdfViewer.currentPageNumber = this.page;
+      }
+    });
     this.updateScale();
   }
 
@@ -200,7 +223,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
         this.pdfViewer ??= this.createViewer();
         const task = this.pdfjs.lib.getDocument({
           url: src,
-          worker: this.pdfjs.worker,
+          worker: getWorker(this.pdfjs.lib),
           cMapUrl: assetUrl("cmaps/"),
           iccUrl: assetUrl("iccs/"),
           standardFontDataUrl: assetUrl("standard_fonts/"),
@@ -245,7 +268,20 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     const { lib, viewer } = this.pdfjs;
     const signal = this.abortController.signal;
     const eventBus = new viewer.EventBus();
-    this.linkService = new viewer.PDFLinkService({
+    const scrollToCurrentPage = () => this.scrollToCurrentPage();
+    // a link in the pdf brings its page into view also when all pages are shown
+    class LinkService extends viewer.PDFLinkService {
+      override async goToDestination(dest: string | unknown[]) {
+        await super.goToDestination(dest);
+        scrollToCurrentPage();
+      }
+
+      override goToPage(val: number | string) {
+        super.goToPage(val);
+        scrollToCurrentPage();
+      }
+    }
+    this.linkService = new LinkService({
       eventBus,
       externalLinkTarget: viewer.LinkTarget.BLANK,
       // the zoom of the toolbar stays, so that a link in the pdf only changes the page
@@ -319,6 +355,18 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     return pdfViewer;
   }
 
+  /*
+   * When all pages are shown, pdf.js changes only the current page for a link
+   * in the pdf, because it doesn't scroll the ancestors of the viewer (see
+   * above). The browser scrolls the panel around the viewer to the page then.
+   * On a single page, the page itself changes.
+   */
+  private scrollToCurrentPage() {
+    if (this.showAll) {
+      this.pdfViewer.getPageView(this.pdfViewer.currentPageNumber - 1)?.div.scrollIntoView({ block: "start" });
+    }
+  }
+
   private updateScrollMode() {
     const { ScrollMode } = this.pdfjs.viewer;
     this.pdfViewer.scrollMode = this.showAll ? ScrollMode.VERTICAL : ScrollMode.PAGE;
@@ -334,8 +382,12 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
    * when the scale changes the pages that fit in the viewer.
    */
   private updateScale() {
-    // the width of this element, because a scrollbar of the container would take from its width
-    const viewerWidth = this.host.nativeElement.clientWidth;
+    /*
+     * The width of this element, because a scrollbar of the container would
+     * take from its width. The width that the resize observer accepted, so
+     * that the pages stay at the narrower width when it refused a wider one.
+     */
+    const viewerWidth = this.hostWidth ?? this.host.nativeElement.clientWidth;
     if (!this.pdfViewer?.pdfDocument || this.pdfViewer.pagesCount === 0 || viewerWidth === 0) {
       return;
     }
