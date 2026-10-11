@@ -17,6 +17,8 @@ interface PdfPage {
   links?: number[];
   // a web page that this page links to
   webLink?: string;
+  // more drawing on the page, in the operators of a pdf content stream
+  drawing?: string;
 }
 
 /*
@@ -36,6 +38,9 @@ function createPdfPages(pages: PdfPage[], paddingBytes = 0): Buffer {
   const linkObjects: string[] = [];
   pages.forEach((page, i) => {
     let content = `BT /F1 24 Tf 72 ${page.height - 72} Td (${page.text}) Tj ET`;
+    if (page.drawing) {
+      content += "\n" + page.drawing;
+    }
     const annotations: string[] = [];
     (page.links ?? []).forEach((target, j) => {
       const y = page.height - 130 - 40 * j;
@@ -555,6 +560,38 @@ test("the viewer of the previous file is closed when another file is selected", 
   await expect(viewer(page).locator(".page")).toHaveCount(1);
   // the same worker of pdf.js reads both files
   expect(workers.filter((url) => url.includes("pdf.worker"))).toHaveLength(1);
+});
+
+test("the worker is stopped when another file is selected while a page is being rendered", async ({ page }) => {
+  // squares that take long to render
+  let drawing = "";
+  for (let i = 0; i < 200_000; i++) {
+    drawing += `${i % 500} ${Math.floor(i / 500) % 700} 1 1 re f\n`;
+  }
+  const heavyPdf = createPdfPages([{ text: "Heavy page", width: 612, height: 792, drawing }]);
+  const heavyId = await createDataset(api, sessionId, { name: "heavy.pdf", x: 100, y: 100 }, heavyPdf);
+  const smallId = await createDataset(api, sessionId, { name: "small.pdf", x: 200, y: 100 }, SMALL_PDF);
+  const workers: { url: string; closed: boolean }[] = [];
+  page.on("worker", (worker) => {
+    const entry = { url: worker.url(), closed: false };
+    workers.push(entry);
+    worker.on("close", () => {
+      entry.closed = true;
+    });
+  });
+
+  await openSession(page, sessionId, heavyId);
+  await selectDataset(page, heavyId);
+  // the file is loaded, and the page is being rendered
+  await expect(pdfVisualization(page).locator("#pdf-view-navigation")).toBeVisible({ timeout: 30_000 });
+  await selectDataset(page, smallId);
+  await expectRendered(page);
+  await expect(viewer(page).locator(".textLayer")).toContainText("Small test PDF");
+
+  const pdfWorkers = () => workers.filter((worker) => worker.url.includes("pdf.worker"));
+  expect(pdfWorkers()).toHaveLength(2);
+  await expect.poll(() => pdfWorkers()[0].closed).toBe(true);
+  expect(pdfWorkers()[1].closed).toBe(false);
 });
 
 test("the progress of the download is shown", async ({ page }) => {

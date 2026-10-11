@@ -26,7 +26,7 @@ interface Pdfjs {
   viewer: PdfjsViewer;
 }
 
-// the worker, the stylesheet and the files that pdf.js loads when a pdf needs them, copied to the assets in angular.json
+// the worker, the stylesheet and the files that pdf.js loads when a pdf needs them, copied there in angular.json
 const pdfjsAssets = "assets/pdfjs/";
 
 let pdfjsPromise: Promise<Pdfjs>;
@@ -62,23 +62,17 @@ function loadPdfjs(): Promise<Pdfjs> {
 
 /*
  * One worker for all pdf files, so that its script isn't downloaded and
- * started again for each file.
+ * started again for each file. A new one only after the previous one was
+ * stopped, see clear().
  *
- * When the worker fails to start, pdf.js parses the files on the main thread
- * instead, until the page is reloaded. Only when that fails too, for example
- * because the script couldn't be downloaded at all, the worker fails, and it
- * would fail every file after it, so the next file gets a new one.
+ * When a worker fails to start, pdf.js parses the files on the main thread
+ * instead, and when that fails too, for example because the script couldn't
+ * be downloaded, pdf.js keeps the failure until the page is reloaded, so a
+ * new worker wouldn't help then.
  */
 function getWorker(lib: PdfjsLib): PDFWorker {
   if (!sharedWorker || sharedWorker.destroyed) {
-    const worker = new lib.PDFWorker();
-    worker.promise.catch(() => {
-      worker.destroy();
-      if (sharedWorker === worker) {
-        sharedWorker = undefined;
-      }
-    });
-    sharedWorker = worker;
+    sharedWorker = new lib.PDFWorker();
   }
   return sharedWorker;
 }
@@ -187,6 +181,8 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   private hostHeight: number;
   private scaleFrame: number;
   private pagesHeight = 0;
+  // the document is loaded and given to the viewer
+  private documentLoaded = false;
   private pendingProgress: OnProgressParameters;
   private progressTimeout: ReturnType<typeof setTimeout>;
   private destroyed = false;
@@ -274,6 +270,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       this.linkService.setDocument(pdf);
       this.pdfViewer.setDocument(pdf);
     });
+    this.documentLoaded = true;
     this.emit(this.loaded, pdf);
   }
 
@@ -299,11 +296,11 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
         scrollToCurrentPage();
       }
 
-      // for the buttons in a pdf that go to the next, previous, first or last page
-      override executeNamedAction(action: string) {
-        super.executeNamedAction(action);
-        scrollToCurrentPage();
-      }
+      /*
+       * Not for the buttons in a pdf that go to the next or previous page:
+       * when all pages are shown, the current page of pdf.js doesn't follow
+       * the scrolling of the session view, so those would go to the wrong page.
+       */
     }
     this.linkService = new LinkService({
       eventBus,
@@ -468,9 +465,11 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
     // the shown pages: on a single page, pdf.js keeps only that page here
     const pages = Array.from(this.viewerElement.nativeElement.querySelectorAll<HTMLElement>(":scope > .page"));
+    // the same margin under each page, from the stylesheet of pdf.js
+    const margin = pages.length > 0 ? parseFloat(getComputedStyle(pages[0]).marginBottom) : 0;
     let height = 0;
     for (const page of pages) {
-      height += page.getBoundingClientRect().height + parseFloat(getComputedStyle(page).marginBottom);
+      height += page.getBoundingClientRect().height + margin;
     }
     if (height > 0 && height !== this.pagesHeight) {
       this.pagesHeight = height;
@@ -481,17 +480,41 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   // forget the previous file
   private clear() {
     const loadingTask = this.loadingTask;
+    const workerBusy = loadingTask && this.isWorkerBusy();
     this.loadingTask = null;
+    this.documentLoaded = false;
     this.pagesHeight = 0;
     clearTimeout(this.progressTimeout);
     this.progressTimeout = null;
     this.pendingProgress = null;
     // destroys also the document, but not the shared worker
     loadingTask?.destroy();
+    /*
+     * The worker would go on with what it was doing for this file, which could
+     * take long for a large file or a page with large images, and the next
+     * file would have to wait. A new worker is started for it instead.
+     */
+    if (workerBusy) {
+      sharedWorker?.destroy();
+    }
     this.ngZone.runOutsideAngular(() => {
       this.pdfViewer?.setDocument(null);
       this.linkService?.setDocument(null);
     });
+  }
+
+  // the file is still being loaded, or a page is being rendered, which the worker prepares
+  private isWorkerBusy(): boolean {
+    if (!this.documentLoaded) {
+      return true;
+    }
+    const { RenderingStates } = this.pdfjs.viewer;
+    for (let i = 0; i < this.pdfViewer.pagesCount; i++) {
+      if (this.pdfViewer.getPageView(i).renderingState === RenderingStates.RUNNING) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /*
