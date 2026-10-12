@@ -211,7 +211,7 @@ describe("PdfVisualizationComponent", () => {
     it("starts again from nothing when trying again", () => {
       select(1000);
       urlRequests[0].next("http://localhost/file.pdf");
-      component.onProgress({ loaded: 600, total: 1000 });
+      component.onProgress({ loaded: 600, total: 1000, percent: 60 });
       component.height = 6000;
       component.pdfLoadFailed(new Error("test failure"));
 
