@@ -1,0 +1,43 @@
+name: Unit test
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# The check only reads the repository.
+permissions:
+  contents: read
+
+# A new push to a pull request makes an in-progress run redundant. Runs on
+# master are not cancelled, so that every commit on master keeps a result
+# even when merges land in quick succession.
+concurrency:
+  group: unit-test-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    # The tests take seconds, the rest is the install.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # .nvmrc holds the Node version, and .npmrc sets engine-strict,
+          # so an older Node would fail the install rather than run the
+          # tests against the wrong toolchain.
+          node-version-file: .nvmrc
+          cache: npm
+
+      # The dependency scripts are skipped, same as in the format and lint
+      # workflows. Vite's esbuild comes as a prebuilt optional dependency,
+      # which works without its postinstall, and the other scripts aren't
+      # needed for these tests. The end-to-end tests with Playwright need a
+      # running backend, so they are not run here.
+      - run: npm ci --ignore-scripts
+
+      - run: npm test

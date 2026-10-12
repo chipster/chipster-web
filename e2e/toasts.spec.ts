@@ -1,7 +1,16 @@
 import { expect, test } from "@playwright/test";
 
 import { login } from "./login";
-import { Api, createDataset, createSession, datasetNode, deleteDataset, getApi, openSession } from "./session";
+import {
+  Api,
+  createDataset,
+  createSession,
+  datasetNode,
+  deleteDataset,
+  deleteSession,
+  getApi,
+  openSession,
+} from "./session";
 
 test.describe.configure({ timeout: 90_000 });
 
@@ -20,8 +29,7 @@ test.afterEach(async () => {
   const sessionToDelete = sessionId;
   sessionId = undefined;
   if (sessionToDelete) {
-    const response = await api.request.delete(`/session-db/sessions/${sessionToDelete}`, { headers: api.headers });
-    expect(response.ok()).toBe(true);
+    await deleteSession(api, sessionToDelete);
   }
 });
 

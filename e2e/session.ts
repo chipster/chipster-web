@@ -1,8 +1,8 @@
 import { APIRequestContext, expect, Page } from "@playwright/test";
 
 /*
- * Helpers for the specs that need a session of their own, created through the
- * REST APIs that the dev server proxies.
+ * Sessions and datasets for the tests, created through the REST API as the
+ * user who is logged in on the page
  */
 
 export interface Api {
@@ -25,7 +25,12 @@ export async function createSession(api: Api, name: string): Promise<string> {
   return (await response.json()).sessionId;
 }
 
-export async function createDataset(api: Api, sessionId: string, dataset: object, content: string): Promise<string> {
+export async function createDataset(
+  api: Api,
+  sessionId: string,
+  dataset: object,
+  content: string | Buffer,
+): Promise<string> {
   const response = await api.request.post(`/session-db/sessions/${sessionId}/datasets`, {
     headers: api.headers,
     data: dataset,
@@ -39,6 +44,11 @@ export async function createDataset(api: Api, sessionId: string, dataset: object
   );
   expect(upload.ok()).toBe(true);
   return datasetId;
+}
+
+export async function deleteSession(api: Api, sessionId: string): Promise<void> {
+  const response = await api.request.delete(`/session-db/sessions/${sessionId}`, { headers: api.headers });
+  expect(response.ok()).toBe(true);
 }
 
 /*

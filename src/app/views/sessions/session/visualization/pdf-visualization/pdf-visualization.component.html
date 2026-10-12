@@ -58,6 +58,7 @@
   </div>
 </div>
 <pdf-viewer
+  #pdfViewer
   *ngIf="urlReady"
   [src]="src"
   [zoom]="zoom"
@@ -65,11 +66,14 @@
   [fit-to-page]="true"
   [page]="page"
   (after-load-complete)="pdfLoadComplete($event)"
-  (page-rendered)="pageRendered($event)"
+  (error)="pdfLoadFailed($event)"
+  (page-rendered)="pageRendered()"
+  (pagesloaded)="pagesLoaded()"
+  (pageChange)="onPageChange($event)"
   (on-progress)="onProgress($event)"
   style="height: {{ height }}px"></pdf-viewer>
 
 <ng-template #statusTemplate>
-  <ch-status [state]="state"></ch-status>
-  <progress value="{{ loadedBytes }}" max="{{ totalBytes }}"></progress>
+  <ch-status [state]="state" (buttonEvent)="onStatusButton($event)"></ch-status>
+  <progress *ngIf="state.isLoading()" value="{{ loadedBytes }}" max="{{ totalBytes }}"></progress>
 </ng-template>

@@ -6,6 +6,15 @@ export enum State {
   TooLarge = "File is too large",
 }
 
+/*
+ * A button of the status component. The action identifies the button when it
+ * is clicked, so that the handler doesn't depend on the text shown to the user.
+ */
+export interface StatusButton {
+  text: string;
+  action: string;
+}
+
 export class LoadState {
   static Ready = new LoadState(State.Ready);
   static Loading = new LoadState(State.Loading);
@@ -14,12 +23,12 @@ export class LoadState {
 
   public state: State;
   private _message: string;
-  public buttonText;
+  public buttons: StatusButton[];
 
-  constructor(state: State, message?: string, buttonText?: string) {
+  constructor(state: State, message?: string, buttons: StatusButton[] = []) {
     this.state = state;
     this._message = message;
-    this.buttonText = buttonText;
+    this.buttons = buttons;
   }
 
   get message(): string {
@@ -36,5 +45,9 @@ export class LoadState {
 
   isFail(): boolean {
     return this.state === State.Fail;
+  }
+
+  isTooLarge(): boolean {
+    return this.state === State.TooLarge;
   }
 }
