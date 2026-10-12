@@ -73,10 +73,7 @@
           [(ngModel)]="listFilterText"></textarea>
 
         @if (allSessionsState.isReady()) {
-          <ag-grid-angular
-            style="width: 100%; height: 700px"
-            class="ag-theme-alpine"
-            [gridOptions]="combinedGridOptions"></ag-grid-angular>
+          <ag-grid-angular style="width: 100%; height: 700px" [gridOptions]="combinedGridOptions"></ag-grid-angular>
         } @else {
           <ch-status [state]="allSessionsState"></ch-status>
         }
@@ -150,10 +147,7 @@
           [(ngModel)]="listFilterText"></textarea>
 
         @if (allSessionsState.isReady()) {
-          <ag-grid-angular
-            style="width: 100%; height: 700px"
-            class="ag-theme-alpine"
-            [gridOptions]="authOnlyGridOptions"></ag-grid-angular>
+          <ag-grid-angular style="width: 100%; height: 700px" [gridOptions]="authOnlyGridOptions"></ag-grid-angular>
         } @else {
           <ch-status [state]="allSessionsState"></ch-status>
         }
@@ -224,7 +218,6 @@
         @if (allSessionsState.isReady()) {
           <ag-grid-angular
             style="width: 100%; height: 700px"
-            class="ag-theme-alpine"
             [gridOptions]="sessionDbOnlyGridOptions"></ag-grid-angular>
         } @else {
           <ch-status [state]="allSessionsState"></ch-status>

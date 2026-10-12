@@ -14,8 +14,9 @@
       <div class="scrolling-wrapper" #horizontalScroll>
         <ag-grid-angular
           #agGrid
-          style="width: 100%; height: 26ex"
-          class="ag-theme-alpine mt-2"
+          style="width: 100%"
+          class="mt-2"
+          domLayout="autoHeight"
           [rowData]="previewRowData"
           [columnDefs]="columnDefs"></ag-grid-angular>
         <!-- row col here to prevent alert from going on top of legends -->

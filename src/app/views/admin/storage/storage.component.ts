@@ -159,8 +159,6 @@ export class StorageComponent implements OnInit {
     },
   ];
 
-  public rowSelection: "single" | "multiple" = "single";
-
   public combinedUsers = [];
   public authOnlyUsers = [];
   public sessionDbOnlyUsers = [];
@@ -284,7 +282,7 @@ export class StorageComponent implements OnInit {
         this.sessionDbOnlyUsers = inSessionDbNotAuth;
 
         // grid options
-        const commonOptions = { suppressRowClickSelection: true, suppressCellFocus: true };
+        const commonOptions = { suppressCellFocus: true };
 
         this.combinedGridOptions = {
           ...commonOptions,
@@ -307,7 +305,6 @@ export class StorageComponent implements OnInit {
           ...{
             rowData: this.authOnlyUsers,
             columnDefs: this.authOnlyColumnDefs,
-            rowSelection: this.rowSelection,
             onGridReady: (event: GridReadyEvent) => {
               this.authOnlyGridReady = true;
               this.authOnlyGridApi = event.api;
@@ -323,7 +320,6 @@ export class StorageComponent implements OnInit {
           ...{
             rowData: this.sessionDbOnlyUsers,
             columnDefs: this.sessionDbOnlyColumnDefs,
-            rowSelection: this.rowSelection,
             onGridReady: (event: GridReadyEvent) => {
               this.sessionDbOnlyGridReady = true;
               this.sessionDbOnlyGridApi = event.api;
