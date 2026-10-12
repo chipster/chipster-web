@@ -62,7 +62,6 @@ export class ConfigService {
   getInternalServices(token: string): Observable<Service[]> {
     return this.getConfiguration().pipe(
       mergeMap((conf) => this.configurationResource.getInternalServices(conf, token)),
-      shareReplay({ bufferSize: 1, refCount: true }),
     );
   }
 

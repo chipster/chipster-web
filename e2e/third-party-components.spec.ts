@@ -7,10 +7,11 @@ import { createDataset, datasetNode, getDatasets, getSession, openSession } from
 
 /*
  * Smoke tests for the screens built on third-party Angular components:
- * angular-split, ng-bootstrap, ng-select, ngx-toastr, ng2-pdf-viewer and
- * ag-grid. The unit tests don't render components, so these are what catches
- * a library upgrade that breaks one of them. Each test checks that the
- * component renders and does its basic job, not the app logic around it.
+ * angular-split, ng-bootstrap, ng-select, ng2-pdf-viewer and ag-grid. The
+ * unit tests don't render components, so these are what catches a library
+ * upgrade that breaks one of them. Each test checks that the component
+ * renders and does its basic job, not the app logic around it. The toasts
+ * have tests of their own in toasts.spec.ts.
  */
 
 // the dataset Actions menu of the Selected Files panel
@@ -59,27 +60,6 @@ test("a dropdown menu opens a modal that renames a file (ng-bootstrap)", async (
 
   await expect.poll(async () => (await getDatasets(api, sessionId)).map((d) => d.name)).toEqual(["after.txt"]);
   await expect(page.locator("ch-selected-files")).toContainText("after.txt");
-});
-
-test("deleting a file shows a toast that can undo it (ngx-toastr)", async ({ page, api, sessionId }) => {
-  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "text\n");
-  await openSession(page, sessionId, datasetId);
-  await datasetNode(page, datasetId).click();
-
-  const menu = await openDatasetMenu(page);
-  await menu.getByRole("button", { name: "Delete" }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
-
-  // the app's own toast component, with the action buttons
-  const toast = page.locator("#toast-container ch-action-toast-component");
-  await expect(toast).toBeVisible();
-  await expect(datasetNode(page, datasetId)).toBeHidden();
-
-  await toast.getByRole("button", { name: "Undo" }).click();
-  await expect(toast).toBeHidden();
-  await expect(datasetNode(page, datasetId)).toBeVisible();
-  // the dataset is deleted from the server only when the toast times out
-  expect((await getDatasets(api, sessionId)).map((d) => d.datasetId)).toEqual([datasetId]);
 });
 
 test("tools can be chosen from the module dropdown and the search (ng-select)", async ({ page, api, sessionId }) => {

@@ -14,9 +14,8 @@ import {
 import { FileState } from "chipster-js-common/lib/model/dataset";
 import { clone } from "lodash-es";
 import log from "loglevel";
-import { ProgressAnimationType, ToastrService } from "ngx-toastr";
 import { Observable, forkJoin, from as observableFrom, lastValueFrom, merge as observableMerge, of } from "rxjs";
-import { catchError, concatMap, filter, mergeMap, takeUntil } from "rxjs/operators";
+import { catchError, concatMap, filter, mergeMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -24,6 +23,7 @@ import { SessionData } from "../../../model/session/session-data";
 import { FileResource } from "../../../shared/resources/fileresource";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { TabService } from "../../../shared/services/tab.service";
+import { ToastMessage, ToastService } from "../../../shared/services/toast.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 import { SelectionHandlerService } from "./selection-handler.service";
@@ -42,7 +42,7 @@ export class SessionDataService {
     private tokenService: TokenService,
     private sessionEventService: SessionEventService,
     private selectionHandlerService: SelectionHandlerService,
-    private toastrService: ToastrService,
+    private toastService: ToastService,
     private restErrorService: RestErrorService,
     private dialogModalService: DialogModalService,
     private tabService: TabService,
@@ -311,29 +311,21 @@ export class SessionDataService {
       this.sessionEventService.generateLocalEvent(wsEvent);
     });
 
-    let msg;
+    let msg: ToastMessage;
 
     if (deletedDatasets.length === 1) {
-      msg = "Deleted file <b>" + deletedDatasets[0].name + "</b>";
+      msg = [{ text: "Deleted file " }, { text: deletedDatasets[0].name, bold: true }];
     } else {
       msg = "Deleted " + deletedDatasets.length + " files";
     }
 
     const BTN_UNDO = "Undo";
 
-    const progressAnimation: ProgressAnimationType = "decreasing";
-
-    const options = {
-      positionClass: "toast-top-right",
+    const toast = this.toastService.info(msg, "", {
       closeButton: true,
       tapToDismiss: false,
-      timeOut: 15000,
-      easeTime: 300,
-      extendedTimeOut: 15000,
-      progressAnimation,
+      timeout: 15000,
       progressBar: true,
-      enableHtml: true,
-
       buttons: [
         {
           text: BTN_UNDO,
@@ -341,29 +333,28 @@ export class SessionDataService {
           class: "btn-info",
         },
       ],
-    };
+    });
 
-    const toast = this.toastrService.info(msg, "", options);
+    let undone = false;
 
     toast.onAction.pipe(filter((text) => text === BTN_UNDO)).subscribe({
       next: () => {
+        undone = true;
         this.deleteDatasetsUndo(deletedDatasets, sessionId);
-        this.toastrService.clear(toast.toastId);
+        this.toastService.close(toast);
       },
       error: (err) => this.errorService.showError("error in dataset deletion", err),
     });
 
-    toast.onHidden
-      .pipe(
-        takeUntil(toast.onAction), // only if there was no action
-      )
-      .subscribe({
-        next: () => {
+    // closed by the timer or the close button
+    toast.afterClosed.subscribe({
+      next: () => {
+        if (!undone) {
           this.deleteDatasetsNow(deletedDatasets, sessionId);
-          this.toastrService.clear(toast.toastId);
-        },
-        error: (err) => this.errorService.showError("error in dataset deletion", err),
-      });
+        }
+      },
+      error: (err) => this.errorService.showError("error in dataset deletion", err),
+    });
   }
 
   getSessionSize(sessionData: SessionData): number {

@@ -14,7 +14,6 @@ import {
   Tool,
 } from "chipster-js-common";
 import log from "loglevel";
-import { ToastrService } from "ngx-toastr";
 import { EMPTY, forkJoin, from, NEVER, Observable, of, Subject } from "rxjs";
 // New imports for rxjs v6
 import { catchError, map, mergeMap, takeUntil, tap } from "rxjs/operators";
@@ -26,6 +25,7 @@ import { DEFAULT_LABELS } from "./labels/label-palette";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { ConfigService } from "../../../shared/services/config.service";
 import { RouteService } from "../../../shared/services/route.service";
+import { ToastService } from "../../../shared/services/toast.service";
 import { SettingsService } from "../../../shared/services/settings.service";
 import { ToolsService } from "../../../shared/services/tools.service";
 import { UserService } from "../../../shared/services/user.service";
@@ -87,7 +87,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private toolsService: ToolsService,
     private configService: ConfigService,
-    private toastrService: ToastrService,
+    private toastService: ToastService,
     private errorService: ErrorService,
     private getSessionDataService: GetSessionDataService,
   ) {}
@@ -315,7 +315,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
         if (change.event.type === EventType.Delete && rule.username === this.tokenService.getUsername()) {
           this.sessionEventService.unsubscribe();
-          this.toastrService.info(this.sessionData.session.name, "Session deleted");
+          this.toastService.info(this.sessionData.session.name, "Session deleted");
           this.routeService.navigateAbsolute("/sessions");
         }
       });

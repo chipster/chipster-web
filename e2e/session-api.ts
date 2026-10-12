@@ -86,7 +86,12 @@ export async function getSession(api: Api, sessionId: string): Promise<Session> 
   return response.json();
 }
 
-export async function createDataset(api: Api, sessionId: string, dataset: object, content: string): Promise<string> {
+export async function createDataset(
+  api: Api,
+  sessionId: string,
+  dataset: object,
+  content: string | Buffer,
+): Promise<string> {
   const response = await api.post("session-db", `/sessions/${sessionId}/datasets`, dataset);
   expect(response.ok()).toBe(true);
   const datasetId = (await response.json()).datasetId;
@@ -131,4 +136,16 @@ export async function openSession(page: Page, sessionId: string, datasetId?: str
   await page.goto(`/analyze/${sessionId}`);
   const ready = datasetId ? datasetNode(page, datasetId) : page.locator("#addFileDropdownMenuButton");
   await expect(ready).toBeVisible({ timeout: 30_000 });
+}
+
+/*
+ * Delete a file the way a user does, from the Selected Files menu. The file
+ * disappears right away, but it's deleted on the server only when the undo
+ * toast closes.
+ */
+export async function deleteDatasetFromMenu(page: Page, datasetId: string) {
+  await datasetNode(page, datasetId).click();
+  await page.locator("ch-selected-files").getByTitle("Actions").locator("visible=true").first().click();
+  await page.locator(".dropdown-menu.show").getByText("Delete", { exact: true }).click();
+  await page.locator(".modal-footer").getByRole("button", { name: "Delete" }).click();
 }

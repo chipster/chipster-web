@@ -13,7 +13,8 @@ import { Api, createSession, getApi } from "./session-api";
  * an uncaught exception, even when everything the test checked was right: an
  * upgrade of Angular or of a library often shows only there at first, while
  * the page still looks fine. A test allows the failed requests that it
- * causes on purpose, like a failed login, with pageErrors.allowFailedRequest().
+ * causes on purpose, like a failed login, with pageErrors.allowFailedRequest(),
+ * and the error messages that the app then shows with allowErrorMessage().
  * The ones that the app makes regardless of the test are in
  * KNOWN_FAILED_REQUESTS, each with the reason it isn't a failure of the test.
  */
@@ -37,6 +38,8 @@ const KNOWN_FAILED_REQUESTS: FailedRequest[] = [
 export interface PageErrors {
   // allow the console error of a failed request in the current test
   allowFailedRequest(status: number, role: string, path: string): void;
+  // allow an error message that the app shows in the current test, by its text
+  allowErrorMessage(msg: string): void;
   // check the pages of a context that the test created itself too
   watch(context: BrowserContext): void;
   // wait until the errors logged so far have been read, before their pages are closed
@@ -47,6 +50,8 @@ interface PageError {
   text: string;
   // the address of the failed request for "Failed to load resource"
   url?: string;
+  // the text of an ErrorMessage of the app
+  msg?: string;
 }
 
 interface TestFixtures {
@@ -108,6 +113,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       // the address is relative in the proxy mode and absolute in the direct mode
       const requestPrefix = (r: FailedRequest) => new URL(api.address(r.role) + r.path, baseURL).href;
       const allowedRequests = KNOWN_FAILED_REQUESTS.map((r) => ({ status: r.status, prefix: requestPrefix(r) }));
+      const allowedMessages: string[] = [];
 
       const listen = (page: Page) => {
         page.on("pageerror", (error) => errors.push(Promise.resolve({ text: `uncaught: ${error.message}` })));
@@ -118,11 +124,16 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
           const url = message.location().url;
           if (message.text() === "ErrorMessage") {
             // the console shows only the class name of the object, read what the app shows from the page
-            const text = message
+            const shown = message
               .args()[0]
-              .evaluate((m: { title?: string; msg?: string }) => JSON.stringify([m.title, m.msg]))
-              .catch(() => "(page closed)");
-            errors.push(text.then((t) => ({ text: `console: ErrorMessage ${t}` })));
+              .evaluate((m: { title?: string; msg?: string }) => ({ title: m.title, msg: m.msg }))
+              .catch(() => undefined);
+            errors.push(
+              shown.then((m) => ({
+                text: `console: ErrorMessage ${m ? JSON.stringify([m.title, m.msg]) : "(page closed)"}`,
+                msg: m?.msg,
+              })),
+            );
           } else {
             errors.push(Promise.resolve({ text: `console: ${message.text()} (${url})`, url }));
           }
@@ -139,6 +150,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
         // the address is resolved right away, so that a wrong role fails the test that allows it
         allowFailedRequest: (status, role, path) =>
           allowedRequests.push({ status, prefix: requestPrefix({ status, role, path }) }),
+        allowErrorMessage: (msg) => allowedMessages.push(msg),
         watch,
         settle: async () => {
           await Promise.all(errors);
@@ -148,7 +160,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       const isAllowedRequest = (error: PageError) =>
         allowedRequests.some((r) => error.text.includes(`status of ${r.status} `) && error.url?.startsWith(r.prefix));
       const unexpected = (await Promise.all(errors))
-        .filter((error) => !isAllowedRequest(error))
+        .filter((error) => !isAllowedRequest(error) && !allowedMessages.includes(error.msg))
         .map((error) => error.text);
       expect(unexpected, "errors on the page").toEqual([]);
     },
