@@ -5,7 +5,7 @@ import { RouterModule } from "@angular/router";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { AgGridModule } from "ag-grid-angular";
-import { AngularSplitModule } from "angular-split";
+import { SplitAreaComponent, SplitComponent } from "angular-split";
 import { UploadService } from "../../../shared/services/upload.service";
 import { SharedModule } from "../../../shared/shared.module";
 import { ImportSessionModalComponent } from "../open-session-file/import-session-modal.component";
@@ -46,7 +46,8 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     SessionPanelModule,
     NgbModule,
     DialogModalModule,
-    AngularSplitModule,
+    SplitComponent,
+    SplitAreaComponent,
     RouterModule,
     AgGridModule,
     FormsModule,
