@@ -7,7 +7,8 @@ import { Api, createSession, getApi } from "./session-api";
  *
  * api gives a test the REST API, and sessionId a session of its own, which is
  * deleted after the test. A spec sets the state of the session with
- * test.use({ sessionState }), e.g. to "TEMPORARY_UNMODIFIED".
+ * test.use({ sessionState }), e.g. to "TEMPORARY_UNMODIFIED", and a test
+ * that deletes the session itself through the app sets sessionDeletedByTest.
  *
  * pageErrors fails a test if a page logged an error in the console or threw
  * an uncaught exception, even when everything the test checked was right: an
@@ -57,6 +58,7 @@ interface PageError {
 interface TestFixtures {
   pageErrors: PageErrors;
   sessionState: string | undefined;
+  sessionDeletedByTest: boolean;
   sessionId: string;
 }
 
@@ -90,7 +92,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   // a SessionState of chipster-js-common, the default is a normal session
   sessionState: [undefined, { option: true }],
 
-  sessionId: async ({ api, context, sessionState, pageErrors }, use, testInfo) => {
+  // otherwise a session that is gone after the test fails it, the app shouldn't delete it on its own
+  sessionDeletedByTest: [false, { option: true }],
+
+  sessionId: async ({ api, context, sessionState, sessionDeletedByTest, pageErrors }, use, testInfo) => {
     const sessionId = await createSession(api, `e2e ${testInfo.title}`, sessionState);
     await use(sessionId);
 
@@ -103,8 +108,11 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       await page.close();
     }
     const response = await api.delete("session-db", `/sessions/${sessionId}`);
-    // 404 if the test deleted it through the app
-    expect(response.ok() || response.status() === 404, `delete session: ${response.status()}`).toBe(true);
+    if (sessionDeletedByTest) {
+      expect(response.status(), "delete session").toBe(404);
+    } else {
+      expect(response.ok(), `delete session: ${response.status()}`).toBe(true);
+    }
   },
 
   pageErrors: [

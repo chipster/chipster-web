@@ -58,12 +58,16 @@ test.describe("modified temporary session", () => {
     expect(await getSession(api, sessionId)).toMatchObject({ name: "e2e route guards saved", state: "READY" });
   });
 
-  test("leaving can discard the session", async ({ page, api, sessionId }) => {
-    const modal = await leaveSession(page);
-    await modal.getByRole("button", { name: "Discard changes" }).click();
-    await expect(page).toHaveURL(/\/sessions$/);
+  test.describe(() => {
+    test.use({ sessionDeletedByTest: true });
 
-    // discarding deletes the user's rule, and session-db deletes a session that has no rules left
-    await expect.poll(async () => (await api.get("session-db", `/sessions/${sessionId}`)).status()).toBe(404);
+    test("leaving can discard the session", async ({ page, api, sessionId }) => {
+      const modal = await leaveSession(page);
+      await modal.getByRole("button", { name: "Discard changes" }).click();
+      await expect(page).toHaveURL(/\/sessions$/);
+
+      // discarding deletes the user's rule, and session-db deletes a session that has no rules left
+      await expect.poll(async () => (await api.get("session-db", `/sessions/${sessionId}`)).status()).toBe(404);
+    });
   });
 });
