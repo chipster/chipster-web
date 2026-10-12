@@ -1,0 +1,47 @@
+.ch-toast {
+  position: relative;
+  overflow: hidden;
+}
+
+.ch-toast-dismissible {
+  cursor: pointer;
+}
+
+// the colors of Bootstrap's alerts
+.ch-toast-info {
+  --bs-toast-color: var(--bs-info-text-emphasis);
+  --bs-toast-bg: var(--bs-info-bg-subtle);
+  --bs-toast-border-color: var(--bs-info-border-subtle);
+}
+
+.ch-toast-warning {
+  --bs-toast-color: var(--bs-warning-text-emphasis);
+  --bs-toast-bg: var(--bs-warning-bg-subtle);
+  --bs-toast-border-color: var(--bs-warning-border-subtle);
+}
+
+// error messages may have long words like URLs and JSON
+.ch-toast-text {
+  overflow-wrap: anywhere;
+}
+
+.ch-toast-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  background-color: #000;
+  opacity: 0.3;
+  animation-name: ch-toast-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes ch-toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0;
+  }
+}

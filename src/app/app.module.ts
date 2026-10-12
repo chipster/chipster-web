@@ -2,10 +2,8 @@ import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http"
 import { ErrorHandler, Injector, NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { StoreModule } from "@ngrx/store";
-import { ToastrModule } from "ngx-toastr";
 import { setAppInjector } from "./app-injector";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -14,7 +12,6 @@ import { CoreModule } from "./core/core.module";
 import { AppErrorHandler } from "./core/errorhandler/apperrorhandler";
 import { ErrorService } from "./core/errorhandler/error.service";
 import { RoutingModule } from "./core/routing/routing.module";
-import { ActionToastComponent } from "./shared/components/action-toast";
 import { SharedModule } from "./shared/shared.module";
 import { latestSession } from "./state/latest-session.reducer";
 import { selectedDatasets } from "./state/selectedDatasets.reducer";
@@ -97,10 +94,6 @@ import { TermsComponent } from "./views/terms/terms.component";
     ),
     SharedModule,
     RoutingModule,
-    BrowserAnimationsModule,
-    ToastrModule.forRoot({
-      toastComponent: ActionToastComponent,
-    }),
     AppRoutingModule,
   ],
   providers: [
