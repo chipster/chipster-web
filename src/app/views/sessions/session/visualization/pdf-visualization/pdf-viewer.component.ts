@@ -116,21 +116,63 @@ function assetUrl(path: string): string {
  * when the stylesheet itself failed.
  */
 function loadStylesheet(href: string): Promise<void> {
-  stylesheetPromise ??= new Promise<void>((resolve, reject) => {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = href;
-    link.onload = () => resolve();
-    link.onerror = () => {
-      link.remove();
-      reject(new Error("Loading the stylesheet " + href + " failed"));
-    };
-    document.head.append(link);
-  });
-  stylesheetPromise.catch(() => {
-    stylesheetPromise = undefined;
-  });
+  if (!stylesheetPromise) {
+    stylesheetPromise = new Promise<void>((resolve, reject) => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = href;
+      link.onload = () => resolve();
+      link.onerror = () => {
+        link.remove();
+        reject(new Error("Loading the stylesheet " + href + " failed"));
+      };
+      document.head.append(link);
+    });
+    stylesheetPromise.catch(() => {
+      stylesheetPromise = undefined;
+    });
+  }
   return stylesheetPromise;
+}
+
+/*
+ * The viewer as the link service of pdf.js sees it, so that a link in the pdf
+ * can bring its place into view also when all pages are shown. The link
+ * service goes to each place through scrollPageIntoView(), and the buttons in
+ * a pdf that go to the first or the last page set the current page, so those
+ * are told to onTarget. pdf.js scrolls the viewer itself too, for example when
+ * the scale changes, but not through the link service, and a link that goes
+ * nowhere, for example to a destination that the pdf doesn't have, doesn't get
+ * this far.
+ *
+ * The buttons that go to the next or the previous page aren't told: when all
+ * pages are shown, the current page of pdf.js doesn't follow the scrolling of
+ * the session view, so those would go to the wrong page.
+ *
+ * A proxy, because the viewer keeps its state in private fields, which only
+ * the viewer itself can read, so its methods and properties are used on it.
+ */
+function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => void): PDFViewer {
+  return new Proxy(pdfViewer, {
+    get(viewer, property) {
+      if (property === "scrollPageIntoView") {
+        return (target: ScrollTarget) => {
+          viewer.scrollPageIntoView(target);
+          onTarget(target);
+        };
+      }
+      const value: unknown = Reflect.get(viewer, property);
+      return typeof value === "function" ? value.bind(viewer) : value;
+    },
+    set(viewer, property, value) {
+      const isSet = Reflect.set(viewer, property, value);
+      // not for a page that the pdf doesn't have
+      if (property === "currentPageNumber" && viewer.currentPageNumber === value) {
+        onTarget({ pageNumber: value });
+      }
+      return isSet;
+    },
+  });
 }
 
 /*
@@ -311,62 +353,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     const { lib, viewer } = this.pdfjs;
     const signal = this.abortController.signal;
     const eventBus = new viewer.EventBus();
-    const scrollToTarget = (target: ScrollTarget) => this.scrollToTarget(target);
-
-    /*
-     * A link in the pdf brings its place into view also when all pages are
-     * shown. pdf.js tells the place when it goes there, and not for a link that
-     * goes nowhere, for example to a destination that the pdf doesn't have.
-     */
-    let followingLink = false;
-    let linkTarget: ScrollTarget = null;
-    const followLink = async (go: () => unknown) => {
-      followingLink = true;
-      linkTarget = null;
-      try {
-        await go();
-      } finally {
-        followingLink = false;
-      }
-      if (linkTarget) {
-        scrollToTarget(linkTarget);
-      }
-    };
-    class Viewer extends viewer.PDFViewer {
-      override scrollPageIntoView(target: ScrollTarget) {
-        if (followingLink) {
-          linkTarget = target;
-        }
-        super.scrollPageIntoView(target);
-      }
-    }
-    class LinkService extends viewer.PDFLinkService {
-      override async goToDestination(dest: string | unknown[]) {
-        await followLink(() => super.goToDestination(dest));
-      }
-
-      override goToPage(val: number | string) {
-        followLink(() => super.goToPage(val));
-      }
-
-      override goToXY(pageNumber: number, x: number, y: number, options?: object) {
-        followLink(() => super.goToXY(pageNumber, x, y, options));
-      }
-
-      /*
-       * For the buttons in a pdf that go to the first or the last page, but not
-       * for the next or the previous page: when all pages are shown, the current
-       * page of pdf.js doesn't follow the scrolling of the session view, so
-       * those would go to the wrong page.
-       */
-      override executeNamedAction(action: string) {
-        super.executeNamedAction(action);
-        if (action === "FirstPage" || action === "LastPage") {
-          scrollToTarget({ pageNumber: this.page });
-        }
-      }
-    }
-    this.linkService = new LinkService({
+    this.linkService = new viewer.PDFLinkService({
       eventBus,
       externalLinkTarget: viewer.LinkTarget.BLANK,
       // the zoom of the toolbar stays, so that a link in the pdf only changes the page
@@ -384,8 +371,8 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       imageResourcesPath: assetUrl("images/"),
       abortSignal: signal,
     };
-    const pdfViewer = new Viewer(options);
-    this.linkService.setViewer(pdfViewer);
+    const pdfViewer = new viewer.PDFViewer(options);
+    this.linkService.setViewer(linkViewer(pdfViewer, (target) => this.scrollToTarget(target)));
 
     // the page views are created, but nothing is rendered yet
     eventBus.on(
