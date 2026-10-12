@@ -1,7 +1,7 @@
-import { expect, Page, test } from "@playwright/test";
+import { Page } from "@playwright/test";
 
-import { login } from "./login";
-import { Api, createDataset, createSession, datasetNode, deleteSession, getApi, openSession } from "./session";
+import { expect, test } from "./fixtures";
+import { createDataset, datasetNode, openSession } from "./session-api";
 
 /*
  * Large pdf files may take a long time to render, so the pdf visualization
@@ -143,28 +143,7 @@ async function expectHeightFitsPages(page: Page, shownPages: number) {
   return (await viewerAndPageHeights(page)).viewer;
 }
 
-test.describe.configure({ timeout: 90_000 });
-
-let api: Api;
-let sessionId: string | undefined;
-
-test.beforeEach(async ({ page }) => {
-  await login(page, "chipster", "chipster");
-  api = await getApi(page);
-  sessionId = await createSession(api, "e2e pdf visualization");
-});
-
-test.afterEach(async () => {
-  // cleared right away, so that a later test whose setup fails before
-  // creating its own session doesn't delete this one again
-  const sessionToDelete = sessionId;
-  sessionId = undefined;
-  if (sessionToDelete) {
-    await deleteSession(api, sessionToDelete);
-  }
-});
-
-test("a small pdf file is shown directly", async ({ page }) => {
+test("a small pdf file is shown directly", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -174,9 +153,9 @@ test("a small pdf file is shown directly", async ({ page }) => {
   await expect(pdfVisualization(page).getByRole("button", { name: "Show here" })).toHaveCount(0);
 });
 
-test("a large pdf file is shown only when asked", async ({ page, context }) => {
+test("a large pdf file is shown only when asked", async ({ page, context, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
-  const filePath = `/file-broker/sessions/${sessionId}/datasets/${datasetId}`;
+  const filePath = `${api.address("file-broker")}/sessions/${sessionId}/datasets/${datasetId}`;
 
   // requests for the file's contents from this page
   const pageFileRequests: string[] = [];
@@ -216,10 +195,22 @@ test("a large pdf file is shown only when asked", async ({ page, context }) => {
   await expectRendered(page);
 });
 
-test("a failing request for the file's address ends in the fail state", async ({ page }) => {
+test("a failing request for the file's address ends in the fail state", async ({
+  page,
+  api,
+  sessionId,
+  baseURL,
+  pageErrors,
+}) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
-  await page.route(new RegExp(`/session-db/tokens/sessions/${sessionId}/datasets/${datasetId}`), (route) =>
-    route.fulfill({ status: 500, body: "test failure" }),
+  const tokenPath = `/tokens/sessions/${sessionId}/datasets/${datasetId}`;
+  // the address is relative in the proxy mode and absolute in the direct mode
+  const tokenUrl = new URL(api.address("session-db") + tokenPath, baseURL).href;
+  pageErrors.allowFailedRequest(500, "session-db", tokenPath);
+  pageErrors.allowErrorMessage("Loading pdf file failed");
+  await page.route(
+    (url) => url.href.startsWith(tokenUrl),
+    (route) => route.fulfill({ status: 500, body: "test failure" }),
   );
 
   await openSession(page, sessionId, datasetId);
@@ -228,7 +219,8 @@ test("a failing request for the file's address ends in the fail state", async ({
   await expectFailed(page);
 });
 
-test("a broken pdf file ends in the fail state", async ({ page }) => {
+test("a broken pdf file ends in the fail state", async ({ page, api, sessionId, pageErrors }) => {
+  pageErrors.allowErrorMessage("Loading pdf file failed");
   const datasetId = await createDataset(
     api,
     sessionId,
@@ -242,7 +234,7 @@ test("a broken pdf file ends in the fail state", async ({ page }) => {
   await expectFailed(page);
 });
 
-test("the height follows the pages of a pdf file with pages of different sizes", async ({ page }) => {
+test("the height follows the pages of a pdf file with pages of different sizes", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "multipage.pdf", x: 100, y: 100 }, MULTI_PAGE_PDF);
 
   await openSession(page, sessionId, datasetId);
