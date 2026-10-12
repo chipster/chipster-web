@@ -19,6 +19,13 @@ interface PdfPage {
   webLink?: string;
   // more drawing on the page, in the operators of a pdf content stream
   drawing?: string;
+  // more links, each with its text and its destination or action in the syntax of a pdf
+  actions?: { text: string; action: string }[];
+}
+
+// the object of a page in the pdf files of createPdfPages, for the destinations of links
+function pageRef(pageNumber: number): string {
+  return `${4 + 2 * (pageNumber - 1)} 0 R`;
 }
 
 /*
@@ -59,6 +66,12 @@ function createPdfPages(pages: PdfPage[], paddingBytes = 0): Buffer {
         `<< /Type /Annot /Subtype /Link /Rect [70 ${y - 5} 250 ${y + 20}] /Border [0 0 0] ` +
           `/A << /S /URI /URI (${page.webLink}) >> >>`,
       );
+      annotations.push(`${4 + 2 * pages.length + linkObjects.length - 1} 0 R`);
+    }
+    for (const { text, action } of page.actions ?? []) {
+      const y = page.height - 130 - 40 * annotations.length;
+      content += `\nBT /F1 18 Tf 72 ${y} Td (${text}) Tj ET`;
+      linkObjects.push(`<< /Type /Annot /Subtype /Link /Rect [70 ${y - 5} 250 ${y + 20}] /Border [0 0 0] ${action} >>`);
       annotations.push(`${4 + 2 * pages.length + linkObjects.length - 1} 0 R`);
     }
     const annots = annotations.length > 0 ? ` /Annots [${annotations.join(" ")}]` : "";
@@ -102,6 +115,22 @@ const WIDE_PAGE_LINKS_PDF = createPdfPages([
   { text: "Page 1, Letter portrait", width: 612, height: 792, links: [3] },
   { text: "Page 2, A5 portrait", width: 420, height: 595 },
   { text: "Page 3, A3 landscape", width: 1191, height: 842, links: [1] },
+]);
+
+// links to a place in a page, to the last page and to a destination that the pdf doesn't have
+const PLACE_LINKS_PDF = createPdfPages([
+  {
+    text: "Page 1",
+    width: 612,
+    height: 792,
+    actions: [
+      // 200 points from the bottom of page 2
+      { text: "Lower on page 2", action: `/Dest [${pageRef(2)} /XYZ 0 200 null]` },
+      { text: "Last page", action: "/A << /S /Named /N /LastPage >>" },
+    ],
+  },
+  { text: "Page 2", width: 612, height: 792 },
+  { text: "Page 3", width: 612, height: 792, actions: [{ text: "Nowhere", action: "/Dest (nowhere)" }] },
 ]);
 
 // pages of different sizes, so that the height of the viewer has to follow them, and links between them
@@ -279,10 +308,18 @@ test("a broken pdf file ends in the fail state", async ({ page }) => {
     "This is not a pdf file.\n",
   );
 
+  const workers: string[] = [];
+  page.on("worker", (worker) => workers.push(worker.url()));
+
   await openSession(page, sessionId, datasetId);
   await selectDataset(page, datasetId);
 
   await expectFailed(page);
+
+  // the worker isn't busy after a failure, so trying again uses it
+  await pdfVisualization(page).getByRole("button", { name: "Try again" }).click();
+  await expectFailed(page);
+  expect(workers.filter((url) => url.includes("pdf.worker"))).toHaveLength(1);
 });
 
 test("the height follows the pages of a pdf file with pages of different sizes", async ({ page }) => {
@@ -590,8 +627,73 @@ test("the worker is stopped when another file is selected while a page is being 
 
   const pdfWorkers = () => workers.filter((worker) => worker.url.includes("pdf.worker"));
   expect(pdfWorkers()).toHaveLength(2);
-  await expect.poll(() => pdfWorkers()[0].closed).toBe(true);
+  // after pdf.js has closed the file in it
+  await expect.poll(() => pdfWorkers()[0].closed, { timeout: 30_000 }).toBe(true);
   expect(pdfWorkers()[1].closed).toBe(false);
+});
+
+test("the download is cancelled when another file is selected", async ({ page }) => {
+  const largeId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
+  const smallId = await createDataset(api, sessionId, { name: "small.pdf", x: 200, y: 100 }, SMALL_PDF);
+  const largeFile = `/file-broker/sessions/${sessionId}/datasets/${largeId}`;
+
+  await openSession(page, sessionId, largeId);
+  await selectDataset(page, largeId);
+  // slow enough to select another file in the middle of the download, the file is about 11 MB
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.emulateNetworkConditions", {
+    offline: false,
+    latency: 0,
+    downloadThroughput: 1024 * 1024,
+    uploadThroughput: -1,
+  });
+  const cancelled = page.waitForEvent("requestfailed", (request) => request.url().includes(largeFile));
+  await pdfVisualization(page).getByRole("button", { name: "Show here" }).click();
+  await expect
+    .poll(async () => Number(await pdfVisualization(page).locator("progress").getAttribute("value")))
+    .toBeGreaterThan(0);
+
+  await selectDataset(page, smallId);
+  expect((await cancelled).failure()?.errorText).toContain("ABORTED");
+  await expectRendered(page);
+});
+
+test("the links in a pdf file go to their place when all pages are shown", async ({ page }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "places.pdf", x: 100, y: 100 }, PLACE_LINKS_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+  await visualization.getByTitle("Show all pages").click();
+  await expectHeightFitsPages(page, 3);
+  const link = (pageNumber: number, index: number) =>
+    viewer(page).locator(`.page[data-page-number="${pageNumber}"] .linkAnnotation a`).nth(index);
+
+  // a link to a destination that the pdf doesn't have doesn't move the session view
+  await link(3, 0).scrollIntoViewIfNeeded();
+  const before = await pageInPanel(page, 3);
+  await link(3, 0).click();
+  await page.waitForTimeout(500);
+  expect(Math.abs((await pageInPanel(page, 3)).top - before.top)).toBeLessThan(2);
+
+  // a link to a place 200 points from the bottom of page 2 brings that place to the top of the session view
+  await link(1, 0).click();
+  await expect
+    .poll(async () => {
+      const { top, height } = await pageInPanel(page, 2);
+      return Math.abs(top + ((792 - 200) / 792) * height);
+    })
+    .toBeLessThan(3);
+
+  // the button to the last page brings it into view, or as near as the session view scrolls
+  await link(1, 1).click();
+  await expect
+    .poll(async () => {
+      const { top, panelHeight } = await pageInPanel(page, 3);
+      return top > -2 && top < panelHeight / 4;
+    })
+    .toBe(true);
 });
 
 test("the progress of the download is shown", async ({ page }) => {
@@ -636,6 +738,7 @@ async function pageInPanel(page: Page, pageNumber: number) {
       }
       return {
         top: pageDiv.getBoundingClientRect().top - panel.getBoundingClientRect().top - panel.clientTop,
+        height: pageDiv.getBoundingClientRect().height,
         panelHeight: panel.clientHeight,
       };
     });

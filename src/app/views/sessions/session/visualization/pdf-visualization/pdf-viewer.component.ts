@@ -20,6 +20,8 @@ import type { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 
 type PdfjsLib = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
 type PdfjsViewer = typeof import("pdfjs-dist/legacy/web/pdf_viewer.mjs");
+// where pdf.js goes in the pdf: a page, and maybe a place in it
+type ScrollTarget = Parameters<PDFViewer["scrollPageIntoView"]>[0];
 
 interface Pdfjs {
   lib: PdfjsLib;
@@ -62,8 +64,8 @@ function loadPdfjs(): Promise<Pdfjs> {
 
 /*
  * One worker for all pdf files, so that its script isn't downloaded and
- * started again for each file. A new one only after the previous one was
- * stopped, see clear().
+ * started again for each file. A new one when the previous one is busy with
+ * a file that was left, see clear().
  *
  * When a worker fails to start, pdf.js parses the files on the main thread
  * instead, and when that fails too, for example because the script couldn't
@@ -75,6 +77,32 @@ function getWorker(lib: PdfjsLib): PDFWorker {
     sharedWorker = new lib.PDFWorker();
   }
   return sharedWorker;
+}
+
+/*
+ * The top of the place in a page that a pdf destination gives, in the units of
+ * the pdf, or null for the whole page. Like pdf.js finds it.
+ */
+function destinationTop(destArray: unknown[] | undefined): number | null {
+  const name = (destArray?.[1] as { name?: string } | undefined)?.name;
+  let top: unknown = null;
+  if (name === "XYZ") {
+    top = destArray[3];
+  } else if (name === "FitH" || name === "FitBH") {
+    top = destArray[2];
+  } else if (name === "FitR") {
+    top = destArray[5];
+  }
+  return typeof top === "number" ? top : null;
+}
+
+// the nearest ancestor that scrolls its content vertically
+function scrollingAncestor(element: HTMLElement): HTMLElement | null {
+  let ancestor = element.parentElement;
+  while (ancestor && !/auto|scroll/.test(getComputedStyle(ancestor).overflowY)) {
+    ancestor = ancestor.parentElement;
+  }
+  return ancestor;
 }
 
 // relative to the app, not to the address of the current view
@@ -117,7 +145,7 @@ function loadStylesheet(href: string): Promise<void> {
  * page. The container has nothing to scroll, so pdf.js goes on to the nearest
  * positioned ancestor that has, and none of them may have (now the search ends
  * without one), or the panel around the visualization would jump on each zoom.
- * A link in the pdf scrolls the panel itself, see scrollToCurrentPage().
+ * A link in the pdf scrolls the panel itself, see scrollToTarget().
  */
 @Component({
   selector: "ch-pdf-viewer",
@@ -181,8 +209,10 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   private hostHeight: number;
   private scaleFrame: number;
   private pagesHeight = 0;
-  // the document is loaded and given to the viewer
-  private documentLoaded = false;
+  // the worker of the current file
+  private worker: PDFWorker;
+  // the current file is still being loaded
+  private loading = false;
   private pendingProgress: OnProgressParameters;
   private progressTimeout: ReturnType<typeof setTimeout>;
   private destroyed = false;
@@ -230,9 +260,10 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
           return null;
         }
         this.pdfViewer ??= this.createViewer();
+        this.worker = getWorker(this.pdfjs.lib);
         const task = this.pdfjs.lib.getDocument({
           url: src,
-          worker: getWorker(this.pdfjs.lib),
+          worker: this.worker,
           cMapUrl: assetUrl("cmaps/"),
           iccUrl: assetUrl("iccs/"),
           standardFontDataUrl: assetUrl("standard_fonts/"),
@@ -240,6 +271,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
         });
         // right away, so that clear() can cancel it
         this.loadingTask = task;
+        this.loading = true;
         task.onProgress = (progress: OnProgressParameters) => this.emitProgress(task, progress);
         return task;
       } catch (error) {
@@ -259,6 +291,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     } catch (error) {
       // a task that was cancelled by another file or by closing the viewer fails too
       if (loadingTask === this.loadingTask) {
+        this.loading = false;
         this.emit(this.loadFailed, error);
       }
       return;
@@ -266,11 +299,11 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     if (loadingTask !== this.loadingTask) {
       return;
     }
+    this.loading = false;
     this.ngZone.runOutsideAngular(() => {
       this.linkService.setDocument(pdf);
       this.pdfViewer.setDocument(pdf);
     });
-    this.documentLoaded = true;
     this.emit(this.loaded, pdf);
   }
 
@@ -278,29 +311,60 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     const { lib, viewer } = this.pdfjs;
     const signal = this.abortController.signal;
     const eventBus = new viewer.EventBus();
-    const scrollToCurrentPage = () => this.scrollToCurrentPage();
-    // a link in the pdf brings its page into view also when all pages are shown
+    const scrollToTarget = (target: ScrollTarget) => this.scrollToTarget(target);
+
+    /*
+     * A link in the pdf brings its place into view also when all pages are
+     * shown. pdf.js tells the place when it goes there, and not for a link that
+     * goes nowhere, for example to a destination that the pdf doesn't have.
+     */
+    let followingLink = false;
+    let linkTarget: ScrollTarget = null;
+    const followLink = async (go: () => unknown) => {
+      followingLink = true;
+      linkTarget = null;
+      try {
+        await go();
+      } finally {
+        followingLink = false;
+      }
+      if (linkTarget) {
+        scrollToTarget(linkTarget);
+      }
+    };
+    class Viewer extends viewer.PDFViewer {
+      override scrollPageIntoView(target: ScrollTarget) {
+        if (followingLink) {
+          linkTarget = target;
+        }
+        super.scrollPageIntoView(target);
+      }
+    }
     class LinkService extends viewer.PDFLinkService {
       override async goToDestination(dest: string | unknown[]) {
-        await super.goToDestination(dest);
-        scrollToCurrentPage();
+        await followLink(() => super.goToDestination(dest));
       }
 
       override goToPage(val: number | string) {
-        super.goToPage(val);
-        scrollToCurrentPage();
+        followLink(() => super.goToPage(val));
       }
 
       override goToXY(pageNumber: number, x: number, y: number, options?: object) {
-        super.goToXY(pageNumber, x, y, options);
-        scrollToCurrentPage();
+        followLink(() => super.goToXY(pageNumber, x, y, options));
       }
 
       /*
-       * Not for the buttons in a pdf that go to the next or previous page:
-       * when all pages are shown, the current page of pdf.js doesn't follow
-       * the scrolling of the session view, so those would go to the wrong page.
+       * For the buttons in a pdf that go to the first or the last page, but not
+       * for the next or the previous page: when all pages are shown, the current
+       * page of pdf.js doesn't follow the scrolling of the session view, so
+       * those would go to the wrong page.
        */
+      override executeNamedAction(action: string) {
+        super.executeNamedAction(action);
+        if (action === "FirstPage" || action === "LastPage") {
+          scrollToTarget({ pageNumber: this.page });
+        }
+      }
     }
     this.linkService = new LinkService({
       eventBus,
@@ -320,7 +384,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       imageResourcesPath: assetUrl("images/"),
       abortSignal: signal,
     };
-    const pdfViewer = new viewer.PDFViewer(options);
+    const pdfViewer = new Viewer(options);
     this.linkService.setViewer(pdfViewer);
 
     // the page views are created, but nothing is rendered yet
@@ -393,13 +457,25 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   /*
    * When all pages are shown, pdf.js changes only the current page for a link
    * in the pdf, because it doesn't scroll the ancestors of the viewer (see
-   * above). The browser scrolls the panel around the viewer to the page then.
-   * On a single page, the page itself changes.
+   * above). The panel around the viewer is scrolled to the place that the link
+   * gives then, or to the top of the page. On a single page, the page itself
+   * changes.
    */
-  private scrollToCurrentPage() {
-    if (this.showAll) {
-      this.pdfViewer.getPageView(this.pdfViewer.currentPageNumber - 1)?.div.scrollIntoView({ block: "start" });
+  private scrollToTarget({ pageNumber, destArray }: ScrollTarget) {
+    const pageView = this.showAll ? this.pdfViewer.getPageView(pageNumber - 1) : null;
+    if (!pageView) {
+      return;
     }
+    const top = destinationTop(destArray);
+    // from the top of the page, in the size that the page is shown
+    const offset = top === null ? 0 : Math.max(0, pageView.viewport.convertToViewportPoint(0, top)[1]);
+    const panel = scrollingAncestor(pageView.div);
+    if (!panel) {
+      pageView.div.scrollIntoView({ block: "start" });
+      return;
+    }
+    const pageTop = pageView.div.getBoundingClientRect().top - panel.getBoundingClientRect().top - panel.clientTop;
+    panel.scrollTop += pageTop + offset;
   }
 
   /*
@@ -480,22 +556,29 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   // forget the previous file
   private clear() {
     const loadingTask = this.loadingTask;
+    const worker = this.worker;
     const workerBusy = loadingTask && this.isWorkerBusy();
     this.loadingTask = null;
-    this.documentLoaded = false;
+    this.worker = null;
+    this.loading = false;
     this.pagesHeight = 0;
     clearTimeout(this.progressTimeout);
     this.progressTimeout = null;
     this.pendingProgress = null;
-    // destroys also the document, but not the shared worker
-    loadingTask?.destroy();
+    // closes the document, but doesn't stop the shared worker
+    const closed = loadingTask?.destroy();
     /*
-     * The worker would go on with what it was doing for this file, which could
-     * take long for a large file or a page with large images, and the next
-     * file would have to wait. A new worker is started for it instead.
+     * A busy worker would go on with what it was doing for this file, which
+     * could take long for a large file or a page with large images, and the
+     * next file would have to wait, so the next file gets a new worker. This
+     * one is stopped only after pdf.js has closed the document, because pdf.js
+     * cancels the download and removes the fonts of the file only when the
+     * worker has answered that it has closed the document.
      */
-    if (workerBusy) {
-      sharedWorker?.destroy();
+    if (workerBusy && worker === sharedWorker) {
+      sharedWorker = undefined;
+      const stop = () => worker.destroy();
+      closed.then(stop, stop);
     }
     this.ngZone.runOutsideAngular(() => {
       this.pdfViewer?.setDocument(null);
@@ -505,8 +588,11 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
   // the file is still being loaded, or a page is being rendered, which the worker prepares
   private isWorkerBusy(): boolean {
-    if (!this.documentLoaded) {
+    if (this.loading) {
       return true;
+    }
+    if (!this.pdfViewer?.pdfDocument) {
+      return false;
     }
     const { RenderingStates } = this.pdfjs.viewer;
     for (let i = 0; i < this.pdfViewer.pagesCount; i++) {
@@ -519,14 +605,16 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
   /*
    * The chunks of the download come faster than the progress is worth showing,
-   * so the latest is told ten times a second at most, and not for a file that
-   * is gone. A timer rather than a frame, so that it goes on in a background tab.
+   * so the latest is told ten times a second at most. Not for a file that is
+   * gone, and not after the file is loaded, when pdf.js may still download the
+   * rest of it, but the progress isn't shown anymore. A timer rather than a
+   * frame, so that it goes on in a background tab.
    */
   private emitProgress(loadingTask: PDFDocumentLoadingTask, progress: OnProgressParameters) {
     this.pendingProgress = progress;
     this.progressTimeout ??= setTimeout(() => {
       this.progressTimeout = null;
-      if (loadingTask === this.loadingTask && this.pendingProgress) {
+      if (loadingTask === this.loadingTask && this.loading && this.pendingProgress) {
         this.emit(this.loadProgress, this.pendingProgress);
       }
     }, 100);
