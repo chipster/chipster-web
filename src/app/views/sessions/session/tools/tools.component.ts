@@ -6,12 +6,12 @@ import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-
 import { NgSelectComponent } from "@ng-select/ng-select";
 import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
-import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
 import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
+import { Toast, ToastService } from "../../../../shared/services/toast.service";
 import {
   CLEAR_SELECTED_TOOL_BY_ID,
   CLEAR_SELECTED_TOOL_WITH_INPUTS,
@@ -123,7 +123,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   compactToolList = true;
 
   public searchBoxModel: ToolSearchListItem;
-  private lastJobStartedToastId: number;
+  private lastJobStartedToast: Toast;
 
   // use to signal that parameters have been changed and need to be validated
   private parametersChanged$: BehaviorSubject<any> = new BehaviorSubject<any>(null);
@@ -146,7 +146,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     private sessionDataService: SessionDataService,
     public toolService: ToolService,
     private modalService: NgbModal,
-    private toastrService: ToastrService,
+    private toastService: ToastService,
     private errorService: ErrorService,
     private datasetModalService: DatasetModalService,
     private dialogModalService: DialogModalService,
@@ -274,14 +274,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private showRunJobToaster(jobCount = 1) {
     const notificationText = jobCount > 1 ? `${jobCount} jobs started` : "Job started";
 
-    // close the previous toastr not to cover the run button
-    // we can't use the global preventDuplicates because we wan't to show duplicates of error messages
-    if (this.lastJobStartedToastId != null) {
-      this.toastrService.remove(this.lastJobStartedToastId);
+    // close the previous toast not to cover the run button
+    if (this.lastJobStartedToast != null) {
+      this.toastService.close(this.lastJobStartedToast);
     }
-    this.lastJobStartedToastId = this.toastrService.info(notificationText, "", {
-      timeOut: 1500,
-    }).toastId;
+    this.lastJobStartedToast = this.toastService.info(notificationText, "", {
+      timeout: 1500,
+    });
   }
 
   updateJobs() {

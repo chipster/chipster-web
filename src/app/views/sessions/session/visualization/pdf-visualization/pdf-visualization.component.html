@@ -67,18 +67,24 @@
     </div>
   </div>
 } @else {
-  <ch-status [state]="state"></ch-status>
-  <progress value="{{ loadedBytes }}" max="{{ totalBytes }}"></progress>
+  <ch-status [state]="state" (buttonEvent)="onStatusButton($event)"></ch-status>
+  @if (state.isLoading()) {
+    <progress value="{{ loadedBytes }}" max="{{ totalBytes }}"></progress>
+  }
 }
 @if (urlReady) {
   <pdf-viewer
+    #pdfViewer
     [src]="src"
     [zoom]="zoom"
     [show-all]="showAll"
     [fit-to-page]="true"
     [page]="page"
     (after-load-complete)="pdfLoadComplete($event)"
-    (page-rendered)="pageRendered($event)"
+    (error)="pdfLoadFailed($event)"
+    (page-rendered)="pageRendered()"
+    (pagesloaded)="pagesLoaded()"
+    (pageChange)="onPageChange($event)"
     (on-progress)="onProgress($event)"
     style="height: {{ height }}px"></pdf-viewer>
 }
