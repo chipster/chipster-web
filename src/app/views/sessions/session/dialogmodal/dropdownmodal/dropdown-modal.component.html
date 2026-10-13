@@ -13,9 +13,11 @@
         {{ getOptionName(value) }}
       </button>
       <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-        <button ngbDropdownItem *ngFor="let key of optionKeys" (click)="select(key)">
-          {{ getOptionName(key) }}
-        </button>
+        @for (key of optionKeys; track key) {
+          <button ngbDropdownItem (click)="select(key)">
+            {{ getOptionName(key) }}
+          </button>
+        }
       </div>
     </div>
 

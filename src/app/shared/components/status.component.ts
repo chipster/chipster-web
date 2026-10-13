@@ -5,13 +5,11 @@ import { LoadState, StatusButton } from "../../model/loadstate";
   selector: "ch-status",
   template: `
     <div>{{ state.message }}</div>
-    <button
-      *ngFor="let button of state.buttons; let first = first"
-      class="btn btn-secondary btn-sm mt-3"
-      [class.ms-2]="!first"
-      (click)="onButton(button)">
-      {{ button.text }}
-    </button>
+    @for (button of state.buttons; track button.action; let first = $first) {
+      <button class="btn btn-secondary btn-sm mt-3" [class.ms-2]="!first" (click)="onButton(button)">
+        {{ button.text }}
+      </button>
+    }
   `,
   styles: [
     `
