@@ -124,6 +124,9 @@ export default tseslint.config(
       // templates use the `x != null` idiom to catch undefined too, same as
       // the eqeqeq exception for typescript above
       "@angular-eslint/template/eqeqeq": ["error", { allowNullOrUndefined: true }],
+      // the templates were migrated to the built-in @if, @for and @switch. keep
+      // new *ngIf, *ngFor and ngSwitch out, angular deprecates them in v20.
+      "@angular-eslint/template/prefer-control-flow": "error",
     },
   },
   {

@@ -8,8 +8,10 @@
       placeholder="{{ placeholder }}"
       (keyup)="searchKeyEvent($event)"
       #searchInput />
-    <button class="btn btn-outline-dark clear-search-button" *ngIf="searchTerm" (click)="clearClick($event)">
-      <i class="fas fa-times" aria-hidden="true"></i>
-    </button>
+    @if (searchTerm) {
+      <button class="btn btn-outline-dark clear-search-button" (click)="clearClick($event)">
+        <i class="fas fa-times" aria-hidden="true"></i>
+      </button>
+    }
   </div>
 </div>

@@ -16,6 +16,8 @@ import { Api, createSession, getApi } from "./session-api";
  * the page still looks fine. A test allows the failed requests that it
  * causes on purpose, like a failed login, with pageErrors.allowFailedRequest(),
  * and the error messages that the app then shows with allowErrorMessage().
+ * A console error that a library logs about the test data, like pdf.js about
+ * a broken link in a pdf, is allowed with allowConsoleError().
  * The ones that the app makes regardless of the test are in
  * KNOWN_FAILED_REQUESTS, each with the reason it isn't a failure of the test.
  */
@@ -41,6 +43,8 @@ export interface PageErrors {
   allowFailedRequest(status: number, role: string, path: string): void;
   // allow an error message that the app shows in the current test, by its text
   allowErrorMessage(msg: string): void;
+  // allow a console error in the current test that starts with this text
+  allowConsoleError(text: string): void;
   // check the pages of a context that the test created itself too
   watch(context: BrowserContext): void;
   // wait until the errors logged so far have been read, before their pages are closed
@@ -53,6 +57,8 @@ interface PageError {
   url?: string;
   // the text of an ErrorMessage of the app
   msg?: string;
+  // the text of any other console error
+  console?: string;
 }
 
 interface TestFixtures {
@@ -122,6 +128,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       const requestPrefix = (r: FailedRequest) => new URL(api.address(r.role) + r.path, baseURL).href;
       const allowedRequests = KNOWN_FAILED_REQUESTS.map((r) => ({ status: r.status, prefix: requestPrefix(r) }));
       const allowedMessages: string[] = [];
+      const allowedConsoleErrors: string[] = [];
 
       const listen = (page: Page) => {
         page.on("pageerror", (error) => errors.push(Promise.resolve({ text: `uncaught: ${error.message}` })));
@@ -143,7 +150,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
               })),
             );
           } else {
-            errors.push(Promise.resolve({ text: `console: ${message.text()} (${url})`, url }));
+            errors.push(Promise.resolve({ text: `console: ${message.text()} (${url})`, url, console: message.text() }));
           }
         });
       };
@@ -159,6 +166,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
         allowFailedRequest: (status, role, path) =>
           allowedRequests.push({ status, prefix: requestPrefix({ status, role, path }) }),
         allowErrorMessage: (msg) => allowedMessages.push(msg),
+        allowConsoleError: (text) => allowedConsoleErrors.push(text),
         watch,
         settle: async () => {
           await Promise.all(errors);
@@ -168,7 +176,12 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
       const isAllowedRequest = (error: PageError) =>
         allowedRequests.some((r) => error.text.includes(`status of ${r.status} `) && error.url?.startsWith(r.prefix));
       const unexpected = (await Promise.all(errors))
-        .filter((error) => !isAllowedRequest(error) && !allowedMessages.includes(error.msg))
+        .filter(
+          (error) =>
+            !isAllowedRequest(error) &&
+            !allowedMessages.includes(error.msg) &&
+            !allowedConsoleErrors.some((text) => error.console?.startsWith(text)),
+        )
         .map((error) => error.text);
       expect(unexpected, "errors on the page").toEqual([]);
     },

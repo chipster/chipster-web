@@ -3,18 +3,17 @@
 </div>
 <div class="modal-body">
   <p>{{ message }}</p>
-  <p *ngIf="question" class="mt-3">{{ question }}</p>
+  @if (question) {
+    <p class="mt-3">{{ question }}</p>
+  }
 </div>
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary me-auto" (click)="cancel()">{{ cancelButtonText }}</button>
-  <button
-    *ngIf="action3ButtonText"
-    type="button"
-    class="btn btn-info me-1"
-    (click)="action3()"
-    [disabled]="action3Disabled">
-    {{ action3ButtonText }}
-  </button>
+  @if (action3ButtonText) {
+    <button type="button" class="btn btn-info me-1" (click)="action3()" [disabled]="action3Disabled">
+      {{ action3ButtonText }}
+    </button>
+  }
   <button type="button" class="btn btn-info me-1" (click)="action2()" [disabled]="action2Disabled">
     {{ action2ButtonText }}
   </button>

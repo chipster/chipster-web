@@ -2,7 +2,6 @@ import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
-import { PdfViewerModule } from "ng2-pdf-viewer";
 import { SharedModule } from "../../../../shared/shared.module";
 import { PlotService } from "../../../../shared/visualization/plot.service";
 import { VisualizationTSVService } from "../../../../shared/visualization/visualizationTSV.service";
@@ -19,6 +18,7 @@ import { ExpressionProfileService } from "./expression-profile/expression-profil
 import { HtmlvisualizationComponent } from "./html-visualization/html-visualization.component";
 import { ImageVisualizationComponent } from "./image-visualization/image-visualization.component";
 import { NewTabVisualizationComponent } from "./new-tab-visualization/new-tab-visualization.component";
+import { PdfViewerComponent } from "./pdf-visualization/pdf-viewer.component";
 import { PdfVisualizationComponent } from "./pdf-visualization/pdf-visualization.component";
 import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualization.component";
 import { ScatterPlotComponent } from "./scatter-plot/scatter-plot.component";
@@ -36,11 +36,12 @@ import { VolcanoPlotComponent } from "./volcano-plot/volcano-plot.component";
 import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, PdfViewerModule, LabelsModule],
+  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, LabelsModule],
   declarations: [
     VisualizationsComponent,
     VennDiagramComponent,
     PdfVisualizationComponent,
+    PdfViewerComponent,
     NewTabVisualizationComponent,
     HtmlvisualizationComponent,
     TextVisualizationComponent,

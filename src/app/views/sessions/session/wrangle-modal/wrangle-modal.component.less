@@ -33,3 +33,9 @@ h3 {
 ng-dropdown-panel {
   width: auto !important;
 }
+
+// fit the preview grid to its few rows, ag-grid would leave room for 150px of them. Keep
+// the height of one row for the overlay that tells there are no rows.
+:host ::ng-deep .ag-layout-auto-height .ag-center-cols-viewport {
+  min-height: var(--ag-row-height);
+}

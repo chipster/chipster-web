@@ -15,6 +15,17 @@ interface PdfPage {
   height: number;
   // numbers of the pages that this page links to
   links?: number[];
+  // a web page that this page links to
+  webLink?: string;
+  // more drawing on the page, in the operators of a pdf content stream
+  drawing?: string;
+  // more links, each with its text and its destination or action in the syntax of a pdf
+  actions?: { text: string; action: string }[];
+}
+
+// the object of a page in the pdf files of createPdfPages, for the destinations of links
+function pageRef(pageNumber: number): string {
+  return `${4 + 2 * (pageNumber - 1)} 0 R`;
 }
 
 /*
@@ -34,6 +45,9 @@ function createPdfPages(pages: PdfPage[], paddingBytes = 0): Buffer {
   const linkObjects: string[] = [];
   pages.forEach((page, i) => {
     let content = `BT /F1 24 Tf 72 ${page.height - 72} Td (${page.text}) Tj ET`;
+    if (page.drawing) {
+      content += "\n" + page.drawing;
+    }
     const annotations: string[] = [];
     (page.links ?? []).forEach((target, j) => {
       const y = page.height - 130 - 40 * j;
@@ -45,6 +59,21 @@ function createPdfPages(pages: PdfPage[], paddingBytes = 0): Buffer {
       );
       annotations.push(`${4 + 2 * pages.length + linkObjects.length - 1} 0 R`);
     });
+    if (page.webLink) {
+      const y = page.height - 130 - 40 * annotations.length;
+      content += `\nBT /F1 18 Tf 72 ${y} Td (Open web page) Tj ET`;
+      linkObjects.push(
+        `<< /Type /Annot /Subtype /Link /Rect [70 ${y - 5} 250 ${y + 20}] /Border [0 0 0] ` +
+          `/A << /S /URI /URI (${page.webLink}) >> >>`,
+      );
+      annotations.push(`${4 + 2 * pages.length + linkObjects.length - 1} 0 R`);
+    }
+    for (const { text, action } of page.actions ?? []) {
+      const y = page.height - 130 - 40 * annotations.length;
+      content += `\nBT /F1 18 Tf 72 ${y} Td (${text}) Tj ET`;
+      linkObjects.push(`<< /Type /Annot /Subtype /Link /Rect [70 ${y - 5} 250 ${y + 20}] /Border [0 0 0] ${action} >>`);
+      annotations.push(`${4 + 2 * pages.length + linkObjects.length - 1} 0 R`);
+    }
     const annots = annotations.length > 0 ? ` /Annots [${annotations.join(" ")}]` : "";
     objects.push(
       `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${page.width} ${page.height}] ` +
@@ -78,6 +107,32 @@ const SMALL_PDF = createPdf("Small test PDF");
 // over the limit of 10 MB, and clearly over 11 MB so that the prompt shows 11.1 MB
 const LARGE_PDF = createPdf("Large test PDF", 11 * 1024 * 1024 + 2048);
 
+const WEB_PAGE = "https://example.org/linked-from-pdf";
+const WEB_LINK_PDF = createPdfPages([{ text: "Web link", width: 612, height: 792, webLink: WEB_PAGE }]);
+
+// links between pages of different widths, so that the page that a link goes to doesn't fit the viewer like the first one
+const WIDE_PAGE_LINKS_PDF = createPdfPages([
+  { text: "Page 1, Letter portrait", width: 612, height: 792, links: [3] },
+  { text: "Page 2, A5 portrait", width: 420, height: 595 },
+  { text: "Page 3, A3 landscape", width: 1191, height: 842, links: [1] },
+]);
+
+// links to a place in a page, to the last page and to a destination that the pdf doesn't have
+const PLACE_LINKS_PDF = createPdfPages([
+  {
+    text: "Page 1",
+    width: 612,
+    height: 792,
+    actions: [
+      // 200 points from the bottom of page 2
+      { text: "Lower on page 2", action: `/Dest [${pageRef(2)} /XYZ 0 200 null]` },
+      { text: "Last page", action: "/A << /S /Named /N /LastPage >>" },
+    ],
+  },
+  { text: "Page 2", width: 612, height: 792 },
+  { text: "Page 3", width: 612, height: 792, actions: [{ text: "Nowhere", action: "/Dest (nowhere)" }] },
+]);
+
 // pages of different sizes, so that the height of the viewer has to follow them, and links between them
 const MULTI_PAGE_PDF = createPdfPages([
   { text: "Page 1, Letter portrait", width: 612, height: 792, links: [5] },
@@ -88,8 +143,21 @@ const MULTI_PAGE_PDF = createPdfPages([
   { text: "Page 6, A4 landscape", width: 842, height: 595 },
 ]);
 
+/*
+ * Playwright hides the scrollbars of Chromium by default. They are shown, like
+ * on Linux and Windows, where they take space from the content. The other
+ * options come from the project.
+ */
+test.use({
+  launchOptions: async ({ launchOptions }, use) => use({ ...launchOptions, ignoreDefaultArgs: ["--hide-scrollbars"] }),
+});
+
 function pdfVisualization(page: Page) {
   return page.locator("ch-pdf-visualization");
+}
+
+function viewer(page: Page) {
+  return pdfVisualization(page).locator("ch-pdf-viewer");
 }
 
 async function selectDataset(page: Page, datasetId: string) {
@@ -108,29 +176,31 @@ async function expectFailed(page: Page) {
   // the user can still try again or open the file in a new tab
   await expect(visualization.locator("ch-status").getByRole("button")).toHaveText(["Try again", "Open in new tab"]);
   await expect(visualization.locator("progress")).toHaveCount(0);
-  await expect(visualization.locator("pdf-viewer")).toHaveCount(0);
+  await expect(viewer(page)).toHaveCount(0);
 }
 
 /*
- * The height of the pdf-viewer element and the height of the pages it shows,
- * as laid out by pdf.js. Each page has a 10px bottom margin.
+ * The visible height of the viewer and the height of the pages it shows, as
+ * laid out by pdf.js. Each page has a 10px bottom margin.
  */
 async function viewerAndPageHeights(page: Page) {
-  return pdfVisualization(page)
-    .locator("pdf-viewer")
-    .evaluate((viewer) => {
-      const shownPages = Array.from(viewer.querySelectorAll<HTMLElement>(".page")).filter(
-        (pageDiv) => pageDiv.offsetParent !== null,
-      );
-      const container = viewer.querySelector<HTMLElement>(".ng2-pdf-viewer-container");
-      return {
-        viewer: viewer.getBoundingClientRect().height,
-        pages: shownPages.reduce((sum, pageDiv) => sum + pageDiv.getBoundingClientRect().height + 10, 0),
-        shownPages: shownPages.length,
-        // more than 0 when the pages don't fit, so that a part of them is cut off
-        overflow: container.scrollHeight - container.clientHeight,
-      };
-    });
+  return viewer(page).evaluate((viewerElement) => {
+    const shownPages = Array.from(viewerElement.querySelectorAll<HTMLElement>(".page")).filter(
+      (pageDiv) => pageDiv.offsetParent !== null,
+    );
+    const container = viewerElement.querySelector<HTMLElement>(".pdf-viewer-container");
+    return {
+      // without the horizontal scrollbar, when there is one
+      viewer: container.clientHeight,
+      pages: shownPages.reduce((sum, pageDiv) => sum + pageDiv.getBoundingClientRect().height + 10, 0),
+      shownPages: shownPages.length,
+      // more than 0 when the pages don't fit, so that a part of them is cut off
+      overflow: container.scrollHeight - container.clientHeight,
+      // more than 0 when the pages are wider than the viewer, so that there's a horizontal scrollbar
+      overflowX: container.scrollWidth - container.clientWidth,
+      pageWidth: shownPages[0]?.getBoundingClientRect().width,
+    };
+  });
 }
 
 async function expectHeightFitsPages(page: Page, shownPages: number) {
@@ -151,6 +221,8 @@ test("a small pdf file is shown directly", async ({ page, api, sessionId }) => {
 
   await expectRendered(page);
   await expect(pdfVisualization(page).getByRole("button", { name: "Show here" })).toHaveCount(0);
+  // the stylesheet of pdf.js is loaded with it, this margin comes from it
+  await expect(viewer(page).locator(".page").first()).toHaveCSS("margin-bottom", "10px");
 });
 
 test("a large pdf file is shown only when asked", async ({ page, context, api, sessionId }) => {
@@ -170,12 +242,12 @@ test("a large pdf file is shown only when asked", async ({ page, context, api, s
 
   const visualization = pdfVisualization(page);
   await expect(visualization.locator("ch-status")).toContainText(
-    "This PDF is larger than 10 MB (11.1 MB). Showing it here may be slow or make the page unresponsive. " +
+    "This PDF (11.1 MB) is larger than 10 MB. Showing it here may be slow or make the page unresponsive. " +
       "Opening it in a new tab is recommended.",
   );
   await expect(visualization.locator("ch-status").getByRole("button")).toHaveText(["Show here", "Open in new tab"]);
   await expect(visualization.locator("progress")).toHaveCount(0);
-  await expect(visualization.locator("pdf-viewer")).toHaveCount(0);
+  await expect(viewer(page)).toHaveCount(0);
 
   // the new tab gets the file, and the prompt stays in case the user wants to show it here too.
   // The new tab may request the file before Playwright hands it over as a popup, so the request is
@@ -228,10 +300,18 @@ test("a broken pdf file ends in the fail state", async ({ page, api, sessionId, 
     "This is not a pdf file.\n",
   );
 
+  const workers: string[] = [];
+  page.on("worker", (worker) => workers.push(worker.url()));
+
   await openSession(page, sessionId, datasetId);
   await selectDataset(page, datasetId);
 
   await expectFailed(page);
+
+  // the worker isn't busy after a failure, so trying again uses it
+  await pdfVisualization(page).getByRole("button", { name: "Try again" }).click();
+  await expectFailed(page);
+  expect(workers.filter((url) => url.includes("pdf.worker"))).toHaveLength(1);
 });
 
 test("the height follows the pages of a pdf file with pages of different sizes", async ({ page, api, sessionId }) => {
@@ -268,4 +348,454 @@ test("the height follows the pages of a pdf file with pages of different sizes",
   await expect(visualization.getByText("All 6 pages")).toBeVisible();
   await expectHeightFitsPages(page, 6);
   await expect(visualization.locator(".page canvas")).toHaveCount(6, { timeout: 30_000 });
+});
+
+test("all pages are rendered when they are shown, also when they have the same size", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  // pages of the same size don't need a new scale, which would render them again
+  const pages = Array.from({ length: 6 }, (_, i) => ({ text: `Page ${i + 1}`, width: 612, height: 792 }));
+  const datasetId = await createDataset(api, sessionId, { name: "same.pdf", x: 100, y: 100 }, createPdfPages(pages));
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+
+  await visualization.getByTitle("Show all pages").click();
+  await expectHeightFitsPages(page, 6);
+  await expect(visualization.locator(".page canvas")).toHaveCount(6, { timeout: 30_000 });
+});
+
+test("a pdf doesn't change the color scheme of the app", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
+  await page.emulateMedia({ colorScheme: "dark" });
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe("normal");
+});
+
+test("the height follows the pages when switching between one and all pages", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "multipage.pdf", x: 100, y: 100 }, MULTI_PAGE_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+  const onePage = await expectHeightFitsPages(page, 1);
+
+  // the pages are rendered already when they are shown the second time
+  for (let i = 0; i < 2; i++) {
+    await visualization.getByTitle("Show all pages").click();
+    await expect(visualization.getByText("All 6 pages")).toBeVisible();
+    expect(await expectHeightFitsPages(page, 6)).toBeGreaterThan(onePage);
+
+    await visualization.getByTitle("Show single page").click();
+    await expect(visualization.getByText("Page 1 / 6")).toBeVisible();
+    expect(await expectHeightFitsPages(page, 1)).toBe(onePage);
+  }
+});
+
+test("zooming changes the size of the page and keeps the height fitting", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+  const original = await expectHeightFitsPages(page, 1);
+
+  await visualization.getByTitle("Zoom out").click();
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.viewer)).toBeLessThan(original);
+  await expectHeightFitsPages(page, 1);
+
+  await visualization.getByTitle("Zoom in").click();
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.viewer)).toBe(original);
+
+  // wider than the viewer, so that there's a horizontal scrollbar, which mustn't take space from the page
+  await visualization.getByTitle("Zoom in").click();
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.overflowX)).toBeGreaterThan(0);
+  await expectHeightFitsPages(page, 1);
+
+  await visualization.getByTitle("Zoom out").click();
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.overflowX)).toBe(0);
+  await expectHeightFitsPages(page, 1);
+});
+
+test("the scrollbar of a wide page doesn't take space from the pages when changing the page", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const datasetId = await createDataset(api, sessionId, { name: "multipage.pdf", x: 100, y: 100 }, MULTI_PAGE_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+  await expectHeightFitsPages(page, 1);
+
+  // the Letter page is wider than the viewer at this zoom, but the A5 page isn't
+  await visualization.getByTitle("Zoom in").click();
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.overflowX)).toBeGreaterThan(0);
+  await expectHeightFitsPages(page, 1);
+
+  for (let pageNumber = 2; pageNumber <= 4; pageNumber++) {
+    await visualization.getByTitle("Next page").click();
+    await expect(visualization.getByText(`Page ${pageNumber} / 6`)).toBeVisible();
+  }
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.overflowX)).toBe(0);
+  await expectHeightFitsPages(page, 1);
+
+  // back to a page that was rendered already
+  await visualization.getByTitle("Previous page").click();
+  await expect(visualization.getByText("Page 3 / 6")).toBeVisible();
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.overflowX)).toBeGreaterThan(0);
+  await expectHeightFitsPages(page, 1);
+});
+
+test("the page follows the width of the viewer", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+  const original = await viewerAndPageHeights(page);
+  expect(original.pageWidth).toBeGreaterThan(400);
+
+  // the width of the visualization changes without a window resize, like when a panel next to it opens
+  await visualization.evaluate((element) => {
+    // the element is inline by default, so the width needs a block
+    element.style.display = "block";
+    element.style.width = "400px";
+  });
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.pageWidth)).toBeLessThanOrEqual(400);
+  expect(await expectHeightFitsPages(page, 1)).toBeLessThan(original.viewer);
+
+  await visualization.evaluate((element) => {
+    element.style.display = "";
+    element.style.width = "";
+  });
+  await expect.poll(() => viewerAndPageHeights(page).then((heights) => heights.pageWidth)).toBe(original.pageWidth);
+  expect(await expectHeightFitsPages(page, 1)).toBe(original.viewer);
+});
+
+test("the width of the session view doesn't change with the height of the pages", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+
+  // the width inside the panel around the visualization, when there's something to scroll and when there isn't
+  const widths = await viewer(page).evaluate((element) => {
+    let panel = element.parentElement;
+    while (panel && !/auto|scroll/.test(getComputedStyle(panel).overflowY)) {
+      panel = panel.parentElement;
+    }
+    const children = Array.from(panel.children) as HTMLElement[];
+    for (const child of children) {
+      child.style.display = "none";
+    }
+    const spacer = document.createElement("div");
+    panel.append(spacer);
+    spacer.style.height = panel.clientHeight * 2 + "px";
+    const scrolling = { scrolls: panel.scrollHeight > panel.clientHeight, width: panel.clientWidth };
+    spacer.style.height = "10px";
+    const notScrolling = { scrolls: panel.scrollHeight > panel.clientHeight, width: panel.clientWidth };
+    spacer.remove();
+    for (const child of children) {
+      child.style.display = "";
+    }
+    return { scrolling, notScrolling };
+  });
+  expect(widths.scrolling.scrolls).toBe(true);
+  expect(widths.notScrolling.scrolls).toBe(false);
+  expect(widths.notScrolling.width).toBe(widths.scrolling.width);
+});
+
+test("all pages can be shown only up to a limit", async ({ page, api, sessionId }) => {
+  const pages = Array.from({ length: 51 }, (_, i) => ({ text: `Page ${i + 1}`, width: 612, height: 792 }));
+  const datasetId = await createDataset(api, sessionId, { name: "long.pdf", x: 100, y: 100 }, createPdfPages(pages));
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+
+  await expect(visualization.getByText("Page 1 / 51")).toBeVisible();
+  await expect(visualization.getByTitle("Next page")).toBeEnabled();
+  await expect(visualization.getByTitle("Show all pages")).toHaveCount(0);
+});
+
+test("a link to a web page opens it in a new tab", async ({ page, context, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "weblink.pdf", x: 100, y: 100 }, WEB_LINK_PDF);
+  // the web page isn't loaded from the internet
+  await context.route(WEB_PAGE, (route) => route.fulfill({ body: "linked page" }));
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+
+  const link = viewer(page).locator(".linkAnnotation a");
+  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("rel", /noopener/);
+  const popupPromise = page.waitForEvent("popup");
+  await link.click();
+  const popup = await popupPromise;
+  expect(popup.url()).toBe(WEB_PAGE);
+  await popup.close();
+});
+
+test("the viewer requests nothing from other sites", async ({ page, baseURL, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
+  // the worker, the fonts and the other files of pdf.js are served by the app
+  const otherSites: string[] = [];
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (url.protocol.startsWith("http") && url.origin !== new URL(baseURL).origin) {
+      otherSites.push(request.url());
+    }
+  });
+  const pdfjsAssets: string[] = [];
+  page.on("requestfinished", (request) => {
+    if (request.url().includes("/assets/pdfjs/")) {
+      pdfjsAssets.push(new URL(request.url()).pathname);
+    }
+  });
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  // the text of the pdf is selectable
+  await expect(viewer(page).locator(".textLayer")).toContainText("Small test PDF");
+
+  expect(otherSites).toEqual([]);
+  expect(pdfjsAssets).toContain("/assets/pdfjs/pdf.worker.min.mjs");
+});
+
+test("the viewer of the previous file is closed when another file is selected", async ({ page, api, sessionId }) => {
+  const firstId = await createDataset(api, sessionId, { name: "first.pdf", x: 100, y: 100 }, SMALL_PDF);
+  const secondId = await createDataset(api, sessionId, { name: "second.pdf", x: 200, y: 100 }, createPdf("Second"));
+  const workers: string[] = [];
+  page.on("worker", (worker) => workers.push(worker.url()));
+
+  await openSession(page, sessionId, firstId);
+  await selectDataset(page, firstId);
+  await expectRendered(page);
+
+  await selectDataset(page, secondId);
+  await expectRendered(page);
+  await expect(viewer(page)).toHaveCount(1);
+  await expect(viewer(page).locator(".textLayer")).toContainText("Second");
+  await expect(viewer(page).locator(".page")).toHaveCount(1);
+  // the same worker of pdf.js reads both files
+  expect(workers.filter((url) => url.includes("pdf.worker"))).toHaveLength(1);
+});
+
+test("the worker is stopped when another file is selected while a page is being rendered", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  // squares that take long to render
+  let drawing = "";
+  for (let i = 0; i < 200_000; i++) {
+    drawing += `${i % 500} ${Math.floor(i / 500) % 700} 1 1 re f\n`;
+  }
+  const heavyPdf = createPdfPages([{ text: "Heavy page", width: 612, height: 792, drawing }]);
+  const heavyId = await createDataset(api, sessionId, { name: "heavy.pdf", x: 100, y: 100 }, heavyPdf);
+  const smallId = await createDataset(api, sessionId, { name: "small.pdf", x: 200, y: 100 }, SMALL_PDF);
+  const workers: { url: string; closed: boolean }[] = [];
+  page.on("worker", (worker) => {
+    const entry = { url: worker.url(), closed: false };
+    workers.push(entry);
+    worker.on("close", () => {
+      entry.closed = true;
+    });
+  });
+
+  await openSession(page, sessionId, heavyId);
+  await selectDataset(page, heavyId);
+  // the file is loaded, and the page is being rendered
+  await expect(pdfVisualization(page).locator("#pdf-view-navigation")).toBeVisible({ timeout: 30_000 });
+  await selectDataset(page, smallId);
+  await expectRendered(page);
+  await expect(viewer(page).locator(".textLayer")).toContainText("Small test PDF");
+
+  const pdfWorkers = () => workers.filter((worker) => worker.url.includes("pdf.worker"));
+  expect(pdfWorkers()).toHaveLength(2);
+  // after pdf.js has closed the file in it
+  await expect.poll(() => pdfWorkers()[0].closed, { timeout: 30_000 }).toBe(true);
+  expect(pdfWorkers()[1].closed).toBe(false);
+});
+
+test("the download is cancelled when another file is selected", async ({ page, api, sessionId }) => {
+  const largeId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
+  const smallId = await createDataset(api, sessionId, { name: "small.pdf", x: 200, y: 100 }, SMALL_PDF);
+  const largeFile = `${api.address("file-broker")}/sessions/${sessionId}/datasets/${largeId}`;
+
+  await openSession(page, sessionId, largeId);
+  await selectDataset(page, largeId);
+  // slow enough to select another file in the middle of the download, the file is about 11 MB
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.emulateNetworkConditions", {
+    offline: false,
+    latency: 0,
+    downloadThroughput: 1024 * 1024,
+    uploadThroughput: -1,
+  });
+  const cancelled = page.waitForEvent("requestfailed", (request) => request.url().includes(largeFile));
+  await pdfVisualization(page).getByRole("button", { name: "Show here" }).click();
+  await expect
+    .poll(async () => Number(await pdfVisualization(page).locator("progress").getAttribute("value")))
+    .toBeGreaterThan(0);
+
+  await selectDataset(page, smallId);
+  expect((await cancelled).failure()?.errorText).toContain("ABORTED");
+  await expectRendered(page);
+});
+
+test("the links in a pdf file go to their place when all pages are shown", async ({
+  page,
+  api,
+  sessionId,
+  pageErrors,
+}) => {
+  // pdf.js logs the link to the destination that the pdf doesn't have
+  pageErrors.allowConsoleError('goToDestination: "null" is not a valid destination array, for dest="nowhere"');
+  const datasetId = await createDataset(api, sessionId, { name: "places.pdf", x: 100, y: 100 }, PLACE_LINKS_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+  await visualization.getByTitle("Show all pages").click();
+  await expectHeightFitsPages(page, 3);
+  const link = (pageNumber: number, index: number) =>
+    viewer(page).locator(`.page[data-page-number="${pageNumber}"] .linkAnnotation a`).nth(index);
+
+  // a link to a destination that the pdf doesn't have doesn't move the session view
+  await link(3, 0).scrollIntoViewIfNeeded();
+  const before = await pageInPanel(page, 3);
+  await link(3, 0).click();
+  await page.waitForTimeout(500);
+  expect(Math.abs((await pageInPanel(page, 3)).top - before.top)).toBeLessThan(2);
+
+  // a link to a place 200 points from the bottom of page 2 brings that place to the top of the session view
+  await link(1, 0).click();
+  await expect
+    .poll(async () => {
+      const { top, height } = await pageInPanel(page, 2);
+      return Math.abs(top + ((792 - 200) / 792) * height);
+    })
+    .toBeLessThan(3);
+
+  // the button to the last page brings it into view, or as near as the session view scrolls
+  await link(1, 1).click();
+  await expect
+    .poll(async () => {
+      const { top, panelHeight } = await pageInPanel(page, 3);
+      return top > -2 && top < panelHeight / 4;
+    })
+    .toBe(true);
+});
+
+test("the progress of the download is shown", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  // slow enough to see the download progressing, the file is about 11 MB
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.emulateNetworkConditions", {
+    offline: false,
+    latency: 0,
+    downloadThroughput: 4 * 1024 * 1024,
+    uploadThroughput: -1,
+  });
+  await pdfVisualization(page).getByRole("button", { name: "Show here" }).click();
+
+  const progress = pdfVisualization(page).locator("progress");
+  await expect(progress).toHaveAttribute("max", String(LARGE_PDF.length));
+  // somewhere between the start and the end
+  await expect
+    .poll(async () => {
+      const value = Number(await progress.getAttribute("value"));
+      return value > 0 && value < LARGE_PDF.length;
+    })
+    .toBe(true);
+  await expectRendered(page);
+});
+
+/*
+ * Where a page is in the scrolling panel of the session view around the
+ * visualization: how far its top is from the top of the visible part of the
+ * panel, and the height of that visible part.
+ */
+async function pageInPanel(page: Page, pageNumber: number) {
+  return viewer(page)
+    .locator(`.page[data-page-number="${pageNumber}"]`)
+    .evaluate((pageDiv) => {
+      let panel = pageDiv.parentElement;
+      while (panel && !/auto|scroll/.test(getComputedStyle(panel).overflowY)) {
+        panel = panel.parentElement;
+      }
+      return {
+        top: pageDiv.getBoundingClientRect().top - panel.getBoundingClientRect().top - panel.clientTop,
+        height: pageDiv.getBoundingClientRect().height,
+        panelHeight: panel.clientHeight,
+      };
+    });
+}
+
+test("the links in a pdf file work when all pages are shown", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "links.pdf", x: 100, y: 100 }, WIDE_PAGE_LINKS_PDF);
+  // Angular reports its errors to the console, and the app shows them in a toast too
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      errors.push(message.text());
+    }
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await openSession(page, sessionId, datasetId);
+  await selectDataset(page, datasetId);
+  await expectRendered(page);
+  const visualization = pdfVisualization(page);
+  await visualization.getByTitle("Show all pages").click();
+  await expect(visualization.getByText("All 3 pages")).toBeVisible();
+  const allPages = await expectHeightFitsPages(page, 3);
+
+  // to the wide page and back, and the page comes into view in the panel around the viewer
+  const before = await pageInPanel(page, 3);
+  expect(before.top).toBeGreaterThan(before.panelHeight);
+  for (const [link, target] of [
+    [0, 3],
+    [1, 1],
+  ]) {
+    await viewer(page).locator(".linkAnnotation a").nth(link).click();
+    expect(await expectHeightFitsPages(page, 3)).toBe(allPages);
+    // at the top of the panel, or as near as the panel scrolls: the last page can't go higher than the end
+    await expect
+      .poll(async () => {
+        const { top, panelHeight } = await pageInPanel(page, target);
+        return top > -2 && top < panelHeight / 4;
+      })
+      .toBe(true);
+  }
+  // the link on a single page goes to the wide page too
+  await visualization.getByTitle("Show single page").click();
+  await viewer(page).locator(".linkAnnotation a").click();
+  await expect(visualization.getByText("Page 3 / 3")).toBeVisible();
+  await expectHeightFitsPages(page, 1);
+
+  expect(errors).toEqual([]);
 });
