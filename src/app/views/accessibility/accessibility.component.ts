@@ -5,10 +5,10 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 
 @Component({
-    selector: "ch-accessibility",
-    templateUrl: "./accessibility.component.html",
-    styleUrls: ["./accessibility.component.less"],
-    standalone: false
+  selector: "ch-accessibility",
+  templateUrl: "./accessibility.component.html",
+  styleUrls: ["./accessibility.component.less"],
+  standalone: false,
 })
 export class AccessibilityComponent implements OnInit {
   public accessibilityPath: string;

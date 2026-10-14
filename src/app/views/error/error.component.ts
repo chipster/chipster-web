@@ -12,9 +12,9 @@ import { ContactSupportService } from "../contact/contact-support.service";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
 
 @Component({
-    selector: "ch-error",
-    template: "",
-    standalone: false
+  selector: "ch-error",
+  template: "",
+  standalone: false,
 })
 export class ErrorComponent implements OnInit {
   constructor(

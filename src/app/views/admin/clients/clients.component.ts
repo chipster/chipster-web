@@ -8,11 +8,11 @@ import { AuthHttpClientService } from "../../../shared/services/auth-http-client
 import { ConfigService } from "../../../shared/services/config.service";
 
 @Component({
-    selector: "ch-clients",
-    templateUrl: "./clients.component.html",
-    styleUrls: ["./clients.component.less"],
-    encapsulation: ViewEncapsulation.Emulated,
-    standalone: false
+  selector: "ch-clients",
+  templateUrl: "./clients.component.html",
+  styleUrls: ["./clients.component.less"],
+  encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class ClientsComponent implements OnInit {
   users: any[];

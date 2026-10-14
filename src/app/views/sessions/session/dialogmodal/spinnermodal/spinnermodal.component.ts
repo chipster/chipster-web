@@ -4,8 +4,8 @@ import { Observable } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
-    templateUrl: "./spinnermodal.component.html",
-    standalone: false
+  templateUrl: "./spinnermodal.component.html",
+  standalone: false,
 })
 export class SpinnerModalComponent implements AfterViewInit {
   @Input() message: string;

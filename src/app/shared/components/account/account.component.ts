@@ -3,10 +3,10 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { TokenService } from "../../../core/authentication/token.service";
 
 @Component({
-    selector: "ch-account",
-    templateUrl: "./account.component.html",
-    styleUrls: ["./account.component.less"],
-    standalone: false
+  selector: "ch-account",
+  templateUrl: "./account.component.html",
+  styleUrls: ["./account.component.less"],
+  standalone: false,
 })
 export class AccountComponent {
   constructor(

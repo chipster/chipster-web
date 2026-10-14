@@ -2,9 +2,9 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { NewsItem } from "./NewsItem";
 
 @Component({
-    selector: "ch-news-item",
-    templateUrl: "./news-item.component.html",
-    standalone: false
+  selector: "ch-news-item",
+  templateUrl: "./news-item.component.html",
+  standalone: false,
 })
 export class NewsItemComponent {
   @Input() newsItem: NewsItem;

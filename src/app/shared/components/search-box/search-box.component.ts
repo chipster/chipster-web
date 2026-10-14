@@ -2,10 +2,10 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } 
 import { HotkeyService } from "../../services/hotkey.service";
 
 @Component({
-    selector: "ch-search-box",
-    templateUrl: "./search-box.component.html",
-    styleUrls: ["./search-box.component.less"],
-    standalone: false
+  selector: "ch-search-box",
+  templateUrl: "./search-box.component.html",
+  styleUrls: ["./search-box.component.less"],
+  standalone: false,
 })
 export class SearchBoxComponent implements OnInit, OnDestroy {
   @Input()

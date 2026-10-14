@@ -5,8 +5,8 @@ import { NewsItem } from "../../../../../shared/components/news/NewsItem";
 import { PreferencesService } from "../../../../../shared/services/preferences.service";
 
 @Component({
-    templateUrl: "./news-modal.component.html",
-    standalone: false
+  templateUrl: "./news-modal.component.html",
+  standalone: false,
 })
 export class NewsModalComponent implements OnInit {
   @Input()

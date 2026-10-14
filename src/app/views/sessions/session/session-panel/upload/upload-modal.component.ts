@@ -5,10 +5,10 @@ import { SessionResource } from "../../../../../shared/resources/session.resourc
 import { UploadService } from "../../../../../shared/services/upload.service";
 
 @Component({
-    selector: "ch-add-dataset-modal-content",
-    templateUrl: "./upload-modal.component.html",
-    styleUrls: ["./upload-modal.component.less"],
-    standalone: false
+  selector: "ch-add-dataset-modal-content",
+  templateUrl: "./upload-modal.component.html",
+  styleUrls: ["./upload-modal.component.less"],
+  standalone: false,
 })
 export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() sessionId: string;

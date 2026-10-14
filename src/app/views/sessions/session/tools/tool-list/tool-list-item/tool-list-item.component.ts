@@ -1,10 +1,10 @@
 import { Component, Input } from "@angular/core";
 
 @Component({
-    selector: "ch-tool-list-item",
-    templateUrl: "tool-list-item.component.html",
-    styleUrls: ["./tool-list-item.component.less"],
-    standalone: false
+  selector: "ch-tool-list-item",
+  templateUrl: "tool-list-item.component.html",
+  styleUrls: ["./tool-list-item.component.less"],
+  standalone: false,
 })
 export class ToolListItemComponent {
   @Input() color: string;

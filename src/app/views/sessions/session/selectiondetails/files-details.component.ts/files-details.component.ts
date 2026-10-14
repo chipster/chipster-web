@@ -4,10 +4,10 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { getSortedLabels } from "../../labels/labels-util";
 
 @Component({
-    selector: "ch-files-details",
-    templateUrl: "./files-details.component.html",
-    styleUrls: ["./files-details.component.less"],
-    standalone: false
+  selector: "ch-files-details",
+  templateUrl: "./files-details.component.html",
+  styleUrls: ["./files-details.component.less"],
+  standalone: false,
 })
 export class FilesDetailsComponent {
   @Input()

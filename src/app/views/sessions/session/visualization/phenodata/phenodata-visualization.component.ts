@@ -34,13 +34,13 @@ export enum PhenodataState {
 }
 
 @Component({
-    selector: "ch-phenodata-visualization",
-    templateUrl: "./phenodata-visualization.component.html",
-    styleUrls: ["./phenodata-visualization.component.less"],
-    // disable ViewEncapsulation.Emulated, because we want dynamically add a style to the
-    // remove column button, but an emulated view encapsulation would mess up style names
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: "ch-phenodata-visualization",
+  templateUrl: "./phenodata-visualization.component.html",
+  styleUrls: ["./phenodata-visualization.component.less"],
+  // disable ViewEncapsulation.Emulated, because we want dynamically add a style to the
+  // remove column button, but an emulated view encapsulation would mess up style names
+  encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() private dataset!: Dataset;

@@ -4,11 +4,11 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { AuthenticationService } from "../../../core/authentication/authentication-service";
 
 @Component({
-    selector: "ch-users",
-    templateUrl: "./users.component.html",
-    styleUrls: ["./users.component.less"],
-    encapsulation: ViewEncapsulation.Emulated,
-    standalone: false
+  selector: "ch-users",
+  templateUrl: "./users.component.html",
+  styleUrls: ["./users.component.less"],
+  encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class UsersComponent implements OnInit {
   users: User[];

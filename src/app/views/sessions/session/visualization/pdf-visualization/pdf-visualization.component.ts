@@ -15,10 +15,10 @@ enum ButtonAction {
 }
 
 @Component({
-    selector: "ch-pdf-visualization",
-    templateUrl: "./pdf-visualization.component.html",
-    styleUrls: ["./pdf-visualization.component.less"],
-    standalone: false
+  selector: "ch-pdf-visualization",
+  templateUrl: "./pdf-visualization.component.html",
+  styleUrls: ["./pdf-visualization.component.less"],
+  standalone: false,
 })
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   @Input()

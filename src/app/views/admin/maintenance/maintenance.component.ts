@@ -10,11 +10,11 @@ import { ConfigService } from "../../../shared/services/config.service";
 import FileBrokerStorage from "./file-broker-storage";
 
 @Component({
-    selector: "ch-services",
-    templateUrl: "./maintenance.component.html",
-    styleUrls: ["./maintenance.component.less"],
-    encapsulation: ViewEncapsulation.Emulated,
-    standalone: false
+  selector: "ch-services",
+  templateUrl: "./maintenance.component.html",
+  styleUrls: ["./maintenance.component.less"],
+  encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class MaintenanceComponent implements OnInit {
   storageIds = [];

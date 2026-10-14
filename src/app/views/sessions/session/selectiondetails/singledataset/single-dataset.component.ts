@@ -9,10 +9,10 @@ import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
 
 @Component({
-    selector: "ch-single-dataset",
-    templateUrl: "./single-dataset.component.html",
-    styleUrls: ["./single-dataset.component.less"],
-    standalone: false
+  selector: "ch-single-dataset",
+  templateUrl: "./single-dataset.component.html",
+  styleUrls: ["./single-dataset.component.less"],
+  standalone: false,
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
   @Input()

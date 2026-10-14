@@ -2,8 +2,8 @@ import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-    templateUrl: "./choice-modal.component.html",
-    standalone: false
+  templateUrl: "./choice-modal.component.html",
+  standalone: false,
 })
 export class ChoiceModalComponent implements AfterViewInit {
   @Input() title: string;

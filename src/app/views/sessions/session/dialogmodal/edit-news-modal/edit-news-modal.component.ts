@@ -4,8 +4,8 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
 
 @Component({
-    templateUrl: "./edit-news-modal.component.html",
-    standalone: false
+  templateUrl: "./edit-news-modal.component.html",
+  standalone: false,
 })
 export class EditNewsModalComponent implements OnInit {
   public modalTitle: string;

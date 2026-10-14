@@ -9,11 +9,11 @@ import { AuthHttpClientService } from "../../../shared/services/auth-http-client
 import { ConfigService } from "../../../shared/services/config.service";
 
 @Component({
-    selector: "ch-services",
-    templateUrl: "./services.component.html",
-    styleUrls: ["./services.component.less"],
-    encapsulation: ViewEncapsulation.Emulated,
-    standalone: false
+  selector: "ch-services",
+  templateUrl: "./services.component.html",
+  styleUrls: ["./services.component.less"],
+  encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class ServicesComponent implements OnInit {
   services: Service[];

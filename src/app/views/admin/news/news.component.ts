@@ -4,11 +4,11 @@ import { NewsItem } from "../../../shared/components/news/NewsItem";
 import { NewsService } from "../../../shared/services/news.service";
 
 @Component({
-    selector: "ch-notifications",
-    templateUrl: "./news.component.html",
-    styleUrls: ["./news.component.less"],
-    encapsulation: ViewEncapsulation.Emulated,
-    standalone: false
+  selector: "ch-notifications",
+  templateUrl: "./news.component.html",
+  styleUrls: ["./news.component.less"],
+  encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class NewsComponent implements OnInit {
   public news: NewsItem[];

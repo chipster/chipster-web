@@ -15,10 +15,10 @@ import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "./oidc-config";
 
 @Component({
-    selector: "ch-login",
-    templateUrl: "./login.component.html",
-    styleUrls: ["./login.component.less"],
-    standalone: false
+  selector: "ch-login",
+  templateUrl: "./login.component.html",
+  styleUrls: ["./login.component.less"],
+  standalone: false,
 })
 export class LoginComponent implements OnInit {
   static CONF_KEY_JAAS_DESCRIPTION = "jaas-description";

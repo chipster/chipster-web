@@ -4,8 +4,8 @@ import { Job, JobState } from "chipster-js-common";
 import { ContactSupportService } from "../../../contact/contact-support.service";
 
 @Component({
-    templateUrl: "./job-error-modal.component.html",
-    standalone: false
+  templateUrl: "./job-error-modal.component.html",
+  standalone: false,
 })
 export class JobErrorModalComponent {
   private readonly showText = "Show screen output";

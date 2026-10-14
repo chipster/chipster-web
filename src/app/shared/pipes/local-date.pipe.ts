@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({
-    name: "localDate",
-    standalone: false
+  name: "localDate",
+  standalone: false,
 })
 export class LocalDatePipe implements PipeTransform {
   transform(date: any): string {

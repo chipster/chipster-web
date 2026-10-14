@@ -16,10 +16,10 @@ import { SessionEventService } from "../../session-event.service";
 import { ToolService } from "../../tools/tool.service";
 
 @Component({
-    selector: "ch-job",
-    templateUrl: "./job.component.html",
-    styleUrls: ["./job.component.less"],
-    standalone: false
+  selector: "ch-job",
+  templateUrl: "./job.component.html",
+  styleUrls: ["./job.component.less"],
+  standalone: false,
 })
 export class JobComponent implements OnInit, OnDestroy {
   @Input() sessionData: SessionData;

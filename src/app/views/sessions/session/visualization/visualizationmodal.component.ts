@@ -4,10 +4,10 @@ import { Dataset } from "chipster-js-common";
 import { SessionData } from "../../../../model/session/session-data";
 
 @Component({
-    selector: "ch-visualizationmodal",
-    templateUrl: "./visualizationmodal.component.html",
-    styleUrls: ["./visualizationmodal.component.less"],
-    standalone: false
+  selector: "ch-visualizationmodal",
+  templateUrl: "./visualizationmodal.component.html",
+  styleUrls: ["./visualizationmodal.component.less"],
+  standalone: false,
 })
 export class VisualizationModalComponent {
   @Input() dataset: Dataset;

@@ -2,8 +2,8 @@ import { Component } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-    templateUrl: "./download-from-url.component.html",
-    standalone: false
+  templateUrl: "./download-from-url.component.html",
+  standalone: false,
 })
 export class DownloadFromUrlModalComponent {
   value = "";

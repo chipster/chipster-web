@@ -2,8 +2,8 @@ import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-    templateUrl: "./temp-copy-modal.component.html",
-    standalone: false
+  templateUrl: "./temp-copy-modal.component.html",
+  standalone: false,
 })
 export class TempCopyModalComponent implements AfterViewInit {
   @Input()

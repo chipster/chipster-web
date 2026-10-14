@@ -21,11 +21,11 @@ import Line from "./line";
 import Rectangle from "./rectangle";
 
 @Component({
-    selector: "ch-expression-profile",
-    templateUrl: "./expression-profile.component.html",
-    styleUrls: ["./expression-profile.component.less"],
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: "ch-expression-profile",
+  templateUrl: "./expression-profile.component.html",
+  styleUrls: ["./expression-profile.component.less"],
+  encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   @Input()

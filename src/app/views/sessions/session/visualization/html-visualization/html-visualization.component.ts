@@ -54,10 +54,10 @@ import { SessionDataService } from "../../session-data.service";
  * sites don't allow framing (X-Frame-Options).
  */
 @Component({
-    selector: "ch-htmlvisualization",
-    templateUrl: "./html-visualization.component.html",
-    styleUrls: ["./html-visualization.component.less"],
-    standalone: false
+  selector: "ch-htmlvisualization",
+  templateUrl: "./html-visualization.component.html",
+  styleUrls: ["./html-visualization.component.less"],
+  standalone: false,
 })
 export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy {
   private static readonly SIZE_MESSAGE_TYPE = "chipster-html-visualization-size";

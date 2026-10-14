@@ -12,11 +12,11 @@ import { DropdownCloseService } from "../services/dropdown-close.service";
  * in a module without NgbModule stays inert instead of failing injection.
  */
 @Directive({
-    // matches ng-bootstrap's selector on purpose so the directive attaches to
-    // every ngbDropdown without changes to the templates
-    // eslint-disable-next-line @angular-eslint/directive-selector
-    selector: "[ngbDropdown]",
-    standalone: false
+  // matches ng-bootstrap's selector on purpose so the directive attaches to
+  // every ngbDropdown without changes to the templates
+  // eslint-disable-next-line @angular-eslint/directive-selector
+  selector: "[ngbDropdown]",
+  standalone: false,
 })
 export class DropdownCloseDirective implements OnInit, OnDestroy {
   private subscription: Subscription;

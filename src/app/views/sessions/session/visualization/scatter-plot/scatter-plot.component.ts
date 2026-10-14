@@ -11,10 +11,10 @@ import { PlotData } from "../model/plotData";
 import Point from "../model/point";
 
 @Component({
-    selector: "ch-scatter-plot",
-    templateUrl: "./scatter-plot.component.html",
-    styleUrls: ["./scatter-plot.component.less"],
-    standalone: false
+  selector: "ch-scatter-plot",
+  templateUrl: "./scatter-plot.component.html",
+  styleUrls: ["./scatter-plot.component.less"],
+  standalone: false,
 })
 export class ScatterPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
   public chipHeaders: Array<string> = [];

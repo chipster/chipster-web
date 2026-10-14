@@ -6,10 +6,10 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 
 @Component({
-    selector: "ch-home",
-    templateUrl: "./home.component.html",
-    styleUrls: ["./home.component.less"],
-    standalone: false
+  selector: "ch-home",
+  templateUrl: "./home.component.html",
+  styleUrls: ["./home.component.less"],
+  standalone: false,
 })
 export class HomeComponent implements OnInit {
   routerLinkLogin: string;

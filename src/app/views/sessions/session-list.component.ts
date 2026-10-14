@@ -19,10 +19,10 @@ import { UserEventData } from "./user-event-data";
 import { UserEventService } from "./user-event.service";
 
 @Component({
-    selector: "ch-session-list",
-    templateUrl: "./session-list.component.html",
-    styleUrls: ["./session-list.component.less"],
-    standalone: false
+  selector: "ch-session-list",
+  templateUrl: "./session-list.component.html",
+  styleUrls: ["./session-list.component.less"],
+  standalone: false,
 })
 export class SessionListComponent implements OnInit, OnDestroy {
   public SessionListMode = SessionListMode; // ref for using enum in template

@@ -47,11 +47,11 @@ import Node from "./node";
 import { WorkflowGraphService } from "./workflow-graph.service";
 
 @Component({
-    selector: "ch-workflow-graph",
-    templateUrl: "./workflow-graph.component.html",
-    styleUrls: ["./workflow-graph.component.less"],
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+  selector: "ch-workflow-graph",
+  templateUrl: "./workflow-graph.component.html",
+  styleUrls: ["./workflow-graph.component.less"],
+  encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   svg: d3.Selection<SVGSVGElement, {}, HTMLElement, {}>;

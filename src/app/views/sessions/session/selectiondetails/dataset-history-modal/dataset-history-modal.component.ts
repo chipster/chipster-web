@@ -25,10 +25,10 @@ interface HistoryOption {
   enabled: boolean;
 }
 @Component({
-    selector: "ch-dataset-history-modal",
-    templateUrl: "./dataset-history-modal.component.html",
-    styleUrls: ["./dataset-history-modal.component.less"],
-    standalone: false
+  selector: "ch-dataset-history-modal",
+  templateUrl: "./dataset-history-modal.component.html",
+  styleUrls: ["./dataset-history-modal.component.less"],
+  standalone: false,
 })
 export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   @Input() dataset: Dataset;

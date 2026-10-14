@@ -20,11 +20,11 @@ import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
 import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-modal/confirm-delete-modal.component";
 
 @Component({
-    selector: "ch-storage",
-    templateUrl: "./storage.component.html",
-    styleUrls: ["./storage.component.less"],
-    encapsulation: ViewEncapsulation.Emulated,
-    standalone: false
+  selector: "ch-storage",
+  templateUrl: "./storage.component.html",
+  styleUrls: ["./storage.component.less"],
+  encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 
 /**

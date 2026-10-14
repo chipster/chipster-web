@@ -8,9 +8,9 @@ import { Component } from "@angular/core";
  * but it leaves ugly focus border after being clicked (at least on Chrome).
  */
 @Component({
-    selector: "ch-link-button",
-    template: '<a style="text-decoration-line: none;" href="javascript:void(0)" #anchor><ng-content></ng-content></a>',
-    standalone: false
+  selector: "ch-link-button",
+  template: '<a style="text-decoration-line: none;" href="javascript:void(0)" #anchor><ng-content></ng-content></a>',
+  standalone: false,
 })
 export class LinkButtonComponent {
   constructor() {}

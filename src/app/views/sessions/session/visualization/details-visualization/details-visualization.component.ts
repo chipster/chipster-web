@@ -3,9 +3,9 @@ import { Dataset, Tool } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 
 @Component({
-    selector: "ch-details-visualization",
-    templateUrl: "./details-visualization.component.html",
-    standalone: false
+  selector: "ch-details-visualization",
+  templateUrl: "./details-visualization.component.html",
+  standalone: false,
 })
 export class DetailsVisualizationComponent {
   @Input()

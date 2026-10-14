@@ -4,10 +4,10 @@ import { Tool } from "chipster-js-common";
 import { ToolService } from "../../sessions/session/tools/tool.service";
 
 @Component({
-    selector: "ch-manual-modal-component",
-    templateUrl: "./manual-modal.component.html",
-    styleUrls: ["./manual-modal.component.less"],
-    standalone: false
+  selector: "ch-manual-modal-component",
+  templateUrl: "./manual-modal.component.html",
+  styleUrls: ["./manual-modal.component.less"],
+  standalone: false,
 })
 export class ManualModalComponent {
   @Input() tool: Tool;
