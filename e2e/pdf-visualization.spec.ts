@@ -242,7 +242,7 @@ test("a large pdf file is shown only when asked", async ({ page, context, api, s
 
   const visualization = pdfVisualization(page);
   await expect(visualization.locator("ch-status")).toContainText(
-    "This PDF is larger than 10 MB (11.1 MB). Showing it here may be slow or make the page unresponsive. " +
+    "This PDF (11.1 MB) is larger than 10 MB. Showing it here may be slow or make the page unresponsive. " +
       "Opening it in a new tab is recommended.",
   );
   await expect(visualization.locator("ch-status").getByRole("button")).toHaveText(["Show here", "Open in new tab"]);
