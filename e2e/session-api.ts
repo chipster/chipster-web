@@ -123,6 +123,20 @@ export async function getDatasets(api: Api, sessionId: string): Promise<{ datase
   return response.json();
 }
 
+/*
+ * A session file like the one the app downloads: session-worker packages the
+ * session to a zip, which it adds to the same session as a dataset.
+ */
+export async function packageSession(api: Api, sessionId: string): Promise<Buffer> {
+  const response = await api.post("session-worker", `/sessions/${sessionId}`, {});
+  expect(response.ok()).toBe(true);
+  const { datasetId, errors } = await response.json();
+  expect(errors).toEqual([]);
+  const zip = await api.get("file-broker", `/sessions/${sessionId}/datasets/${datasetId}`);
+  expect(zip.ok()).toBe(true);
+  return zip.body();
+}
+
 export function datasetNode(page: Page, datasetId: string) {
   return page.locator(`#d3DatasetNodesGroup rect[id$="_${datasetId}"]`);
 }
