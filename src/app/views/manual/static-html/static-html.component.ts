@@ -14,9 +14,10 @@ import { ManualUtils } from "../manual-utils";
  * also if the html would be updated. To avoid that, this components must not be reused.
  */
 @Component({
-  selector: "ch-static-html",
-  templateUrl: "./static-html.component.html",
-  styleUrls: ["./static-html.component.less"],
+    selector: "ch-static-html",
+    templateUrl: "./static-html.component.html",
+    styleUrls: ["./static-html.component.less"],
+    standalone: false
 })
 export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input()

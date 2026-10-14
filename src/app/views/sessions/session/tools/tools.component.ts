@@ -67,10 +67,11 @@ enum ModuleSelectionMode {
 }
 
 @Component({
-  selector: "ch-tools",
-  templateUrl: "./tools.component.html",
-  styleUrls: ["./tools.component.less"],
-  providers: [NgbDropdownConfig],
+    selector: "ch-tools",
+    templateUrl: "./tools.component.html",
+    styleUrls: ["./tools.component.less"],
+    providers: [NgbDropdownConfig],
+    standalone: false
 })
 export class ToolsComponent implements OnInit, OnDestroy {
   public readonly categoryElementIdPrefix = "category-button-";

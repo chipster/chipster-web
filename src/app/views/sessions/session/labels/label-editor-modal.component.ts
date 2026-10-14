@@ -7,9 +7,10 @@ import { SessionResource } from "../../../../shared/resources/session.resource";
 import { DEFAULT_LABEL_COLOR, LABEL_PALETTE, LabelColor } from "./label-palette";
 
 @Component({
-  selector: "ch-label-editor-modal",
-  templateUrl: "./label-editor-modal.component.html",
-  styleUrls: ["./label-editor-modal.component.less"],
+    selector: "ch-label-editor-modal",
+    templateUrl: "./label-editor-modal.component.html",
+    styleUrls: ["./label-editor-modal.component.less"],
+    standalone: false
 })
 export class LabelEditorModalComponent implements OnInit {
   @Input() sessionData: SessionData;

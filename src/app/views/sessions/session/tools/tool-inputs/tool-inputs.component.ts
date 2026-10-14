@@ -13,9 +13,10 @@ interface BindingModel {
 }
 
 @Component({
-  selector: "ch-tool-inputs",
-  templateUrl: "./tool-inputs.component.html",
-  styleUrls: ["./tool-inputs.component.less"],
+    selector: "ch-tool-inputs",
+    templateUrl: "./tool-inputs.component.html",
+    styleUrls: ["./tool-inputs.component.less"],
+    standalone: false
 })
 export class ToolInputsComponent implements OnChanges {
   @Input() sessionData: SessionData;

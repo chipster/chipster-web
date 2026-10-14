@@ -10,9 +10,10 @@ import { Toast, ToastService } from "../../services/toast.service";
  * starts it from the beginning.
  */
 @Component({
-  selector: "ch-toasts",
-  templateUrl: "./toasts.component.html",
-  styleUrls: ["./toasts.component.less"],
+    selector: "ch-toasts",
+    templateUrl: "./toasts.component.html",
+    styleUrls: ["./toasts.component.less"],
+    standalone: false
 })
 export class ToastsComponent {
   // the toasts under the pointer

@@ -4,9 +4,10 @@ import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
 
 @Component({
-  selector: "ch-run-options",
-  templateUrl: "./run-options.component.html",
-  styleUrls: ["./run-options.component.less"],
+    selector: "ch-run-options",
+    templateUrl: "./run-options.component.html",
+    styleUrls: ["./run-options.component.less"],
+    standalone: false
 })
 export class RunOptionsComponent implements OnChanges {
   @Input() sessionData: SessionData;

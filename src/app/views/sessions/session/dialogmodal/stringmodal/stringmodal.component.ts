@@ -2,7 +2,8 @@ import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  templateUrl: "./stringmodal.component.html",
+    templateUrl: "./stringmodal.component.html",
+    standalone: false
 })
 export class StringModalComponent implements AfterViewInit {
   @Input()

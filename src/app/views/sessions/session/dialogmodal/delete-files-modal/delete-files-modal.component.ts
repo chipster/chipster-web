@@ -3,7 +3,8 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 
 @Component({
-  templateUrl: "./delete-files-modal.component.html",
+    templateUrl: "./delete-files-modal.component.html",
+    standalone: false
 })
 export class DeleteFilesModalComponent {
   @Input()

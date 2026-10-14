@@ -47,9 +47,10 @@ export enum ComponentState {
   FAIL = "", // empty to avoid duplicate error messages
 }
 @Component({
-  selector: "ch-session",
-  templateUrl: "./session.component.html",
-  styleUrls: ["./session.component.less"],
+    selector: "ch-session",
+    templateUrl: "./session.component.html",
+    styleUrls: ["./session.component.less"],
+    standalone: false
 })
 export class SessionComponent implements OnInit, OnDestroy {
   sessionData: SessionData;

@@ -11,9 +11,10 @@ import { DialogModalService } from "../session/dialogmodal/dialogmodal.service";
 import { ImportSessionModalComponent } from "./import-session-modal.component";
 
 @Component({
-  selector: "ch-open-session-file",
-  templateUrl: "./open-session-file.component.html",
-  styleUrls: ["./open-session-file.component.less"],
+    selector: "ch-open-session-file",
+    templateUrl: "./open-session-file.component.html",
+    styleUrls: ["./open-session-file.component.less"],
+    standalone: false
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   @ViewChild("browseFilesButton")

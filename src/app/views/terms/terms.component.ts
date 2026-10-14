@@ -8,9 +8,10 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 
 @Component({
-  selector: "ch-terms",
-  templateUrl: "./terms.component.html",
-  styleUrls: ["./terms.component.less"],
+    selector: "ch-terms",
+    templateUrl: "./terms.component.html",
+    styleUrls: ["./terms.component.less"],
+    standalone: false
 })
 export class TermsComponent implements OnInit {
   // increase by one to force everyone to accept again

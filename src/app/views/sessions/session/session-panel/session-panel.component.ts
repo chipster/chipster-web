@@ -15,9 +15,10 @@ import { SessionDataService } from "../session-data.service";
 import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
 
 @Component({
-  selector: "ch-session-panel",
-  templateUrl: "./session-panel.component.html",
-  styleUrls: ["./session-panel.component.less"],
+    selector: "ch-session-panel",
+    templateUrl: "./session-panel.component.html",
+    styleUrls: ["./session-panel.component.less"],
+    standalone: false
 })
 export class SessionPanelComponent {
   @Input()

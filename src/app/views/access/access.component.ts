@@ -4,8 +4,9 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 
 @Component({
-  selector: "ch-access",
-  templateUrl: "./access.component.html",
+    selector: "ch-access",
+    templateUrl: "./access.component.html",
+    standalone: false
 })
 export class AccessComponent implements OnInit {
   file: string;

@@ -11,9 +11,10 @@ import { PipeService } from "../../../../../shared/services/pipeservice.service"
 import { ToolSelectionService } from "../../tool.selection.service";
 
 @Component({
-  selector: "ch-tool-list-accordion",
-  templateUrl: "./tool-list-accordion.component.html",
-  styleUrls: ["./tool-list-accordion.component.less"],
+    selector: "ch-tool-list-accordion",
+    templateUrl: "./tool-list-accordion.component.html",
+    styleUrls: ["./tool-list-accordion.component.less"],
+    standalone: false
 })
 export class ToolListAccordionComponent implements OnInit {
   @Input()

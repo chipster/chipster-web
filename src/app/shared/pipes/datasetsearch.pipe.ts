@@ -3,7 +3,8 @@ import { Dataset } from "chipster-js-common";
 import { PipeService } from "../services/pipeservice.service";
 
 @Pipe({
-  name: "datasetsearch",
+    name: "datasetsearch",
+    standalone: false
 })
 export class DatasetsearchPipe implements PipeTransform {
   constructor(private pipeService: PipeService) {}

@@ -2,7 +2,8 @@ import { Component, Input } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  templateUrl: "./notification-modal.component.html",
+    templateUrl: "./notification-modal.component.html",
+    standalone: false
 })
 export class NotificationModalComponent {
   @Input()

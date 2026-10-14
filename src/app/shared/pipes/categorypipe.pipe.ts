@@ -3,7 +3,8 @@ import { Category } from "chipster-js-common";
 import { PipeService } from "../services/pipeservice.service";
 
 @Pipe({
-  name: "categorypipe",
+    name: "categorypipe",
+    standalone: false
 })
 export class CategoryPipe implements PipeTransform {
   constructor(private pipeService: PipeService) {}

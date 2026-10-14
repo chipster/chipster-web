@@ -6,8 +6,9 @@ import { TokenService } from "../../core/authentication/token.service";
 import { ContactSupportService } from "./contact-support.service";
 
 @Component({
-  selector: "ch-contact",
-  templateUrl: "./contact.component.html",
+    selector: "ch-contact",
+    templateUrl: "./contact.component.html",
+    standalone: false
 })
 export class ContactComponent implements OnInit {
   contactFile: string;

@@ -20,9 +20,10 @@ import { ManualUtils } from "./manual-utils";
  * Absolute links are changed to open in a new tab.
  */
 @Component({
-  selector: "ch-manual",
-  templateUrl: "./manual.component.html",
-  styleUrls: ["./manual.component.less"],
+    selector: "ch-manual",
+    templateUrl: "./manual.component.html",
+    styleUrls: ["./manual.component.less"],
+    standalone: false
 })
 export class ManualComponent implements OnDestroy, AfterViewInit {
   private unsubscribe: Subject<any> = new Subject();

@@ -1,9 +1,10 @@
 import { Component, Input, OnChanges } from "@angular/core";
 
 @Component({
-  selector: "ch-counter-spinner",
-  templateUrl: "./counter-spinner.component.html",
-  styleUrls: ["./counter-spinner.component.less"],
+    selector: "ch-counter-spinner",
+    templateUrl: "./counter-spinner.component.html",
+    styleUrls: ["./counter-spinner.component.less"],
+    standalone: false
 })
 export class CounterSpinnerComponent implements OnChanges {
   @Input() count: number;

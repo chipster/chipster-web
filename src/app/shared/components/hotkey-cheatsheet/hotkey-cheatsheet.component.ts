@@ -3,10 +3,11 @@ import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { HotkeyService } from "../../services/hotkey.service";
 
 @Component({
-  selector: "ch-hotkey-cheatsheet",
-  templateUrl: "./hotkey-cheatsheet.component.html",
-  styleUrls: ["./hotkey-cheatsheet.component.less"],
-  encapsulation: ViewEncapsulation.None,
+    selector: "ch-hotkey-cheatsheet",
+    templateUrl: "./hotkey-cheatsheet.component.html",
+    styleUrls: ["./hotkey-cheatsheet.component.less"],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
   @ViewChild("content") contentTemplate!: TemplateRef<unknown>;

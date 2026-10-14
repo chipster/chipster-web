@@ -19,9 +19,10 @@ import VennDiagramUtils from "./venn-diagram-utils";
 import { VennDiagramService } from "./venn-diagram.service";
 
 @Component({
-  selector: "ch-venn-diagram",
-  templateUrl: "./venn-diagram.component.html",
-  styleUrls: ["./venn-diagram.component.less"],
+    selector: "ch-venn-diagram",
+    templateUrl: "./venn-diagram.component.html",
+    styleUrls: ["./venn-diagram.component.less"],
+    standalone: false
 })
 export class VennDiagramComponent implements OnChanges {
   @Input()

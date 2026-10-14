@@ -15,9 +15,10 @@ import { RouteService } from "../../shared/services/route.service";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
 
 @Component({
-  selector: "ch-navigation",
-  templateUrl: "./navigation.component.html",
-  styleUrls: ["./navigation.component.less"],
+    selector: "ch-navigation",
+    templateUrl: "./navigation.component.html",
+    styleUrls: ["./navigation.component.less"],
+    standalone: false
 })
 export class NavigationComponent implements OnInit {
   routerLinkAdmin = RouteService.PATH_ADMIN;

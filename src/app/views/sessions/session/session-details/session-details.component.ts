@@ -13,9 +13,10 @@ import { SessionService } from "../session.service";
 import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
 
 @Component({
-  selector: "ch-session-details",
-  templateUrl: "./session-details.component.html",
-  styleUrls: ["./session-details.component.less"],
+    selector: "ch-session-details",
+    templateUrl: "./session-details.component.html",
+    styleUrls: ["./session-details.component.less"],
+    standalone: false
 })
 export class SessionDetailsComponent {
   @Input()

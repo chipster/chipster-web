@@ -14,9 +14,10 @@ import VisualizationConstants, { Visualization } from "./visualization-constants
 import { VisualizationEventService } from "./visualization-event.service";
 
 @Component({
-  selector: "ch-visualizations",
-  templateUrl: "./visualizations.component.html",
-  styleUrls: ["./visualizations.component.less"],
+    selector: "ch-visualizations",
+    templateUrl: "./visualizations.component.html",
+    styleUrls: ["./visualizations.component.less"],
+    standalone: false
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";

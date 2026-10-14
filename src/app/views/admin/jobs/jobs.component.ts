@@ -11,10 +11,11 @@ import { ConfigService } from "../../../shared/services/config.service";
 import { JobService } from "../../sessions/session/job.service";
 
 @Component({
-  selector: "ch-jobs",
-  templateUrl: "./jobs.component.html",
-  styleUrls: ["./jobs.component.less"],
-  encapsulation: ViewEncapsulation.Emulated,
+    selector: "ch-jobs",
+    templateUrl: "./jobs.component.html",
+    styleUrls: ["./jobs.component.less"],
+    encapsulation: ViewEncapsulation.Emulated,
+    standalone: false
 })
 export class JobsComponent implements OnInit {
   jobs: Job[];

@@ -7,8 +7,9 @@ import { LoadState, State } from "../../../../../model/loadstate";
 import { SessionDataService } from "../../session-data.service";
 
 @Component({
-  selector: "ch-image-visualization",
-  templateUrl: "./image-visualization.component.html",
+    selector: "ch-image-visualization",
+    templateUrl: "./image-visualization.component.html",
+    standalone: false
 })
 export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   @Input()

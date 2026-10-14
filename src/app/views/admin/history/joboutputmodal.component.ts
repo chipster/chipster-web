@@ -2,8 +2,8 @@ import { Component, Input } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: "ch-joboutput-modal-content",
-  template: `
+    selector: "ch-joboutput-modal-content",
+    template: `
     <div class="modal-header">
       <h4 class="modal-title">Job Output</h4>
       <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
@@ -17,6 +17,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
       <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
     </div>
   `,
+    standalone: false
 })
 export class JobOutputModalComponent {
   @Input() output;

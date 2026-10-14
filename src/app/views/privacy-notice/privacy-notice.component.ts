@@ -5,9 +5,10 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 
 @Component({
-  selector: "ch-privacy-notice",
-  templateUrl: "./privacy-notice.component.html",
-  styleUrls: ["./privacy-notice.component.less"],
+    selector: "ch-privacy-notice",
+    templateUrl: "./privacy-notice.component.html",
+    styleUrls: ["./privacy-notice.component.less"],
+    standalone: false
 })
 export class PrivacyNoticeComponent implements OnInit {
   public htmlPath: string;

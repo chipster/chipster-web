@@ -190,14 +190,14 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
  * A link in the pdf scrolls the panel itself, see scrollToTarget().
  */
 @Component({
-  selector: "ch-pdf-viewer",
-  template: `
+    selector: "ch-pdf-viewer",
+    template: `
     <div #container class="pdf-viewer-container">
       <div #viewer class="pdfViewer"></div>
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
       :host {
         display: block;
         position: relative;
@@ -214,7 +214,8 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
         overflow-y: hidden;
       }
     `,
-  ],
+    ],
+    standalone: false
 })
 export class PdfViewerComponent implements OnChanges, OnDestroy {
   @Input() src: string;

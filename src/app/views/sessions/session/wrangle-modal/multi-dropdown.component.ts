@@ -3,9 +3,10 @@ import log from "loglevel";
 import { ColumnItem } from "./wrangle-modal.component";
 
 @Component({
-  selector: "ch-multi-dropdown",
-  templateUrl: "./multi-dropdown.component.html",
-  styleUrls: ["./multi-dropdown.component.less"],
+    selector: "ch-multi-dropdown",
+    templateUrl: "./multi-dropdown.component.html",
+    styleUrls: ["./multi-dropdown.component.less"],
+    standalone: false
 })
 /**
  * Two things make things a little bit complicated here:

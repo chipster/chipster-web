@@ -13,9 +13,10 @@ import { SessionEventService } from "../session-event.service";
 import { JobListComponent } from "../tools/job-list/job-list.component";
 
 @Component({
-  selector: "ch-jobs-modal",
-  templateUrl: "./jobs-modal.component.html",
-  styleUrls: ["./jobs-modal.component.less"],
+    selector: "ch-jobs-modal",
+    templateUrl: "./jobs-modal.component.html",
+    styleUrls: ["./jobs-modal.component.less"],
+    standalone: false
 })
 export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();

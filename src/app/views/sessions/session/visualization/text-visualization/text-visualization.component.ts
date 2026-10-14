@@ -9,16 +9,17 @@ import { SessionDataService } from "../../session-data.service";
 import { VisualizationModalService } from "../visualizationmodal.service";
 
 @Component({
-  selector: "ch-text-visualization",
-  templateUrl: "./text-visualization.component.html",
-  styles: [
-    `
+    selector: "ch-text-visualization",
+    templateUrl: "./text-visualization.component.html",
+    styles: [
+        `
       pre {
         background-color: white;
       }
     `,
-  ],
-  styleUrls: ["./text-visualization.component.less"],
+    ],
+    styleUrls: ["./text-visualization.component.less"],
+    standalone: false
 })
 export class TextVisualizationComponent implements OnChanges, OnDestroy {
   @Input() dataset: Dataset;

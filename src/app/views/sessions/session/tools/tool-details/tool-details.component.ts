@@ -4,9 +4,10 @@ import { Subject } from "rxjs";
 import { SessionData } from "../../../../../model/session/session-data";
 
 @Component({
-  selector: "ch-tool-details",
-  templateUrl: "./tool-details.component.html",
-  styleUrls: ["./tool-details.component.less"],
+    selector: "ch-tool-details",
+    templateUrl: "./tool-details.component.html",
+    styleUrls: ["./tool-details.component.less"],
+    standalone: false
 })
 export class ToolDetailsComponent implements OnDestroy {
   // FIXME after tool state refactoring

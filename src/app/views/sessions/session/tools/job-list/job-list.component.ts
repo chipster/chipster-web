@@ -9,9 +9,10 @@ import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
 
 @Component({
-  selector: "ch-job-list",
-  templateUrl: "./job-list.component.html",
-  styleUrls: ["./job-list.component.less"],
+    selector: "ch-job-list",
+    templateUrl: "./job-list.component.html",
+    styleUrls: ["./job-list.component.less"],
+    standalone: false
 })
 export class JobListComponent implements OnChanges {
   @Input() jobs: Job[];

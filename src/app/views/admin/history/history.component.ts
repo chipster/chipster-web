@@ -12,10 +12,11 @@ import UtilsService from "../../../shared/utilities/utils";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
 
 @Component({
-  selector: "ch-history",
-  templateUrl: "./history.component.html",
-  styleUrls: ["./history.component.less"],
-  encapsulation: ViewEncapsulation.Emulated,
+    selector: "ch-history",
+    templateUrl: "./history.component.html",
+    styleUrls: ["./history.component.less"],
+    encapsulation: ViewEncapsulation.Emulated,
+    standalone: false
 })
 export class HistoryComponent implements OnInit {
   readonly comparisonIs = "is";

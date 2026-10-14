@@ -11,7 +11,8 @@ import { SessionResource } from "../../../../../shared/resources/session.resourc
 import { BooleanModalComponent } from "../booleanmodal/booleanmodal.component";
 
 @Component({
-  templateUrl: "./share-session-modal.component.html",
+    templateUrl: "./share-session-modal.component.html",
+    standalone: false
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input()

@@ -6,8 +6,9 @@ import { DatasetModalService } from "../../selectiondetails/datasetmodal.service
 import { SessionData } from "../../../../../model/session/session-data";
 
 @Component({
-  selector: "ch-add-dataset-modal",
-  templateUrl: "./upload.component.html",
+    selector: "ch-add-dataset-modal",
+    templateUrl: "./upload.component.html",
+    standalone: false
 })
 export class UploadComponent implements AfterViewInit, OnInit {
   @Input() sessionData: SessionData;

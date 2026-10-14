@@ -15,9 +15,10 @@ export interface ColumnItem {
 }
 
 @Component({
-  selector: "ch-samples-modal",
-  templateUrl: "./samples-modal.component.html",
-  styleUrls: ["./samples-modal.component.less"],
+    selector: "ch-samples-modal",
+    templateUrl: "./samples-modal.component.html",
+    styleUrls: ["./samples-modal.component.less"],
+    standalone: false
 })
 export class SamplesModalComponent implements OnInit {
   constructor(

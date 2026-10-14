@@ -3,9 +3,10 @@ import { Dataset } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 
 @Component({
-  selector: "ch-new-tab-visualization",
-  templateUrl: "./new-tab-visualization.component.html",
-  styleUrls: ["./new-tab-visualization.component.less"],
+    selector: "ch-new-tab-visualization",
+    templateUrl: "./new-tab-visualization.component.html",
+    styleUrls: ["./new-tab-visualization.component.less"],
+    standalone: false
 })
 export class NewTabVisualizationComponent implements OnInit {
   @Input()

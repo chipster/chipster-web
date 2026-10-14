@@ -2,7 +2,8 @@ import { Component, Input, OnInit } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  templateUrl: "./dropdown-modal.component.html",
+    templateUrl: "./dropdown-modal.component.html",
+    standalone: false
 })
 export class DropdownModalComponent implements OnInit {
   @Input()

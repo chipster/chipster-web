@@ -8,8 +8,8 @@ import { LabelMenuItem } from "./labels-context-menu.service";
 // button's children on every CD pass, which can leave a mousedown target
 // detached before mouseup arrives and the browser then never fires a click.
 @Component({
-  selector: "ch-label-menu-item-content",
-  template: `
+    selector: "ch-label-menu-item-content",
+    template: `
     <span
       class="d-inline-block align-middle text-center fw-bold"
       style="width:13px;height:13px;border-radius:2px;box-sizing:border-box;margin-right:0.75em;line-height:11px;font-size:10px"
@@ -32,6 +32,7 @@ import { LabelMenuItem } from "./labels-context-menu.service";
       [style.background]="item.colorBg"></span>
     <span>{{ item.label.name }}</span>
   `,
+    standalone: false
 })
 export class LabelMenuItemContentComponent {
   @Input() item!: LabelMenuItem;

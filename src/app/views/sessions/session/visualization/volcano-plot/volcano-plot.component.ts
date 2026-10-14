@@ -13,9 +13,10 @@ import { VolcanoPlotService } from "./volcano-plot.service";
 import VolcanoPlotDataRow from "./volcanoPlotDataRow";
 
 @Component({
-  selector: "ch-volcano-plot",
-  templateUrl: "./volcano-plot.component.html",
-  styleUrls: ["./volcano-plot.component.less"],
+    selector: "ch-volcano-plot",
+    templateUrl: "./volcano-plot.component.html",
+    styleUrls: ["./volcano-plot.component.less"],
+    standalone: false
 })
 export class VolcanoPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
   private volcanoPlotDataRows: Array<VolcanoPlotDataRow> = [];

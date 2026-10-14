@@ -5,8 +5,9 @@ import { Component } from "@angular/core";
  * actually never loaded.
  */
 @Component({
-  template: `
+    template: `
     <div>This is a dummy page, nothing interesting here.</div>
   `,
+    standalone: false
 })
 export class DummyRouteComponent {}

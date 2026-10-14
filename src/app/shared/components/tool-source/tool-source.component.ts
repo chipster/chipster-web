@@ -4,9 +4,10 @@ import { ToolResource } from "../../resources/tool-resource";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 
 @Component({
-  selector: "ch-tool-source",
-  template: '<pre class="tool-source">{{source}}</pre>',
-  styleUrls: ["./tool-source.component.less"],
+    selector: "ch-tool-source",
+    template: '<pre class="tool-source">{{source}}</pre>',
+    styleUrls: ["./tool-source.component.less"],
+    standalone: false
 })
 export class ToolSourceComponent implements OnInit {
   source: string;

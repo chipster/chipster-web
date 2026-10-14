@@ -6,8 +6,9 @@ import { Component, HostListener, ViewChild } from "@angular/core";
  * Affects the scrolling performance considerably, so use only when really needed.
  */
 @Component({
-  selector: "ch-scroller",
-  templateUrl: "./scroller.component.html",
+    selector: "ch-scroller",
+    templateUrl: "./scroller.component.html",
+    standalone: false
 })
 export class ScrollerComponent {
   @ViewChild("scroll") scrollElement;
