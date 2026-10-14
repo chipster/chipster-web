@@ -59,7 +59,7 @@ In proxy mode (see Angular Configuration below), the same flag is needed:
 cd /workspace/chipster-web && npm run start:proxy -- --host 0.0.0.0
 ```
 
-**Ready signal:** There is no "Compiled successfully" log line with this Angular/Vite setup. The server is ready after the Vite dynamic import warnings (from `ng2-pdf-viewer.js`) finish printing. Verify by hitting `http://localhost:4200` rather than waiting for a log message.
+**Ready signal:** There is no "Compiled successfully" log line with this Angular/Vite setup. Verify by hitting `http://localhost:4200` rather than waiting for a log message.
 
 To kill: `fuser -k 4200/tcp`
 

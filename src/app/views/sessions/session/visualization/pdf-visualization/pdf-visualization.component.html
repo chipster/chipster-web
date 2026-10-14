@@ -34,7 +34,7 @@
               <span class="fas fa-lg fa-angle-right"></span>
             </button>
 
-            @if (!showAll) {
+            @if (!showAll && canShowAll) {
               <button
                 class="btn btn-secondary btn-sm tool-bar-button ms-2"
                 (click)="toggleShowAll()"
@@ -73,18 +73,15 @@
   }
 }
 @if (urlReady) {
-  <pdf-viewer
-    #pdfViewer
+  <ch-pdf-viewer
     [src]="src"
     [zoom]="zoom"
-    [show-all]="showAll"
-    [fit-to-page]="true"
+    [showAll]="showAll"
     [page]="page"
-    (after-load-complete)="pdfLoadComplete($event)"
-    (error)="pdfLoadFailed($event)"
-    (page-rendered)="pageRendered()"
-    (pagesloaded)="pagesLoaded()"
+    (loaded)="pdfLoadComplete($event)"
+    (loadFailed)="pdfLoadFailed($event)"
+    (heightChange)="height = $event"
     (pageChange)="onPageChange($event)"
-    (on-progress)="onProgress($event)"
-    style="height: {{ height }}px"></pdf-viewer>
+    (loadProgress)="onProgress($event)"
+    style="height: {{ height }}px"></ch-pdf-viewer>
 }

@@ -1,5 +1,4 @@
 import { Dataset } from "chipster-js-common";
-import type { PdfViewerComponent } from "ng2-pdf-viewer";
 import { Subject } from "rxjs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -46,14 +45,6 @@ describe("PdfVisualizationComponent", () => {
     component.ngOnChanges();
   }
 
-  // a pdf.js viewer whose page views have the given heights at the current zoom
-  function viewer(pageHeights: number[]) {
-    return {
-      pagesCount: pageHeights.length,
-      getPageView: (index: number) => ({ viewport: { height: pageHeights[index] } }),
-    } as unknown as PdfViewerComponent["pdfViewer"];
-  }
-
   function buttonTexts(): string[] {
     return component.state.buttons.map((button) => button.text);
   }
@@ -91,13 +82,13 @@ describe("PdfVisualizationComponent", () => {
     it("shows the limit and the size of a large file in the prompt", () => {
       select(11 * 1024 * 1024);
 
-      expect(component.state.message).toContain("This PDF is larger than 10 MB (11.0 MB).");
+      expect(component.state.message).toContain("This PDF (11.0 MB) is larger than 10 MB.");
     });
 
     it("never shows the size of a large file below the limit", () => {
       select(limit + 1);
 
-      expect(component.state.message).toContain("This PDF is larger than 10 MB (10.1 MB).");
+      expect(component.state.message).toContain("This PDF (10.1 MB) is larger than 10 MB.");
     });
 
     it("shows the pdf when its url arrives", () => {
@@ -117,90 +108,47 @@ describe("PdfVisualizationComponent", () => {
     });
   });
 
-  describe("height", () => {
-    // Letter, A4 and Letter landscape at the same zoom
-    const pageHeights = [1056, 1123.5, 816];
-
+  describe("pages", () => {
     beforeEach(() => {
       select(1000);
       component.pdfLoadComplete({ numPages: 3 });
-      component.pdfViewerComponent = { pdfViewer: viewer(pageHeights) } as PdfViewerComponent;
     });
 
-    it("is the height of the shown page and its margin on a single page", () => {
-      component.pageRendered();
-
-      expect(component.height).toBe(1066);
-    });
-
-    it("isn't the height of the next page when it's rendered in advance", () => {
-      component.pageRendered();
-      // pdf.js renders also the next page on a single page, but page 1 is still shown
-      component.pageRendered();
-
-      expect(component.height).toBe(1066);
-    });
-
-    it("follows the shown page, also without a new rendering", () => {
+    it("moves between the pages", () => {
       component.nextPage();
-      expect(component.height).toBe(1134);
-
       component.nextPage();
-      expect(component.height).toBe(826);
+      component.nextPage();
+      expect(component.page).toBe(3);
 
       component.previousPage();
-      expect(component.height).toBe(1134);
+      expect(component.page).toBe(2);
     });
 
     it("follows the page when pdf.js changes it, for example for a link in the pdf", () => {
-      component.pageRendered();
-
       component.onPageChange(3);
 
       expect(component.page).toBe(3);
-      expect(component.height).toBe(826);
     });
 
-    it("rounds the height of each page to whole pixels like pdf.js", () => {
-      // the exact sum would be 2 * (1004.4 + 10) = 2028.8, but pdf.js lays out 2 * (1004 + 10)
-      component.pdfViewerComponent = { pdfViewer: viewer([1004.4, 1004.4]) } as PdfViewerComponent;
+    it("switches between one page and all pages", () => {
       component.toggleShowAll();
-      component.pageRendered();
-      expect(component.height).toBe(2028);
+      expect(component.showAll).toBe(true);
+      expect(component.showAllButtonText).toBe("Show single page");
 
-      // and rounds a half pixel up
-      component.pdfViewerComponent = { pdfViewer: viewer([1067.5, 1067.5]) } as PdfViewerComponent;
-      component.pagesLoaded();
-      expect(component.height).toBe(2 * 1078);
-    });
-
-    it("is the height of all pages and their margins when all pages are shown", () => {
       component.toggleShowAll();
-      component.pageRendered();
-
-      expect(component.height).toBe(1066 + 1134 + 826);
+      expect(component.showAll).toBe(false);
+      expect(component.showAllButtonText).toBe("Show all pages");
     });
 
-    it("is updated when all pages are loaded", () => {
+    it("shows all pages only up to the limit", () => {
+      component.pdfLoadComplete({ numPages: 50 });
       component.toggleShowAll();
-      // until the other pages are fetched, their page views have the size of the first page
-      component.pdfViewerComponent = { pdfViewer: viewer([1056, 1056, 1056]) } as PdfViewerComponent;
-      component.pageRendered();
-      expect(component.height).toBe(3 * 1066);
+      expect(component.showAll).toBe(true);
+      component.toggleShowAll();
 
-      component.pdfViewerComponent = { pdfViewer: viewer(pageHeights) } as PdfViewerComponent;
-      component.pagesLoaded();
-
-      expect(component.height).toBe(1066 + 1134 + 826);
-    });
-
-    it("isn't changed without a viewer", () => {
-      component.pageRendered();
-      component.pdfViewerComponent = undefined;
-      component.nextPage();
-      component.pagesLoaded();
-
-      expect(component.height).toBe(1066);
+      component.pdfLoadComplete({ numPages: 51 });
+      component.toggleShowAll();
+      expect(component.showAll).toBe(false);
     });
   });
 
@@ -263,13 +211,15 @@ describe("PdfVisualizationComponent", () => {
     it("starts again from nothing when trying again", () => {
       select(1000);
       urlRequests[0].next("http://localhost/file.pdf");
-      component.onProgress({ loaded: 600, total: 1000 });
+      component.onProgress({ loaded: 600, total: 1000, percent: 60 });
+      component.height = 6000;
       component.pdfLoadFailed(new Error("test failure"));
 
       click("Try again");
 
       expect(component.loadedBytes).toBe(0);
       expect(component.totalBytes).toBe(0);
+      expect(component.height).toBe(500);
       expect(component.urlReady).toBe(false);
     });
 

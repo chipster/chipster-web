@@ -6,8 +6,8 @@ import { ADMIN_STATE } from "./login";
 import { createDataset, datasetNode, getDatasets, getSession, openSession } from "./session-api";
 
 /*
- * Smoke tests for the screens built on third-party Angular components:
- * angular-split, ng-bootstrap, ng-select, ng2-pdf-viewer and ag-grid. The
+ * Smoke tests for the screens built on third-party components:
+ * angular-split, ng-bootstrap, ng-select, pdf.js (pdfjs-dist) and ag-grid. The
  * unit tests don't render components, so these are what catches a library
  * upgrade that breaks one of them. Each test checks that the component
  * renders and does its basic job, not the app logic around it. The toasts
@@ -143,7 +143,7 @@ function blankPdf(pageCount: number): string {
   return pdf;
 }
 
-test("a pdf file is rendered and paged (ng2-pdf-viewer)", async ({ page, api, sessionId }) => {
+test("a pdf file is rendered and paged (pdfjs-dist)", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "a.pdf", x: 100, y: 100 }, blankPdf(2));
   await openSession(page, sessionId, datasetId);
   await datasetNode(page, datasetId).click();
@@ -151,11 +151,11 @@ test("a pdf file is rendered and paged (ng2-pdf-viewer)", async ({ page, api, se
   const pdf = page.locator("ch-pdf-visualization");
   await expect(pdf.getByText("Page 1 / 2")).toBeVisible();
   // the viewer renders the visible page to a canvas
-  await expect(pdf.locator("pdf-viewer .page[data-page-number='1'] canvas")).toBeVisible();
+  await expect(pdf.locator("ch-pdf-viewer .page[data-page-number='1'] canvas")).toBeVisible();
 
   await pdf.getByTitle("Next page").click();
   await expect(pdf.getByText("Page 2 / 2")).toBeVisible();
-  await expect(pdf.locator("pdf-viewer .page[data-page-number='2'] canvas")).toBeVisible();
+  await expect(pdf.locator("ch-pdf-viewer .page[data-page-number='2'] canvas")).toBeVisible();
 });
 
 test("a text file can be converted in the wrangle modal (ag-grid, ng-select)", async ({ page, api, sessionId }) => {
