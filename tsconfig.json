@@ -19,7 +19,12 @@
     ],
     "useDefineForClassFields": false,
     // the type declarations of pdfjs-dist need TypeScript 5.7 or later
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // TypeScript 6 turns strict on by default, and the code isn't strict yet
+    "strict": false,
+    // Handsontable is used as a global, not imported. TypeScript 6 doesn't load
+    // anything from node_modules/@types by default
+    "types": ["handsontable"]
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,
