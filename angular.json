@@ -79,6 +79,11 @@
               "node_modules/d3-context-menu/css/d3-context-menu.css",
               "node_modules/@ng-select/ng-select/themes/default.theme.css"
             ],
+            "stylePreprocessorOptions": {
+              "sass": {
+                "silenceDeprecations": ["import", "global-builtin", "color-functions", "mixed-decls"]
+              }
+            },
             "scripts": [
               "node_modules/@flowjs/flow.js/dist/flow.js",
               "src/assets/lib/handsontable/handsontable.full.js",
@@ -110,7 +115,7 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
+                  "maximumWarning": "3kb",
                   "maximumError": "4kb"
                 }
               ]
