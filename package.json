@@ -76,7 +76,7 @@
     "@types/handsontable": "^0.24.20",
     "@types/jquery": "^3.5.13",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "^20.10.8",
+    "@types/node": "^24.19.2",
     "@types/pako": "^2.0.3",
     "@types/pdf": "0.0.31",
     "angular-eslint": "^18.4.3",
