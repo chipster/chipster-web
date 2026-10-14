@@ -16,3 +16,4 @@ src/assets/manual
 
 # Playwright
 /test-results
+/playwright/.auth

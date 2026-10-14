@@ -1,15 +1,19 @@
 <div>
   <h5 class="mb-0">
     {{ newsItem.contents.title }}
-    <span *ngIf="editable" class="float-end">
-      <button (click)="onEdit(newsItem)" class="btn btn-link">Edit</button>
-      <button (click)="onDelete(newsItem)" class="btn btn-link">Delete</button>
-    </span>
+    @if (editable) {
+      <span class="float-end">
+        <button (click)="onEdit(newsItem)" class="btn btn-link">Edit</button>
+        <button (click)="onDelete(newsItem)" class="btn btn-link">Delete</button>
+      </span>
+    }
   </h5>
 
   <div class="text-sm text-muted mb-1">
     <span>{{ newsItem.created | localDate }}</span>
-    <span *ngIf="newsItem.modified != null">, modified {{ newsItem.modified | localDate }}</span>
+    @if (newsItem.modified != null) {
+      <span>, modified {{ newsItem.modified | localDate }}</span>
+    }
   </div>
   <div class="mb-4" [innerHtml]="newsItem.contents.body"></div>
 </div>

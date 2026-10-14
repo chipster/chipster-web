@@ -1,7 +1,7 @@
-import { expect, Page, test } from "@playwright/test";
+import { Page } from "@playwright/test";
 
-import { login } from "./login";
-import { Api, createDataset, createSession, datasetNode, deleteSession, getApi, openSession } from "./session";
+import { expect, test } from "./fixtures";
+import { createDataset, datasetNode, openSession } from "./session-api";
 
 /*
  * Large pdf files may take a long time to render, so the pdf visualization
@@ -213,28 +213,7 @@ async function expectHeightFitsPages(page: Page, shownPages: number) {
   return (await viewerAndPageHeights(page)).viewer;
 }
 
-test.describe.configure({ timeout: 90_000 });
-
-let api: Api;
-let sessionId: string | undefined;
-
-test.beforeEach(async ({ page }) => {
-  await login(page, "chipster", "chipster");
-  api = await getApi(page);
-  sessionId = await createSession(api, "e2e pdf visualization");
-});
-
-test.afterEach(async () => {
-  // cleared right away, so that a later test whose setup fails before
-  // creating its own session doesn't delete this one again
-  const sessionToDelete = sessionId;
-  sessionId = undefined;
-  if (sessionToDelete) {
-    await deleteSession(api, sessionToDelete);
-  }
-});
-
-test("a small pdf file is shown directly", async ({ page }) => {
+test("a small pdf file is shown directly", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -246,9 +225,9 @@ test("a small pdf file is shown directly", async ({ page }) => {
   await expect(viewer(page).locator(".page").first()).toHaveCSS("margin-bottom", "10px");
 });
 
-test("a large pdf file is shown only when asked", async ({ page, context }) => {
+test("a large pdf file is shown only when asked", async ({ page, context, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
-  const filePath = `/file-broker/sessions/${sessionId}/datasets/${datasetId}`;
+  const filePath = `${api.address("file-broker")}/sessions/${sessionId}/datasets/${datasetId}`;
 
   // requests for the file's contents from this page
   const pageFileRequests: string[] = [];
@@ -288,10 +267,22 @@ test("a large pdf file is shown only when asked", async ({ page, context }) => {
   await expectRendered(page);
 });
 
-test("a failing request for the file's address ends in the fail state", async ({ page }) => {
+test("a failing request for the file's address ends in the fail state", async ({
+  page,
+  api,
+  sessionId,
+  baseURL,
+  pageErrors,
+}) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
-  await page.route(new RegExp(`/session-db/tokens/sessions/${sessionId}/datasets/${datasetId}`), (route) =>
-    route.fulfill({ status: 500, body: "test failure" }),
+  const tokenPath = `/tokens/sessions/${sessionId}/datasets/${datasetId}`;
+  // the address is relative in the proxy mode and absolute in the direct mode
+  const tokenUrl = new URL(api.address("session-db") + tokenPath, baseURL).href;
+  pageErrors.allowFailedRequest(500, "session-db", tokenPath);
+  pageErrors.allowErrorMessage("Loading pdf file failed");
+  await page.route(
+    (url) => url.href.startsWith(tokenUrl),
+    (route) => route.fulfill({ status: 500, body: "test failure" }),
   );
 
   await openSession(page, sessionId, datasetId);
@@ -300,7 +291,8 @@ test("a failing request for the file's address ends in the fail state", async ({
   await expectFailed(page);
 });
 
-test("a broken pdf file ends in the fail state", async ({ page }) => {
+test("a broken pdf file ends in the fail state", async ({ page, api, sessionId, pageErrors }) => {
+  pageErrors.allowErrorMessage("Loading pdf file failed");
   const datasetId = await createDataset(
     api,
     sessionId,
@@ -322,7 +314,7 @@ test("a broken pdf file ends in the fail state", async ({ page }) => {
   expect(workers.filter((url) => url.includes("pdf.worker"))).toHaveLength(1);
 });
 
-test("the height follows the pages of a pdf file with pages of different sizes", async ({ page }) => {
+test("the height follows the pages of a pdf file with pages of different sizes", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "multipage.pdf", x: 100, y: 100 }, MULTI_PAGE_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -358,7 +350,11 @@ test("the height follows the pages of a pdf file with pages of different sizes",
   await expect(visualization.locator(".page canvas")).toHaveCount(6, { timeout: 30_000 });
 });
 
-test("all pages are rendered when they are shown, also when they have the same size", async ({ page }) => {
+test("all pages are rendered when they are shown, also when they have the same size", async ({
+  page,
+  api,
+  sessionId,
+}) => {
   // pages of the same size don't need a new scale, which would render them again
   const pages = Array.from({ length: 6 }, (_, i) => ({ text: `Page ${i + 1}`, width: 612, height: 792 }));
   const datasetId = await createDataset(api, sessionId, { name: "same.pdf", x: 100, y: 100 }, createPdfPages(pages));
@@ -373,7 +369,7 @@ test("all pages are rendered when they are shown, also when they have the same s
   await expect(visualization.locator(".page canvas")).toHaveCount(6, { timeout: 30_000 });
 });
 
-test("a pdf doesn't change the color scheme of the app", async ({ page }) => {
+test("a pdf doesn't change the color scheme of the app", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
   await page.emulateMedia({ colorScheme: "dark" });
 
@@ -384,7 +380,7 @@ test("a pdf doesn't change the color scheme of the app", async ({ page }) => {
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe("normal");
 });
 
-test("the height follows the pages when switching between one and all pages", async ({ page }) => {
+test("the height follows the pages when switching between one and all pages", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "multipage.pdf", x: 100, y: 100 }, MULTI_PAGE_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -405,7 +401,7 @@ test("the height follows the pages when switching between one and all pages", as
   }
 });
 
-test("zooming changes the size of the page and keeps the height fitting", async ({ page }) => {
+test("zooming changes the size of the page and keeps the height fitting", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -431,7 +427,11 @@ test("zooming changes the size of the page and keeps the height fitting", async 
   await expectHeightFitsPages(page, 1);
 });
 
-test("the scrollbar of a wide page doesn't take space from the pages when changing the page", async ({ page }) => {
+test("the scrollbar of a wide page doesn't take space from the pages when changing the page", async ({
+  page,
+  api,
+  sessionId,
+}) => {
   const datasetId = await createDataset(api, sessionId, { name: "multipage.pdf", x: 100, y: 100 }, MULTI_PAGE_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -459,7 +459,7 @@ test("the scrollbar of a wide page doesn't take space from the pages when changi
   await expectHeightFitsPages(page, 1);
 });
 
-test("the page follows the width of the viewer", async ({ page }) => {
+test("the page follows the width of the viewer", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -486,7 +486,7 @@ test("the page follows the width of the viewer", async ({ page }) => {
   expect(await expectHeightFitsPages(page, 1)).toBe(original.viewer);
 });
 
-test("the width of the session view doesn't change with the height of the pages", async ({ page }) => {
+test("the width of the session view doesn't change with the height of the pages", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -520,7 +520,7 @@ test("the width of the session view doesn't change with the height of the pages"
   expect(widths.notScrolling.width).toBe(widths.scrolling.width);
 });
 
-test("all pages can be shown only up to a limit", async ({ page }) => {
+test("all pages can be shown only up to a limit", async ({ page, api, sessionId }) => {
   const pages = Array.from({ length: 51 }, (_, i) => ({ text: `Page ${i + 1}`, width: 612, height: 792 }));
   const datasetId = await createDataset(api, sessionId, { name: "long.pdf", x: 100, y: 100 }, createPdfPages(pages));
 
@@ -534,7 +534,7 @@ test("all pages can be shown only up to a limit", async ({ page }) => {
   await expect(visualization.getByTitle("Show all pages")).toHaveCount(0);
 });
 
-test("a link to a web page opens it in a new tab", async ({ page, context }) => {
+test("a link to a web page opens it in a new tab", async ({ page, context, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "weblink.pdf", x: 100, y: 100 }, WEB_LINK_PDF);
   // the web page isn't loaded from the internet
   await context.route(WEB_PAGE, (route) => route.fulfill({ body: "linked page" }));
@@ -553,7 +553,7 @@ test("a link to a web page opens it in a new tab", async ({ page, context }) => 
   await popup.close();
 });
 
-test("the viewer requests nothing from other sites", async ({ page, baseURL }) => {
+test("the viewer requests nothing from other sites", async ({ page, baseURL, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
   // the worker, the fonts and the other files of pdf.js are served by the app
   const otherSites: string[] = [];
@@ -580,7 +580,7 @@ test("the viewer requests nothing from other sites", async ({ page, baseURL }) =
   expect(pdfjsAssets).toContain("/assets/pdfjs/pdf.worker.min.mjs");
 });
 
-test("the viewer of the previous file is closed when another file is selected", async ({ page }) => {
+test("the viewer of the previous file is closed when another file is selected", async ({ page, api, sessionId }) => {
   const firstId = await createDataset(api, sessionId, { name: "first.pdf", x: 100, y: 100 }, SMALL_PDF);
   const secondId = await createDataset(api, sessionId, { name: "second.pdf", x: 200, y: 100 }, createPdf("Second"));
   const workers: string[] = [];
@@ -599,7 +599,11 @@ test("the viewer of the previous file is closed when another file is selected", 
   expect(workers.filter((url) => url.includes("pdf.worker"))).toHaveLength(1);
 });
 
-test("the worker is stopped when another file is selected while a page is being rendered", async ({ page }) => {
+test("the worker is stopped when another file is selected while a page is being rendered", async ({
+  page,
+  api,
+  sessionId,
+}) => {
   // squares that take long to render
   let drawing = "";
   for (let i = 0; i < 200_000; i++) {
@@ -632,10 +636,10 @@ test("the worker is stopped when another file is selected while a page is being 
   expect(pdfWorkers()[1].closed).toBe(false);
 });
 
-test("the download is cancelled when another file is selected", async ({ page }) => {
+test("the download is cancelled when another file is selected", async ({ page, api, sessionId }) => {
   const largeId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
   const smallId = await createDataset(api, sessionId, { name: "small.pdf", x: 200, y: 100 }, SMALL_PDF);
-  const largeFile = `/file-broker/sessions/${sessionId}/datasets/${largeId}`;
+  const largeFile = `${api.address("file-broker")}/sessions/${sessionId}/datasets/${largeId}`;
 
   await openSession(page, sessionId, largeId);
   await selectDataset(page, largeId);
@@ -658,7 +662,14 @@ test("the download is cancelled when another file is selected", async ({ page })
   await expectRendered(page);
 });
 
-test("the links in a pdf file go to their place when all pages are shown", async ({ page }) => {
+test("the links in a pdf file go to their place when all pages are shown", async ({
+  page,
+  api,
+  sessionId,
+  pageErrors,
+}) => {
+  // pdf.js logs the link to the destination that the pdf doesn't have
+  pageErrors.allowConsoleError('goToDestination: "null" is not a valid destination array, for dest="nowhere"');
   const datasetId = await createDataset(api, sessionId, { name: "places.pdf", x: 100, y: 100 }, PLACE_LINKS_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -696,7 +707,7 @@ test("the links in a pdf file go to their place when all pages are shown", async
     .toBe(true);
 });
 
-test("the progress of the download is shown", async ({ page }) => {
+test("the progress of the download is shown", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "large.pdf", x: 100, y: 100 }, LARGE_PDF);
 
   await openSession(page, sessionId, datasetId);
@@ -744,7 +755,7 @@ async function pageInPanel(page: Page, pageNumber: number) {
     });
 }
 
-test("the links in a pdf file work when all pages are shown", async ({ page }) => {
+test("the links in a pdf file work when all pages are shown", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "links.pdf", x: 100, y: 100 }, WIDE_PAGE_LINKS_PDF);
   // Angular reports its errors to the console, and the app shows them in a toast too
   const errors: string[] = [];

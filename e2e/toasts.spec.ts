@@ -1,47 +1,13 @@
-import { expect, test } from "@playwright/test";
-
-import { login } from "./login";
-import {
-  Api,
-  createDataset,
-  createSession,
-  datasetNode,
-  deleteDataset,
-  deleteSession,
-  getApi,
-  openSession,
-} from "./session";
-
-test.describe.configure({ timeout: 90_000 });
-
-let api: Api;
-let sessionId: string | undefined;
-
-test.beforeEach(async ({ page }) => {
-  await login(page, "chipster", "chipster");
-  api = await getApi(page);
-  sessionId = await createSession(api, "e2e toasts");
-});
-
-test.afterEach(async () => {
-  // cleared right away, so that a later test whose setup fails before
-  // creating its own session doesn't delete this one again
-  const sessionToDelete = sessionId;
-  sessionId = undefined;
-  if (sessionToDelete) {
-    await deleteSession(api, sessionToDelete);
-  }
-});
+import { expect, test } from "./fixtures";
+import { Api, createDataset, datasetNode, deleteDatasetFromMenu, openSession } from "./session-api";
 
 // 200 when the file exists, 404 when it's deleted; anything else is a failure of the test setup
-async function datasetStatus(datasetId: string): Promise<number> {
-  const response = await api.request.get(`/session-db/sessions/${sessionId}/datasets/${datasetId}`, {
-    headers: api.headers,
-  });
+async function datasetStatus(api: Api, sessionId: string, datasetId: string): Promise<number> {
+  const response = await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`);
   return response.status();
 }
 
-test("undo in the toast brings a deleted file back", async ({ page }) => {
+test("undo in the toast brings a deleted file back", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "undo.txt", x: 100, y: 100 }, "text\n");
   await openSession(page, sessionId, datasetId);
 
@@ -53,7 +19,7 @@ test("undo in the toast brings a deleted file back", async ({ page }) => {
     }
   });
 
-  await deleteDataset(page, datasetId);
+  await deleteDatasetFromMenu(page, datasetId);
   const toast = page.locator("ch-toasts .toast").filter({ hasText: "Deleted file" });
   await expect(toast).toContainText("Deleted file undo.txt");
   await expect(toast.locator("b")).toHaveText("undo.txt");
@@ -64,30 +30,35 @@ test("undo in the toast brings a deleted file back", async ({ page }) => {
   await expect(datasetNode(page, datasetId)).toBeVisible();
 
   expect(deleteRequests).toEqual([]);
-  expect(await datasetStatus(datasetId)).toBe(200);
+  expect(await datasetStatus(api, sessionId, datasetId)).toBe(200);
 });
 
-test("closing the toast deletes the file", async ({ page }) => {
+test("closing the toast deletes the file", async ({ page, api, sessionId }) => {
   const datasetId = await createDataset(api, sessionId, { name: "close.txt", x: 100, y: 100 }, "text\n");
   await openSession(page, sessionId, datasetId);
 
-  await deleteDataset(page, datasetId);
+  await deleteDatasetFromMenu(page, datasetId);
   const toast = page.locator("ch-toasts .toast").filter({ hasText: "Deleted file" });
   await toast.getByRole("button", { name: "Close" }).click();
 
   await expect(toast).toHaveCount(0);
-  await expect.poll(() => datasetStatus(datasetId)).toBe(404);
+  await expect.poll(() => datasetStatus(api, sessionId, datasetId)).toBe(404);
 });
 
-test("an error toast has its buttons and closes when the url changes", async ({ page }) => {
-  await page.route(/\/session-db\//, (route) => route.fulfill({ status: 500, body: "e2e failure" }));
+test("an error toast has its buttons and closes when the url changes", async ({ page, api, baseURL, pageErrors }) => {
+  // the address is relative in the proxy mode and absolute in the direct mode
+  const sessions = new URL(api.address("session-db") + "/sessions", baseURL).href;
+  const failSessionDb = (url: URL) => url.href.startsWith(sessions);
+  pageErrors.allowFailedRequest(500, "session-db", "/sessions");
+  pageErrors.allowErrorMessage("Updating sessions failed");
+  await page.route(failSessionDb, (route) => route.fulfill({ status: 500, body: "e2e failure" }));
   await page.goto("/sessions");
 
   const toast = page.locator("ch-toasts .toast").filter({ hasText: "Updating sessions failed" });
   await expect(toast).toBeVisible();
   await expect(toast.getByRole("button", { name: "Reload" })).toBeVisible();
   await expect(toast.getByRole("button", { name: "Contact support" })).toBeVisible();
-  await page.unroute(/\/session-db\//);
+  await page.unroute(failSessionDb);
 
   await toast.getByRole("button", { name: "Show details" }).click();
   // the error has only a message, so the title of the details is just "details"
