@@ -75,6 +75,7 @@
               notFoundText="No tools found"
               (blur)="searchBoxBlur()"
               placeholder="Find tool"
+              [tabFocusOnClearButton]="false"
               [dropdownPosition]="'bottom'">
               <ng-template ng-option-tmp let-item="item">
                 <div style="font-size: smaller">{{ item.moduleName }} - {{ item.category }}</div>
