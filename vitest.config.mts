@@ -17,7 +17,7 @@ export default defineConfig({
      * builder (@angular/build:unit-test), which is deliberately not used:
      * vitest runs directly, and moving to the builder is a separate decision
      * after the Angular upgrade. It would also tie the vitest version to the
-     * builder's, see the overrides note in README.
+     * builder's.
      */
     environment: "node",
   },
