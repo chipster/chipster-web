@@ -6,7 +6,7 @@
 // importing all the rest, which I guess imports functions again. Seems to work
 
 // Include functions first (so you can manipulate colors, SVGs, calc, etc)
-@import "../node_modules/bootstrap/scss/functions";
+@import "bootstrap/scss/functions";
 
 // Override variables
 // shade-color(red, 20%) to darken
@@ -26,4 +26,4 @@ $table-active-color: white;
 $table-active-bg: $primary;
 
 // Import all the bootstrap (functions will be imported again)
-@import "../node_modules/bootstrap/scss/bootstrap";
+@import "bootstrap/scss/bootstrap";
