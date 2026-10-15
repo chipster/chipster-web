@@ -48,6 +48,10 @@ export default tseslint.config(
       // only as part of that. don't let --fix run it: in 19 it removes
       // standalone: false, which breaks the NgModules.
       "@angular-eslint/prefer-standalone": "off",
+      // the services are injected with constructor parameters. moving to
+      // inject() is planned as a separate change after the upgrade to angular
+      // 22 too.
+      "@angular-eslint/prefer-inject": "off",
 
       // rules kept from the airbnb set that was dropped with eslint 9, see
       // README. these catch mistakes, the style-only airbnb rules are gone.
