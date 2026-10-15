@@ -1,4 +1,14 @@
-import { Component, ElementRef, Input, NgZone, OnChanges, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  Input,
+  NgZone,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { fromEvent, Subject, Subscription } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -57,6 +67,7 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-htmlvisualization",
   templateUrl: "./html-visualization.component.html",
   styleUrls: ["./html-visualization.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy {

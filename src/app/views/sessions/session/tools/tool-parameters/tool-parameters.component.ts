@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
@@ -10,6 +19,7 @@ import { ValidatedTool } from "../ToolSelection";
   selector: "ch-tool-parameters",
   templateUrl: "./tool-parameters.component.html",
   styleUrls: ["./tool-parameters.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {

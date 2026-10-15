@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -9,6 +9,7 @@ import { SessionDataService } from "../../session-data.service";
 @Component({
   selector: "ch-image-visualization",
   templateUrl: "./image-visualization.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ImageVisualizationComponent implements OnChanges, OnDestroy {

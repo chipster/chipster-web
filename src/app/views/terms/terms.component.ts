@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { User } from "chipster-js-common";
 import { filter, mergeMap } from "rxjs/operators";
@@ -11,6 +11,7 @@ import { RouteService } from "../../shared/services/route.service";
   selector: "ch-terms",
   templateUrl: "./terms.component.html",
   styleUrls: ["./terms.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class TermsComponent implements OnInit {

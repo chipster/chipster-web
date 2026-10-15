@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy } from "@angular/core";
+import { Component, Input, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -7,6 +7,7 @@ import { SessionData } from "../../../../../model/session/session-data";
   selector: "ch-tool-details",
   templateUrl: "./tool-details.component.html",
   styleUrls: ["./tool-details.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ToolDetailsComponent implements OnDestroy {

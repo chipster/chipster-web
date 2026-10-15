@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Module, Rule, Session, WsEvent } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
@@ -22,6 +22,7 @@ import { UserEventService } from "./user-event.service";
   selector: "ch-session-list",
   templateUrl: "./session-list.component.html",
   styleUrls: ["./session-list.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SessionListComponent implements OnInit, OnDestroy {

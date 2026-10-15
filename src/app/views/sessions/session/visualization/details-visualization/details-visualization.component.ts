@@ -1,10 +1,11 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset, Tool } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 
 @Component({
   selector: "ch-details-visualization",
   templateUrl: "./details-visualization.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DetailsVisualizationComponent {

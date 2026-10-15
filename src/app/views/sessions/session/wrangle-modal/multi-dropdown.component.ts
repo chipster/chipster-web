@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, ViewChild } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import log from "loglevel";
 import { ColumnItem } from "./wrangle-modal.component";
 
@@ -6,6 +15,7 @@ import { ColumnItem } from "./wrangle-modal.component";
   selector: "ch-multi-dropdown",
   templateUrl: "./multi-dropdown.component.html",
   styleUrls: ["./multi-dropdown.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 /**

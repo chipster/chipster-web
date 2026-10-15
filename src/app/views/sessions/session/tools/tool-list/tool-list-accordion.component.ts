@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
 import { cloneDeep } from "lodash-es";
 import { Subject } from "rxjs";
@@ -14,6 +14,7 @@ import { ToolSelectionService } from "../../tool.selection.service";
   selector: "ch-tool-list-accordion",
   templateUrl: "./tool-list-accordion.component.html",
   styleUrls: ["./tool-list-accordion.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ToolListAccordionComponent implements OnInit {

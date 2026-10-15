@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { NavigationStart, Router } from "@angular/router";
 import log from "loglevel";
 import { EMPTY, from, Observable, of } from "rxjs";
@@ -14,6 +14,7 @@ import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.
 @Component({
   selector: "ch-error",
   template: "",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ErrorComponent implements OnInit {

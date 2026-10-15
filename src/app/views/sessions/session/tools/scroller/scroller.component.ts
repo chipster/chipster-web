@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewChild } from "@angular/core";
+import { Component, HostListener, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 
 /**
  * Scroller component that prevents the parent component from scrolling
@@ -8,6 +8,7 @@ import { Component, HostListener, ViewChild } from "@angular/core";
 @Component({
   selector: "ch-scroller",
   templateUrl: "./scroller.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ScrollerComponent {

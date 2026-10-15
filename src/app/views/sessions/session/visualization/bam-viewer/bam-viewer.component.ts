@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as pako from "pako";
 import { Subject } from "rxjs";
@@ -13,6 +13,7 @@ import BamRecord from "./bamRecord";
   selector: "ch-bam-viewer",
   templateUrl: "bam-viewer.component.html",
   styleUrls: ["./bam-viewer.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class BamViewerComponent implements OnChanges, OnDestroy {

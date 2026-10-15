@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import log from "loglevel";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState } from "../../../model/loadstate";
@@ -9,6 +9,7 @@ import { NewsItem } from "./NewsItem";
 @Component({
   selector: "ch-news-list",
   templateUrl: "./news-list.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class NewsListComponent implements OnInit {

@@ -1,9 +1,10 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { OidcService } from "../../core/authentication/oidc.service";
 
 @Component({
   selector: "ch-oidc-callback",
   templateUrl: "./oidc-callback.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class OidcCallbackComponent implements OnInit {

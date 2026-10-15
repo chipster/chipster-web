@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import * as d3 from "d3";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
@@ -16,6 +16,7 @@ import VolcanoPlotDataRow from "./volcanoPlotDataRow";
   selector: "ch-volcano-plot",
   templateUrl: "./volcano-plot.component.html",
   styleUrls: ["./volcano-plot.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class VolcanoPlotComponent extends PlotDirective implements OnChanges, OnDestroy {

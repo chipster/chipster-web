@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from "@angular/core";
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
 import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
@@ -7,6 +7,7 @@ import { ValidatedTool } from "../ToolSelection";
   selector: "ch-run-options",
   templateUrl: "./run-options.component.html",
   styleUrls: ["./run-options.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class RunOptionsComponent implements OnChanges {

@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, Tool } from "chipster-js-common";
 import log from "loglevel";
@@ -16,6 +25,7 @@ import { JobListComponent } from "../tools/job-list/job-list.component";
   selector: "ch-jobs-modal",
   templateUrl: "./jobs-modal.component.html",
   styleUrls: ["./jobs-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {

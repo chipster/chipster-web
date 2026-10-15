@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -19,6 +19,7 @@ import { VisualizationModalService } from "../visualizationmodal.service";
     `,
   ],
   styleUrls: ["./text-visualization.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class TextVisualizationComponent implements OnChanges, OnDestroy {

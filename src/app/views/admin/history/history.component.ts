@@ -1,5 +1,5 @@
 import { HttpParams } from "@angular/common/http";
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { JobHistory, Role } from "chipster-js-common";
@@ -16,6 +16,7 @@ import { JobOutputModalComponent } from "./joboutputmodal.component";
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class HistoryComponent implements OnInit {

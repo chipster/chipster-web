@@ -9,6 +9,7 @@ import {
   Output,
   SimpleChanges,
   ViewChild,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import type {
   OnProgressParameters,
@@ -215,6 +216,7 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class PdfViewerComponent implements OnChanges, OnDestroy {

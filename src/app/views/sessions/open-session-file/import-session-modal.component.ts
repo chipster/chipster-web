@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from "@angular/core";
+import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from "@angular/core";
 import { Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
@@ -10,6 +10,7 @@ import { UploadService } from "../../../shared/services/upload.service";
 @Component({
   selector: "ch-import-session-modal",
   templateUrl: "./import-session-modal.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ImportSessionModalComponent {

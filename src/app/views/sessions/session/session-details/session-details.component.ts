@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from "@angular/core";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { map, mergeMap } from "rxjs/operators";
@@ -16,6 +16,7 @@ import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
   selector: "ch-session-details",
   templateUrl: "./session-details.component.html",
   styleUrls: ["./session-details.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SessionDetailsComponent {

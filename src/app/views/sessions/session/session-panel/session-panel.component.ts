@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset, Label, Module, Tool } from "chipster-js-common";
 import { range } from "lodash-es";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
@@ -18,6 +18,7 @@ import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
   selector: "ch-session-panel",
   templateUrl: "./session-panel.component.html",
   styleUrls: ["./session-panel.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SessionPanelComponent {

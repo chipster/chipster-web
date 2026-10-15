@@ -1,10 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { ICellRendererAngularComp } from "ag-grid-angular";
 import { ICellRendererParams } from "ag-grid-community";
 
 @Component({
   selector: "ch-ag-btn-cell-renderer",
   templateUrl: "./ag-btn-cell-renderer.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AgBtnCellRendererComponent implements ICellRendererAngularComp {

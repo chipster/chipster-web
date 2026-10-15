@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
@@ -30,6 +30,7 @@ export interface ColumnItem {
   selector: "ch-wrangle-modal",
   templateUrl: "./wrangle-modal.component.html",
   styleUrls: ["./wrangle-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class WrangleModalComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewChild, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
 import { Role } from "chipster-js-common";
@@ -24,6 +24,7 @@ import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-moda
   templateUrl: "./storage.component.html",
   styleUrls: ["./storage.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 

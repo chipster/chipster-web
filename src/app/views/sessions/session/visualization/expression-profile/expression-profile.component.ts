@@ -1,4 +1,12 @@
-import { Component, Input, NgZone, OnChanges, OnDestroy, ViewEncapsulation } from "@angular/core";
+import {
+  Component,
+  Input,
+  NgZone,
+  OnChanges,
+  OnDestroy,
+  ViewEncapsulation,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { filter, map, find, difference, uniq, floor, intersection, range, flatMap, minBy } from "lodash-es";
@@ -25,6 +33,7 @@ import Rectangle from "./rectangle";
   templateUrl: "./expression-profile.component.html",
   styleUrls: ["./expression-profile.component.less"],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ExpressionProfileComponent implements OnChanges, OnDestroy {

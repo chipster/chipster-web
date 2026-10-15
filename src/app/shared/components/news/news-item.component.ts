@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from "@angular/core";
 import { NewsItem } from "./NewsItem";
 
 @Component({
   selector: "ch-news-item",
   templateUrl: "./news-item.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class NewsItemComponent {

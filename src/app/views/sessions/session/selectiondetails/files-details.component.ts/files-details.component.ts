@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset, Label } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 import { getSortedLabels } from "../../labels/labels-util";
@@ -7,6 +7,7 @@ import { getSortedLabels } from "../../labels/labels-util";
   selector: "ch-files-details",
   templateUrl: "./files-details.component.html",
   styleUrls: ["./files-details.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class FilesDetailsComponent {
