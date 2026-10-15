@@ -21,7 +21,7 @@
     "*.{ts,mts,js,mjs,html}": "eslint --no-warn-ignored"
   },
   "engines": {
-    "node": ">=24",
+    "node": ">=24.15",
     "npm": ">=11"
   },
   "private": true,
