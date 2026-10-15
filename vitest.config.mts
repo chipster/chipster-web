@@ -13,8 +13,9 @@ export default defineConfig({
     /*
      * These tests are plain TypeScript: model classes and services created
      * with stub dependencies. Nothing renders a component, so no DOM is
-     * needed. Angular's own TestBed support comes with the Angular 20
-     * unit-test builder.
+     * needed. Angular's own TestBed support would come from its unit-test
+     * builder (@angular/build:unit-test, experimental in Angular 20), which
+     * isn't used here: vitest runs directly.
      */
     environment: "node",
   },
