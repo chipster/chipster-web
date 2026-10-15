@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { TokenService } from "../../../core/authentication/token.service";
 
@@ -6,6 +6,7 @@ import { TokenService } from "../../../core/authentication/token.service";
   selector: "ch-account",
   templateUrl: "./account.component.html",
   styleUrls: ["./account.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AccountComponent {

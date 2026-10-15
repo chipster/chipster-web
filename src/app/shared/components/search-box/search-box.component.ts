@@ -1,10 +1,20 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
 
 @Component({
   selector: "ch-search-box",
   templateUrl: "./search-box.component.html",
   styleUrls: ["./search-box.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SearchBoxComponent implements OnInit, OnDestroy {

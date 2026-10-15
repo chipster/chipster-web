@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import log from "loglevel";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
@@ -9,6 +9,7 @@ import { RouteService } from "../../shared/services/route.service";
   selector: "ch-home",
   templateUrl: "./home.component.html",
   styleUrls: ["./home.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class HomeComponent implements OnInit {

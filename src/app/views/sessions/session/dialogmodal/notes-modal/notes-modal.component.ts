@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
@@ -6,6 +6,7 @@ import { SessionDataService } from "../../session-data.service";
 @Component({
   templateUrl: "./notes-modal.component.html",
   styleUrls: ["./notes-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class NotesModalComponent implements AfterViewInit, OnInit {

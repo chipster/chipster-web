@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import { find, includes, every, some } from "lodash-es";
@@ -17,6 +17,7 @@ import { VisualizationEventService } from "./visualization-event.service";
   selector: "ch-visualizations",
   templateUrl: "./visualizations.component.html",
   styleUrls: ["./visualizations.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {

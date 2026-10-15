@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import * as d3 from "d3";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
@@ -14,6 +14,7 @@ import Point from "../model/point";
   selector: "ch-scatter-plot",
   templateUrl: "./scatter-plot.component.html",
   styleUrls: ["./scatter-plot.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ScatterPlotComponent extends PlotDirective implements OnChanges, OnDestroy {

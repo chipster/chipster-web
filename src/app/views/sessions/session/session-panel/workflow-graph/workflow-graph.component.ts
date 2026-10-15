@@ -7,6 +7,7 @@ import {
   OnInit,
   SimpleChanges,
   ViewEncapsulation,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Label, Module, Tool } from "chipster-js-common";
@@ -51,6 +52,7 @@ import { WorkflowGraphService } from "./workflow-graph.service";
   templateUrl: "./workflow-graph.component.html",
   styleUrls: ["./workflow-graph.component.less"],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {

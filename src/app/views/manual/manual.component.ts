@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
+import { AfterViewInit, Component, Input, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -23,6 +23,7 @@ import { ManualUtils } from "./manual-utils";
   selector: "ch-manual",
   templateUrl: "./manual.component.html",
   styleUrls: ["./manual.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ManualComponent implements OnDestroy, AfterViewInit {

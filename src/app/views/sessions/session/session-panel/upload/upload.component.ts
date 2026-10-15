@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
 import { UploadModalComponent } from "./upload-modal.component";
@@ -8,6 +8,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 @Component({
   selector: "ch-add-dataset-modal",
   templateUrl: "./upload.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class UploadComponent implements AfterViewInit, OnInit {

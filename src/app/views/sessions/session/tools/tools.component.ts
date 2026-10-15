@@ -1,4 +1,13 @@
-import { Component, Inject, Input, OnDestroy, OnInit, ViewChild, DOCUMENT } from "@angular/core";
+import {
+  Component,
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  DOCUMENT,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
@@ -70,6 +79,7 @@ enum ModuleSelectionMode {
   templateUrl: "./tools.component.html",
   styleUrls: ["./tools.component.less"],
   providers: [NgbDropdownConfig],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ToolsComponent implements OnInit, OnDestroy {

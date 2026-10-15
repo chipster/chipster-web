@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Tool } from "chipster-js-common";
 import { ToolService } from "../../sessions/session/tools/tool.service";
@@ -7,6 +7,7 @@ import { ToolService } from "../../sessions/session/tools/tool.service";
   selector: "ch-manual-modal-component",
   templateUrl: "./manual-modal.component.html",
   styleUrls: ["./manual-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ManualModalComponent {

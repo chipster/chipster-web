@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, Output, ChangeDetectionStrategy } from "@angular/core";
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -12,6 +12,7 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-job-list",
   templateUrl: "./job-list.component.html",
   styleUrls: ["./job-list.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class JobListComponent implements OnChanges {

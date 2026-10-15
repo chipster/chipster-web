@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset } from "chipster-js-common";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
@@ -9,6 +9,7 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-dataset-details",
   templateUrl: "./dataset-details.component.html",
   styleUrls: ["./dataset-details.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DatasetDetailsComponent implements OnInit {

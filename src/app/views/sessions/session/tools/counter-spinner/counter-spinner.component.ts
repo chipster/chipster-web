@@ -1,9 +1,10 @@
-import { Component, Input, OnChanges } from "@angular/core";
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
 
 @Component({
   selector: "ch-counter-spinner",
   templateUrl: "./counter-spinner.component.html",
   styleUrls: ["./counter-spinner.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class CounterSpinnerComponent implements OnChanges {

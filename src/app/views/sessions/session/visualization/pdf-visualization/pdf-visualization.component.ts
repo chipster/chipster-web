@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import type { OnProgressParameters } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { Subject } from "rxjs";
@@ -18,6 +18,7 @@ enum ButtonAction {
   selector: "ch-pdf-visualization",
   templateUrl: "./pdf-visualization.component.html",
   styleUrls: ["./pdf-visualization.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {

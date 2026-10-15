@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { UntypedFormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -18,6 +18,7 @@ import { OidcConfig } from "./oidc-config";
   selector: "ch-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class LoginComponent implements OnInit {

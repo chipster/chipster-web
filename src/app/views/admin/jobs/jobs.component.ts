@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { Job, JobState } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, Observable, of } from "rxjs";
@@ -15,6 +15,7 @@ import { JobService } from "../../sessions/session/job.service";
   templateUrl: "./jobs.component.html",
   styleUrls: ["./jobs.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class JobsComponent implements OnInit {

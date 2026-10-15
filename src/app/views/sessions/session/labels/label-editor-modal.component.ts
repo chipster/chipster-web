@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Label } from "chipster-js-common";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -10,6 +10,7 @@ import { DEFAULT_LABEL_COLOR, LABEL_PALETTE, LabelColor } from "./label-palette"
   selector: "ch-label-editor-modal",
   templateUrl: "./label-editor-modal.component.html",
   styleUrls: ["./label-editor-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class LabelEditorModalComponent implements OnInit {

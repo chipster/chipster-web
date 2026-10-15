@@ -9,6 +9,7 @@ import {
   SimpleChanges,
   ViewChild,
   ViewEncapsulation,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -40,6 +41,7 @@ export enum PhenodataState {
   // disable ViewEncapsulation.Emulated, because we want dynamically add a style to the
   // remove column button, but an emulated view encapsulation would mess up style names
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {

@@ -1,10 +1,11 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
 
 @Component({
   templateUrl: "./edit-news-modal.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class EditNewsModalComponent implements OnInit {

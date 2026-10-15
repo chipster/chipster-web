@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 
 /**
  * Link that looks like a link, but doesn't navigate
@@ -10,6 +10,7 @@ import { Component } from "@angular/core";
 @Component({
   selector: "ch-link-button",
   template: '<a style="text-decoration-line: none;" href="javascript:void(0)" #anchor><ng-content></ng-content></a>',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class LinkButtonComponent {

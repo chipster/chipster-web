@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from "@angular/core";
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
 import { JobParameter, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
 import log from "loglevel";
@@ -8,6 +8,7 @@ import { ToolService } from "../../tools/tool.service";
   selector: "ch-dataset-parameter-list",
   templateUrl: "./dataset-parameter-list.component.html",
   styleUrls: ["./dataset-parameter-list.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DatasetParameterListComponent implements OnChanges {

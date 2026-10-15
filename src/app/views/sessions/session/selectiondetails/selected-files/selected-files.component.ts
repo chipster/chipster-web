@@ -1,4 +1,14 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
 import { Subject } from "rxjs";
@@ -19,6 +29,7 @@ import { DatasetModalService } from "../datasetmodal.service";
   selector: "ch-selected-files",
   templateUrl: "./selected-files.component.html",
   styleUrls: ["./selected-files.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class FileComponent implements OnInit, OnChanges, OnDestroy {

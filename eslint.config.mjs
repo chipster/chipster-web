@@ -52,6 +52,11 @@ export default tseslint.config(
       // inject() is planned as a separate change after the upgrade to angular
       // 22 too.
       "@angular-eslint/prefer-inject": "off",
+      // every component sets ChangeDetectionStrategy.Eager explicitly, which
+      // angular 22's migration added to keep the previous default (the
+      // default is OnPush from 22 on), and the rule reports exactly those.
+      // moving to OnPush is a separate change after the upgrade too.
+      "@angular-eslint/prefer-on-push-component-change-detection": "off",
 
       // rules kept from the airbnb set that was dropped with eslint 9, see
       // README. these catch mistakes, the style-only airbnb rules are gone.
