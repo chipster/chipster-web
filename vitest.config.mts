@@ -16,8 +16,7 @@ export default defineConfig({
      * needed. Angular's own TestBed support would come from its unit-test
      * builder (@angular/build:unit-test), which is deliberately not used:
      * vitest runs directly, and moving to the builder is a separate decision
-     * after the Angular upgrade. It would also tie the vitest version to the
-     * builder's.
+     * after the Angular upgrade.
      */
     environment: "node",
   },
