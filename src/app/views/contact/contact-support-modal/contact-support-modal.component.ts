@@ -47,7 +47,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     private configService: ConfigService,
     private dialogModalService: DialogModalService,
     private fb: UntypedFormBuilder,
-    @Inject(DOCUMENT) private document,
+    @Inject(DOCUMENT) private document: Document,
   ) {}
 
   ngOnInit() {

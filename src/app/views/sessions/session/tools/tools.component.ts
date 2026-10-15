@@ -136,7 +136,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private jobsModalRef: NgbModalRef | null = null;
 
   constructor(
-    @Inject(DOCUMENT) private document: any,
+    @Inject(DOCUMENT) private document: Document,
     public settingsService: SettingsService,
     private toolSelectionService: ToolSelectionService,
     public selectionService: SelectionService,
