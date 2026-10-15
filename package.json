@@ -94,7 +94,7 @@
     "vitest": "^4.1.11"
   },
   "overrides": {
-    "@angular/build": {
+    "@angular/build@^20.3.40": {
       "vitest": "$vitest"
     }
   }

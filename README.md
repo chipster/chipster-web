@@ -13,7 +13,7 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project, or `npm run build` for a production build. The build artifacts will be stored in the `dist/` directory.
 
-`package.json` has an npm `overrides` entry that makes `@angular/build` 20 accept the app's Vitest 4. It declares an optional peer dependency on Vitest 3 for Angular's own unit-test builder, which this app doesn't use (see `vitest.config.mts`), but npm checks an optional peer all the same once it's installed. `ng update` does its own peer check and ignores npm overrides, so it needs `--force` while the override is there. `@angular/build` 21 accepts Vitest 4: remove the override with that update.
+`package.json` has an npm `overrides` entry that makes `@angular/build` 20 accept the app's Vitest 4. It declares an optional peer dependency on Vitest 3 for Angular's own unit-test builder, which this app doesn't use (see `vitest.config.mts`), but npm checks an optional peer all the same once it's installed. The key of the entry repeats the dependency's own version range, which npm requires for a direct dependency: with a different range that still matches the installed version, `npm install` fails with `EOVERRIDE`. `ng update` does its own peer check and ignores npm overrides, so it needs `--force` while the override is there. `--force` turns off all of its peer checks, not only this one, so update ng-bootstrap and ng-select to the majors that match Angular in the same step, and check with `npm ls` afterwards that nothing is left invalid. `@angular/build` 21 accepts Vitest 4, and once its update changes the version range, the override no longer matches and stops applying: remove it then.
 
 ## Running unit tests
 
