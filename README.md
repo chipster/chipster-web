@@ -13,6 +13,8 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project, or `npm run build` for a production build. The build artifacts will be stored in the `dist/` directory.
 
+`package.json` has an npm `overrides` entry that makes `@angular/build` 20 accept the app's Vitest 4. It declares an optional peer dependency on Vitest 3 for Angular's own unit-test builder, which this app doesn't use (see `vitest.config.mts`), but npm checks an optional peer all the same once it's installed. `ng update` does its own peer check and ignores npm overrides, so it needs `--force` while the override is there. `@angular/build` 21 accepts Vitest 4: remove the override with that update.
+
 ## Running unit tests
 
 Run `npm test` to execute the unit tests via [Vitest](https://vitest.dev). Use `npm run test:watch` to re-run them on file changes.
