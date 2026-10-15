@@ -1,5 +1,4 @@
-import { DOCUMENT } from "@angular/common";
-import { Component, Inject, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, Inject, Input, OnDestroy, OnInit, ViewChild, DOCUMENT } from "@angular/core";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
@@ -137,7 +136,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   private jobsModalRef: NgbModalRef | null = null;
 
   constructor(
-    @Inject(DOCUMENT) private document: any,
+    @Inject(DOCUMENT) private document: Document,
     public settingsService: SettingsService,
     private toolSelectionService: ToolSelectionService,
     public selectionService: SelectionService,
