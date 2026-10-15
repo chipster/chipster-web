@@ -4,6 +4,7 @@ import { PipeService } from "../services/pipeservice.service";
 
 @Pipe({
   name: "datasetsearch",
+  standalone: false,
 })
 export class DatasetsearchPipe implements PipeTransform {
   constructor(private pipeService: PipeService) {}

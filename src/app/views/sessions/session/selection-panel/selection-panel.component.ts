@@ -13,6 +13,7 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
   selector: "ch-selection-panel",
   templateUrl: "./selection-panel.component.html",
   styleUrls: ["./selection-panel.component.less"],
+  standalone: false,
 })
 export class SelectionPanelComponent implements OnInit, OnDestroy {
   @Input()

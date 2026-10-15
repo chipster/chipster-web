@@ -5,6 +5,7 @@ import { Component, ViewEncapsulation } from "@angular/core";
   templateUrl: "./admin.component.html",
   styleUrls: ["./admin.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class AdminComponent {
   constructor() {}

@@ -12,6 +12,7 @@ import { DatasetModalService } from "../datasetmodal.service";
   selector: "ch-single-dataset",
   templateUrl: "./single-dataset.component.html",
   styleUrls: ["./single-dataset.component.less"],
+  standalone: false,
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
   @Input()

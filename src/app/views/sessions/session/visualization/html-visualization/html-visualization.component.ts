@@ -57,6 +57,7 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-htmlvisualization",
   templateUrl: "./html-visualization.component.html",
   styleUrls: ["./html-visualization.component.less"],
+  standalone: false,
 })
 export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy {
   private static readonly SIZE_MESSAGE_TYPE = "chipster-html-visualization-size";

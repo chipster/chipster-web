@@ -10,6 +10,7 @@ import { UploadService } from "../../../shared/services/upload.service";
 @Component({
   selector: "ch-import-session-modal",
   templateUrl: "./import-session-modal.component.html",
+  standalone: false,
 })
 export class ImportSessionModalComponent {
   public flow: any;

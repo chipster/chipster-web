@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({
   name: "secondspipe",
+  standalone: false,
 })
 export class SecondsPipe implements PipeTransform {
   transform(seconds: number | string): any {

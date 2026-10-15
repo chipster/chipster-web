@@ -6,6 +6,7 @@ import { ColumnItem } from "./wrangle-modal.component";
   selector: "ch-multi-dropdown",
   templateUrl: "./multi-dropdown.component.html",
   styleUrls: ["./multi-dropdown.component.less"],
+  standalone: false,
 })
 /**
  * Two things make things a little bit complicated here:

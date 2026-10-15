@@ -5,6 +5,7 @@ import { NewsItem } from "../../../../../shared/components/news/NewsItem";
 
 @Component({
   templateUrl: "./edit-news-modal.component.html",
+  standalone: false,
 })
 export class EditNewsModalComponent implements OnInit {
   public modalTitle: string;

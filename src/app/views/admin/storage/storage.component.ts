@@ -24,6 +24,7 @@ import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-moda
   templateUrl: "./storage.component.html",
   styleUrls: ["./storage.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 
 /**

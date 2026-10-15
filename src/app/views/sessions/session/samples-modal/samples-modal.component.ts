@@ -18,6 +18,7 @@ export interface ColumnItem {
   selector: "ch-samples-modal",
   templateUrl: "./samples-modal.component.html",
   styleUrls: ["./samples-modal.component.less"],
+  standalone: false,
 })
 export class SamplesModalComponent implements OnInit {
   constructor(

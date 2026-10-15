@@ -7,6 +7,7 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
   selector: "ch-tool-source",
   template: '<pre class="tool-source">{{source}}</pre>',
   styleUrls: ["./tool-source.component.less"],
+  standalone: false,
 })
 export class ToolSourceComponent implements OnInit {
   source: string;

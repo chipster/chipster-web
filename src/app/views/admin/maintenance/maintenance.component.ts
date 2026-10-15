@@ -14,6 +14,7 @@ import FileBrokerStorage from "./file-broker-storage";
   templateUrl: "./maintenance.component.html",
   styleUrls: ["./maintenance.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class MaintenanceComponent implements OnInit {
   storageIds = [];

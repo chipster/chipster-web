@@ -13,6 +13,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   templateUrl: "./services.component.html",
   styleUrls: ["./services.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class ServicesComponent implements OnInit {
   services: Service[];

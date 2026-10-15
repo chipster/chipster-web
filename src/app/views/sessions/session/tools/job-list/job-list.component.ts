@@ -12,6 +12,7 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-job-list",
   templateUrl: "./job-list.component.html",
   styleUrls: ["./job-list.component.less"],
+  standalone: false,
 })
 export class JobListComponent implements OnChanges {
   @Input() jobs: Job[];

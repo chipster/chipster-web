@@ -5,6 +5,7 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 
 @Component({
   templateUrl: "./spinnermodal.component.html",
+  standalone: false,
 })
 export class SpinnerModalComponent implements AfterViewInit {
   @Input() message: string;

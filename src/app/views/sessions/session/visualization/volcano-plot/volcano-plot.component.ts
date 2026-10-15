@@ -16,6 +16,7 @@ import VolcanoPlotDataRow from "./volcanoPlotDataRow";
   selector: "ch-volcano-plot",
   templateUrl: "./volcano-plot.component.html",
   styleUrls: ["./volcano-plot.component.less"],
+  standalone: false,
 })
 export class VolcanoPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
   private volcanoPlotDataRows: Array<VolcanoPlotDataRow> = [];

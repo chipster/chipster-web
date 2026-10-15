@@ -7,6 +7,7 @@ import { getSortedLabels } from "../../labels/labels-util";
   selector: "ch-files-details",
   templateUrl: "./files-details.component.html",
   styleUrls: ["./files-details.component.less"],
+  standalone: false,
 })
 export class FilesDetailsComponent {
   @Input()

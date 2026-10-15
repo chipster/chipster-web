@@ -18,6 +18,7 @@ import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.
   selector: "ch-navigation",
   templateUrl: "./navigation.component.html",
   styleUrls: ["./navigation.component.less"],
+  standalone: false,
 })
 export class NavigationComponent implements OnInit {
   routerLinkAdmin = RouteService.PATH_ADMIN;

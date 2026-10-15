@@ -20,6 +20,7 @@ import { VisualizationModalService } from "../visualizationmodal.service";
   selector: "ch-spreadsheet-visualization",
   templateUrl: "./spreadsheet-visualization.component.html",
   styleUrls: ["./spreadsheet-visualization.component.less"],
+  standalone: false,
 })
 export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, AfterViewInit {
   @Input()

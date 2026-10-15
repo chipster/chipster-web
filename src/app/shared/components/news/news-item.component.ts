@@ -4,6 +4,7 @@ import { NewsItem } from "./NewsItem";
 @Component({
   selector: "ch-news-item",
   templateUrl: "./news-item.component.html",
+  standalone: false,
 })
 export class NewsItemComponent {
   @Input() newsItem: NewsItem;

@@ -7,6 +7,7 @@ import { ValidatedTool } from "../ToolSelection";
   selector: "ch-run-options",
   templateUrl: "./run-options.component.html",
   styleUrls: ["./run-options.component.less"],
+  standalone: false,
 })
 export class RunOptionsComponent implements OnChanges {
   @Input() sessionData: SessionData;

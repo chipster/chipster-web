@@ -18,6 +18,7 @@ import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
   selector: "ch-session-panel",
   templateUrl: "./session-panel.component.html",
   styleUrls: ["./session-panel.component.less"],
+  standalone: false,
 })
 export class SessionPanelComponent {
   @Input()

@@ -6,6 +6,7 @@ import { SessionDataService } from "../../session-data.service";
 @Component({
   templateUrl: "./notes-modal.component.html",
   styleUrls: ["./notes-modal.component.less"],
+  standalone: false,
 })
 export class NotesModalComponent implements AfterViewInit, OnInit {
   @Input()

@@ -12,6 +12,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   templateUrl: "./clients.component.html",
   styleUrls: ["./clients.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class ClientsComponent implements OnInit {
   users: any[];

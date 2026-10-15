@@ -30,6 +30,7 @@ export interface ColumnItem {
   selector: "ch-wrangle-modal",
   templateUrl: "./wrangle-modal.component.html",
   styleUrls: ["./wrangle-modal.component.less"],
+  standalone: false,
 })
 export class WrangleModalComponent implements OnInit {
   constructor(

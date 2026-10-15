@@ -4,6 +4,7 @@ import { Component, Input } from "@angular/core";
 @Component({
   templateUrl: "./pre-modal.component.html",
   styleUrls: ["./pre-modal.component.less"],
+  standalone: false,
 })
 export class PreModalComponent {
   @Input()

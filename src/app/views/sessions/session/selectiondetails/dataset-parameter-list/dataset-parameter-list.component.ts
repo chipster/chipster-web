@@ -8,6 +8,7 @@ import { ToolService } from "../../tools/tool.service";
   selector: "ch-dataset-parameter-list",
   templateUrl: "./dataset-parameter-list.component.html",
   styleUrls: ["./dataset-parameter-list.component.less"],
+  standalone: false,
 })
 export class DatasetParameterListComponent implements OnChanges {
   @Input() tool: Tool;

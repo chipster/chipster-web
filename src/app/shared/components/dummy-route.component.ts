@@ -8,5 +8,6 @@ import { Component } from "@angular/core";
   template: `
     <div>This is a dummy page, nothing interesting here.</div>
   `,
+  standalone: false,
 })
 export class DummyRouteComponent {}

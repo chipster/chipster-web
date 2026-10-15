@@ -3,6 +3,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   templateUrl: "./booleanmodal.component.html",
+  standalone: false,
 })
 export class BooleanModalComponent implements AfterViewInit {
   @Input()

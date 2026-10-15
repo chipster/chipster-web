@@ -13,6 +13,7 @@ import BamRecord from "./bamRecord";
   selector: "ch-bam-viewer",
   templateUrl: "bam-viewer.component.html",
   styleUrls: ["./bam-viewer.component.less"],
+  standalone: false,
 })
 export class BamViewerComponent implements OnChanges, OnDestroy {
   @Input()

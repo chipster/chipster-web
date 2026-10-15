@@ -10,6 +10,7 @@ import { ValidatedTool } from "../ToolSelection";
   selector: "ch-tool-parameters",
   templateUrl: "./tool-parameters.component.html",
   styleUrls: ["./tool-parameters.component.less"],
+  standalone: false,
 })
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   @Input() validatedTool: ValidatedTool;

@@ -6,6 +6,7 @@
   bindLabel="name"
   bindValue="index"
   [closeOnSelect]="!multiple"
+  [tabFocusOnClearButton]="false"
   [(ngModel)]="selectedIndexes"
   (change)="onSelectionChange()"
   (search)="onSearch($event)"

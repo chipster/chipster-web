@@ -4,6 +4,7 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
   selector: "ch-auth-button",
   templateUrl: "./auth-button.component.html",
   styleUrls: ["./auth-button.component.less"],
+  standalone: false,
 })
 export class AuthButtonComponent {
   @Input() name: string;

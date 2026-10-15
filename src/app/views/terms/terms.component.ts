@@ -11,6 +11,7 @@ import { RouteService } from "../../shared/services/route.service";
   selector: "ch-terms",
   templateUrl: "./terms.component.html",
   styleUrls: ["./terms.component.less"],
+  standalone: false,
 })
 export class TermsComponent implements OnInit {
   // increase by one to force everyone to accept again

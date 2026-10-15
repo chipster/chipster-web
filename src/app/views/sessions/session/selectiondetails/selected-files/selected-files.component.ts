@@ -19,6 +19,7 @@ import { DatasetModalService } from "../datasetmodal.service";
   selector: "ch-selected-files",
   templateUrl: "./selected-files.component.html",
   styleUrls: ["./selected-files.component.less"],
+  standalone: false,
 })
 export class FileComponent implements OnInit, OnChanges, OnDestroy {
   @Input()

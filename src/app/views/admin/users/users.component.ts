@@ -8,6 +8,7 @@ import { AuthenticationService } from "../../../core/authentication/authenticati
   templateUrl: "./users.component.html",
   styleUrls: ["./users.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class UsersComponent implements OnInit {
   users: User[];

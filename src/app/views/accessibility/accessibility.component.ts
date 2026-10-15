@@ -8,6 +8,7 @@ import { RouteService } from "../../shared/services/route.service";
   selector: "ch-accessibility",
   templateUrl: "./accessibility.component.html",
   styleUrls: ["./accessibility.component.less"],
+  standalone: false,
 })
 export class AccessibilityComponent implements OnInit {
   public accessibilityPath: string;

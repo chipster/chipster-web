@@ -17,6 +17,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
       <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
     </div>
   `,
+  standalone: false,
 })
 export class JobOutputModalComponent {
   @Input() output;

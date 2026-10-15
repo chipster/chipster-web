@@ -42,6 +42,12 @@ export default tseslint.config(
     rules: {
       "@angular-eslint/directive-selector": ["error", { type: "attribute", prefix: "ch", style: "camelCase" }],
       "@angular-eslint/component-selector": ["error", { type: "element", prefix: "ch", style: "kebab-case" }],
+      // the components are declared in NgModules, which angular 19 marks with
+      // standalone: false. moving to standalone components is planned as a
+      // separate change after the upgrade to angular 22, so turn this rule on
+      // only as part of that. don't let --fix run it: in 19 it removes
+      // standalone: false, which breaks the NgModules.
+      "@angular-eslint/prefer-standalone": "off",
 
       // rules kept from the airbnb set that was dropped with eslint 9, see
       // README. these catch mistakes, the style-only airbnb rules are gone.

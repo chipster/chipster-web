@@ -7,6 +7,7 @@ import { SessionListMode, SettingsService } from "../../services/settings.servic
   selector: "ch-settings",
   templateUrl: "./settings.component.html",
   styleUrls: ["./settings.component.less"],
+  standalone: false,
 })
 export class SettingsComponent implements OnDestroy {
   public SessionListMode = SessionListMode; // ref for using enum in template

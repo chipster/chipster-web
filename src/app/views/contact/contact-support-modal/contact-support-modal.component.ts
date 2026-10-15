@@ -18,6 +18,7 @@ import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmod
 @Component({
   templateUrl: "./contact-support-modal.component.html",
   styleUrls: ["./contact-support-modal.component.less"],
+  standalone: false,
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   public supportForm = this.fb.group({

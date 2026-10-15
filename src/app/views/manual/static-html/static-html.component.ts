@@ -17,6 +17,7 @@ import { ManualUtils } from "../manual-utils";
   selector: "ch-static-html",
   templateUrl: "./static-html.component.html",
   styleUrls: ["./static-html.component.less"],
+  standalone: false,
 })
 export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input()

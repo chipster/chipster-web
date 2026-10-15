@@ -6,6 +6,7 @@ import { resolveLabelColor, textColorForBackground } from "./label-palette";
   selector: "ch-label-pill",
   templateUrl: "./label-pill.component.html",
   styleUrls: ["./label-pill.component.less"],
+  standalone: false,
 })
 export class LabelPillComponent {
   @Input() label: Label;

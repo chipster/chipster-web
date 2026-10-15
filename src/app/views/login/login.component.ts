@@ -18,6 +18,7 @@ import { OidcConfig } from "./oidc-config";
   selector: "ch-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.less"],
+  standalone: false,
 })
 export class LoginComponent implements OnInit {
   static CONF_KEY_JAAS_DESCRIPTION = "jaas-description";

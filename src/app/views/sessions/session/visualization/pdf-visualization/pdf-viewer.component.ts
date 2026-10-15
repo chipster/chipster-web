@@ -215,6 +215,7 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
       }
     `,
   ],
+  standalone: false,
 })
 export class PdfViewerComponent implements OnChanges, OnDestroy {
   @Input() src: string;

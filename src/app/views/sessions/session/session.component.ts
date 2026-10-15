@@ -50,6 +50,7 @@ export enum ComponentState {
   selector: "ch-session",
   templateUrl: "./session.component.html",
   styleUrls: ["./session.component.less"],
+  standalone: false,
 })
 export class SessionComponent implements OnInit, OnDestroy {
   sessionData: SessionData;

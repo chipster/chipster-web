@@ -23,6 +23,7 @@ import { ManualUtils } from "./manual-utils";
   selector: "ch-manual",
   templateUrl: "./manual.component.html",
   styleUrls: ["./manual.component.less"],
+  standalone: false,
 })
 export class ManualComponent implements OnDestroy, AfterViewInit {
   private unsubscribe: Subject<any> = new Subject();

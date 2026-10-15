@@ -9,6 +9,7 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-dataset-details",
   templateUrl: "./dataset-details.component.html",
   styleUrls: ["./dataset-details.component.less"],
+  standalone: false,
 })
 export class DatasetDetailsComponent implements OnInit {
   @Output() delete: EventEmitter<any> = new EventEmitter();

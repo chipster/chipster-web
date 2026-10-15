@@ -19,6 +19,7 @@ import { VisualizationModalService } from "../visualizationmodal.service";
     `,
   ],
   styleUrls: ["./text-visualization.component.less"],
+  standalone: false,
 })
 export class TextVisualizationComponent implements OnChanges, OnDestroy {
   @Input() dataset: Dataset;

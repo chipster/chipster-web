@@ -8,6 +8,7 @@ import { Tool } from "chipster-js-common";
   selector: "ch-parameters-modal",
   templateUrl: "./parameters-modal.component.html",
   styleUrls: ["./parameters-modal.component.less"],
+  standalone: false,
 })
 export class ParametersModalComponent {
   constructor(public activeModal: NgbActiveModal) {}

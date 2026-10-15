@@ -5,6 +5,7 @@ import { SessionData } from "../../../../model/session/session-data";
 
 @Pipe({
   name: "filterCompatibleDatasets",
+  standalone: false,
 })
 export class FilterCompatibleDatasetsPipe implements PipeTransform {
   constructor(private toolService: ToolService) {}

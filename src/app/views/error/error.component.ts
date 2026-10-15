@@ -14,6 +14,7 @@ import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.
 @Component({
   selector: "ch-error",
   template: "",
+  standalone: false,
 })
 export class ErrorComponent implements OnInit {
   constructor(

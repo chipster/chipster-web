@@ -9,6 +9,7 @@ import { NewsItem } from "./NewsItem";
 @Component({
   selector: "ch-news-list",
   templateUrl: "./news-list.component.html",
+  standalone: false,
 })
 export class NewsListComponent implements OnInit {
   // @Input() news: NewsItem[];

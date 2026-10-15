@@ -8,6 +8,7 @@ import { UploadService } from "../../../../../shared/services/upload.service";
   selector: "ch-add-dataset-modal-content",
   templateUrl: "./upload-modal.component.html",
   styleUrls: ["./upload-modal.component.less"],
+  standalone: false,
 })
 export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() sessionId: string;

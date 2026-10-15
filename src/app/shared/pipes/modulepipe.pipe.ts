@@ -4,6 +4,7 @@ import { PipeService } from "../services/pipeservice.service";
 
 @Pipe({
   name: "modulepipe",
+  standalone: false,
 })
 export class ModulePipe implements PipeTransform {
   constructor(private pipeService: PipeService) {}

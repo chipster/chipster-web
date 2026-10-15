@@ -32,6 +32,7 @@ import { LabelMenuItem } from "./labels-context-menu.service";
       [style.background]="item.colorBg"></span>
     <span>{{ item.label.name }}</span>
   `,
+  standalone: false,
 })
 export class LabelMenuItemContentComponent {
   @Input() item!: LabelMenuItem;

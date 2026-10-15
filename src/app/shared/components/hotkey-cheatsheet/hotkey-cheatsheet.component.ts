@@ -7,6 +7,7 @@ import { HotkeyService } from "../../services/hotkey.service";
   templateUrl: "./hotkey-cheatsheet.component.html",
   styleUrls: ["./hotkey-cheatsheet.component.less"],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
   @ViewChild("content") contentTemplate!: TemplateRef<unknown>;

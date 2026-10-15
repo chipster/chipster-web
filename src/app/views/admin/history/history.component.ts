@@ -16,6 +16,7 @@ import { JobOutputModalComponent } from "./joboutputmodal.component";
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class HistoryComponent implements OnInit {
   readonly comparisonIs = "is";

@@ -10,6 +10,7 @@ import { DEFAULT_LABEL_COLOR, LABEL_PALETTE, LabelColor } from "./label-palette"
   selector: "ch-label-editor-modal",
   templateUrl: "./label-editor-modal.component.html",
   styleUrls: ["./label-editor-modal.component.less"],
+  standalone: false,
 })
 export class LabelEditorModalComponent implements OnInit {
   @Input() sessionData: SessionData;

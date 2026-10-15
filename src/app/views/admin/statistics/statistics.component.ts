@@ -14,6 +14,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   templateUrl: "./statistics.component.html",
   styleUrls: ["./statistics.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class StatisticsComponent implements OnInit {
   readonly IGNORE_USERS_PARAMS = "ignoreUsers";

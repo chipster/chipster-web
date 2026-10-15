@@ -18,6 +18,7 @@ import { LoadState, StatusButton } from "../../model/loadstate";
       }
     `,
   ],
+  standalone: false,
 })
 export class StatusComponent {
   @Input() state: LoadState;

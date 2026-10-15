@@ -7,6 +7,7 @@ import { ToolService } from "../../sessions/session/tools/tool.service";
   selector: "ch-manual-modal-component",
   templateUrl: "./manual-modal.component.html",
   styleUrls: ["./manual-modal.component.less"],
+  standalone: false,
 })
 export class ManualModalComponent {
   @Input() tool: Tool;

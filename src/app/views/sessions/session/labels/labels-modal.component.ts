@@ -20,6 +20,7 @@ interface LabelRow {
 @Component({
   selector: "ch-labels-modal",
   templateUrl: "./labels-modal.component.html",
+  standalone: false,
 })
 export class LabelsModalComponent implements OnInit {
   @Input() sessionData: SessionData;

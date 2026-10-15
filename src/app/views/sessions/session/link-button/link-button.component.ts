@@ -10,6 +10,7 @@ import { Component } from "@angular/core";
 @Component({
   selector: "ch-link-button",
   template: '<a style="text-decoration-line: none;" href="javascript:void(0)" #anchor><ng-content></ng-content></a>',
+  standalone: false,
 })
 export class LinkButtonComponent {
   constructor() {}

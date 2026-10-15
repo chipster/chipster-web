@@ -7,6 +7,7 @@ import { SessionData } from "../../../../../model/session/session-data";
   selector: "ch-tool-details",
   templateUrl: "./tool-details.component.html",
   styleUrls: ["./tool-details.component.less"],
+  standalone: false,
 })
 export class ToolDetailsComponent implements OnDestroy {
   // FIXME after tool state refactoring

@@ -6,6 +6,7 @@ import { PreferencesService } from "../../../../../shared/services/preferences.s
 
 @Component({
   templateUrl: "./news-modal.component.html",
+  standalone: false,
 })
 export class NewsModalComponent implements OnInit {
   @Input()

@@ -5,6 +5,7 @@ import { HotkeyService } from "./shared/services/hotkey.service";
   selector: "ch-app-root",
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.css"],
+  standalone: false,
 })
 export class AppComponent {
   constructor(private readonly hotkeyService: HotkeyService) {}

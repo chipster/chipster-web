@@ -29,6 +29,7 @@ enum DeleteStatus {
   selector: "ch-confirm-delete-modal",
   templateUrl: "./confirm-delete-modal.component.html",
   styleUrls: ["./confirm-delete-modal.component.less"],
+  standalone: false,
 })
 export class ConfirmDeleteModalComponent implements OnInit {
   @Input() users: any[];

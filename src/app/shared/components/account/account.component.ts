@@ -6,6 +6,7 @@ import { TokenService } from "../../../core/authentication/token.service";
   selector: "ch-account",
   templateUrl: "./account.component.html",
   styleUrls: ["./account.component.less"],
+  standalone: false,
 })
 export class AccountComponent {
   constructor(

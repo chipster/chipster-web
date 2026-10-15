@@ -14,6 +14,7 @@ import { ImportSessionModalComponent } from "./import-session-modal.component";
   selector: "ch-open-session-file",
   templateUrl: "./open-session-file.component.html",
   styleUrls: ["./open-session-file.component.less"],
+  standalone: false,
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   @ViewChild("browseFilesButton")

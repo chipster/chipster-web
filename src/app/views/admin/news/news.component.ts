@@ -8,6 +8,7 @@ import { NewsService } from "../../../shared/services/news.service";
   templateUrl: "./news.component.html",
   styleUrls: ["./news.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class NewsComponent implements OnInit {
   public news: NewsItem[];

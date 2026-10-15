@@ -15,6 +15,7 @@ import { JobService } from "../../sessions/session/job.service";
   templateUrl: "./jobs.component.html",
   styleUrls: ["./jobs.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  standalone: false,
 })
 export class JobsComponent implements OnInit {
   jobs: Job[];

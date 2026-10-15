@@ -5,6 +5,7 @@ import { ICellRendererParams } from "ag-grid-community";
 @Component({
   selector: "ch-ag-btn-cell-renderer",
   templateUrl: "./ag-btn-cell-renderer.component.html",
+  standalone: false,
 })
 export class AgBtnCellRendererComponent implements ICellRendererAngularComp {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

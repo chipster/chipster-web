@@ -8,6 +8,7 @@ import { RouteService } from "../../shared/services/route.service";
   selector: "ch-privacy-notice",
   templateUrl: "./privacy-notice.component.html",
   styleUrls: ["./privacy-notice.component.less"],
+  standalone: false,
 })
 export class PrivacyNoticeComponent implements OnInit {
   public htmlPath: string;

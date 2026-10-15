@@ -26,6 +26,7 @@ interface Resources {
   selector: "ch-tool-resources",
   templateUrl: "./tool-resources.component.html",
   styleUrls: ["./tool-resources.component.less"],
+  standalone: false,
 })
 export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   @Input() validatedTool: ValidatedTool;
