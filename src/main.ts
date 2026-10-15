@@ -1,6 +1,6 @@
 /// <reference types="@angular/localize" />
 
-import { enableProdMode } from "@angular/core";
+import { enableProdMode, provideZoneChangeDetection } from "@angular/core";
 import { platformBrowser } from "@angular/platform-browser";
 import {
   CellStyleModule,
@@ -39,5 +39,5 @@ ModuleRegistry.registerModules([
 provideGlobalGridOptions({ theme: themeAlpine });
 
 platformBrowser()
-  .bootstrapModule(AppModule)
+  .bootstrapModule(AppModule, { applicationProviders: [provideZoneChangeDetection()] })
   .catch((err) => log.error(err));

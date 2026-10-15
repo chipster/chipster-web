@@ -6,11 +6,8 @@ import TSVRow from "./TSVRow";
 export const noColumnError = "NoColumnError";
 
 export class NoColumnError extends Error {
-  constructor(
-    message,
-    private cause?: Error,
-  ) {
-    super(message);
+  constructor(message: string, cause?: Error) {
+    super(message, { cause });
     this.name = this.constructor.name;
   }
 }
