@@ -10,13 +10,7 @@
     "experimentalDecorators": true,
     "target": "ES2022",
     "importHelpers": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "typeRoots": ["node_modules/@types"],
     "useDefineForClassFields": false,
     // TypeScript 6 turns strict on by default, and the code isn't strict yet
     "strict": false,
