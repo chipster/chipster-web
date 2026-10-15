@@ -1,5 +1,5 @@
-import { DOCUMENT } from "@angular/common";
-import { AfterViewInit, Component, Inject, Input, OnInit, ViewChild } from "@angular/core";
+
+import { AfterViewInit, Component, Inject, Input, OnInit, ViewChild, DOCUMENT } from "@angular/core";
 import { AbstractControl, UntypedFormBuilder, UntypedFormControl, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, User } from "chipster-js-common";
