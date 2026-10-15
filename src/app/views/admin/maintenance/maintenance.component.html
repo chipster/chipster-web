@@ -110,9 +110,9 @@
           <td>{{ idOnStorage.get(storageId) }}</td>
           <td>{{ fileBrokerStorages.get(storageId)?.uri }}</td>
           <td>{{ sessionDbFileStats.get(storageId)?.fileCount }}</td>
-          <td>{{ $safeNavigationMigration(sessionDbFileStats.get(storageId)?.fileBytes) | bytes }}</td>
+          <td>{{ sessionDbFileStats.get(storageId)?.fileBytes | bytes }}</td>
           <td>{{ fileStorageFileStats.get(storageId)?.fileCount }}</td>
-          <td>{{ $safeNavigationMigration(fileStorageFileStats.get(storageId)?.fileBytes) | bytes }}</td>
+          <td>{{ fileStorageFileStats.get(storageId)?.fileBytes | bytes }}</td>
           <td>{{ total.get(storageId) | bytes }}</td>
           <td>{{ free.get(storageId) | bytes }}</td>
           <td>{{ fileStorageFileStats.get(storageId)?.status }}</td>
