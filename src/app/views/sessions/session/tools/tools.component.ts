@@ -1,4 +1,3 @@
-
 import { Component, Inject, Input, OnDestroy, OnInit, ViewChild, DOCUMENT } from "@angular/core";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
