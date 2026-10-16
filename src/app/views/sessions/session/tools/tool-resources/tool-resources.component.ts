@@ -107,6 +107,10 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
         // use lower max limit for tools that doesn't define any # STORAGE
         // just to limit careless use, no need to check in server side
         this.resources.storage.max = quotas.preferredStorage;
+      } else if (this.origTool.storage < quotas.defaultStorage) {
+        // allow small tools to request less than the default
+        this.resources.storage.min = this.origTool.storage;
+        this.resources.storage.step = this.origTool.storage;
       }
 
       let slots = this.validatedTool.tool.slotCount;
