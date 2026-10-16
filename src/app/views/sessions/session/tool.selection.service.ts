@@ -4,10 +4,11 @@ import { Category, Dataset, InputBinding, Module, Tool, ToolParameter } from "ch
 import { flatten } from "lodash-es";
 import log from "loglevel";
 import { Observable, forkJoin, forkJoin as observableForkJoin, of } from "rxjs";
-import { map } from "rxjs/operators";
+import { map, take } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
 import { JobQuota, SchedulerResource } from "../../../shared/resources/scheduler-resource";
+import { ToolsService } from "../../../shared/services/tools.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { SET_SELECTED_TOOL, SET_SELECTED_TOOL_BY_ID } from "../../../state/tool.reducer";
 import { SelectionOption } from "./SelectionOption";
@@ -33,6 +34,7 @@ export class ToolSelectionService {
     private datasetService: DatasetService,
     private store: Store<any>,
     private schedulerResource: SchedulerResource,
+    private toolsService: ToolsService,
   ) {}
 
   selectToolById(moduleId: string, categoryName: string, toolId: string) {
@@ -341,12 +343,32 @@ export class ToolSelectionService {
       this.getResourceValidation(toolWithValidatedParameters.tool.slotCount, quotas.defaultSlots, quotas.maxSlots),
     );
 
+    // the selected tool has the storage set by the user, get the original from the tool definition
+    const declaredStorage = this.getDeclaredStorage(toolWithValidatedParameters.tool.name.id);
+
     resourcesValidations.set(
       "storage",
-      this.getResourceValidation(toolWithValidatedParameters.tool.storage, quotas.defaultStorage, quotas.maxStorage),
+      // allow tools that define less storage than the default to request less
+      this.getResourceValidation(
+        toolWithValidatedParameters.tool.storage,
+        Math.min(declaredStorage ?? quotas.defaultStorage, quotas.defaultStorage),
+        quotas.maxStorage,
+      ),
     );
 
     return resourcesValidations;
+  }
+
+  private getDeclaredStorage(toolId: string): number {
+    let storage: number;
+    // tools have been loaded already when the session was opened, so the cached value is returned synchronously
+    this.toolsService
+      .getTools()
+      .pipe(take(1))
+      .subscribe((tools: Tool[]) => {
+        storage = tools.find((tool: Tool) => tool.name.id === toolId)?.storage;
+      });
+    return storage;
   }
 
   getResourceValidation(value: any, min: number, max: number) {
