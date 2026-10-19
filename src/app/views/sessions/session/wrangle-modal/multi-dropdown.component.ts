@@ -9,7 +9,7 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 import log from "loglevel";
-import { ColumnItem } from "./wrangle-modal.component";
+import type { ColumnItem } from "./wrangle-modal.component";
 import { NgSelectComponent, NgHeaderTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
 import { FormsModule } from "@angular/forms";
 
