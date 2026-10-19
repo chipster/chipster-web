@@ -7,6 +7,7 @@ import {
   OnInit,
   ViewChild,
   ChangeDetectionStrategy,
+  forwardRef,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, Tool } from "chipster-js-common";
@@ -27,7 +28,9 @@ import { JobComponent } from "../selectiondetails/job/job.component";
   templateUrl: "./jobs-modal.component.html",
   styleUrls: ["./jobs-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [JobListComponent, JobComponent],
+  // forwardRef: these components inject services that lead to DialogModalService, which
+  // imports this modal to open it. In that import cycle they can be undefined here (NG0919)
+  imports: [forwardRef(() => JobListComponent), forwardRef(() => JobComponent)],
 })
 export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();

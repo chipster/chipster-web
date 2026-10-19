@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, forwardRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
@@ -25,7 +25,10 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   templateUrl: "./job.component.html",
   styleUrls: ["./job.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [DatasetParameterListComponent, LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
+  // forwardRef: DatasetParameterListComponent leads through the session data services to
+  // DialogModalService, which imports the jobs modal, which imports this component. In that
+  // import cycle the class can be undefined here (NG0919)
+  imports: [forwardRef(() => DatasetParameterListComponent), LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
 })
 export class JobComponent implements OnInit, OnDestroy {
   @Input() sessionData: SessionData;

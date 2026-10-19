@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, forwardRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
@@ -8,7 +8,9 @@ import { NewsListComponent } from "../../../../../shared/components/news/news-li
 @Component({
   templateUrl: "./news-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [NewsListComponent],
+  // forwardRef: NewsListComponent injects DialogModalService, which imports this modal
+  // to open it. In that import cycle the class can be undefined here (NG0919)
+  imports: [forwardRef(() => NewsListComponent)],
 })
 export class NewsModalComponent implements OnInit {
   @Input()
