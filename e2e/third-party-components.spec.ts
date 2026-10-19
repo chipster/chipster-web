@@ -158,6 +158,33 @@ test("a pdf file is rendered and paged (pdfjs-dist)", async ({ page, api, sessio
   await expect(pdf.locator("ch-pdf-viewer .page[data-page-number='2'] canvas")).toBeVisible();
 });
 
+/*
+ * The full screen modal imports the visualizations that open it, so it's in an
+ * import cycle with them, which broke it once (NG0919)
+ */
+test("a table opens in a full screen modal (Handsontable, ng-bootstrap)", async ({ page, api, sessionId }) => {
+  const content = "gene\tchip.a\ng1\t1\ng2\t3\n";
+  const datasetId = await createDataset(api, sessionId, { name: "table.tsv", x: 100, y: 100 }, content);
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+
+  await page.locator("ch-spreadsheet-visualization").getByText("Full Screen").click();
+  const modal = page.getByRole("dialog");
+  await expect(modal.locator(".modal-title")).toHaveText("table.tsv");
+  await expect(modal.locator("ch-spreadsheet-visualization .htCore").first()).toContainText("g2");
+});
+
+test("a text file opens in a full screen modal (ng-bootstrap)", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "first line\n");
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+
+  await page.locator("ch-text-visualization").getByText("Full Screen").click();
+  const modal = page.getByRole("dialog");
+  await expect(modal.locator(".modal-title")).toHaveText("a.txt");
+  await expect(modal.locator("ch-text-visualization pre")).toHaveText("first line\n");
+});
+
 test("a text file can be converted in the wrangle modal (ag-grid, ng-select)", async ({ page, api, sessionId }) => {
   const content = "gene\tchip.a\tchip.b\tnote\ng1\t1\t2\tx\ng2\t3\t4\ty\n";
   const datasetId = await createDataset(api, sessionId, { name: "table.tsv", x: 100, y: 100 }, content);
