@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { LoadState } from "../../../model/loadstate";
 import { NewsItem } from "../../../shared/components/news/NewsItem";
 import { NewsService } from "../../../shared/services/news.service";
@@ -8,6 +8,7 @@ import { NewsService } from "../../../shared/services/news.service";
   templateUrl: "./news.component.html",
   styleUrls: ["./news.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class NewsComponent implements OnInit {

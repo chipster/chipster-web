@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild } from "@angular/core";
+import { Component, ElementRef, Input, OnChanges, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { every, includes } from "lodash-es";
@@ -22,6 +22,7 @@ import { VennDiagramService } from "./venn-diagram.service";
   selector: "ch-venn-diagram",
   templateUrl: "./venn-diagram.component.html",
   styleUrls: ["./venn-diagram.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class VennDiagramComponent implements OnChanges {

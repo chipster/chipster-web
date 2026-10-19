@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
@@ -18,6 +18,7 @@ import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.
   selector: "ch-navigation",
   templateUrl: "./navigation.component.html",
   styleUrls: ["./navigation.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class NavigationComponent implements OnInit {

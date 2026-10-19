@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { User } from "chipster-js-common";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthenticationService } from "../../../core/authentication/authentication-service";
@@ -8,6 +8,7 @@ import { AuthenticationService } from "../../../core/authentication/authenticati
   templateUrl: "./users.component.html",
   styleUrls: ["./users.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class UsersComponent implements OnInit {

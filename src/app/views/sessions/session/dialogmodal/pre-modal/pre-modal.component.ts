@@ -1,9 +1,10 @@
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 
 @Component({
   templateUrl: "./pre-modal.component.html",
   styleUrls: ["./pre-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class PreModalComponent {

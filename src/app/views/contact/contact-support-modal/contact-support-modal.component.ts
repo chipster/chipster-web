@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, Inject, Input, OnInit, ViewChild, DOCUMENT } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  Inject,
+  Input,
+  OnInit,
+  ViewChild,
+  DOCUMENT,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { AbstractControl, UntypedFormBuilder, UntypedFormControl, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, User } from "chipster-js-common";
@@ -17,6 +26,7 @@ import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmod
 @Component({
   templateUrl: "./contact-support-modal.component.html",
   styleUrls: ["./contact-support-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit } from "@angular/core";
+import { Component, Input, OnChanges, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, JobInput, JobParameter, Tool } from "chipster-js-common";
 import * as FileSaver from "file-saver";
@@ -28,6 +28,7 @@ interface HistoryOption {
   selector: "ch-dataset-history-modal",
   templateUrl: "./dataset-history-modal.component.html",
   styleUrls: ["./dataset-history-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DatasetHistoryModalComponent implements OnInit, OnChanges {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Label } from "chipster-js-common";
 import { forkJoin, of } from "rxjs";
@@ -20,6 +20,7 @@ interface LabelRow {
 @Component({
   selector: "ch-labels-modal",
   templateUrl: "./labels-modal.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class LabelsModalComponent implements OnInit {

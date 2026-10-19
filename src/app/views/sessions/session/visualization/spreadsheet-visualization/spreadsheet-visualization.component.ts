@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, Input, NgZone, OnChanges, OnDestroy, ViewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  NgZone,
+  OnChanges,
+  OnDestroy,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import log from "loglevel";
@@ -20,6 +29,7 @@ import { VisualizationModalService } from "../visualizationmodal.service";
   selector: "ch-spreadsheet-visualization",
   templateUrl: "./spreadsheet-visualization.component.html",
   styleUrls: ["./spreadsheet-visualization.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, AfterViewInit {

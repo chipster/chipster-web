@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, ChangeDetectionStrategy } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { ToolResource } from "../../resources/tool-resource";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -7,6 +7,7 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
   selector: "ch-tool-source",
   template: '<pre class="tool-source">{{source}}</pre>',
   styleUrls: ["./tool-source.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ToolSourceComponent implements OnInit {

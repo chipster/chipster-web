@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
@@ -8,6 +8,7 @@ import { Tool } from "chipster-js-common";
   selector: "ch-parameters-modal",
   templateUrl: "./parameters-modal.component.html",
   styleUrls: ["./parameters-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ParametersModalComponent {

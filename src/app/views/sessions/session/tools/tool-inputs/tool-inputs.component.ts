@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, Output, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset, InputBinding, ToolInput } from "chipster-js-common";
 import { difference } from "lodash-es";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -16,6 +16,7 @@ interface BindingModel {
   selector: "ch-tool-inputs",
   templateUrl: "./tool-inputs.component.html",
   styleUrls: ["./tool-inputs.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ToolInputsComponent implements OnChanges {

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { Role } from "chipster-js-common";
 import { clone } from "lodash-es";
 import { mergeMap } from "rxjs/operators";
@@ -12,6 +12,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   templateUrl: "./clients.component.html",
   styleUrls: ["./clients.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ClientsComponent implements OnInit {

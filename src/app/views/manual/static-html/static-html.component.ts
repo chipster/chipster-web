@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute, Router } from "@angular/router";
 import log from "loglevel";
@@ -17,6 +26,7 @@ import { ManualUtils } from "../manual-utils";
   selector: "ch-static-html",
   templateUrl: "./static-html.component.html",
   styleUrls: ["./static-html.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges {

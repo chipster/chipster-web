@@ -1,10 +1,11 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, JobState } from "chipster-js-common";
 import { ContactSupportService } from "../../../contact/contact-support.service";
 
 @Component({
   templateUrl: "./job-error-modal.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class JobErrorModalComponent {

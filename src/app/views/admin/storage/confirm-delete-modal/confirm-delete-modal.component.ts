@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { GridOptions, GridReadyEvent } from "ag-grid-community";
 import log from "loglevel";
@@ -29,6 +29,7 @@ enum DeleteStatus {
   selector: "ch-confirm-delete-modal",
   templateUrl: "./confirm-delete-modal.component.html",
   styleUrls: ["./confirm-delete-modal.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ConfirmDeleteModalComponent implements OnInit {

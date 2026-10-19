@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, of } from "rxjs";
@@ -13,6 +13,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   templateUrl: "./services.component.html",
   styleUrls: ["./services.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ServicesComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import log from "loglevel";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
@@ -8,6 +8,7 @@ import { RouteService } from "../../shared/services/route.service";
   selector: "ch-accessibility",
   templateUrl: "./accessibility.component.html",
   styleUrls: ["./accessibility.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AccessibilityComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 
@@ -6,6 +6,7 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-new-tab-visualization",
   templateUrl: "./new-tab-visualization.component.html",
   styleUrls: ["./new-tab-visualization.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class NewTabVisualizationComponent implements OnInit {

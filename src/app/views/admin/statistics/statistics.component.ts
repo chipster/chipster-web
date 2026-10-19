@@ -1,5 +1,5 @@
 import { HttpParams } from "@angular/common/http";
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 import { Role } from "chipster-js-common";
 import { mergeMap } from "rxjs/operators";
@@ -14,6 +14,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   templateUrl: "./statistics.component.html",
   styleUrls: ["./statistics.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class StatisticsComponent implements OnInit {

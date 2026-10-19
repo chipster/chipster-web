@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, SessionEvent } from "chipster-js-common";
 import log from "loglevel";
@@ -12,6 +12,7 @@ import { BooleanModalComponent } from "../booleanmodal/booleanmodal.component";
 
 @Component({
   templateUrl: "./share-session-modal.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {

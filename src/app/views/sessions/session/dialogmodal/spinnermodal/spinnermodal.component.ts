@@ -1,10 +1,11 @@
-import { AfterViewInit, Component, Input } from "@angular/core";
+import { AfterViewInit, Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Observable } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 
 @Component({
   templateUrl: "./spinnermodal.component.html",
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SpinnerModalComponent implements AfterViewInit {

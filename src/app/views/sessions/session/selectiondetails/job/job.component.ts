@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
@@ -19,6 +19,7 @@ import { ToolService } from "../../tools/tool.service";
   selector: "ch-job",
   templateUrl: "./job.component.html",
   styleUrls: ["./job.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class JobComponent implements OnInit, OnDestroy {

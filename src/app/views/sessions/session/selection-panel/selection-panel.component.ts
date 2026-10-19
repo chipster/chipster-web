@@ -1,5 +1,5 @@
 import { Dataset, Tool, Job } from "chipster-js-common";
-import { Component, Input, OnInit, OnDestroy } from "@angular/core";
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { SessionDataService } from "../session-data.service";
@@ -13,6 +13,7 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
   selector: "ch-selection-panel",
   templateUrl: "./selection-panel.component.html",
   styleUrls: ["./selection-panel.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SelectionPanelComponent implements OnInit, OnDestroy {

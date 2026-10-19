@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -12,6 +12,7 @@ import { DatasetModalService } from "../datasetmodal.service";
   selector: "ch-single-dataset",
   templateUrl: "./single-dataset.component.html",
   styleUrls: ["./single-dataset.component.less"],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
