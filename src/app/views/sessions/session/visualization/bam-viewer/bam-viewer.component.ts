@@ -14,7 +14,6 @@ import BamRecord from "./bamRecord";
   templateUrl: "bam-viewer.component.html",
   styleUrls: ["./bam-viewer.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class BamViewerComponent implements OnChanges, OnDestroy {
   @Input()

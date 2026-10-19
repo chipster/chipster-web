@@ -11,7 +11,7 @@ import {
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
-import { NgSelectComponent } from "@ng-select/ng-select";
+import { NgSelectComponent, NgLabelTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
 import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
 import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
@@ -57,6 +57,19 @@ import {
 import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
 import { ToolService } from "./tool.service";
 import { SchedulerResource } from "../../../../shared/resources/scheduler-resource";
+import { FormsModule } from "@angular/forms";
+import { NgClass } from "@angular/common";
+import { CounterSpinnerComponent } from "./counter-spinner/counter-spinner.component";
+import { ToolListItemComponent } from "./tool-list/tool-list-item/tool-list-item.component";
+import { DropdownCloseDirective } from "../../../../shared/directives/dropdown-close.directive";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownButtonItem,
+  NgbDropdownItem,
+} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { LinkButtonComponent } from "../link-button/link-button.component";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -80,7 +93,22 @@ enum ModuleSelectionMode {
   styleUrls: ["./tools.component.less"],
   providers: [NgbDropdownConfig],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [
+    NgSelectComponent,
+    FormsModule,
+    NgLabelTemplateDirective,
+    NgOptionTemplateDirective,
+    NgClass,
+    CounterSpinnerComponent,
+    ToolListItemComponent,
+    DropdownCloseDirective,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownButtonItem,
+    NgbDropdownItem,
+    LinkButtonComponent,
+  ],
 })
 export class ToolsComponent implements OnInit, OnDestroy {
   public readonly categoryElementIdPrefix = "category-button-";

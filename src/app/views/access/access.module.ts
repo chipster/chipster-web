@@ -4,7 +4,6 @@ import { ManualModule } from "../manual/manual.module";
 import { AccessComponent } from "./access.component";
 
 @NgModule({
-  imports: [CommonModule, ManualModule],
-  declarations: [AccessComponent],
+  imports: [CommonModule, ManualModule, AccessComponent],
 })
 export class AccessModule {}

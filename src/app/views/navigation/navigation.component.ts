@@ -13,13 +13,31 @@ import { NewsService } from "../../shared/services/news.service";
 import { PreferencesService } from "../../shared/services/preferences.service";
 import { RouteService } from "../../shared/services/route.service";
 import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.service";
+import { RouterLinkActive, RouterLink } from "@angular/router";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownButtonItem,
+  NgbDropdownItem,
+} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { DropdownCloseDirective } from "../../shared/directives/dropdown-close.directive";
 
 @Component({
   selector: "ch-navigation",
   templateUrl: "./navigation.component.html",
   styleUrls: ["./navigation.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [
+    RouterLinkActive,
+    RouterLink,
+    NgbDropdown,
+    DropdownCloseDirective,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownButtonItem,
+    NgbDropdownItem,
+  ],
 })
 export class NavigationComponent implements OnInit {
   routerLinkAdmin = RouteService.PATH_ADMIN;

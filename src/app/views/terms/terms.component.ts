@@ -6,13 +6,14 @@ import { AuthenticationService } from "../../core/authentication/authentication-
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
 
 @Component({
   selector: "ch-terms",
   templateUrl: "./terms.component.html",
   styleUrls: ["./terms.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [ManualComponent],
 })
 export class TermsComponent implements OnInit {
   // increase by one to force everyone to accept again

@@ -8,7 +8,6 @@ import { ValidatedTool } from "../ToolSelection";
   templateUrl: "./run-options.component.html",
   styleUrls: ["./run-options.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class RunOptionsComponent implements OnChanges {
   @Input() sessionData: SessionData;

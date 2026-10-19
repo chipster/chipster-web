@@ -1,10 +1,11 @@
 import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   templateUrl: "./download-from-url.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule],
 })
 export class DownloadFromUrlModalComponent {
   value = "";

@@ -7,6 +7,7 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
 
 @Component({
   selector: "ch-services",
@@ -14,7 +15,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   styleUrls: ["./services.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NgbPopover],
 })
 export class ServicesComponent implements OnInit {
   services: Service[];

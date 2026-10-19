@@ -16,7 +16,6 @@ import { JobService } from "../../sessions/session/job.service";
   styleUrls: ["./jobs.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class JobsComponent implements OnInit {
   jobs: Job[];

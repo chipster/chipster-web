@@ -2,6 +2,7 @@ import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@
 import { User } from "chipster-js-common";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthenticationService } from "../../../core/authentication/authentication-service";
+import { LocalDatePipe } from "../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-users",
@@ -9,7 +10,7 @@ import { AuthenticationService } from "../../../core/authentication/authenticati
   styleUrls: ["./users.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [LocalDatePipe],
 })
 export class UsersComponent implements OnInit {
   users: User[];

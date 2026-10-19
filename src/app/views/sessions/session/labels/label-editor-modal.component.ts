@@ -5,13 +5,15 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SessionResource } from "../../../../shared/resources/session.resource";
 import { DEFAULT_LABEL_COLOR, LABEL_PALETTE, LabelColor } from "./label-palette";
+import { FormsModule } from "@angular/forms";
+import { LabelPillComponent } from "./label-pill.component";
 
 @Component({
   selector: "ch-label-editor-modal",
   templateUrl: "./label-editor-modal.component.html",
   styleUrls: ["./label-editor-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule, LabelPillComponent],
 })
 export class LabelEditorModalComponent implements OnInit {
   @Input() sessionData: SessionData;

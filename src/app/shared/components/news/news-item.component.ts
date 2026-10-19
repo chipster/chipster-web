@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from "@angular/core";
 import { NewsItem } from "./NewsItem";
+import { LocalDatePipe } from "../../pipes/local-date.pipe";
 
 @Component({
   selector: "ch-news-item",
   templateUrl: "./news-item.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [LocalDatePipe],
 })
 export class NewsItemComponent {
   @Input() newsItem: NewsItem;

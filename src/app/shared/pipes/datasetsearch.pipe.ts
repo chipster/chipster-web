@@ -2,10 +2,7 @@ import { Pipe, PipeTransform } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { PipeService } from "../services/pipeservice.service";
 
-@Pipe({
-  name: "datasetsearch",
-  standalone: false,
-})
+@Pipe({ name: "datasetsearch" })
 export class DatasetsearchPipe implements PipeTransform {
   constructor(private pipeService: PipeService) {}
 

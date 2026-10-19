@@ -9,11 +9,13 @@ import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
 import { BooleanModalComponent } from "../booleanmodal/booleanmodal.component";
+import { FormsModule } from "@angular/forms";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   templateUrl: "./share-session-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule, LocalDatePipe],
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input()

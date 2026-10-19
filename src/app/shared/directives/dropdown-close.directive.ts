@@ -16,7 +16,6 @@ import { DropdownCloseService } from "../services/dropdown-close.service";
   // every ngbDropdown without changes to the templates
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: "[ngbDropdown]",
-  standalone: false,
 })
 export class DropdownCloseDirective implements OnInit, OnDestroy {
   private subscription: Subscription;

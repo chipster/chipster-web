@@ -36,8 +36,13 @@ import { VolcanoPlotComponent } from "./volcano-plot/volcano-plot.component";
 import { VolcanoPlotService } from "./volcano-plot/volcano-plot.service";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule, SharedModule, LinkButtonModule, LabelsModule],
-  declarations: [
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgbModule,
+    SharedModule,
+    LinkButtonModule,
+    LabelsModule,
     VisualizationsComponent,
     VennDiagramComponent,
     PdfVisualizationComponent,

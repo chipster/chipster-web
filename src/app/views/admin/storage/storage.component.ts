@@ -18,6 +18,26 @@ import UtilsService from "../../../shared/utilities/utils";
 import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
 import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
 import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-modal/confirm-delete-modal.component";
+import {
+  NgbNav,
+  NgbNavItem,
+  NgbNavItemRole,
+  NgbNavLinkButton,
+  NgbNavLinkBase,
+  NgbNavContent,
+  NgbNavOutlet,
+} from "@ng-bootstrap/ng-bootstrap/nav";
+import { DropdownCloseDirective } from "../../../shared/directives/dropdown-close.directive";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownButtonItem,
+  NgbDropdownItem,
+} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { FormsModule } from "@angular/forms";
+import { AgGridAngular } from "ag-grid-angular";
+import { StatusComponent } from "../../../shared/components/status.component";
 
 @Component({
   selector: "ch-storage",
@@ -25,7 +45,25 @@ import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-moda
   styleUrls: ["./storage.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [
+    NgbNav,
+    NgbNavItem,
+    NgbNavItemRole,
+    NgbNavLinkButton,
+    NgbNavLinkBase,
+    NgbNavContent,
+    DropdownCloseDirective,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownButtonItem,
+    NgbDropdownItem,
+    FormsModule,
+    AgGridAngular,
+    StatusComponent,
+    NgbNavOutlet,
+    BytesPipe,
+  ],
 })
 
 /**

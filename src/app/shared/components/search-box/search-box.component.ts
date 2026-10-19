@@ -9,13 +9,14 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-search-box",
   templateUrl: "./search-box.component.html",
   styleUrls: ["./search-box.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule],
 })
 export class SearchBoxComponent implements OnInit, OnDestroy {
   @Input()

@@ -53,7 +53,6 @@ import { WorkflowGraphService } from "./workflow-graph.service";
   styleUrls: ["./workflow-graph.component.less"],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   svg: d3.Selection<SVGSVGElement, {}, HTMLElement, {}>;

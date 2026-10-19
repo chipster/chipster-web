@@ -1,9 +1,6 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
-@Pipe({
-  name: "bytes",
-  standalone: false,
-})
+@Pipe({ name: "bytes" })
 export class BytesPipe implements PipeTransform {
   /*
    * Round up to show a value that is never below the real size, for example

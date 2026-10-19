@@ -5,6 +5,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
+import { FormsModule } from "@angular/forms";
 
 interface BindingModel {
   input: ToolInput;
@@ -17,7 +18,7 @@ interface BindingModel {
   templateUrl: "./tool-inputs.component.html",
   styleUrls: ["./tool-inputs.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule],
 })
 export class ToolInputsComponent implements OnChanges {
   @Input() sessionData: SessionData;

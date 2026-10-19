@@ -9,6 +9,8 @@ import { SessionResource } from "../../../../shared/resources/session.resource";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { LabelEditorModalComponent } from "./label-editor-modal.component";
 import { LabelsContextMenuService } from "./labels-context-menu.service";
+import { LabelPillComponent } from "./label-pill.component";
+import { NgClass } from "@angular/common";
 
 type SelectionState = "checked" | "unchecked" | "indeterminate";
 
@@ -21,7 +23,7 @@ interface LabelRow {
   selector: "ch-labels-modal",
   templateUrl: "./labels-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [LabelPillComponent, NgClass],
 })
 export class LabelsModalComponent implements OnInit {
   @Input() sessionData: SessionData;

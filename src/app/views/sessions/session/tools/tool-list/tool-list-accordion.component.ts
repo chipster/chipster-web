@@ -9,13 +9,16 @@ import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
 import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
 import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { ToolSelectionService } from "../../tool.selection.service";
+import { NgClass } from "@angular/common";
+import { ScrollerComponent } from "../scroller/scroller.component";
+import { ToolListItemComponent } from "./tool-list-item/tool-list-item.component";
 
 @Component({
   selector: "ch-tool-list-accordion",
   templateUrl: "./tool-list-accordion.component.html",
   styleUrls: ["./tool-list-accordion.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NgClass, SearchBoxComponent, ScrollerComponent, ToolListItemComponent, CategoryPipe, ModulePipe],
 })
 export class ToolListAccordionComponent implements OnInit {
   @Input()

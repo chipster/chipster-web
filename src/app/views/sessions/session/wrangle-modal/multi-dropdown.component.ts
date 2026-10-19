@@ -10,13 +10,15 @@ import {
 } from "@angular/core";
 import log from "loglevel";
 import { ColumnItem } from "./wrangle-modal.component";
+import { NgSelectComponent, NgHeaderTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-multi-dropdown",
   templateUrl: "./multi-dropdown.component.html",
   styleUrls: ["./multi-dropdown.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NgSelectComponent, FormsModule, NgHeaderTemplateDirective, NgOptionTemplateDirective],
 })
 /**
  * Two things make things a little bit complicated here:

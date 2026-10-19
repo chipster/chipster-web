@@ -7,7 +7,6 @@ import { SessionDataService } from "../../session-data.service";
   templateUrl: "./new-tab-visualization.component.html",
   styleUrls: ["./new-tab-visualization.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class NewTabVisualizationComponent implements OnInit {
   @Input()

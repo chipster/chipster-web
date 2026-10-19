@@ -20,13 +20,15 @@ import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { JobListComponent } from "../tools/job-list/job-list.component";
+import { JobComponent } from "../selectiondetails/job/job.component";
+import { SessionComponent } from "../session.component";
 
 @Component({
   selector: "ch-jobs-modal",
   templateUrl: "./jobs-modal.component.html",
   styleUrls: ["./jobs-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [JobListComponent, JobComponent, SessionComponent],
 })
 export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();

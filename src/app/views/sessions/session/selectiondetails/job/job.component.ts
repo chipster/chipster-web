@@ -14,13 +14,18 @@ import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
 import { ToolService } from "../../tools/tool.service";
+import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { AsyncPipe } from "@angular/common";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-job",
   templateUrl: "./job.component.html",
   styleUrls: ["./job.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [DatasetParameterListComponent, LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
 })
 export class JobComponent implements OnInit, OnDestroy {
   @Input() sessionData: SessionData;

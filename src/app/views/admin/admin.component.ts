@@ -1,4 +1,5 @@
 import { Component, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 
 @Component({
   selector: "ch-admin",
@@ -6,7 +7,7 @@ import { Component, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/
   styleUrls: ["./admin.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
 })
 export class AdminComponent {
   constructor() {}

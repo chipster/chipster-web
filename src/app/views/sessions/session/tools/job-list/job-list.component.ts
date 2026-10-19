@@ -7,13 +7,16 @@ import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { JobService } from "../../job.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
+import { NgClass, AsyncPipe } from "@angular/common";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-job-list",
   templateUrl: "./job-list.component.html",
   styleUrls: ["./job-list.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NgClass, LinkButtonComponent, AsyncPipe, LocalDatePipe],
 })
 export class JobListComponent implements OnChanges {
   @Input() jobs: Job[];

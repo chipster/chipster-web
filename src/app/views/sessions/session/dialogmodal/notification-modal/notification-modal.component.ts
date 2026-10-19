@@ -4,7 +4,6 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 @Component({
   templateUrl: "./notification-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class NotificationModalComponent {
   @Input()

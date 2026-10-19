@@ -16,6 +16,7 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 import { LoadState, State } from "../../../../../model/loadstate";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { SessionDataService } from "../../session-data.service";
+import { StatusComponent } from "../../../../../shared/components/status.component";
 
 /**
  * Show a html dataset in a sandboxed iframe.
@@ -68,7 +69,7 @@ import { SessionDataService } from "../../session-data.service";
   templateUrl: "./html-visualization.component.html",
   styleUrls: ["./html-visualization.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [StatusComponent],
 })
 export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy {
   private static readonly SIZE_MESSAGE_TYPE = "chipster-html-visualization-size";

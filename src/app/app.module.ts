@@ -46,20 +46,7 @@ import { SessionModule } from "./views/sessions/session/session.module";
 import { TermsComponent } from "./views/terms/terms.component";
 
 @NgModule({
-  declarations: [
-    NavigationComponent,
-    LoginComponent,
-    AuthButtonComponent,
-    OidcCallbackComponent,
-    HomeComponent,
-    AppComponent,
-    ErrorComponent,
-    TermsComponent,
-    NotFoundComponent,
-    MyllyHasMovedComponent,
-    AccessibilityComponent,
-    PrivacyNoticeComponent,
-  ],
+  declarations: [AppComponent],
   bootstrap: [AppComponent],
   imports: [
     BrowserModule,
@@ -95,6 +82,17 @@ import { TermsComponent } from "./views/terms/terms.component";
     SharedModule,
     RoutingModule,
     AppRoutingModule,
+    NavigationComponent,
+    LoginComponent,
+    AuthButtonComponent,
+    OidcCallbackComponent,
+    HomeComponent,
+    ErrorComponent,
+    TermsComponent,
+    NotFoundComponent,
+    MyllyHasMovedComponent,
+    AccessibilityComponent,
+    PrivacyNoticeComponent,
   ],
   providers: [
     SelectionService,

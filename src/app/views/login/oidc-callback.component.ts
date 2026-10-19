@@ -5,7 +5,6 @@ import { OidcService } from "../../core/authentication/oidc.service";
   selector: "ch-oidc-callback",
   templateUrl: "./oidc-callback.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class OidcCallbackComponent implements OnInit {
   constructor(private oidcService: OidcService) {}

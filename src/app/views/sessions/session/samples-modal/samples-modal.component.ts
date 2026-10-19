@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
-import { UntypedFormBuilder, Validators } from "@angular/forms";
+import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { defer, of, Subject } from "rxjs";
@@ -8,6 +8,7 @@ import { LoadState, State } from "../../../../model/loadstate";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetService, PairedEndSample, SampleGroups, SingleEndSample } from "../dataset.service";
 import { SessionDataService } from "../session-data.service";
+import { StatusComponent } from "../../../../shared/components/status.component";
 
 export interface ColumnItem {
   index: number;
@@ -19,7 +20,7 @@ export interface ColumnItem {
   templateUrl: "./samples-modal.component.html",
   styleUrls: ["./samples-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class SamplesModalComponent implements OnInit {
   constructor(

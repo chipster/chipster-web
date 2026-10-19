@@ -2,12 +2,13 @@ import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
 
 @Component({
   selector: "ch-access",
   templateUrl: "./access.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [ManualComponent],
 })
 export class AccessComponent implements OnInit {
   file: string;

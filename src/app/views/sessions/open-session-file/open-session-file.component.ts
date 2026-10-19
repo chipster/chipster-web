@@ -23,7 +23,6 @@ import { ImportSessionModalComponent } from "./import-session-modal.component";
   templateUrl: "./open-session-file.component.html",
   styleUrls: ["./open-session-file.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   @ViewChild("browseFilesButton")

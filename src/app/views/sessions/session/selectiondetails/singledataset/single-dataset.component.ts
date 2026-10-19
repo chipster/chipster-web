@@ -7,13 +7,40 @@ import { getSortedLabels } from "../../labels/labels-util";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
+import {
+  NgbDropdown,
+  NgbDropdownToggle,
+  NgbDropdownMenu,
+  NgbDropdownButtonItem,
+  NgbDropdownItem,
+} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { DropdownCloseDirective } from "../../../../../shared/directives/dropdown-close.directive";
+import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { LabelPillComponent } from "../../labels/label-pill.component";
+import { FormsModule } from "@angular/forms";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-single-dataset",
   templateUrl: "./single-dataset.component.html",
   styleUrls: ["./single-dataset.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [
+    NgbDropdown,
+    DropdownCloseDirective,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownButtonItem,
+    NgbDropdownItem,
+    DatasetParameterListComponent,
+    LinkButtonComponent,
+    LabelPillComponent,
+    FormsModule,
+    BytesPipe,
+    LocalDatePipe,
+  ],
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
   @Input()

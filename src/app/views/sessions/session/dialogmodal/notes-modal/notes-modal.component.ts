@@ -2,12 +2,14 @@ import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStra
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
+import { FormsModule } from "@angular/forms";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   templateUrl: "./notes-modal.component.html",
   styleUrls: ["./notes-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule, LocalDatePipe],
 })
 export class NotesModalComponent implements AfterViewInit, OnInit {
   @Input()

@@ -9,8 +9,15 @@ import { LabelsContextMenuService } from "./labels-context-menu.service";
 import { LabelsModalComponent } from "./labels-modal.component";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NgbModule],
-  declarations: [LabelEditorModalComponent, LabelMenuItemContentComponent, LabelPillComponent, LabelsModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgbModule,
+    LabelEditorModalComponent,
+    LabelMenuItemContentComponent,
+    LabelPillComponent,
+    LabelsModalComponent,
+  ],
   exports: [LabelEditorModalComponent, LabelMenuItemContentComponent, LabelPillComponent, LabelsModalComponent],
   providers: [LabelsContextMenuService],
 })

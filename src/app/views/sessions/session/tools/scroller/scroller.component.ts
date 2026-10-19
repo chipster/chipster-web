@@ -1,4 +1,5 @@
 import { Component, HostListener, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { ToolListItemComponent } from "../tool-list/tool-list-item/tool-list-item.component";
 
 /**
  * Scroller component that prevents the parent component from scrolling
@@ -9,7 +10,7 @@ import { Component, HostListener, ViewChild, ChangeDetectionStrategy } from "@an
   selector: "ch-scroller",
   templateUrl: "./scroller.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [ToolListItemComponent],
 })
 export class ScrollerComponent {
   @ViewChild("scroll") scrollElement;

@@ -4,7 +4,6 @@ import { Component, ChangeDetectionStrategy } from "@angular/core";
   selector: "ch-not-found",
   templateUrl: "./not-found.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class NotFoundComponent {
   constructor() {}

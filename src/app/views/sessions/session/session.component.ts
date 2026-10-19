@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
-import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
+import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot, RouterLink } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import {
   Dataset,
@@ -38,6 +38,13 @@ import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./session-event.service";
 import { SessionService } from "./session.service";
 import UtilsService from "../../../shared/utilities/utils";
+import { SplitComponent, SplitAreaComponent } from "angular-split";
+import { SessionPanelComponent } from "./session-panel/session-panel.component";
+import { ToolsComponent } from "./tools/tools.component";
+import { SessionDetailsComponent } from "./session-details/session-details.component";
+import { FileComponent } from "./selectiondetails/selected-files/selected-files.component";
+import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
+import { ToolListAccordionComponent } from "./tools/tool-list/tool-list-accordion.component";
 
 export enum ComponentState {
   LOADING_SESSION = "Loading session...",
@@ -51,7 +58,17 @@ export enum ComponentState {
   templateUrl: "./session.component.html",
   styleUrls: ["./session.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [
+    RouterLink,
+    SplitComponent,
+    SplitAreaComponent,
+    SessionPanelComponent,
+    ToolsComponent,
+    SessionDetailsComponent,
+    FileComponent,
+    SelectionPanelComponent,
+    ToolListAccordionComponent,
+  ],
 })
 export class SessionComponent implements OnInit, OnDestroy {
   sessionData: SessionData;

@@ -1,6 +1,6 @@
 import { HttpParams } from "@angular/common/http";
 import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
-import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
+import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Role } from "chipster-js-common";
 import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../../core/authentication/token.service";
@@ -8,6 +8,7 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { LoadState } from "../../../model/loadstate";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { StatusComponent } from "../../../shared/components/status.component";
 
 @Component({
   selector: "ch-statistics",
@@ -15,7 +16,7 @@ import { ConfigService } from "../../../shared/services/config.service";
   styleUrls: ["./statistics.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class StatisticsComponent implements OnInit {
   readonly IGNORE_USERS_PARAMS = "ignoreUsers";

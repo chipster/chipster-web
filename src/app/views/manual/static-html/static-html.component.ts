@@ -27,7 +27,6 @@ import { ManualUtils } from "../manual-utils";
   templateUrl: "./static-html.component.html",
   styleUrls: ["./static-html.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input()

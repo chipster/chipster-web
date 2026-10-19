@@ -18,7 +18,6 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class JobOutputModalComponent {
   @Input() output;

@@ -5,7 +5,6 @@ import { Dataset } from "chipster-js-common";
 @Component({
   templateUrl: "./delete-files-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class DeleteFilesModalComponent {
   @Input()

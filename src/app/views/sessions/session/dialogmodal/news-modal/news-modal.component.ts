@@ -3,11 +3,12 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
 import { PreferencesService } from "../../../../../shared/services/preferences.service";
+import { NewsListComponent } from "../../../../../shared/components/news/news-list.component";
 
 @Component({
   templateUrl: "./news-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NewsListComponent],
 })
 export class NewsModalComponent implements OnInit {
   @Input()

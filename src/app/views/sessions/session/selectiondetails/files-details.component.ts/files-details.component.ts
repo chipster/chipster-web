@@ -2,13 +2,16 @@ import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 import { Dataset, Label } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 import { getSortedLabels } from "../../labels/labels-util";
+import { LabelPillComponent } from "../../labels/label-pill.component";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-files-details",
   templateUrl: "./files-details.component.html",
   styleUrls: ["./files-details.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [LabelPillComponent, BytesPipe, LocalDatePipe],
 })
 export class FilesDetailsComponent {
   @Input()

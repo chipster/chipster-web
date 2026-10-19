@@ -6,12 +6,15 @@ import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { UploadService } from "../../../shared/services/upload.service";
+import { NgbProgressbar } from "@ng-bootstrap/ng-bootstrap/progressbar";
+import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
+import { SecondsPipe } from "../../../shared/pipes/secondspipe.pipe";
 
 @Component({
   selector: "ch-import-session-modal",
   templateUrl: "./import-session-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NgbProgressbar, BytesPipe, SecondsPipe],
 })
 export class ImportSessionModalComponent {
   public flow: any;
