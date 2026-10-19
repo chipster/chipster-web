@@ -152,7 +152,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["playwright.config.ts", "vitest.config.mts", "eslint.config.mjs", "e2e/**/*.ts", "**/*.spec.ts"],
+    files: ["playwright.config.ts", "eslint.config.mjs", "e2e/**/*.ts", "**/*.spec.ts"],
     rules: {
       // tooling configs and tests import dev dependencies on purpose
       "import/no-extraneous-dependencies": ["error", { devDependencies: true, optionalDependencies: false }],

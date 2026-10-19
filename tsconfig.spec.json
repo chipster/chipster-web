@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/spec",
+    // the unit tests run in jsdom, and compile the app with them, see
+    // src/test-ngmodules.ts. Same globals as the app
+    "types": ["handsontable"]
+  },
+  "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]
+}

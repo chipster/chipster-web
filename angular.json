@@ -144,6 +144,13 @@
             "buildTarget": "chipster-web:build"
           }
         },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "chipster-web:build",
+            "setupFiles": ["src/test-ngmodules.ts"]
+          }
+        },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
@@ -152,7 +159,6 @@
               "src/**/*.html",
               "e2e/**/*.ts",
               "playwright.config.ts",
-              "vitest.config.mts",
               "eslint.config.mjs",
               "proxy.conf.mjs"
             ]
