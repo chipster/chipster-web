@@ -7,14 +7,14 @@
     "start": "ng serve",
     "start:proxy": "ng serve --configuration proxy",
     "build": "ng build --configuration production",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "ng test --watch=false",
+    "test:watch": "ng test --watch",
     "test:e2e": "playwright test",
     "prepare": "git config core.hooksPath .githooks || true",
     "prettier": "npx prettier --check \"src/**/*.{ts,js,mjs,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,mjs,html}\" \"*.{ts,mjs,mts}\"",
     "prettier-write": "npx prettier --write \"src/**/*.{ts,js,mjs,mts,html,less,css,scss}\" \"e2e/**/*.{ts,js,mjs,html}\" \"*.{ts,mjs,mts}\"",
-    "lint": "npx eslint src/ e2e/ playwright.config.ts vitest.config.mts eslint.config.mjs proxy.conf.mjs",
-    "lint-fix": "npx eslint --fix src/ e2e/ playwright.config.ts vitest.config.mts eslint.config.mjs proxy.conf.mjs"
+    "lint": "npx eslint src/ e2e/ playwright.config.ts eslint.config.mjs proxy.conf.mjs",
+    "lint-fix": "npx eslint --fix src/ e2e/ playwright.config.ts eslint.config.mjs proxy.conf.mjs"
   },
   "lint-staged": {
     "*.{ts,js,mjs,mts,html,less,css,scss}": "prettier --check",
@@ -85,6 +85,7 @@
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^17.12.0",
+    "jsdom": "^30.1.2",
     "less": "^4.2.0",
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.6",

@@ -1,8 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../out-tsc/app"
+    "outDir": "../out-tsc/app",
+    // the app runs in the browser, without Node's globals
+    "types": ["handsontable"]
   },
-  "files": ["src/main.ts", "src/polyfills.ts"],
+  "files": ["src/main.ts"],
   "include": ["src/**/*.d.ts"]
 }
