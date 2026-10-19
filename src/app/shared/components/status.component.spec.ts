@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import { LoadState, State } from "../../model/loadstate";
-import { SharedModule } from "../shared.module";
 import { StatusComponent } from "./status.component";
 
 describe("StatusComponent", () => {
@@ -12,12 +11,7 @@ describe("StatusComponent", () => {
   let element: HTMLElement;
 
   beforeEach(() => {
-    // import the component's NgModule rather than declare the component in
-    // the testing module: a declaration would replace the module's template
-    // scope with the testing module's, so a component that uses other
-    // components of its module would fail. Standalone components are
-    // imported themselves
-    TestBed.configureTestingModule({ imports: [SharedModule] });
+    TestBed.configureTestingModule({ imports: [StatusComponent] });
     fixture = TestBed.createComponent(StatusComponent);
     element = fixture.nativeElement;
   });

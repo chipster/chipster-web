@@ -147,8 +147,7 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "buildTarget": "chipster-web:build",
-            "setupFiles": ["src/test-ngmodules.ts"]
+            "buildTarget": "chipster-web:build"
           }
         },
         "lint": {
