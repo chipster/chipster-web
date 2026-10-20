@@ -1,8 +1,6 @@
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from "@angular/common/http";
 import { ErrorHandler, Injector, NgModule } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
-import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { StoreModule } from "@ngrx/store";
 import { setAppInjector } from "./app-injector";
 import { AppRoutingModule } from "./app-routing.module";
@@ -12,6 +10,8 @@ import { CoreModule } from "./core/core.module";
 import { AppErrorHandler } from "./core/errorhandler/apperrorhandler";
 import { ErrorService } from "./core/errorhandler/error.service";
 import { RoutingModule } from "./core/routing/routing.module";
+import { HotkeyCheatsheetComponent } from "./shared/components/hotkey-cheatsheet/hotkey-cheatsheet.component";
+import { ToastsComponent } from "./shared/components/toasts/toasts.component";
 import { SharedModule } from "./shared/shared.module";
 import { latestSession } from "./state/latest-session.reducer";
 import { selectedDatasets } from "./state/selectedDatasets.reducer";
@@ -26,38 +26,24 @@ import {
   selectedToolWithValidatedResources,
   validatedTool,
 } from "./state/tool.reducer";
-import { AccessModule } from "./views/access/access.module";
-import { AccessibilityComponent } from "./views/accessibility/accessibility.component";
-import { AdminModule } from "./views/admin/admin.module";
+import { AdminRoutingModule } from "./views/admin/admin-routing.module";
 import { ContactModule } from "./views/contact/contact.module";
 import { ErrorComponent } from "./views/error/error.component";
-import { MyllyHasMovedComponent } from "./views/error/mylly.component";
-import { NotFoundComponent } from "./views/error/not-found.component";
-import { HomeComponent } from "./views/home/home.component";
-import { AuthButtonComponent } from "./views/login/auth-button.component";
-import { LoginComponent } from "./views/login/login.component";
-import { OidcCallbackComponent } from "./views/login/oidc-callback.component";
-import { ManualModule } from "./views/manual/manual.module";
 import { NavigationComponent } from "./views/navigation/navigation.component";
-import { PrivacyNoticeComponent } from "./views/privacy-notice/privacy-notice.component";
 import { DatasetContextMenuService } from "./views/sessions/session/dataset.cotext.menu.service";
 import { SelectionService } from "./views/sessions/session/selection.service";
 import { SessionModule } from "./views/sessions/session/session.module";
-import { TermsComponent } from "./views/terms/terms.component";
 
 @NgModule({
   declarations: [AppComponent],
   bootstrap: [AppComponent],
   imports: [
     BrowserModule,
-    FormsModule,
     CoreModule,
     ContactModule,
     SessionModule,
-    ManualModule,
-    AccessModule,
-    NgbModule,
-    AdminModule,
+    // before AppRoutingModule, so that the admin routes come before its "**" route
+    AdminRoutingModule,
     StoreModule.forRoot(
       {
         selectedDatasets,
@@ -83,16 +69,9 @@ import { TermsComponent } from "./views/terms/terms.component";
     RoutingModule,
     AppRoutingModule,
     NavigationComponent,
-    LoginComponent,
-    AuthButtonComponent,
-    OidcCallbackComponent,
-    HomeComponent,
+    HotkeyCheatsheetComponent,
     ErrorComponent,
-    TermsComponent,
-    NotFoundComponent,
-    MyllyHasMovedComponent,
-    AccessibilityComponent,
-    PrivacyNoticeComponent,
+    ToastsComponent,
   ],
   providers: [
     SelectionService,
