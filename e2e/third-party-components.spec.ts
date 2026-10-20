@@ -186,7 +186,12 @@ test("a text file opens in a full screen modal (ng-bootstrap)", async ({ page, a
   await expect(modal.locator("ch-text-visualization pre")).toHaveText("first line\n");
 });
 
-test("the jobs modal lists the jobs and shows the details of one (ng-bootstrap)", async ({ page, api, sessionId }) => {
+test("the jobs modal shows the details of a job, and selecting its file closes it (ng-bootstrap)", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "text\n");
   // a finished job, created directly in session-db. Nothing runs it: the scheduler logs
   // "cannot schedule new job ... tool not found" for it, as for the jobs of an imported session
   const now = new Date().toISOString();
@@ -199,7 +204,7 @@ test("the jobs modal lists the jobs and shows the details of one (ng-bootstrap)"
     startTime: now,
     endTime: now,
     parameters: [],
-    inputs: [],
+    inputs: [{ inputId: "input", displayName: "Input file", datasetId, datasetName: "a.txt" }],
   });
   expect(response.ok()).toBe(true);
   await openSession(page, sessionId);
@@ -212,6 +217,11 @@ test("the jobs modal lists the jobs and shows the details of one (ng-bootstrap)"
   // the modal selects the first job itself
   await expect(modal.locator("ch-job")).toContainText("Tests / E2E tool");
   await expect(modal.locator("ch-job")).toContainText("Completed");
+
+  // the file link selects the file in the session view and closes the modal
+  await modal.locator("ch-job ch-link-button", { hasText: "a.txt" }).click();
+  await expect(modal).toBeHidden();
+  await expect(page.locator("ch-selected-files")).toContainText("a.txt");
 });
 
 test("the news modal opens from the navigation bar (ng-bootstrap)", async ({ page }) => {
