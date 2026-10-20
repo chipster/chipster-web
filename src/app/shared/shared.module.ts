@@ -1,26 +1,5 @@
-import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { NgbToast } from "@ng-bootstrap/ng-bootstrap";
-import { CoreModule } from "../core/core.module";
-import { AccountComponent } from "./components/account/account.component";
-import { DropdownCloseDirective } from "./directives/dropdown-close.directive";
-import { DummyRouteComponent } from "./components/dummy-route.component";
-import { NewsItemComponent } from "./components/news/news-item.component";
-import { NewsListComponent } from "./components/news/news-list.component";
-import { HotkeyCheatsheetComponent } from "./components/hotkey-cheatsheet/hotkey-cheatsheet.component";
-import { SearchBoxComponent } from "./components/search-box/search-box.component";
-import { SettingsComponent } from "./components/settings/settings.component";
-import { StatusComponent } from "./components/status.component";
-import { ToastsComponent } from "./components/toasts/toasts.component";
-import { ToolSourceComponent } from "./components/tool-source/tool-source.component";
 import { BytesPipe } from "./pipes/bytes.pipe";
-import { CategoryPipe } from "./pipes/categorypipe.pipe";
-import { DatasetsearchPipe } from "./pipes/datasetsearch.pipe";
-import { LocalDatePipe } from "./pipes/local-date.pipe";
-import { ModulePipe } from "./pipes/modulepipe.pipe";
-import { SecondsPipe } from "./pipes/secondspipe.pipe";
-import { ToolPipe } from "./pipes/toolpipe.pipe";
 import { ConfigurationResource } from "./resources/configurationresource";
 import { FileResource } from "./resources/fileresource";
 import { SessionResource } from "./resources/session.resource";
@@ -49,30 +28,6 @@ import { SchedulerResource } from "./resources/scheduler-resource";
  */
 
 @NgModule({
-  imports: [
-    CommonModule,
-    CoreModule,
-    FormsModule,
-    NgbToast,
-    BytesPipe,
-    LocalDatePipe,
-    DatasetsearchPipe,
-    ToolPipe,
-    CategoryPipe,
-    ModulePipe,
-    SecondsPipe,
-    HotkeyCheatsheetComponent,
-    SearchBoxComponent,
-    StatusComponent,
-    SettingsComponent,
-    AccountComponent,
-    ToolSourceComponent,
-    DummyRouteComponent,
-    ToastsComponent,
-    NewsItemComponent,
-    NewsListComponent,
-    DropdownCloseDirective,
-  ],
   providers: [
     PipeService,
     TsvService,
@@ -97,25 +52,6 @@ import { SchedulerResource } from "./resources/scheduler-resource";
     PreferencesService,
     SessionDbAdminService,
     TabService,
-  ],
-  exports: [
-    BytesPipe,
-    LocalDatePipe,
-    DatasetsearchPipe,
-    ToolPipe,
-    CategoryPipe,
-    ModulePipe,
-    SecondsPipe,
-    HotkeyCheatsheetComponent,
-    SearchBoxComponent,
-    StatusComponent,
-    SettingsComponent,
-    AccountComponent,
-    ToolSourceComponent,
-    ToastsComponent,
-    NewsItemComponent,
-    NewsListComponent,
-    DropdownCloseDirective,
   ],
 })
 export class SharedModule {}

@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { AuthenticationModule } from "./authentication/authentication.module";
 import { RestErrorService } from "./errorhandler/rest-error.service";
@@ -8,8 +7,7 @@ import { RestErrorService } from "./errorhandler/rest-error.service";
  */
 
 @NgModule({
-  imports: [CommonModule, AuthenticationModule],
-  declarations: [],
+  imports: [AuthenticationModule],
   providers: [RestErrorService],
 })
 export class CoreModule {}
