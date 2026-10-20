@@ -42,7 +42,6 @@ export enum PhenodataState {
   // remove column button, but an emulated view encapsulation would mess up style names
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() private dataset!: Dataset;

@@ -5,12 +5,13 @@ import { LoadState } from "../../../model/loadstate";
 import { DialogModalService } from "../../../views/sessions/session/dialogmodal/dialogmodal.service";
 import { NewsService } from "../../services/news.service";
 import { NewsItem } from "./NewsItem";
+import { NewsItemComponent } from "./news-item.component";
 
 @Component({
   selector: "ch-news-list",
   templateUrl: "./news-list.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NewsItemComponent],
 })
 export class NewsListComponent implements OnInit {
   // @Input() news: NewsItem[];

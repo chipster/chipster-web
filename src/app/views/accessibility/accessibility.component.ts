@@ -3,13 +3,14 @@ import log from "loglevel";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
 
 @Component({
   selector: "ch-accessibility",
   templateUrl: "./accessibility.component.html",
   styleUrls: ["./accessibility.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [ManualComponent],
 })
 export class AccessibilityComponent implements OnInit {
   public accessibilityPath: string;

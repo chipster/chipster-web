@@ -12,13 +12,54 @@ import { DatasetService } from "../dataset.service";
 import { SelectionService } from "../selection.service";
 import VisualizationConstants, { Visualization } from "./visualization-constants";
 import { VisualizationEventService } from "./visualization-event.service";
+import {
+  NgbNav,
+  NgbNavItem,
+  NgbNavItemRole,
+  NgbNavLink,
+  NgbNavLinkBase,
+  NgbNavContent,
+  NgbNavOutlet,
+} from "@ng-bootstrap/ng-bootstrap/nav";
+import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/spreadsheet-visualization.component";
+import { TextVisualizationComponent } from "./text-visualization/text-visualization.component";
+import { ExpressionProfileComponent } from "./expression-profile/expression-profile.component";
+import { ImageVisualizationComponent } from "./image-visualization/image-visualization.component";
+import { PdfVisualizationComponent } from "./pdf-visualization/pdf-visualization.component";
+import { HtmlvisualizationComponent } from "./html-visualization/html-visualization.component";
+import { ScatterPlotComponent } from "./scatter-plot/scatter-plot.component";
+import { VolcanoPlotComponent } from "./volcano-plot/volcano-plot.component";
+import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualization.component";
+import { NewTabVisualizationComponent } from "./new-tab-visualization/new-tab-visualization.component";
+import { DetailsVisualizationComponent } from "./details-visualization/details-visualization.component";
+import { VennDiagramComponent } from "./venn-diagram/venn-diagram.component";
 
 @Component({
   selector: "ch-visualizations",
   templateUrl: "./visualizations.component.html",
   styleUrls: ["./visualizations.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [
+    NgbNav,
+    NgbNavItem,
+    NgbNavItemRole,
+    NgbNavLink,
+    NgbNavLinkBase,
+    NgbNavContent,
+    SpreadsheetVisualizationComponent,
+    TextVisualizationComponent,
+    ExpressionProfileComponent,
+    ImageVisualizationComponent,
+    PdfVisualizationComponent,
+    HtmlvisualizationComponent,
+    ScatterPlotComponent,
+    VolcanoPlotComponent,
+    PhenodataVisualizationComponent,
+    NewTabVisualizationComponent,
+    DetailsVisualizationComponent,
+    VennDiagramComponent,
+    NgbNavOutlet,
+  ],
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";

@@ -19,7 +19,6 @@ import { LoadState, StatusButton } from "../../model/loadstate";
     `,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class StatusComponent {
   @Input() state: LoadState;

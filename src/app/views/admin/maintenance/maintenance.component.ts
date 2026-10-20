@@ -8,6 +8,9 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 import FileBrokerStorage from "./file-broker-storage";
+import { FormsModule } from "@angular/forms";
+import { NGB_DROPDOWN_IMPORTS } from "../../../shared/directives/dropdown-close.directive";
+import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 
 @Component({
   selector: "ch-services",
@@ -15,7 +18,7 @@ import FileBrokerStorage from "./file-broker-storage";
   styleUrls: ["./maintenance.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule, NGB_DROPDOWN_IMPORTS, BytesPipe],
 })
 export class MaintenanceComponent implements OnInit {
   storageIds = [];

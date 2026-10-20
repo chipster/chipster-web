@@ -53,8 +53,6 @@ import { WrangleModalComponent } from "./wrangle-modal/wrangle-modal.component";
     FormsModule,
     NgSelectModule,
     ReactiveFormsModule,
-  ],
-  declarations: [
     SessionComponent,
     SessionListComponent,
     OpenSessionFileComponent,

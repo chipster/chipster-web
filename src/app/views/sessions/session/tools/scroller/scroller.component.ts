@@ -9,7 +9,6 @@ import { Component, HostListener, ViewChild, ChangeDetectionStrategy } from "@an
   selector: "ch-scroller",
   templateUrl: "./scroller.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class ScrollerComponent {
   @ViewChild("scroll") scrollElement;

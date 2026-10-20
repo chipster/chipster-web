@@ -11,13 +11,15 @@ import { PlotData } from "../model/plotData";
 import Point from "../model/point";
 import { VolcanoPlotService } from "./volcano-plot.service";
 import VolcanoPlotDataRow from "./volcanoPlotDataRow";
+import { StatusComponent } from "../../../../../shared/components/status.component";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-volcano-plot",
   templateUrl: "./volcano-plot.component.html",
   styleUrls: ["./volcano-plot.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [StatusComponent, FormsModule],
 })
 export class VolcanoPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
   private volcanoPlotDataRows: Array<VolcanoPlotDataRow> = [];

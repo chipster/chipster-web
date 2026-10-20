@@ -7,6 +7,9 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { QuerySessionDataService } from "../../query-session-data.service";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
+import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 export class DatasetHistoryStep {
   datasetName: string;
@@ -29,7 +32,7 @@ interface HistoryOption {
   templateUrl: "./dataset-history-modal.component.html",
   styleUrls: ["./dataset-history-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NGB_DROPDOWN_IMPORTS, DatasetParameterListComponent, LocalDatePipe],
 })
 export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   @Input() dataset: Dataset;

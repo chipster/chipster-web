@@ -11,7 +11,6 @@ import { Component, ChangeDetectionStrategy } from "@angular/core";
   selector: "ch-link-button",
   template: '<a style="text-decoration-line: none;" href="javascript:void(0)" #anchor><ng-content></ng-content></a>',
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class LinkButtonComponent {
   constructor() {}

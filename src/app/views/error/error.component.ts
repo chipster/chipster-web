@@ -15,7 +15,6 @@ import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.
   selector: "ch-error",
   template: "",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class ErrorComponent implements OnInit {
   constructor(

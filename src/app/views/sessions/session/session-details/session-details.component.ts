@@ -11,13 +11,16 @@ import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { SessionService } from "../session.service";
 import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../shared/directives/dropdown-close.directive";
+import { BytesPipe } from "../../../../shared/pipes/bytes.pipe";
+import { LocalDatePipe } from "../../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-session-details",
   templateUrl: "./session-details.component.html",
   styleUrls: ["./session-details.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NGB_DROPDOWN_IMPORTS, BytesPipe, LocalDatePipe],
 })
 export class SessionDetailsComponent {
   @Input()

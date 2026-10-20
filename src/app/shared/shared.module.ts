@@ -49,8 +49,11 @@ import { SchedulerResource } from "./resources/scheduler-resource";
  */
 
 @NgModule({
-  imports: [CommonModule, CoreModule, FormsModule, NgbToast],
-  declarations: [
+  imports: [
+    CommonModule,
+    CoreModule,
+    FormsModule,
+    NgbToast,
     BytesPipe,
     LocalDatePipe,
     DatasetsearchPipe,

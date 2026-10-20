@@ -3,10 +3,7 @@ import { Dataset, ToolInput } from "chipster-js-common";
 import { ToolService } from "./tool.service";
 import { SessionData } from "../../../../model/session/session-data";
 
-@Pipe({
-  name: "filterCompatibleDatasets",
-  standalone: false,
-})
+@Pipe({ name: "filterCompatibleDatasets" })
 export class FilterCompatibleDatasetsPipe implements PipeTransform {
   constructor(private toolService: ToolService) {}
 

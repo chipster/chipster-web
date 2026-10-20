@@ -1,6 +1,12 @@
 import { HttpParams } from "@angular/common/http";
 import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
-import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
+import {
+  UntypedFormArray,
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from "@angular/forms";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { JobHistory, Role } from "chipster-js-common";
 import { mergeMap } from "rxjs/operators";
@@ -10,6 +16,9 @@ import { AuthHttpClientService } from "../../../shared/services/auth-http-client
 import { ConfigService } from "../../../shared/services/config.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
+import { NgbInputDatepicker } from "@ng-bootstrap/ng-bootstrap/datepicker";
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap/pagination";
+import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 
 @Component({
   selector: "ch-history",
@@ -17,7 +26,7 @@ import { JobOutputModalComponent } from "./joboutputmodal.component";
   styleUrls: ["./history.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [FormsModule, ReactiveFormsModule, NgbInputDatepicker, NgbPagination, BytesPipe],
 })
 export class HistoryComponent implements OnInit {
   readonly comparisonIs = "is";

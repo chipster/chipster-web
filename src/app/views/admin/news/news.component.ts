@@ -2,6 +2,8 @@ import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@
 import { LoadState } from "../../../model/loadstate";
 import { NewsItem } from "../../../shared/components/news/NewsItem";
 import { NewsService } from "../../../shared/services/news.service";
+import { NewsListComponent } from "../../../shared/components/news/news-list.component";
+import { StatusComponent } from "../../../shared/components/status.component";
 
 @Component({
   selector: "ch-notifications",
@@ -9,7 +11,7 @@ import { NewsService } from "../../../shared/services/news.service";
   styleUrls: ["./news.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NewsListComponent, StatusComponent],
 })
 export class NewsComponent implements OnInit {
   public news: NewsItem[];

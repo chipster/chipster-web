@@ -5,7 +5,6 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
   templateUrl: "./auth-button.component.html",
   styleUrls: ["./auth-button.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class AuthButtonComponent {
   @Input() name: string;

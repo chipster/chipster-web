@@ -7,6 +7,8 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 import { LoadState, State, StatusButton } from "../../../../../model/loadstate";
 import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
 import { SessionDataService } from "../../session-data.service";
+import { StatusComponent } from "../../../../../shared/components/status.component";
+import { PdfViewerComponent } from "./pdf-viewer.component";
 
 // actions of the status buttons
 enum ButtonAction {
@@ -19,7 +21,7 @@ enum ButtonAction {
   templateUrl: "./pdf-visualization.component.html",
   styleUrls: ["./pdf-visualization.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [StatusComponent, PdfViewerComponent],
 })
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   @Input()

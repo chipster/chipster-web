@@ -4,7 +4,6 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 @Component({
   templateUrl: "./booleanmodal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class BooleanModalComponent implements AfterViewInit {
   @Input()

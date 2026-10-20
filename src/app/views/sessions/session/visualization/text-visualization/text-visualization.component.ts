@@ -7,6 +7,9 @@ import { LoadState, State } from "../../../../../model/loadstate";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { SessionDataService } from "../../session-data.service";
 import { VisualizationModalService } from "../visualizationmodal.service";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { StatusComponent } from "../../../../../shared/components/status.component";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
 
 @Component({
   selector: "ch-text-visualization",
@@ -20,7 +23,7 @@ import { VisualizationModalService } from "../visualizationmodal.service";
   ],
   styleUrls: ["./text-visualization.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [LinkButtonComponent, StatusComponent, BytesPipe],
 })
 export class TextVisualizationComponent implements OnChanges, OnDestroy {
   @Input() dataset: Dataset;

@@ -6,7 +6,6 @@ import { ContactSupportService } from "../../../contact/contact-support.service"
 @Component({
   templateUrl: "./job-error-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class JobErrorModalComponent {
   private readonly showText = "Show screen output";

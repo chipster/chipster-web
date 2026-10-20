@@ -4,12 +4,13 @@ import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
 import { TokenService } from "../../core/authentication/token.service";
 import { ContactSupportService } from "./contact-support.service";
+import { ManualComponent } from "../manual/manual.component";
 
 @Component({
   selector: "ch-contact",
   templateUrl: "./contact.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [ManualComponent],
 })
 export class ContactComponent implements OnInit {
   contactFile: string;

@@ -158,6 +158,73 @@ test("a pdf file is rendered and paged (pdfjs-dist)", async ({ page, api, sessio
   await expect(pdf.locator("ch-pdf-viewer .page[data-page-number='2'] canvas")).toBeVisible();
 });
 
+/*
+ * The full screen, jobs and news modals import components that lead back to
+ * the service that opens them. That import cycle broke the modals once
+ * (NG0919), so each of them is opened here.
+ */
+test("a table opens in a full screen modal (Handsontable, ng-bootstrap)", async ({ page, api, sessionId }) => {
+  const content = "gene\tchip.a\ng1\t1\ng2\t3\n";
+  const datasetId = await createDataset(api, sessionId, { name: "table.tsv", x: 100, y: 100 }, content);
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+
+  await page.locator("ch-spreadsheet-visualization").getByText("Full Screen").click();
+  const modal = page.getByRole("dialog");
+  await expect(modal.locator(".modal-title")).toHaveText("table.tsv");
+  await expect(modal.locator("ch-spreadsheet-visualization .htCore").first()).toContainText("g2");
+});
+
+test("a text file opens in a full screen modal (ng-bootstrap)", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "first line\n");
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+
+  await page.locator("ch-text-visualization").getByText("Full Screen").click();
+  const modal = page.getByRole("dialog");
+  await expect(modal.locator(".modal-title")).toHaveText("a.txt");
+  await expect(modal.locator("ch-text-visualization pre")).toHaveText("first line\n");
+});
+
+test("the jobs modal lists the jobs and shows the details of one (ng-bootstrap)", async ({ page, api, sessionId }) => {
+  // a finished job, created directly in session-db. Nothing runs it: the scheduler logs
+  // "cannot schedule new job ... tool not found" for it, as for the jobs of an imported session
+  const now = new Date().toISOString();
+  const response = await api.post("session-db", `/sessions/${sessionId}/jobs`, {
+    toolId: "e2e-tool.R",
+    toolName: "E2E tool",
+    toolCategory: "Tests",
+    state: "COMPLETED",
+    created: now,
+    startTime: now,
+    endTime: now,
+    parameters: [],
+    inputs: [],
+  });
+  expect(response.ok()).toBe(true);
+  await openSession(page, sessionId);
+
+  await page.getByTitle("Jobs").click();
+  const modal = page.getByRole("dialog");
+  await expect(modal.locator(".modal-title")).toHaveText("Jobs");
+  await expect(modal.locator("ch-job-list tbody tr")).toHaveCount(1);
+  await expect(modal.locator("ch-job-list tbody tr").first()).toContainText("E2E tool");
+  // the modal selects the first job itself
+  await expect(modal.locator("ch-job")).toContainText("Tests / E2E tool");
+  await expect(modal.locator("ch-job")).toContainText("Completed");
+});
+
+test("the news modal opens from the navigation bar (ng-bootstrap)", async ({ page }) => {
+  await page.goto("/sessions");
+  // the link has no href (routerLink=""), so it has no link role
+  await page.locator("ch-navigation a.nav-link").filter({ hasText: "News" }).click();
+
+  const modal = page.getByRole("dialog");
+  await expect(modal.locator(".modal-title")).toHaveText("News");
+  // whatever news the backend has: the list has loaded when it shows items or says there are none
+  await expect(modal.locator("ch-news-item").first().or(modal.getByText("No news yet."))).toBeVisible();
+});
+
 test("a text file can be converted in the wrangle modal (ag-grid, ng-select)", async ({ page, api, sessionId }) => {
   const content = "gene\tchip.a\tchip.b\tnote\ng1\t1\t2\tx\ng2\t3\t4\ty\n";
   const datasetId = await createDataset(api, sessionId, { name: "table.tsv", x: 100, y: 100 }, content);

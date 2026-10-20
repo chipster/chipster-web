@@ -5,7 +5,6 @@ import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
   templateUrl: "./pre-modal.component.html",
   styleUrls: ["./pre-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class PreModalComponent {
   @Input()

@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { NgbToast } from "@ng-bootstrap/ng-bootstrap";
 import { Toast, ToastService } from "../../services/toast.service";
+import { NgClass } from "@angular/common";
 
 /**
  * Shows the toasts of ToastService. There is one of these, in the AppComponent.
@@ -14,7 +15,7 @@ import { Toast, ToastService } from "../../services/toast.service";
   templateUrl: "./toasts.component.html",
   styleUrls: ["./toasts.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NgbToast, NgClass],
 })
 export class ToastsComponent {
   // the toasts under the pointer

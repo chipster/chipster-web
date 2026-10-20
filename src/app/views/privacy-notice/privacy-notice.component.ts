@@ -3,13 +3,14 @@ import log from "loglevel";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
 
 @Component({
   selector: "ch-privacy-notice",
   templateUrl: "./privacy-notice.component.html",
   styleUrls: ["./privacy-notice.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [ManualComponent],
 })
 export class PrivacyNoticeComponent implements OnInit {
   public htmlPath: string;

@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, forwardRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
@@ -14,13 +14,21 @@ import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
 import { ToolService } from "../../tools/tool.service";
+import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { AsyncPipe } from "@angular/common";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-job",
   templateUrl: "./job.component.html",
   styleUrls: ["./job.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  // forwardRef for every import in an import cycle with this component (the modal
+  // services import the modals to open them): which of them is still undefined when
+  // this decorator runs depends on the bundler, so all of them get it (NG0919)
+  imports: [forwardRef(() => DatasetParameterListComponent), LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
 })
 export class JobComponent implements OnInit, OnDestroy {
   @Input() sessionData: SessionData;

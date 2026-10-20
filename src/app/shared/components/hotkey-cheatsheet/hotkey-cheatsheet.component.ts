@@ -16,7 +16,6 @@ import { HotkeyService } from "../../services/hotkey.service";
   styleUrls: ["./hotkey-cheatsheet.component.less"],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
   @ViewChild("content") contentTemplate!: TemplateRef<unknown>;

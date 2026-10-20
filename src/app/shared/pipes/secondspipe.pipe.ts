@@ -1,9 +1,6 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
-@Pipe({
-  name: "secondspipe",
-  standalone: false,
-})
+@Pipe({ name: "secondspipe" })
 export class SecondsPipe implements PipeTransform {
   transform(seconds: number | string): any {
     if (Number.isNaN(parseFloat(<string>seconds)) || !Number.isFinite(<number>seconds)) {

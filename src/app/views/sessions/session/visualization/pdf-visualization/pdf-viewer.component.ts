@@ -217,7 +217,6 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
     `,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class PdfViewerComponent implements OnChanges, OnDestroy {
   @Input() src: string;

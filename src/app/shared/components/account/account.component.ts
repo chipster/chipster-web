@@ -7,7 +7,6 @@ import { TokenService } from "../../../core/authentication/token.service";
   templateUrl: "./account.component.html",
   styleUrls: ["./account.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class AccountComponent {
   constructor(

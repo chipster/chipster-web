@@ -9,6 +9,5 @@ import { Component, ChangeDetectionStrategy } from "@angular/core";
     <div>This is a dummy page, nothing interesting here.</div>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class DummyRouteComponent {}

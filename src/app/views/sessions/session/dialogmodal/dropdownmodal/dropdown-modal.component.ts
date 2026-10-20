@@ -1,10 +1,11 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 
 @Component({
   templateUrl: "./dropdown-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NGB_DROPDOWN_IMPORTS],
 })
 export class DropdownModalComponent implements OnInit {
   @Input()

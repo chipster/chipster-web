@@ -24,13 +24,16 @@ import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
 import { DatasetModalService } from "../datasetmodal.service";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
+import { LabelMenuItemContentComponent } from "../../labels/label-menu-item-content.component";
+import { VisualizationsComponent } from "../../visualization/visualizations.component";
 
 @Component({
   selector: "ch-selected-files",
   templateUrl: "./selected-files.component.html",
   styleUrls: ["./selected-files.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [NGB_DROPDOWN_IMPORTS, LabelMenuItemContentComponent, VisualizationsComponent],
 })
 export class FileComponent implements OnInit, OnChanges, OnDestroy {
   @Input()

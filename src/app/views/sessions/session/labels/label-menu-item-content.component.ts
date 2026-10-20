@@ -33,7 +33,6 @@ import { LabelMenuItem } from "./labels-context-menu.service";
     <span>{{ item.label.name }}</span>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class LabelMenuItemContentComponent {
   @Input() item!: LabelMenuItem;

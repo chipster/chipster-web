@@ -8,7 +8,6 @@ import { SessionData } from "../../../../../model/session/session-data";
   templateUrl: "./tool-details.component.html",
   styleUrls: ["./tool-details.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
 })
 export class ToolDetailsComponent implements OnDestroy {
   // FIXME after tool state refactoring

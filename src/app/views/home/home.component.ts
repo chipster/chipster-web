@@ -4,13 +4,15 @@ import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: "ch-home",
   templateUrl: "./home.component.html",
   styleUrls: ["./home.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [ManualComponent, RouterLink],
 })
 export class HomeComponent implements OnInit {
   routerLinkLogin: string;

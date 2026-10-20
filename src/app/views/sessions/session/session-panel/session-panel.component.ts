@@ -13,13 +13,41 @@ import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
 import { WorkflowGraphService } from "./workflow-graph/workflow-graph.service";
+import { SearchBoxComponent } from "../../../../shared/components/search-box/search-box.component";
+import {
+  NgbNav,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavLinkBase,
+  NgbNavContent,
+  NgbNavOutlet,
+} from "@ng-bootstrap/ng-bootstrap/nav";
+import { UploadComponent } from "./upload/upload.component";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../shared/directives/dropdown-close.directive";
+import { LabelMenuItemContentComponent } from "../labels/label-menu-item-content.component";
+import { WorkflowGraphComponent } from "./workflow-graph/workflow-graph.component";
+import { NgClass } from "@angular/common";
 
 @Component({
   selector: "ch-session-panel",
   templateUrl: "./session-panel.component.html",
   styleUrls: ["./session-panel.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [
+    SearchBoxComponent,
+    NgbNav,
+    NgbNavItem,
+    NgbNavLink,
+    NgbNavLinkBase,
+    NgbNavContent,
+    UploadComponent,
+    NGB_DROPDOWN_IMPORTS,
+    LabelMenuItemContentComponent,
+    WorkflowGraphComponent,
+    NgClass,
+    NgbNavOutlet,
+    DatasetsearchPipe,
+  ],
 })
 export class SessionPanelComponent {
   @Input()

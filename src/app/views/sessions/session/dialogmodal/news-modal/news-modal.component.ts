@@ -1,13 +1,17 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, forwardRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
 import { PreferencesService } from "../../../../../shared/services/preferences.service";
+import { NewsListComponent } from "../../../../../shared/components/news/news-list.component";
 
 @Component({
   templateUrl: "./news-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  // forwardRef for every import in an import cycle with this component (the modal
+  // services import the modals to open them): which of them is still undefined when
+  // this decorator runs depends on the bundler, so all of them get it (NG0919)
+  imports: [forwardRef(() => NewsListComponent)],
 })
 export class NewsModalComponent implements OnInit {
   @Input()

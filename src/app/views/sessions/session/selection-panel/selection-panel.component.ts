@@ -8,13 +8,16 @@ import { SelectionService } from "../selection.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import { SettingsService } from "../../../../shared/services/settings.service";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
+import { ToolDetailsComponent } from "../tools/tool-details/tool-details.component";
+import { JobComponent } from "../selectiondetails/job/job.component";
+import { FileComponent } from "../selectiondetails/selected-files/selected-files.component";
 
 @Component({
   selector: "ch-selection-panel",
   templateUrl: "./selection-panel.component.html",
   styleUrls: ["./selection-panel.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false,
+  imports: [ToolDetailsComponent, JobComponent, FileComponent],
 })
 export class SelectionPanelComponent implements OnInit, OnDestroy {
   @Input()
