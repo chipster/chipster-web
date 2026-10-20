@@ -1,5 +1,4 @@
-import { NgModule } from "@angular/core";
-import { RouterModule, Routes } from "@angular/router";
+import { Routes } from "@angular/router";
 import { AuthGuard } from "../../core/routing/auth-guard.service";
 import { AdminComponent } from "./admin.component";
 import { ClientsComponent } from "./clients/clients.component";
@@ -12,7 +11,7 @@ import { StatisticsComponent } from "./statistics/statistics.component";
 import { StorageComponent } from "./storage/storage.component";
 import { UsersComponent } from "./users/users.component";
 
-const routes: Routes = [
+export const adminRoutes: Routes = [
   {
     path: "admin",
     component: AdminComponent,
@@ -32,9 +31,3 @@ const routes: Routes = [
     ],
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class AdminRoutingModule {}

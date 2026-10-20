@@ -1,7 +1,7 @@
 /// <reference types="@angular/localize" />
 
-import { enableProdMode, provideZoneChangeDetection } from "@angular/core";
-import { platformBrowser } from "@angular/platform-browser";
+import { enableProdMode } from "@angular/core";
+import { bootstrapApplication } from "@angular/platform-browser";
 import {
   CellStyleModule,
   ClientSideRowModelApiModule,
@@ -15,7 +15,8 @@ import {
   ValidationModule,
 } from "ag-grid-community";
 
-import { AppModule } from "./app/app.module";
+import { AppComponent } from "./app/app.component";
+import { appConfig } from "./app/app.config";
 import { environment } from "./environments/environment";
 import log from "loglevel";
 
@@ -38,6 +39,4 @@ ModuleRegistry.registerModules([
 ]);
 provideGlobalGridOptions({ theme: themeAlpine });
 
-platformBrowser()
-  .bootstrapModule(AppModule, { applicationProviders: [provideZoneChangeDetection()] })
-  .catch((err) => log.error(err));
+bootstrapApplication(AppComponent, appConfig).catch((err) => log.error(err));
