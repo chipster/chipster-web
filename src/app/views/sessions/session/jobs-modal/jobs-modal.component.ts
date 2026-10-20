@@ -28,8 +28,9 @@ import { JobComponent } from "../selectiondetails/job/job.component";
   templateUrl: "./jobs-modal.component.html",
   styleUrls: ["./jobs-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  // forwardRef: these components inject services that lead to DialogModalService, which
-  // imports this modal to open it. In that import cycle they can be undefined here (NG0919)
+  // forwardRef for every import in an import cycle with this component (the modal
+  // services import the modals to open them): which of them is still undefined when
+  // this decorator runs depends on the bundler, so all of them get it (NG0919)
   imports: [forwardRef(() => JobListComponent), forwardRef(() => JobComponent)],
 })
 export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {

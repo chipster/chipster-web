@@ -8,8 +8,9 @@ import { NewsListComponent } from "../../../../../shared/components/news/news-li
 @Component({
   templateUrl: "./news-modal.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  // forwardRef: NewsListComponent injects DialogModalService, which imports this modal
-  // to open it. In that import cycle the class can be undefined here (NG0919)
+  // forwardRef for every import in an import cycle with this component (the modal
+  // services import the modals to open them): which of them is still undefined when
+  // this decorator runs depends on the bundler, so all of them get it (NG0919)
   imports: [forwardRef(() => NewsListComponent)],
 })
 export class NewsModalComponent implements OnInit {

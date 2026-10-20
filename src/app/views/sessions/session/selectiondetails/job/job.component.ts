@@ -25,9 +25,9 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   templateUrl: "./job.component.html",
   styleUrls: ["./job.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  // forwardRef: DatasetParameterListComponent leads through the session data services to
-  // DialogModalService, which imports the jobs modal, which imports this component. In that
-  // import cycle the class can be undefined here (NG0919)
+  // forwardRef for every import in an import cycle with this component (the modal
+  // services import the modals to open them): which of them is still undefined when
+  // this decorator runs depends on the bundler, so all of them get it (NG0919)
   imports: [forwardRef(() => DatasetParameterListComponent), LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
 })
 export class JobComponent implements OnInit, OnDestroy {
