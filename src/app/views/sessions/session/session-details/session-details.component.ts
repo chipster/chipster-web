@@ -11,14 +11,7 @@ import { SessionDataService } from "../session-data.service";
 import { SessionEventService } from "../session-event.service";
 import { SessionService } from "../session.service";
 import { DatasetModalService } from "../selectiondetails/datasetmodal.service";
-import { DropdownCloseDirective } from "../../../../shared/directives/dropdown-close.directive";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../shared/directives/dropdown-close.directive";
 import { BytesPipe } from "../../../../shared/pipes/bytes.pipe";
 import { LocalDatePipe } from "../../../../shared/pipes/local-date.pipe";
 
@@ -27,16 +20,7 @@ import { LocalDatePipe } from "../../../../shared/pipes/local-date.pipe";
   templateUrl: "./session-details.component.html",
   styleUrls: ["./session-details.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
-    DropdownCloseDirective,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
-    BytesPipe,
-    LocalDatePipe,
-  ],
+  imports: [NGB_DROPDOWN_IMPORTS, BytesPipe, LocalDatePipe],
 })
 export class SessionDetailsComponent {
   @Input()

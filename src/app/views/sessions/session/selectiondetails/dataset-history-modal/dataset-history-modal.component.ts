@@ -7,14 +7,7 @@ import { SessionData } from "../../../../../model/session/session-data";
 import { QuerySessionDataService } from "../../query-session-data.service";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
-import { DropdownCloseDirective } from "../../../../../shared/directives/dropdown-close.directive";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
 import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
@@ -39,16 +32,7 @@ interface HistoryOption {
   templateUrl: "./dataset-history-modal.component.html",
   styleUrls: ["./dataset-history-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
-    NgbDropdown,
-    DropdownCloseDirective,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
-    DatasetParameterListComponent,
-    LocalDatePipe,
-  ],
+  imports: [NGB_DROPDOWN_IMPORTS, DatasetParameterListComponent, LocalDatePipe],
 })
 export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   @Input() dataset: Dataset;

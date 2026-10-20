@@ -4,27 +4,13 @@ import { UploadService } from "../../../../../shared/services/upload.service";
 import { UploadModalComponent } from "./upload-modal.component";
 import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
 import { SessionData } from "../../../../../model/session/session-data";
-import { DropdownCloseDirective } from "../../../../../shared/directives/dropdown-close.directive";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 
 @Component({
   selector: "ch-add-dataset-modal",
   templateUrl: "./upload.component.html",
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
-    DropdownCloseDirective,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
-  ],
+  imports: [NGB_DROPDOWN_IMPORTS],
 })
 export class UploadComponent implements AfterViewInit, OnInit {
   @Input() sessionData: SessionData;

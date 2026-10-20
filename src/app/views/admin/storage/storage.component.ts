@@ -27,14 +27,7 @@ import {
   NgbNavContent,
   NgbNavOutlet,
 } from "@ng-bootstrap/ng-bootstrap/nav";
-import { DropdownCloseDirective } from "../../../shared/directives/dropdown-close.directive";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { NGB_DROPDOWN_IMPORTS } from "../../../shared/directives/dropdown-close.directive";
 import { FormsModule } from "@angular/forms";
 import { AgGridAngular } from "ag-grid-angular";
 import { StatusComponent } from "../../../shared/components/status.component";
@@ -52,12 +45,7 @@ import { StatusComponent } from "../../../shared/components/status.component";
     NgbNavLinkButton,
     NgbNavLinkBase,
     NgbNavContent,
-    DropdownCloseDirective,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
+    NGB_DROPDOWN_IMPORTS,
     FormsModule,
     AgGridAngular,
     StatusComponent,

@@ -7,14 +7,7 @@ import { getSortedLabels } from "../../labels/labels-util";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
-import { DropdownCloseDirective } from "../../../../../shared/directives/dropdown-close.directive";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
 import { LinkButtonComponent } from "../../link-button/link-button.component";
 import { LabelPillComponent } from "../../labels/label-pill.component";
@@ -28,12 +21,7 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   styleUrls: ["./single-dataset.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    NgbDropdown,
-    DropdownCloseDirective,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
+    NGB_DROPDOWN_IMPORTS,
     DatasetParameterListComponent,
     LinkButtonComponent,
     LabelPillComponent,

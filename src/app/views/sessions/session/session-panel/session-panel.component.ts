@@ -23,14 +23,7 @@ import {
   NgbNavOutlet,
 } from "@ng-bootstrap/ng-bootstrap/nav";
 import { UploadComponent } from "./upload/upload.component";
-import { DropdownCloseDirective } from "../../../../shared/directives/dropdown-close.directive";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../shared/directives/dropdown-close.directive";
 import { LabelMenuItemContentComponent } from "../labels/label-menu-item-content.component";
 import { WorkflowGraphComponent } from "./workflow-graph/workflow-graph.component";
 import { NgClass } from "@angular/common";
@@ -48,12 +41,7 @@ import { NgClass } from "@angular/common";
     NgbNavLinkBase,
     NgbNavContent,
     UploadComponent,
-    DropdownCloseDirective,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
+    NGB_DROPDOWN_IMPORTS,
     LabelMenuItemContentComponent,
     WorkflowGraphComponent,
     NgClass,

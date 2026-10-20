@@ -61,14 +61,7 @@ import { FormsModule } from "@angular/forms";
 import { NgClass } from "@angular/common";
 import { CounterSpinnerComponent } from "./counter-spinner/counter-spinner.component";
 import { ToolListItemComponent } from "./tool-list/tool-list-item/tool-list-item.component";
-import { DropdownCloseDirective } from "../../../../shared/directives/dropdown-close.directive";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../shared/directives/dropdown-close.directive";
 import { LinkButtonComponent } from "../link-button/link-button.component";
 
 interface ToolSearchListItem {
@@ -101,12 +94,7 @@ enum ModuleSelectionMode {
     NgClass,
     CounterSpinnerComponent,
     ToolListItemComponent,
-    DropdownCloseDirective,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
+    NGB_DROPDOWN_IMPORTS,
     LinkButtonComponent,
   ],
 })

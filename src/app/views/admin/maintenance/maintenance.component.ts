@@ -9,14 +9,7 @@ import { AuthHttpClientService } from "../../../shared/services/auth-http-client
 import { ConfigService } from "../../../shared/services/config.service";
 import FileBrokerStorage from "./file-broker-storage";
 import { FormsModule } from "@angular/forms";
-import { DropdownCloseDirective } from "../../../shared/directives/dropdown-close.directive";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { NGB_DROPDOWN_IMPORTS } from "../../../shared/directives/dropdown-close.directive";
 import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 
 @Component({
@@ -25,16 +18,7 @@ import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
   styleUrls: ["./maintenance.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
-    FormsModule,
-    DropdownCloseDirective,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
-    BytesPipe,
-  ],
+  imports: [FormsModule, NGB_DROPDOWN_IMPORTS, BytesPipe],
 })
 export class MaintenanceComponent implements OnInit {
   storageIds = [];

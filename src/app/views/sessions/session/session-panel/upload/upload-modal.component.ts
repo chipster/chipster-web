@@ -4,14 +4,7 @@ import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
 import { UploadService } from "../../../../../shared/services/upload.service";
 import { NgbProgressbar } from "@ng-bootstrap/ng-bootstrap/progressbar";
-import { DropdownCloseDirective } from "../../../../../shared/directives/dropdown-close.directive";
-import {
-  NgbDropdown,
-  NgbDropdownToggle,
-  NgbDropdownMenu,
-  NgbDropdownButtonItem,
-  NgbDropdownItem,
-} from "@ng-bootstrap/ng-bootstrap/dropdown";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
 import { SecondsPipe } from "../../../../../shared/pipes/secondspipe.pipe";
 
@@ -20,17 +13,7 @@ import { SecondsPipe } from "../../../../../shared/pipes/secondspipe.pipe";
   templateUrl: "./upload-modal.component.html",
   styleUrls: ["./upload-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
-    NgbProgressbar,
-    DropdownCloseDirective,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownButtonItem,
-    NgbDropdownItem,
-    BytesPipe,
-    SecondsPipe,
-  ],
+  imports: [NgbProgressbar, NGB_DROPDOWN_IMPORTS, BytesPipe, SecondsPipe],
 })
 export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() sessionId: string;
