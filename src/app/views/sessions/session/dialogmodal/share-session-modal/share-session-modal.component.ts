@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
-import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, SessionEvent } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, Subject } from "rxjs";
@@ -8,7 +8,7 @@ import { TokenService } from "../../../../../core/authentication/token.service";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
-import { BooleanModalComponent } from "../booleanmodal/booleanmodal.component";
+import { DialogModalService } from "../dialogmodal.service";
 import { FormsModule } from "@angular/forms";
 import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
@@ -39,7 +39,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     private restErrorService: RestErrorService,
     private sessionResource: SessionResource,
     private errorService: ErrorService,
-    private modalService: NgbModal,
+    private dialogModalService: DialogModalService,
   ) {}
 
   ngOnInit() {
@@ -102,24 +102,19 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     const rule = this.rules.find((r) => r.ruleId === ruleId);
     const username = rule ? rule.username : "";
 
-    // open BooleanModalComponent directly instead of via DialogModalService, which would create a
-    // circular dependency (DialogModalService opens this SharingModalComponent)
-    const modalRef = this.modalService.open(BooleanModalComponent);
-    modalRef.componentInstance.title = "Stop sharing";
-    modalRef.componentInstance.message = `Stop sharing with ${username}?`;
-    modalRef.componentInstance.okButtonText = "Stop sharing";
-    modalRef.componentInstance.cancelButtonText = "Cancel";
-    modalRef.result.then(
-      () => {
-        this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe({
-          next: () => log.info("rule deleted"),
-          error: (err) => this.restErrorService.showError("failed to delete the rule", err),
-        });
-      },
-      () => {
-        // modal dismissed
-      },
-    );
+    this.dialogModalService
+      .openBooleanModal("Stop sharing", `Stop sharing with ${username}?`, "Stop sharing", "Cancel")
+      .then(
+        () => {
+          this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe({
+            next: () => log.info("rule deleted"),
+            error: (err) => this.restErrorService.showError("failed to delete the rule", err),
+          });
+        },
+        () => {
+          // modal dismissed
+        },
+      );
   }
 
   getUsername() {

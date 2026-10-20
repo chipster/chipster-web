@@ -75,8 +75,10 @@ export default tseslint.config(
       // a cycle breaks only when one of its modules needs a value from
       // another while it's still being evaluated. angular's dependency
       // injection hides that, so the session services have grown 17 of these.
-      // warn to keep them visible until they are untangled.
-      "import/no-cycle": "warn",
+      // warn to keep them visible until they are untangled. a dynamic import()
+      // is evaluated later, on its own, so a cycle through one is no cycle:
+      // the modal services load the modals with one, see DialogModalService.
+      "import/no-cycle": ["warn", { allowUnsafeDynamicCyclicDependency: true }],
 
       // neither of these was enforced before the airbnb configs were dropped,
       // and the codebase has hundreds of both. warn to keep them visible and
