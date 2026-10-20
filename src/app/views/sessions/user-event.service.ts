@@ -11,7 +11,7 @@ import { SessionDataService } from "./session/session-data.service";
 import { SessionEventService } from "./session/session-event.service";
 import { UserEventData } from "./user-event-data";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class UserEventService {
   topic: string;
 

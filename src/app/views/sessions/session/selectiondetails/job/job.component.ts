@@ -1,5 +1,13 @@
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, forwardRef } from "@angular/core";
-import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+  forwardRef,
+} from "@angular/core";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
@@ -33,6 +41,8 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 export class JobComponent implements OnInit, OnDestroy {
   @Input() sessionData: SessionData;
   @Input() tools: Tool[];
+  // the jobs modal closes on it
+  @Output() datasetSelected = new EventEmitter<void>();
 
   job: Job;
   isRunning: boolean;
@@ -79,7 +89,6 @@ export class JobComponent implements OnInit, OnDestroy {
   outputListForView: Array<JobOutput> = [];
 
   constructor(
-    public activeModal: NgbActiveModal,
     private selectionHandlerService: SelectionHandlerService,
     private selectionService: SelectionService,
     private sessionDataService: SessionDataService,
@@ -203,7 +212,7 @@ export class JobComponent implements OnInit, OnDestroy {
   selectDataset(datasetId: string) {
     const dataset = this.getDataset(datasetId);
     this.selectionHandlerService.setDatasetSelection([dataset]);
-    this.activeModal.close();
+    this.datasetSelected.emit();
   }
 
   getDataset(datasetId: string) {

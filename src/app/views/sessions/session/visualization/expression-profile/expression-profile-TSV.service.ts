@@ -6,7 +6,7 @@ import DomainBoundaries from "./domainboundaries";
 import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ExpressionProfileTSVService {
   /*
    * @description: does tsv-file contain .chip-headers

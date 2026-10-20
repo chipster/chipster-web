@@ -18,7 +18,7 @@ import { RouteService } from "../../../../shared/services/route.service";
 import { cloneDeep } from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class DatasetModalService {
   constructor(
     private ngbModal: NgbModal,

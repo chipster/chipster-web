@@ -4,6 +4,7 @@ import { range } from "lodash-es";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
+import { PipeService } from "../../../../shared/services/pipeservice.service";
 import UtilsService from "../../../../shared/utilities/utils";
 import { GetSessionDataService } from "../get-session-data.service";
 import { resolveLabelColor } from "../labels/label-palette";
@@ -67,7 +68,7 @@ export class SessionPanelComponent {
   constructor(
     public sessionDataService: SessionDataService, // used by template
     public getSessionDataService: GetSessionDataService,
-    private datasetsearchPipe: DatasetsearchPipe,
+    private pipeService: PipeService,
     private selectionHandlerService: SelectionHandlerService,
     public selectionService: SelectionService,
     private restErrorService: RestErrorService,
@@ -124,7 +125,7 @@ export class SessionPanelComponent {
   searchEnter(): void {
     // select highlighted datasets when the enter key is pressed
     const allDatasets = this.sessionDataService.getDatasetList(this.sessionData);
-    this.selectionHandlerService.setDatasetSelection(this.datasetsearchPipe.transform(allDatasets, this.datasetSearch));
+    this.selectionHandlerService.setDatasetSelection(this.pipeService.findDataset(allDatasets, this.datasetSearch));
     this.datasetSearch = null;
   }
 
@@ -136,7 +137,7 @@ export class SessionPanelComponent {
       const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(this.sessionData);
 
       // only apply to those filtered by dataset search
-      const searchDatasets = this.datasetsearchPipe.transform(allDatasets, this.datasetSearch);
+      const searchDatasets = this.pipeService.findDataset(allDatasets, this.datasetSearch);
       const searchIds = searchDatasets.map((d) => d.datasetId);
 
       // indexes of the old selection in the dataset list

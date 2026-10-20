@@ -30,7 +30,7 @@ export function pointerPosition(event: any, node: Element): Point {
   return new Point(pos[0], pos[1]);
 }
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class PlotService {
   constructor(private visualizationTSVService: VisualizationTSVService) {}
 

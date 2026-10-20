@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ContactSupportModalComponent } from "./contact-support-modal/contact-support-modal.component";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ContactSupportService {
   constructor(private modalService: NgbModal) {}
 

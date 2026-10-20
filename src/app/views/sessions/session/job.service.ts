@@ -14,7 +14,7 @@ import { ValidatedTool } from "./tools/ToolSelection";
 import { ToolService } from "./tools/tool.service";
 import { SchedulerResource } from "../../../shared/resources/scheduler-resource";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class JobService {
   readonly APPLICATION_VERSIONS_FILENAME = "application-versions.json";
 

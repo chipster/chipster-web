@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
 import ParsedToken from "./parsed-token";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class TokenService {
   tokenHeader: {};
 

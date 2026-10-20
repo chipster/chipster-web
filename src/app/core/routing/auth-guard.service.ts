@@ -8,7 +8,7 @@ import { RouteService } from "../../shared/services/route.service";
 import { AuthenticationService } from "../authentication/authentication-service";
 import { TokenService } from "../authentication/token.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class AuthGuard {
   constructor(
     private tokenService: TokenService,

@@ -6,7 +6,7 @@ import { TokenService } from "../authentication/token.service";
 /**
  * Redirect to analyze if user is logged in, otherwise to home.
  */
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class LandGuard {
   constructor(
     private tokenService: TokenService,

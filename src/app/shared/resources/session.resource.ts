@@ -14,7 +14,7 @@ import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
 import { SchedulerResource } from "./scheduler-resource";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionResource {
   constructor(
     private configService: ConfigService,

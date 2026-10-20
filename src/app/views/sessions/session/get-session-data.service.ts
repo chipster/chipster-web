@@ -4,7 +4,7 @@ import { SessionData } from "../../../model/session/session-data";
 import { QuerySessionDataService } from "./query-session-data.service";
 import { SessionDataService } from "./session-data.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class GetSessionDataService {
   constructor(
     private querySessionDataService: QuerySessionDataService,

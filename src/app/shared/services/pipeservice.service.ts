@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Tool, Dataset, Category, Module } from "chipster-js-common";
 import { some } from "lodash-es";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class PipeService {
   constructor() {}
 

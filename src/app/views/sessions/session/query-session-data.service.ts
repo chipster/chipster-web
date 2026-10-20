@@ -10,7 +10,7 @@ import { DatasetService } from "./dataset.service";
  *
  *
  */
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class QuerySessionDataService {
   constructor(
     private datasetService: DatasetService,

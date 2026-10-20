@@ -6,7 +6,7 @@ import { Store } from "@ngrx/store";
 import { Observable, Subject } from "rxjs";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SelectionService implements OnDestroy {
   // Selected datasets and jobs
   selectedDatasets: Array<Dataset>; // USE SELECTION-HANDLER SERVICE TO MODIFY

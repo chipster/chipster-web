@@ -46,7 +46,7 @@ export const Tags = {
   R_RDA: "R_RDA",
 };
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class TypeTagService {
   // noinspection JSMethodCanBeStatic
   isCompatible(sessionData: SessionData, dataset: Dataset, type: string) {

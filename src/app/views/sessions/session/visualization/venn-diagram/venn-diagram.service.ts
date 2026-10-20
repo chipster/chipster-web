@@ -11,7 +11,7 @@ import VennCircle from "./venn-circle";
 import VennDiagramSelection from "./venn-diagram-selection";
 import VennDiagramText from "./venn-diagram-text";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class VennDiagramService {
   constructor(
     private twoCircleVenndiagramService: TwoCircleVennDiagramService,

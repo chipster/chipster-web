@@ -7,7 +7,7 @@ import { SessionDataService } from "./session-data.service";
 import { ToolSelectionService } from "./tool.selection.service";
 import { ToolService } from "./tools/tool.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class DatasetContextMenuService {
   constructor(
     private sessionDataService: SessionDataService,

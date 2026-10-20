@@ -13,7 +13,7 @@ import { ConfigService } from "./config.service";
 
 declare let Flow: any;
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class UploadService {
   constructor(
     private configService: ConfigService,

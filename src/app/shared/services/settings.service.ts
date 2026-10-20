@@ -7,7 +7,7 @@ export enum SessionListMode {
   CLICK_TO_PREVIEW_BUTTON_TO_OPEN = "Click to preview, button to open",
 }
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SettingsService {
   public showToolsPanel$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 

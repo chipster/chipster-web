@@ -6,7 +6,7 @@ import { map } from "rxjs/operators";
 import "../../rxjs-operators";
 import { parse } from "yaml";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ConfigurationResource {
   constructor(private httpClient: HttpClient) {}
 

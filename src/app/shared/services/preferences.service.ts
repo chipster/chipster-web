@@ -5,7 +5,7 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class PreferencesService {
   public static readonly KEY_NEWS = "news";
   public static readonly KEY_NEWS_LAST_READ_TIME = "lastNewsReadTime";

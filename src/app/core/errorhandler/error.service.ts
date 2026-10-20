@@ -3,7 +3,7 @@ import log from "loglevel";
 import { Observable, Subject } from "rxjs";
 import { ErrorButton, ErrorMessage } from "./errormessage";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ErrorService {
   // handle the errors in component, because it can access the router
   private errors$ = new Subject<ErrorMessage>();

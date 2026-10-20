@@ -11,7 +11,7 @@ import { UserService } from "../../shared/services/user.service";
 /**
  * Redirect to latest session or new session if no latest found.
  */
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class AnalyzeGuard {
   constructor(
     private routeService: RouteService,

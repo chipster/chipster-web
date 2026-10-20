@@ -22,7 +22,7 @@ import { WebSocketService } from "../../../shared/services/websocket.service";
 import { SelectionService } from "./selection.service";
 import { FileState } from "chipster-js-common/lib/model/dataset";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionEventService {
   sessionId: string;
 

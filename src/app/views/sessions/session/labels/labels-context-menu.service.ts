@@ -25,7 +25,7 @@ export interface LabelMenuItem {
   colorBg: string;
 }
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class LabelsContextMenuService {
   // Most recently toggled label (added or removed). Used by surfaces like the
   // workflow toolbar's split-button to default the next action to whatever the

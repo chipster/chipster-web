@@ -9,7 +9,7 @@ import { NewsContents } from "../components/news/NewsContents";
 import { NewsItem } from "../components/news/NewsItem";
 import { ConfigService } from "./config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class NewsService {
   private newsSubject: Subject<any> = new Subject();
 

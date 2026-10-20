@@ -13,7 +13,7 @@ import { SelectionOption } from "../SelectionOption";
 import { SelectedToolWithInputs } from "./ToolSelection";
 import { SchedulerResource } from "../../../../shared/resources/scheduler-resource";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ToolService {
   constructor(
     private typeTagService: TypeTagService,

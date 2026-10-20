@@ -12,7 +12,7 @@ import { SessionResource } from "../resources/session.resource";
 import { AuthHttpClientService } from "./auth-http-client.service";
 import { ConfigService } from "./config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class UserService {
   constructor(
     private store: Store<any>,

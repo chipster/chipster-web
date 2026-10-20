@@ -16,7 +16,7 @@ export interface JobQuota {
   preferredStorage: number;
 }
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SchedulerResource {
   private jobQuotaCache: Observable<JobQuota>;
   private jobQuotaCacheSync: JobQuota;

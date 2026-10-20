@@ -30,7 +30,7 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import { SessionEventService } from "./session-event.service";
 import { SessionService } from "./session.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionDataService {
   private sessionId: string;
 
