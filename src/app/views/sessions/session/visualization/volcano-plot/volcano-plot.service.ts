@@ -6,7 +6,7 @@ import TSVRow from "../../../../../model/tsv/TSVRow";
 import DomainBoundaries from "../expression-profile/domainboundaries";
 import VolcanoPlotDataRow from "./volcanoPlotDataRow";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class VolcanoPlotService {
   constructor() {}
 

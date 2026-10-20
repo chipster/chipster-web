@@ -11,7 +11,7 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
  * @desc Service functions needed to define the positions of the nodes and links
  *       in the workflowgraph graph
  */
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class WorkflowGraphService {
   readonly nodeHeight = 22;
   // nodeWidth = 36;

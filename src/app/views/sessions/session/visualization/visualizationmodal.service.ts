@@ -3,7 +3,7 @@ import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { VisualizationModalComponent } from "./visualizationmodal.component";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class VisualizationModalService {
   constructor(private ngbModal: NgbModal) {}
 

@@ -13,7 +13,7 @@ import { CLEAR_SELECTED_TOOL } from "../../../state/tool.reducer";
  * Functions for changing selection states. The state is stored in @ngrx/store.
  *
  */
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SelectionHandlerService {
   constructor(private store: Store<any>) {}
 

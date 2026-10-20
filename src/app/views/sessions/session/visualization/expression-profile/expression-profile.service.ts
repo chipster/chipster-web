@@ -7,7 +7,7 @@ import { ExpressionProfileTSVService } from "./expression-profile-TSV.service";
 import Line from "./line";
 import Rectangle from "./rectangle";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ExpressionProfileService {
   constructor(private expressionprofileTSVService: ExpressionProfileTSVService) {}
 

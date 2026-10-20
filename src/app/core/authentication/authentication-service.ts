@@ -11,7 +11,7 @@ import { TokenService } from "./token.service";
 
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class AuthenticationService {
   private tokenRefreshSchedulerId: number;
 

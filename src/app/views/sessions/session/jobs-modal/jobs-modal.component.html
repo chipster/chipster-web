@@ -11,7 +11,7 @@
   <hr class="" />
 
   @if (jobs.length > 0) {
-    <ch-job [sessionData]="sessionData" [tools]="tools"></ch-job>
+    <ch-job [sessionData]="sessionData" [tools]="tools" (datasetSelected)="activeModal.close()"></ch-job>
   }
 </div>
 <div class="modal-footer">

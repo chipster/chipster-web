@@ -5,7 +5,7 @@ import { of } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { SessionComponent } from "./session.component";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ModifiedSessionGuard {
   canDeactivate(
     sessionComponent: SessionComponent,

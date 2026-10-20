@@ -21,7 +21,7 @@ import { StringModalComponent } from "./stringmodal/stringmodal.component";
 import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
 import { DropdownModalComponent } from "./dropdownmodal/dropdown-modal.component";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class DialogModalService {
   constructor(private modalService: NgbModal) {}
 

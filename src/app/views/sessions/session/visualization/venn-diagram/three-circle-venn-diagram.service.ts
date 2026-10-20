@@ -4,7 +4,7 @@ import Circle from "../model/circle";
 import Point from "../model/point";
 import VennDiagramUtils from "./venn-diagram-utils";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ThreeCircleVennDiagramService {
   /*
    * @description: Get centerpoints for three ellipses

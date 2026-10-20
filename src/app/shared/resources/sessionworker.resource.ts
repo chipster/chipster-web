@@ -7,7 +7,7 @@ import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../services/config.service";
 import { SessionResource } from "./session.resource";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionWorkerResource {
   public service: any;
 

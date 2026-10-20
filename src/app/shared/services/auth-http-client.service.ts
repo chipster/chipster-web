@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { TokenService } from "../../core/authentication/token.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class AuthHttpClientService {
   constructor(
     private httpClient: HttpClient,

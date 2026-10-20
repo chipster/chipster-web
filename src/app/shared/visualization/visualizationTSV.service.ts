@@ -12,7 +12,7 @@ import GeneExpression from "../../views/sessions/session/visualization/expressio
 import { PlotData } from "../../views/sessions/session/visualization/model/plotData";
 import { SelectionRow } from "../../views/sessions/session/visualization/model/selectionRow";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class VisualizationTSVService {
   /*
    * @description: does tsv-file contain .chip-headers

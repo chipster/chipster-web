@@ -6,7 +6,7 @@ import { ToolResource } from "../resources/tool-resource";
 import UtilsService from "../utilities/utils";
 import { ConfigService } from "./config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ToolsService {
   private toolsCache$: Observable<Tool[]>;
   private modulesCache$: Observable<Module[]>;

@@ -6,7 +6,7 @@ import { ErrorService } from "../../core/errorhandler/error.service";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { SessionService } from "../../views/sessions/session/session.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class TabService {
   constructor(
     private errorService: ErrorService,

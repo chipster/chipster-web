@@ -32,7 +32,7 @@ export interface SampleGroups {
   sampleDataMissing: Dataset[];
 }
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class DatasetService {
   static readonly R1 = "R1";
   static readonly R2 = "R2";

@@ -6,7 +6,7 @@ import { map, mergeMap, shareReplay, take } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { ConfigurationResource } from "../resources/configurationresource";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ConfigService {
   public static readonly KEY_CUSTOM_CSS = "custom-css";
   public static readonly KEY_APP_NAME = "app-name";

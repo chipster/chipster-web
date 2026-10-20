@@ -13,7 +13,7 @@ import { TypeTagService } from "./typetag.service";
 
 const MAX_HEADER_LENGTH = 64 * 1024;
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class TsvService {
   constructor(
     private fileResource: FileResource,

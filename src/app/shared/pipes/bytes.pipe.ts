@@ -1,5 +1,7 @@
-import { Pipe, PipeTransform } from "@angular/core";
+import { Injectable, Pipe, PipeTransform } from "@angular/core";
 
+// injected as a service too
+@Injectable({ providedIn: "root" })
 @Pipe({ name: "bytes" })
 export class BytesPipe implements PipeTransform {
   /*

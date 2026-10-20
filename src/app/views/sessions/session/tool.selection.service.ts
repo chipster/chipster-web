@@ -25,7 +25,7 @@ import {
 } from "./tools/ToolSelection";
 import { ToolService } from "./tools/tool.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ToolSelectionService {
   constructor(
     private toolService: ToolService,

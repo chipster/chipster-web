@@ -4,7 +4,7 @@ import log from "loglevel";
 import { ErrorService } from "./error.service";
 import { ErrorButton, ErrorMessage } from "./errormessage";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class RestErrorService {
   static isForbidden(error: HttpErrorResponse | any) {
     return RestErrorService.isHttpError(error, 403);

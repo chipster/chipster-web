@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class RouteService {
   static readonly PATH_HOME = "/home";
   static readonly PATH_SESSIONS = "/sessions";

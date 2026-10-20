@@ -10,7 +10,7 @@ import { SessionWorkerResource } from "../../../shared/resources/sessionworker.r
 import { ConfigService } from "../../../shared/services/config.service";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionService {
   constructor(
     private sessionResource: SessionResource,

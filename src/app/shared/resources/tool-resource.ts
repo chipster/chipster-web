@@ -5,7 +5,7 @@ import { Observable } from "rxjs";
 import { mergeMap } from "rxjs/operators";
 import { ConfigService } from "../services/config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ToolResource {
   constructor(
     private configService: ConfigService,

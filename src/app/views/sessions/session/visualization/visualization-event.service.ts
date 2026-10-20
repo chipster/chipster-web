@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Observable, ReplaySubject } from "rxjs";
 import { SelectionService } from "../selection.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class VisualizationEventService {
   private openPhenodataSubject = new ReplaySubject<boolean>(1);
 

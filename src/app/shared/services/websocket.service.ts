@@ -9,7 +9,7 @@ import { ErrorService } from "../../core/errorhandler/error.service";
 import { ErrorButton, ErrorMessage } from "../../core/errorhandler/errormessage";
 import { ConfigService } from "./config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class WebSocketService {
   topic: string;
   private lastCloseCode: number | null = null;

@@ -11,7 +11,7 @@ import { RestErrorService } from "../errorhandler/rest-error.service";
 import { TokenService } from "./token.service";
 import { ErrorService } from "../errorhandler/error.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class OidcService {
   readonly keyReturnUrl = "oidcReturnUrl";
   readonly keyLoginSessionId = "chipsterOidcLoginSessionId";

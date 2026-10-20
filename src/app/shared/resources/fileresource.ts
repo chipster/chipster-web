@@ -6,7 +6,7 @@ import { mergeMap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { ConfigService } from "../services/config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class FileResource {
   constructor(
     private configService: ConfigService,

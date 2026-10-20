@@ -7,7 +7,7 @@ import { mergeMap, tap } from "rxjs/operators";
 import { AuthHttpClientService } from "./auth-http-client.service";
 import { ConfigService } from "./config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionDbAdminService {
   constructor(
     private configService: ConfigService,
