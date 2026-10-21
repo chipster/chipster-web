@@ -1,7 +1,9 @@
-import { Pipe, PipeTransform, inject } from "@angular/core";
+import { Injectable, Pipe, PipeTransform, inject } from "@angular/core";
 import { Category } from "chipster-js-common";
 import { PipeService } from "../services/pipeservice.service";
 
+// injected as a service too
+@Injectable({ providedIn: "root" })
 @Pipe({ name: "categorypipe" })
 export class CategoryPipe implements PipeTransform {
   private pipeService = inject(PipeService);
