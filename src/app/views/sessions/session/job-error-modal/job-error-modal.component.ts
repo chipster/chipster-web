@@ -20,7 +20,7 @@ export class JobErrorModalComponent {
   screenOutputVisible = false;
   screenOutputButtonText = this.screenOutputVisible ? this.hideText : this.showText;
 
-  JobState = JobState;
+  JobState = JobState; // for using the enum in template
 
   close() {
     this.activeModal.close();

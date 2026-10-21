@@ -51,7 +51,7 @@ import { NgClass } from "@angular/common";
   ],
 })
 export class SessionPanelComponent {
-  sessionDataService = inject(SessionDataService);
+  sessionDataService = inject(SessionDataService); // used by template
   getSessionDataService = inject(GetSessionDataService);
   private pipeService = inject(PipeService);
   private selectionHandlerService = inject(SelectionHandlerService);
@@ -72,7 +72,7 @@ export class SessionPanelComponent {
 
   // Whether the "Select files with label" submenu in the toolbar labels
   // dropdown is currently open (controlled via mouseenter/mouseleave).
-  selectByLabelOpen = false; // used by template
+  selectByLabelOpen = false;
 
   get labelMenuItems(): LabelMenuItem[] {
     return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData);

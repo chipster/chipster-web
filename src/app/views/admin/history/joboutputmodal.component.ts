@@ -23,8 +23,4 @@ export class JobOutputModalComponent {
   activeModal = inject(NgbActiveModal);
 
   @Input() output;
-
-  constructor() {
-    console.log(this.output);
-  }
 }
