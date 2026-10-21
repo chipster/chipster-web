@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, JobState } from "chipster-js-common";
 import { ContactSupportService } from "../../../contact/contact-support.service";
@@ -14,8 +14,9 @@ export class JobErrorModalComponent {
   private readonly showText = "Show screen output";
   private readonly hideText = "Hide screen output";
 
-  @Input() title: string;
-  @Input() job: Job;
+  // set through the modal ref by the code that opens the modal
+  title = signal<string>(undefined);
+  job = signal<Job>(undefined);
 
   screenOutputVisible = false;
   screenOutputButtonText = this.screenOutputVisible ? this.hideText : this.showText;
@@ -32,7 +33,7 @@ export class JobErrorModalComponent {
 
   contactSupport() {
     this.activeModal.close();
-    this.contactSupportService.openContactSupportModal(this.jobToLog(this.job));
+    this.contactSupportService.openContactSupportModal(this.jobToLog(this.job()));
   }
 
   toggleScreenOutput() {

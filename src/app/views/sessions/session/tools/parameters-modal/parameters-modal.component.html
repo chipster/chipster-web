@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <h4 class="modal-title">{{ validatedTool.tool.name.displayName }}</h4>
+  <h4 class="modal-title">{{ validatedTool().tool.name.displayName }}</h4>
   <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()"></button>
 </div>
 
@@ -13,7 +13,7 @@
         <div ngbAccordionBody>
           <ng-template>
             <ch-tool-parameters
-              [validatedTool]="validatedTool"
+              [validatedTool]="validatedTool()"
               (parametersChanged)="onParametersChanged()"></ch-tool-parameters>
           </ng-template>
         </div>
@@ -28,8 +28,8 @@
         <div ngbAccordionBody>
           <ng-template>
             <ch-tool-inputs
-              [validatedTool]="validatedTool"
-              [sessionData]="sessionData"
+              [validatedTool]="validatedTool()"
+              [sessionData]="sessionData()"
               (updateBindings)="setBindings($event)"></ch-tool-inputs>
           </ng-template>
         </div>
@@ -43,7 +43,7 @@
       <div ngbAccordionCollapse>
         <div ngbAccordionBody>
           <ng-template>
-            <ch-run-options [validatedTool]="validatedTool"></ch-run-options>
+            <ch-run-options [validatedTool]="validatedTool()"></ch-run-options>
           </ng-template>
         </div>
       </div>
@@ -57,8 +57,8 @@
         <div ngbAccordionBody>
           <ng-template>
             <ch-tool-resources
-              [validatedTool]="validatedTool"
-              [origTool]="origTool"
+              [validatedTool]="validatedTool()"
+              [origTool]="origTool()"
               (resourcesChanged)="onResourcesChanged()"></ch-tool-resources>
           </ng-template>
         </div>

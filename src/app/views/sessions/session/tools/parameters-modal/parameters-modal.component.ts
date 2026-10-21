@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, EventEmitter, Output, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
@@ -41,9 +41,10 @@ import { ToolResourcesComponent } from "../tool-resources/tool-resources.compone
 export class ParametersModalComponent {
   activeModal = inject(NgbActiveModal);
 
-  @Input() validatedTool: ValidatedTool;
-  @Input() sessionData: SessionData;
-  @Input() origTool: Tool;
+  // set through the modal ref by the code that opens the modal
+  validatedTool = signal<ValidatedTool>(undefined);
+  sessionData = signal<SessionData>(undefined);
+  origTool = signal<Tool>(undefined);
   @Output() parametersChanged = new EventEmitter();
   @Output() updateBindings = new EventEmitter();
   @Output() resourcesChanged = new EventEmitter();

@@ -325,7 +325,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.manualModalRef = this.modalService.open(ManualModalComponent, {
       size: "lg",
     });
-    this.manualModalRef.componentInstance.tool = this.selectedTool.tool;
+    const modal = this.manualModalRef.componentInstance as ManualModalComponent;
+    modal.tool.set(this.selectedTool.tool);
   }
 
   private createToolSearchList(): ToolSearchListItem[] {
@@ -671,8 +672,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
         this.validatedTool = tool;
 
         // componentInstance is undefined for closed modal
-        if (this.parametersModalRef?.componentInstance != null) {
-          this.parametersModalRef.componentInstance.validatedTool = this.validatedTool;
+        const modal = this.parametersModalRef?.componentInstance as ParametersModalComponent;
+        if (modal != null) {
+          modal.validatedTool.set(this.validatedTool);
         }
 
         this.runIsDropdown = tool && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
@@ -738,16 +740,17 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.parametersModalRef = this.ngbModal.open(ParametersModalComponent, {
       size: "lg",
     });
-    this.parametersModalRef.componentInstance.validatedTool = this.validatedTool;
-    this.parametersModalRef.componentInstance.sessionData = this.sessionData;
-    this.parametersModalRef.componentInstance.origTool = origTool;
-    this.parametersModalRef.componentInstance.parametersChanged.subscribe({
+    const modal = this.parametersModalRef.componentInstance as ParametersModalComponent;
+    modal.validatedTool.set(this.validatedTool);
+    modal.sessionData.set(this.sessionData);
+    modal.origTool.set(origTool);
+    modal.parametersChanged.subscribe({
       next: () => this.onParametersChanged(),
     });
-    this.parametersModalRef.componentInstance.updateBindings.subscribe({
+    modal.updateBindings.subscribe({
       next: (toolWithInputs: SelectedToolWithInputs) => this.setBindings(toolWithInputs),
     });
-    this.parametersModalRef.componentInstance.resourcesChanged.subscribe({
+    modal.resourcesChanged.subscribe({
       next: () => this.onResourcesChanged(),
     });
   }

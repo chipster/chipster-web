@@ -1,12 +1,12 @@
 import {
   AfterViewInit,
   Component,
-  Input,
   OnDestroy,
   OnInit,
   ViewChild,
   ChangeDetectionStrategy,
   inject,
+  signal,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
@@ -30,8 +30,9 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   private sessionResource = inject(SessionResource);
   private errorService = inject(ErrorService);
 
-  @Input() sessionId: string;
-  @Input() flow: any;
+  // set through the modal ref by the code that opens the modal
+  sessionId = signal<string>(undefined);
+  flow = signal<any>(undefined);
 
   @ViewChild("uploadFilesButton") uploadFilesButton;
   @ViewChild("uploadFolderButton") uploadFolderButton;
@@ -41,7 +42,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   // function references needed for the flow.off in ngOnDestroy
   // 'this' used inside so need to use => or bind
   update = () => {
-    this.files = this.flow.files.slice().reverse();
+    this.files = this.flow().files.slice().reverse();
   };
 
   complete = () => {
@@ -49,27 +50,27 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   };
 
   ngOnInit() {
-    this.flow.on("progress", this.update);
-    this.flow.on("fileRemoved", this.update);
-    this.flow.on("error", this.update);
-    this.flow.on("complete", this.complete);
+    this.flow().on("progress", this.update);
+    this.flow().on("fileRemoved", this.update);
+    this.flow().on("error", this.update);
+    this.flow().on("complete", this.complete);
   }
 
   ngOnDestroy() {
-    this.flow.off("progress", this.update);
-    this.flow.off("fileRemoved", this.update);
-    this.flow.off("error", this.update);
-    this.flow.off("complete", this.complete);
+    this.flow().off("progress", this.update);
+    this.flow().off("fileRemoved", this.update);
+    this.flow().off("error", this.update);
+    this.flow().off("complete", this.complete);
   }
 
   // called by upload.component
   fileAdded(file: any) {
-    this.uploadService.startUpload(this.sessionId, file, false);
+    this.uploadService.startUpload(this.sessionId(), file, false);
   }
 
   ngAfterViewInit() {
-    this.flow.assignBrowse(this.uploadFilesButton);
-    this.flow.assignBrowse(this.uploadFolderButton, true);
+    this.flow().assignBrowse(this.uploadFilesButton);
+    this.flow().assignBrowse(this.uploadFolderButton, true);
   }
 
   cancelUpload(file: any) {

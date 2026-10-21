@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Label } from "chipster-js-common";
 import { forkJoin, of } from "rxjs";
@@ -33,8 +33,9 @@ export class LabelsModalComponent implements OnInit {
   private dialogModalService = inject(DialogModalService);
   private labelsContextMenuService = inject(LabelsContextMenuService);
 
-  @Input() sessionData: SessionData;
-  @Input() selectedDatasets: Dataset[] = [];
+  // set through the modal ref by the code that opens the modal
+  sessionData = signal<SessionData>(undefined);
+  selectedDatasets = signal<Dataset[]>([]);
 
   readonly maxLabelsPerSession = 50;
 
@@ -47,7 +48,7 @@ export class LabelsModalComponent implements OnInit {
   }
 
   private refreshRows(): void {
-    const labels = Array.from(this.sessionData.labelsMap.values()).sort((a, b) =>
+    const labels = Array.from(this.sessionData().labelsMap.values()).sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
 
@@ -58,21 +59,21 @@ export class LabelsModalComponent implements OnInit {
   }
 
   private computeSelection(label: Label): SelectionState {
-    if (this.selectedDatasets.length === 0) {
+    if (this.selectedDatasets().length === 0) {
       return "unchecked";
     }
-    const count = this.selectedDatasets.filter((d) => (d.labelIds ?? []).includes(label.labelId)).length;
+    const count = this.selectedDatasets().filter((d) => (d.labelIds ?? []).includes(label.labelId)).length;
     if (count === 0) {
       return "unchecked";
     }
-    if (count === this.selectedDatasets.length) {
+    if (count === this.selectedDatasets().length) {
       return "checked";
     }
     return "indeterminate";
   }
 
   hasSelection(): boolean {
-    return this.selectedDatasets.length > 0;
+    return this.selectedDatasets().length > 0;
   }
 
   /** There is something to apply only if files are selected and there are labels to check */
@@ -101,17 +102,17 @@ export class LabelsModalComponent implements OnInit {
   }
 
   private confirmDeleteLabel(row: LabelRow): void {
-    this.sessionResource.deleteLabel(this.sessionData.session.sessionId, row.label.labelId).subscribe({
+    this.sessionResource.deleteLabel(this.sessionData().session.sessionId, row.label.labelId).subscribe({
       next: () => {
-        this.sessionData.labelsMap.delete(row.label.labelId);
+        this.sessionData().labelsMap.delete(row.label.labelId);
         // server cascade removes the id from datasets and emits dataset UPDATE events,
         // but also scrub local copies so UI updates immediately
-        this.selectedDatasets.forEach((d) => {
+        this.selectedDatasets().forEach((d) => {
           if (d.labelIds) {
             d.labelIds = d.labelIds.filter((id) => id !== row.label.labelId);
           }
         });
-        this.sessionData.datasetsMap.forEach((d) => {
+        this.sessionData().datasetsMap.forEach((d) => {
           if (d.labelIds) {
             d.labelIds = d.labelIds.filter((id) => id !== row.label.labelId);
           }
@@ -140,7 +141,7 @@ export class LabelsModalComponent implements OnInit {
   }
 
   private confirmDeleteAllLabels(): void {
-    const sessionId = this.sessionData.session.sessionId;
+    const sessionId = this.sessionData().session.sessionId;
     const labelIds = this.rows.map((r) => r.label.labelId);
 
     this.saving = true;
@@ -160,13 +161,13 @@ export class LabelsModalComponent implements OnInit {
       next: (results) => {
         // mirror the local-state scrub done in confirmDeleteLabel, for every deleted id
         const deleted = new Set(results.filter((id): id is string => id != null));
-        deleted.forEach((id) => this.sessionData.labelsMap.delete(id));
-        this.selectedDatasets.forEach((d) => {
+        deleted.forEach((id) => this.sessionData().labelsMap.delete(id));
+        this.selectedDatasets().forEach((d) => {
           if (d.labelIds) {
             d.labelIds = d.labelIds.filter((id) => !deleted.has(id));
           }
         });
-        this.sessionData.datasetsMap.forEach((d) => {
+        this.sessionData().datasetsMap.forEach((d) => {
           if (d.labelIds) {
             d.labelIds = d.labelIds.filter((id) => !deleted.has(id));
           }
@@ -183,7 +184,8 @@ export class LabelsModalComponent implements OnInit {
 
   openCreateLabel(): void {
     const modalRef = this.ngbModal.open(LabelEditorModalComponent, { size: "sm" });
-    modalRef.componentInstance.sessionData = this.sessionData;
+    const modal = modalRef.componentInstance as LabelEditorModalComponent;
+    modal.sessionData.set(this.sessionData());
     modalRef.result.then(
       (created: Label) => this.addCreatedLabelRow(created),
       () => {},
@@ -192,8 +194,9 @@ export class LabelsModalComponent implements OnInit {
 
   openEditLabel(row: LabelRow): void {
     const modalRef = this.ngbModal.open(LabelEditorModalComponent, { size: "sm" });
-    modalRef.componentInstance.sessionData = this.sessionData;
-    modalRef.componentInstance.label = row.label;
+    const modal = modalRef.componentInstance as LabelEditorModalComponent;
+    modal.sessionData.set(this.sessionData());
+    modal.label.set(row.label);
     modalRef.result.then(
       (updated: Label) => {
         this.rows = this.rows
@@ -218,7 +221,7 @@ export class LabelsModalComponent implements OnInit {
       return;
     }
 
-    const sessionId = this.sessionData.session.sessionId;
+    const sessionId = this.sessionData().session.sessionId;
     const datasetUpdates: Dataset[] = [];
 
     // Track which labels were actually applied/removed so the workflow
@@ -226,7 +229,7 @@ export class LabelsModalComponent implements OnInit {
     // applied over removed since that's usually the user's main intent.
     const tracking = { lastAppliedId: null as string | null, lastRemovedId: null as string | null };
 
-    for (const dataset of this.selectedDatasets) {
+    for (const dataset of this.selectedDatasets()) {
       const before = new Set(dataset.labelIds ?? []);
       const after = this.applyRowsTo(before, tracking);
 

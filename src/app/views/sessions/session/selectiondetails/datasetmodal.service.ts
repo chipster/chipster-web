@@ -34,9 +34,10 @@ export class DatasetModalService {
     const modalRef = this.ngbModal.open(DatasetHistoryModalComponent, {
       size: "xl",
     });
-    modalRef.componentInstance.dataset = dataset;
-    modalRef.componentInstance.sessionData = sessionData;
-    modalRef.componentInstance.tools = tools;
+    const modal = modalRef.componentInstance as DatasetHistoryModalComponent;
+    modal.dataset.set(dataset);
+    modal.sessionData.set(sessionData);
+    modal.tools.set(tools);
   }
 
   private labelsModalRef: NgbModalRef | null = null;
@@ -46,8 +47,9 @@ export class DatasetModalService {
       return;
     }
     this.labelsModalRef = this.ngbModal.open(LabelsModalComponent, {});
-    this.labelsModalRef.componentInstance.sessionData = sessionData;
-    this.labelsModalRef.componentInstance.selectedDatasets = selectedDatasets ?? [];
+    const modal = this.labelsModalRef.componentInstance as LabelsModalComponent;
+    modal.sessionData.set(sessionData);
+    modal.selectedDatasets.set(selectedDatasets ?? []);
     this.labelsModalRef.result.then(
       () => {
         this.labelsModalRef = null;
@@ -94,8 +96,9 @@ export class DatasetModalService {
     const modalRef = this.ngbModal.open(WrangleModalComponent, {
       size: "xl",
     });
-    modalRef.componentInstance.dataset = dataset;
-    modalRef.componentInstance.sessionData = sessionData;
+    const modal = modalRef.componentInstance as InstanceType<typeof WrangleModalComponent>;
+    modal.dataset.set(dataset);
+    modal.sessionData.set(sessionData);
 
     // modal returns the observale which runs the wrangle
     // block with the spinner while waiting for that observable to complete
@@ -119,8 +122,9 @@ export class DatasetModalService {
     const modalRef = this.ngbModal.open(SamplesModalComponent, {
       size: "xl",
     });
-    modalRef.componentInstance.datasets = datasets;
-    modalRef.componentInstance.sessionData = sessionData;
+    const modal = modalRef.componentInstance as SamplesModalComponent;
+    modal.datasets.set(datasets);
+    modal.sessionData.set(sessionData);
 
     // modal returns the observale which runs the action
     // block with the spinner while waiting for that observable to complete

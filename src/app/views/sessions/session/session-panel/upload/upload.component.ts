@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
 import { UploadModalComponent } from "./upload-modal.component";
 import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
@@ -24,7 +24,8 @@ export class UploadComponent implements AfterViewInit, OnInit {
 
   private flow: any;
   private modalOpen = false;
-  private modalRef: any;
+  private modalRef: NgbModalRef;
+  private modal: UploadModalComponent;
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(this.fileAdded.bind(this), this.fileSuccess.bind(this));
@@ -37,8 +38,9 @@ export class UploadComponent implements AfterViewInit, OnInit {
         size: "lg",
       });
 
-      this.modalRef.componentInstance.sessionId = this.sessionData.session.sessionId;
-      this.modalRef.componentInstance.flow = this.flow;
+      this.modal = this.modalRef.componentInstance as UploadModalComponent;
+      this.modal.sessionId.set(this.sessionData.session.sessionId);
+      this.modal.flow.set(this.flow);
       this.modalOpen = true;
 
       this.modalRef.result.then(
@@ -52,7 +54,7 @@ export class UploadComponent implements AfterViewInit, OnInit {
     }
 
     // notify modal that file file was added
-    this.modalRef.componentInstance.fileAdded(file);
+    this.modal.fileAdded(file);
   }
 
   fileSuccess(_file: any) {

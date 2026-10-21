@@ -69,22 +69,22 @@
   <div class="row">
     <div class="col">
       <!-- <span *ngIf="flow.getSize()" class="badge badge-info float-start">Total Size: {{flow.getSize() | bytes}}</span> -->
-      @if (flow.timeRemaining()) {
+      @if (flow().timeRemaining()) {
         <span class="float-start">
-          <i>Time remaining: {{ flow.timeRemaining() | secondspipe }}</i>
+          <i>Time remaining: {{ flow().timeRemaining() | secondspipe }}</i>
         </span>
       }
 
       <div class="float-end text-nowrap">
-        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow.cancel()">
+        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow().cancel()">
           <i class="fas fa-times" aria-hidden="true"></i>
           Cancel all
         </button>
-        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow.resume()">
+        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow().resume()">
           <i class="fas fa-play" aria-hidden="true"></i>
           Resume all
         </button>
-        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow.pause()">
+        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow().pause()">
           <i class="fas fa-pause" aria-hidden="true"></i>
           Pause all
         </button>

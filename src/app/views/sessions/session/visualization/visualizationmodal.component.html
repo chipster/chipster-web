@@ -1,19 +1,19 @@
 <div class="modal-header">
-  <h4 class="modal-title">{{ dataset.name }}</h4>
+  <h4 class="modal-title">{{ dataset().name }}</h4>
   <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()"></button>
 </div>
 
 <div class="modal-body">
   <div class="visualization-modal-content">
-    @if (visualizationId === "text") {
-      <ch-text-visualization [dataset]="dataset" [showFullData]="true" [modalMode]="true"></ch-text-visualization>
+    @if (visualizationId() === "text") {
+      <ch-text-visualization [dataset]="dataset()" [showFullData]="true" [modalMode]="true"></ch-text-visualization>
     }
 
-    @if (visualizationId === "spreadsheet") {
+    @if (visualizationId() === "spreadsheet") {
       <ch-spreadsheet-visualization
         class="modal-spreadsheet"
-        [dataset]="dataset"
-        [sessionData]="sessionData"
+        [dataset]="dataset()"
+        [sessionData]="sessionData()"
         [modalMode]="true"></ch-spreadsheet-visualization>
     }
   </div>

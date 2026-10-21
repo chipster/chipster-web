@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -11,7 +11,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
       </button>
     </div>
     <div class="modal-body">
-      <pre>{{ output }}</pre>
+      <pre>{{ output() }}</pre>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
@@ -22,5 +22,6 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 export class JobOutputModalComponent {
   activeModal = inject(NgbActiveModal);
 
-  @Input() output;
+  // set through the modal ref by the code that opens the modal
+  output = signal<string>(undefined);
 }
