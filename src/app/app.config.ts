@@ -1,15 +1,7 @@
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from "@angular/common/http";
-import {
-  ApplicationConfig,
-  ErrorHandler,
-  inject,
-  Injector,
-  provideEnvironmentInitializer,
-  provideZoneChangeDetection,
-} from "@angular/core";
+import { ApplicationConfig, ErrorHandler, provideZoneChangeDetection } from "@angular/core";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 import { provideStore } from "@ngrx/store";
-import { setAppInjector } from "./app-injector";
 import { routes } from "./app.routes";
 import { AppErrorHandler } from "./core/errorhandler/apperrorhandler";
 import { latestSession } from "./state/latest-session.reducer";
@@ -29,8 +21,6 @@ import {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection(),
-    // before any component is created, as the AppModule constructor did
-    provideEnvironmentInitializer(() => setAppInjector(inject(Injector))),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: "enabled" })),
     provideStore(
       {

@@ -5,7 +5,6 @@ import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-import { AppInjector } from "../../app-injector";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../model/loadstate";
 import TSVFile from "../../model/tsv/TSVFile";
@@ -40,11 +39,11 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   showSymbolColumn = false;
 
   svgPadding = 50;
-  protected fileResource: FileResource;
-  protected sessionDataService: SessionDataService;
-  protected visualizationTSVService: VisualizationTSVService;
-  private restErrorService: RestErrorService;
-  private zone: NgZone;
+  protected fileResource = inject(FileResource);
+  protected sessionDataService = inject(SessionDataService);
+  protected visualizationTSVService = inject(VisualizationTSVService);
+  protected restErrorService = inject(RestErrorService);
+  private zone = inject(NgZone);
 
   protected unsubscribe: Subject<any> = new Subject();
   state: LoadState;
@@ -52,18 +51,6 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   // Redraws the plot when its container changes width, see observePlotResize()
   private resizeObserver: ResizeObserver;
   private lastPlotWidth: number;
-
-  constructor() {
-    const fileResource = inject(FileResource);
-    const sessionDataService = inject(SessionDataService);
-    const visualizationTSVService = inject(VisualizationTSVService);
-
-    this.fileResource = fileResource;
-    this.sessionDataService = sessionDataService;
-    this.visualizationTSVService = visualizationTSVService;
-    this.restErrorService = AppInjector.get(RestErrorService);
-    this.zone = AppInjector.get(NgZone);
-  }
 
   ngOnChanges() {
     this.state = new LoadState(State.Loading, "Loading data...");
