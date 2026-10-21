@@ -7,13 +7,12 @@ import {
   OnInit,
   Output,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
-import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SchedulerResource } from "../../../../../shared/resources/scheduler-resource";
 import { FormsModule } from "@angular/forms";
 
@@ -40,6 +39,8 @@ interface Resources {
   imports: [FormsModule],
 })
 export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
+  private schedulerResource = inject(SchedulerResource);
+
   @Input() validatedTool: ValidatedTool;
   @Input() origTool: Tool;
 
@@ -54,12 +55,6 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   private resourceChangedThrottle = new Subject<any>();
 
   private unsubscribe: Subject<any> = new Subject();
-
-  constructor(
-    public toolService: ToolService,
-    private schedulerResource: SchedulerResource,
-    private restErrorService: RestErrorService,
-  ) {}
 
   ngOnInit() {
     this.resourceChangedThrottle

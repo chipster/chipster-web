@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
@@ -13,16 +13,14 @@ import { ManualComponent } from "../manual/manual.component";
   imports: [ManualComponent],
 })
 export class ContactComponent implements OnInit {
+  private errorService = inject(ErrorService);
+  private configService = inject(ConfigService);
+  private routeService = inject(RouteService);
+  private tokenService = inject(TokenService);
+  private contactSupportService = inject(ContactSupportService);
+
   contactFile: string;
   contactPath: string;
-
-  constructor(
-    private errorService: ErrorService,
-    private configService: ConfigService,
-    private routeService: RouteService,
-    private tokenService: TokenService,
-    private contactSupportService: ContactSupportService,
-  ) {}
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_CONTACT_PATH).subscribe({

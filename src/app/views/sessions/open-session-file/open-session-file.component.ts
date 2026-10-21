@@ -6,6 +6,7 @@ import {
   Output,
   ViewChild,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
@@ -25,6 +26,13 @@ import { ImportSessionModalComponent } from "./import-session-modal.component";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
+  private errorService = inject(ErrorService);
+  private modalService = inject(NgbModal);
+  private uploadService = inject(UploadService);
+  private sessionWorkerResource = inject(SessionWorkerResource);
+  private sessionResource = inject(SessionResource);
+  private dialogModalService = inject(DialogModalService);
+
   @ViewChild("browseFilesButton")
   browseFilesButton;
 
@@ -38,15 +46,6 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
 
   // store warnings here, because fileSuccess() is called for each file and we want to show all of them at once
   warnings = new Map<string, string[]>();
-
-  constructor(
-    private errorService: ErrorService,
-    private modalService: NgbModal,
-    private uploadService: UploadService,
-    private sessionWorkerResource: SessionWorkerResource,
-    private sessionResource: SessionResource,
-    private dialogModalService: DialogModalService,
-  ) {}
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(this.fileAdded.bind(this), this.fileSuccess.bind(this));

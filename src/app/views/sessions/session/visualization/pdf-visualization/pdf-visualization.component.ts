@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import type { OnProgressParameters } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { Subject } from "rxjs";
@@ -24,6 +24,10 @@ enum ButtonAction {
   imports: [StatusComponent, PdfViewerComponent],
 })
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+  private bytesPipe = inject(BytesPipe);
+
   @Input()
   dataset: Dataset;
 
@@ -64,12 +68,6 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   private readonly showHereButton: StatusButton = { text: "Show here", action: ButtonAction.ShowHere };
   private readonly tryAgainButton: StatusButton = { text: "Try again", action: ButtonAction.ShowHere };
   private readonly openNewTabButton: StatusButton = { text: "Open in new tab", action: ButtonAction.OpenNewTab };
-
-  constructor(
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-    private bytesPipe: BytesPipe,
-  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions

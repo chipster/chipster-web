@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -6,12 +6,12 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class NotificationModalComponent {
+  private activeModal = inject(NgbActiveModal);
+
   @Input()
   title: string;
   @Input()
   message: string;
-
-  constructor(private activeModal: NgbActiveModal) {}
 
   close(): void {
     this.activeModal.dismiss();

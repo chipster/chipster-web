@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import log from "loglevel";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
@@ -15,6 +15,11 @@ import { RouterLink } from "@angular/router";
   imports: [ManualComponent, RouterLink],
 })
 export class HomeComponent implements OnInit {
+  private tokenService = inject(TokenService);
+  private configService = inject(ConfigService);
+  private errorService = inject(ErrorService);
+  private routeService = inject(RouteService);
+
   routerLinkLogin: string;
   routerLinkSessions: string;
   routerLinkAnalyze: string;
@@ -24,13 +29,6 @@ export class HomeComponent implements OnInit {
   homeHeaderPath: string;
   homeHeaderFile: string;
   homeRouterPath: string;
-
-  constructor(
-    private tokenService: TokenService,
-    private configService: ConfigService,
-    private errorService: ErrorService,
-    private routeService: RouteService,
-  ) {}
 
   ngOnInit() {
     this.homeRouterPath = RouteService.PATH_HOME;

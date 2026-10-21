@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
@@ -12,6 +12,9 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   imports: [FormsModule, LocalDatePipe],
 })
 export class NotesModalComponent implements AfterViewInit, OnInit {
+  private activeModal = inject(NgbActiveModal);
+  private sessionDataService = inject(SessionDataService);
+
   @Input()
   session: Session;
 
@@ -22,11 +25,6 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
 
   public notes: string;
   public readOnly: boolean;
-
-  constructor(
-    private activeModal: NgbActiveModal,
-    private sessionDataService: SessionDataService,
-  ) {}
 
   ngAfterViewInit() {
     // set focus to submit button every time the dialog is opened

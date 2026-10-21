@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Role, Service } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -8,7 +8,7 @@ import { parse } from "yaml";
 
 @Injectable({ providedIn: "root" })
 export class ConfigurationResource {
-  constructor(private httpClient: HttpClient) {}
+  private httpClient = inject(HttpClient);
 
   getConfiguration(file: string): Observable<any> {
     return this.httpClient.get("/assets/conf/" + file, { responseType: "text" }).pipe(map((conf) => parse(conf)));

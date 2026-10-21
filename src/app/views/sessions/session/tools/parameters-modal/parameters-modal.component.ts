@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
@@ -39,7 +39,7 @@ import { ToolResourcesComponent } from "../tool-resources/tool-resources.compone
   ],
 })
 export class ParametersModalComponent {
-  constructor(public activeModal: NgbActiveModal) {}
+  activeModal = inject(NgbActiveModal);
 
   @Input() validatedTool: ValidatedTool;
   @Input() sessionData: SessionData;

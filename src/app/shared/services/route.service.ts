@@ -1,8 +1,10 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Router } from "@angular/router";
 
 @Injectable({ providedIn: "root" })
 export class RouteService {
+  private router = inject(Router);
+
   static readonly PATH_HOME = "/home";
   static readonly PATH_SESSIONS = "/sessions";
   static readonly PATH_ANALYZE = "/analyze";
@@ -11,8 +13,6 @@ export class RouteService {
   static readonly PATH_CONTACT = "/contact";
   static readonly PATH_LOGIN = "/login";
   static readonly PATH_ADMIN = "/admin";
-
-  constructor(private router: Router) {}
 
   redirectToLoginAndBack() {
     const appUrl = this.getCurrentUrl();

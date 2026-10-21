@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -26,6 +26,11 @@ import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
   imports: [LinkButtonComponent, StatusComponent, BytesPipe],
 })
 export class TextVisualizationComponent implements OnChanges, OnDestroy {
+  private fileResource = inject(FileResource);
+  private sessionDataService = inject(SessionDataService);
+  private visualizationModalService = inject(VisualizationModalService);
+  private errorHandlerService = inject(RestErrorService);
+
   @Input() dataset: Dataset;
   @Input() showFullData: boolean;
   @Input() modalMode: boolean;
@@ -36,13 +41,6 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   state: LoadState;
 
   fileSizeLimit = 100 * 1024;
-
-  constructor(
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService,
-    private visualizationModalService: VisualizationModalService,
-    private errorHandlerService: RestErrorService,
-  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions

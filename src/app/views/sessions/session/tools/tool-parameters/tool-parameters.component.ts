@@ -7,11 +7,11 @@ import {
   OnInit,
   Output,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
-import { ToolSelectionService } from "../../tool.selection.service";
 import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
 import { FormsModule } from "@angular/forms";
@@ -24,6 +24,8 @@ import { FormsModule } from "@angular/forms";
   imports: [FormsModule],
 })
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
+  toolService = inject(ToolService);
+
   @Input() validatedTool: ValidatedTool;
 
   @Output() parametersChanged: EventEmitter<any> = new EventEmitter();
@@ -35,12 +37,6 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   private parametersChangedThrottle = new Subject<any>();
 
   private unsubscribe: Subject<any> = new Subject();
-
-  // noinspection JSUnusedLocalSymbols
-  constructor(
-    public toolService: ToolService,
-    private toolSelectionService: ToolSelectionService, // private dropDown: NgbDropdown
-  ) {}
 
   ngOnInit() {
     this.parametersChangedThrottle

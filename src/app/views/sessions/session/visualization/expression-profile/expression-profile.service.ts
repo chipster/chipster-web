@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { map, floor, ceil } from "lodash-es";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import TSVRow from "../../../../../model/tsv/TSVRow";
@@ -9,7 +9,7 @@ import Rectangle from "./rectangle";
 
 @Injectable({ providedIn: "root" })
 export class ExpressionProfileService {
-  constructor(private expressionprofileTSVService: ExpressionProfileTSVService) {}
+  private expressionprofileTSVService = inject(ExpressionProfileTSVService);
 
   // X-axis indexes for intervals the selection rectangle is crossing
   getCrossingIntervals(p1: Point, p2: Point, linearXScale: any, tsv: TSVFile) {

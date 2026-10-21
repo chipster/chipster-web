@@ -1,12 +1,12 @@
 import {
   Component,
-  Inject,
   Input,
   OnDestroy,
   OnInit,
   ViewChild,
   DOCUMENT,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
@@ -99,6 +99,25 @@ enum ModuleSelectionMode {
   ],
 })
 export class ToolsComponent implements OnInit, OnDestroy {
+  private document = inject<Document>(DOCUMENT);
+  settingsService = inject(SettingsService);
+  private toolSelectionService = inject(ToolSelectionService);
+  selectionService = inject(SelectionService);
+  private jobService = inject(JobService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private sessionEventService = inject(SessionEventService);
+  private sessionDataService = inject(SessionDataService);
+  toolService = inject(ToolService);
+  private modalService = inject(NgbModal);
+  private toastService = inject(ToastService);
+  private errorService = inject(ErrorService);
+  private datasetModalService = inject(DatasetModalService);
+  private dialogModalService = inject(DialogModalService);
+  private store = inject<Store<any>>(Store);
+  private ngbModal = inject(NgbModal);
+  private schedulerResource = inject(SchedulerResource);
+  private hotkeyService = inject(HotkeyService);
+
   public readonly categoryElementIdPrefix = "category-button-";
   public readonly toolElementIdPrefix = "tool-button-";
 
@@ -162,27 +181,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
   // the jobs modal of toggleJobs() while it is open or opening
   private jobsModal: Promise<NgbModalRef> | null = null;
 
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    public settingsService: SettingsService,
-    private toolSelectionService: ToolSelectionService,
-    public selectionService: SelectionService,
-    private jobService: JobService,
-    private selectionHandlerService: SelectionHandlerService,
-    private sessionEventService: SessionEventService,
-    private sessionDataService: SessionDataService,
-    public toolService: ToolService,
-    private modalService: NgbModal,
-    private toastService: ToastService,
-    private errorService: ErrorService,
-    private datasetModalService: DatasetModalService,
-    private dialogModalService: DialogModalService,
-    private store: Store<any>,
-    dropdownConfig: NgbDropdownConfig,
-    private ngbModal: NgbModal,
-    private schedulerResource: SchedulerResource,
-    private hotkeyService: HotkeyService,
-  ) {
+  constructor() {
+    const dropdownConfig = inject(NgbDropdownConfig);
+
     // prevent dropdowns from closing on click inside the dropdown
     dropdownConfig.autoClose = "outside";
   }

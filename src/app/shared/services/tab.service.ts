@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -8,11 +8,9 @@ import { SessionService } from "../../views/sessions/session/session.service";
 
 @Injectable({ providedIn: "root" })
 export class TabService {
-  constructor(
-    private errorService: ErrorService,
-    private restErrorService: RestErrorService,
-    private sessionService: SessionService,
-  ) {}
+  private errorService = inject(ErrorService);
+  private restErrorService = inject(RestErrorService);
+  private sessionService = inject(SessionService);
 
   openNewTab(sessionId: string, dataset: Dataset) {
     this.newTab(

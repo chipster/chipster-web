@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Label } from "chipster-js-common";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -16,6 +16,10 @@ import { LabelPillComponent } from "./label-pill.component";
   imports: [FormsModule, LabelPillComponent],
 })
 export class LabelEditorModalComponent implements OnInit {
+  activeModal = inject(NgbActiveModal);
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+
   @Input() sessionData: SessionData;
   // when set, the modal edits this label; when null, it creates a new one
   @Input() label: Label = null;
@@ -24,12 +28,6 @@ export class LabelEditorModalComponent implements OnInit {
   name = "";
   color: string = DEFAULT_LABEL_COLOR;
   saving = false;
-
-  constructor(
-    public activeModal: NgbActiveModal,
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-  ) {}
 
   ngOnInit(): void {
     if (this.label != null) {

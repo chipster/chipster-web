@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
 import { cloneDeep } from "lodash-es";
@@ -13,6 +13,10 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
  */
 @Injectable({ providedIn: "root" })
 export class WorkflowGraphService {
+  private datasetService = inject(DatasetService);
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+
   readonly nodeHeight = 22;
   // nodeWidth = 36;
   readonly nodeWidth = 48;
@@ -26,12 +30,6 @@ export class WorkflowGraphService {
 
   xMargin = this.nodeWidth / 4;
   yMargin = this.nodeHeight;
-
-  constructor(
-    private datasetService: DatasetService,
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-  ) {}
 
   resetDoAndSaveLayout(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>): void {
     // create a copy of the datasets to wait for the websocket updates

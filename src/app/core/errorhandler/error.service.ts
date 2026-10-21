@@ -1,14 +1,14 @@
-import { Injectable, NgZone } from "@angular/core";
+import { Injectable, NgZone, inject } from "@angular/core";
 import log from "loglevel";
 import { Observable, Subject } from "rxjs";
 import { ErrorButton, ErrorMessage } from "./errormessage";
 
 @Injectable({ providedIn: "root" })
 export class ErrorService {
+  private ngZone = inject(NgZone);
+
   // handle the errors in component, because it can access the router
   private errors$ = new Subject<ErrorMessage>();
-
-  constructor(private ngZone: NgZone) {}
 
   showError(msg: string, err: Error): void {
     const errorMessage = new ErrorMessage(null, msg, true, [ErrorButton.Reload, ErrorButton.ContactSupport], [], err);

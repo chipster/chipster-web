@@ -1,7 +1,6 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset, Label, Module, Tool } from "chipster-js-common";
 import { range } from "lodash-es";
-import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
 import { PipeService } from "../../../../shared/services/pipeservice.service";
@@ -51,6 +50,15 @@ import { NgClass } from "@angular/common";
   ],
 })
 export class SessionPanelComponent {
+  sessionDataService = inject(SessionDataService); // used by template
+  getSessionDataService = inject(GetSessionDataService);
+  private pipeService = inject(PipeService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  selectionService = inject(SelectionService);
+  private workflowGraphService = inject(WorkflowGraphService);
+  private labelsContextMenuService = inject(LabelsContextMenuService);
+  private datasetModalService = inject(DatasetModalService);
+
   @Input()
   sessionData: SessionData;
   @Input()
@@ -63,19 +71,6 @@ export class SessionPanelComponent {
   // Whether the "Select files with label" submenu in the toolbar labels
   // dropdown is currently open (controlled via mouseenter/mouseleave).
   selectByLabelOpen = false;
-
-  // noinspection JSUnusedLocalSymbols
-  constructor(
-    public sessionDataService: SessionDataService, // used by template
-    public getSessionDataService: GetSessionDataService,
-    private pipeService: PipeService,
-    private selectionHandlerService: SelectionHandlerService,
-    public selectionService: SelectionService,
-    private restErrorService: RestErrorService,
-    private workflowGraphService: WorkflowGraphService,
-    private labelsContextMenuService: LabelsContextMenuService,
-    private datasetModalService: DatasetModalService,
-  ) {} // used by template
 
   get labelMenuItems(): LabelMenuItem[] {
     return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData);

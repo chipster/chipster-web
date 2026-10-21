@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Label } from "chipster-js-common";
 import { Observable, forkJoin, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
@@ -27,15 +27,13 @@ export interface LabelMenuItem {
 
 @Injectable({ providedIn: "root" })
 export class LabelsContextMenuService {
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+
   // Most recently toggled label (added or removed). Used by surfaces like the
   // workflow toolbar's split-button to default the next action to whatever the
   // user just did.
   private lastUsedLabelId: string | null = null;
-
-  constructor(
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-  ) {}
 
   getLastUsedLabel(sessionData: SessionData): Label | null {
     if (!this.lastUsedLabelId || !sessionData?.labelsMap) {

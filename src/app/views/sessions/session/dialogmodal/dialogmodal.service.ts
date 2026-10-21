@@ -1,4 +1,4 @@
-import { Injectable, Type } from "@angular/core";
+import { Injectable, Type, inject } from "@angular/core";
 import { NgbModal, NgbModalOptions, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, SessionEvent, Tool } from "chipster-js-common";
 import { EMPTY, Observable, from as observableFrom } from "rxjs";
@@ -10,6 +10,8 @@ type Modals = typeof import("./modals");
 
 @Injectable({ providedIn: "root" })
 export class DialogModalService {
+  private modalService = inject(NgbModal);
+
   /*
    * The modals are loaded with a dynamic import() of modals.ts, not imported at the top of
    * this file. A modal imports the components of its template, and many of those inject this
@@ -21,8 +23,6 @@ export class DialogModalService {
    * a modal opens within the click as before.
    */
   private modals = import("./modals");
-
-  constructor(private modalService: NgbModal) {}
 
   static observableFromPromiseWithDismissHandling(result: Promise<any>) {
     return observableFrom(result).pipe(

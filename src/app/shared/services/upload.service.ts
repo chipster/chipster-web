@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Injectable } from "@angular/core";
+import { ChangeDetectorRef, Injectable, inject } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, forkJoin, timer } from "rxjs";
@@ -15,15 +15,13 @@ declare let Flow: any;
 
 @Injectable({ providedIn: "root" })
 export class UploadService {
-  constructor(
-    private configService: ConfigService,
-    private tokenService: TokenService,
-    private sessionResource: SessionResource,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-    private jobService: JobService,
-    private errorService: ErrorService,
-  ) {}
+  private configService = inject(ConfigService);
+  private tokenService = inject(TokenService);
+  private sessionResource = inject(SessionResource);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private jobService = inject(JobService);
+  private errorService = inject(ErrorService);
 
   getFlow(fileAdded: (file: any, event: any, flow: any) => any, fileSuccess: (file: any) => any) {
     const flow = new Flow({

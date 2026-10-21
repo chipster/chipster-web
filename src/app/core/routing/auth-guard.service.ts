@@ -1,5 +1,5 @@
-import { Injectable } from "@angular/core";
-import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from "@angular/router";
+import { Injectable, inject } from "@angular/core";
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import log from "loglevel";
 import { Observable, forkJoin, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
@@ -10,13 +10,10 @@ import { TokenService } from "../authentication/token.service";
 
 @Injectable({ providedIn: "root" })
 export class AuthGuard {
-  constructor(
-    private tokenService: TokenService,
-    private router: Router,
-    private authenticationService: AuthenticationService,
-    private configService: ConfigService,
-    private routeService: RouteService,
-  ) {}
+  private tokenService = inject(TokenService);
+  private authenticationService = inject(AuthenticationService);
+  private configService = inject(ConfigService);
+  private routeService = inject(RouteService);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     // log.info("auth guard", this.tokenService.getAccountName());

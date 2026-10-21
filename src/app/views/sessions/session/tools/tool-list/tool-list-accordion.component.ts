@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
 import { cloneDeep } from "lodash-es";
 import { Subject } from "rxjs";
@@ -7,7 +7,6 @@ import { SearchBoxComponent } from "../../../../../shared/components/search-box/
 import { CategoryPipe } from "../../../../../shared/pipes/categorypipe.pipe";
 import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
 import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
-import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { ToolSelectionService } from "../../tool.selection.service";
 import { NgClass } from "@angular/common";
 import { ScrollerComponent } from "../scroller/scroller.component";
@@ -21,6 +20,11 @@ import { ToolListItemComponent } from "./tool-list-item/tool-list-item.component
   imports: [NgClass, SearchBoxComponent, ScrollerComponent, ToolListItemComponent, CategoryPipe, ModulePipe],
 })
 export class ToolListAccordionComponent implements OnInit {
+  private modulePipe = inject(ModulePipe);
+  private categoryPipe = inject(CategoryPipe);
+  private toolPipe = inject(ToolPipe);
+  private toolSelectionService = inject(ToolSelectionService);
+
   @Input()
   private sessionData: SessionData;
   @Input()
@@ -48,11 +52,6 @@ export class ToolListAccordionComponent implements OnInit {
   selectedCategory: Category = null; // used in modal to keep track of which category has been selected
 
   selectTool$ = new Subject();
-
-  constructor(
-    private pipeService: PipeService,
-    private toolSelectionService: ToolSelectionService,
-  ) {}
 
   ngOnInit() {
     // TODO why copies?
@@ -85,15 +84,12 @@ export class ToolListAccordionComponent implements OnInit {
   }
 
   selectFirstVisible() {
-    const filteredModules = new ModulePipe(this.pipeService).transform(this.modules, this.searchTool);
+    const filteredModules = this.modulePipe.transform(this.modules, this.searchTool);
     if (filteredModules && !filteredModules.includes(this.selectedModule) && filteredModules[0]) {
       this.selectModule(filteredModules[0]);
     }
 
-    const filteredCategories = new CategoryPipe(this.pipeService).transform(
-      this.selectedModule.categories,
-      this.searchTool,
-    );
+    const filteredCategories = this.categoryPipe.transform(this.selectedModule.categories, this.searchTool);
     if (filteredCategories && filteredCategories.indexOf(this.selectedCategory) < 0 && filteredCategories[0]) {
       this.selectCategory(filteredCategories[0]);
     }
@@ -120,7 +116,7 @@ export class ToolListAccordionComponent implements OnInit {
 
   searchEnter() {
     // select the first result
-    const visibleTools = new ToolPipe(this.pipeService).transform(this.selectedCategory.tools, this.searchTool);
+    const visibleTools = this.toolPipe.transform(this.selectedCategory.tools, this.searchTool);
     if (visibleTools[0]) {
       this.searchTool = null;
       // this.selectTool(visibleTools[0].name.id);

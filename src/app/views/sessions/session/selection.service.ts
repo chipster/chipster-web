@@ -1,13 +1,16 @@
 import { takeUntil } from "rxjs/operators";
 import { Dataset, Job } from "chipster-js-common";
 import { some } from "lodash-es";
-import { Injectable, OnDestroy } from "@angular/core";
+import { Injectable, OnDestroy, inject } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable, Subject } from "rxjs";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 
 @Injectable({ providedIn: "root" })
 export class SelectionService implements OnDestroy {
+  private store = inject<Store<any>>(Store);
+  private errorService = inject(ErrorService);
+
   // Selected datasets and jobs
   selectedDatasets: Array<Dataset>; // USE SELECTION-HANDLER SERVICE TO MODIFY
   selectedJobs: Array<Job>; // USE SELECTION-HANDLER SERVICE TO MODIFY
@@ -17,10 +20,7 @@ export class SelectionService implements OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(
-    private store: Store<any>,
-    private errorService: ErrorService,
-  ) {
+  constructor() {
     // Sync selected datasets from store
     this.selectedDatasets$ = this.store.select("selectedDatasets");
     this.store

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Label } from "chipster-js-common";
 import { forkJoin, of } from "rxjs";
@@ -26,6 +26,13 @@ interface LabelRow {
   imports: [LabelPillComponent, NgClass],
 })
 export class LabelsModalComponent implements OnInit {
+  activeModal = inject(NgbActiveModal);
+  private ngbModal = inject(NgbModal);
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private labelsContextMenuService = inject(LabelsContextMenuService);
+
   @Input() sessionData: SessionData;
   @Input() selectedDatasets: Dataset[] = [];
 
@@ -34,15 +41,6 @@ export class LabelsModalComponent implements OnInit {
   rows: LabelRow[] = [];
 
   saving = false;
-
-  constructor(
-    public activeModal: NgbActiveModal,
-    private ngbModal: NgbModal,
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-    private dialogModalService: DialogModalService,
-    private labelsContextMenuService: LabelsContextMenuService,
-  ) {}
 
   ngOnInit(): void {
     this.refreshRows();

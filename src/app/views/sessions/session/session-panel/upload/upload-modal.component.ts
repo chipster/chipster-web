@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+  inject,
+} from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
@@ -16,6 +25,11 @@ import { SecondsPipe } from "../../../../../shared/pipes/secondspipe.pipe";
   imports: [NgbProgressbar, NGB_DROPDOWN_IMPORTS, BytesPipe, SecondsPipe],
 })
 export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
+  activeModal = inject(NgbActiveModal);
+  private uploadService = inject(UploadService);
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+
   @Input() sessionId: string;
   @Input() flow: any;
 
@@ -33,13 +47,6 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   complete = () => {
     // this.activeModal.close();
   };
-
-  constructor(
-    public activeModal: NgbActiveModal,
-    private uploadService: UploadService,
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-  ) {}
 
   ngOnInit() {
     this.flow.on("progress", this.update);

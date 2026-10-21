@@ -1,4 +1,4 @@
-import { Directive, OnDestroy, OnInit, Optional } from "@angular/core";
+import { Directive, OnDestroy, OnInit, inject } from "@angular/core";
 import {
   NgbDropdown,
   NgbDropdownButtonItem,
@@ -25,12 +25,10 @@ import { DropdownCloseService } from "../services/dropdown-close.service";
   selector: "[ngbDropdown]",
 })
 export class DropdownCloseDirective implements OnInit, OnDestroy {
-  private subscription: Subscription;
+  private dropdown = inject(NgbDropdown, { optional: true });
+  private dropdownCloseService = inject(DropdownCloseService);
 
-  constructor(
-    @Optional() private dropdown: NgbDropdown,
-    private dropdownCloseService: DropdownCloseService,
-  ) {}
+  private subscription: Subscription;
 
   ngOnInit(): void {
     if (!this.dropdown) {

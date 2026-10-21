@@ -1,14 +1,12 @@
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Observable } from "rxjs";
 import { TokenService } from "../../core/authentication/token.service";
 
 @Injectable({ providedIn: "root" })
 export class AuthHttpClientService {
-  constructor(
-    private httpClient: HttpClient,
-    private tokenService: TokenService,
-  ) {}
+  private httpClient = inject(HttpClient);
+  private tokenService = inject(TokenService);
 
   /**
    * Make unauthenticated GET request

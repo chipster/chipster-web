@@ -1,5 +1,5 @@
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 
 @Component({
   templateUrl: "./pre-modal.component.html",
@@ -7,13 +7,13 @@ import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class PreModalComponent {
+  private activeModal = inject(NgbActiveModal);
+
   @Input()
   title: string;
 
   @Input()
   text: string;
-
-  constructor(private activeModal: NgbActiveModal) {}
 
   cancel() {
     this.activeModal.dismiss();

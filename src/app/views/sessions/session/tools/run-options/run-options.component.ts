@@ -1,6 +1,5 @@
 import { Component, Input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
-import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
 
 @Component({
@@ -14,8 +13,6 @@ export class RunOptionsComponent implements OnChanges {
   @Input() validatedTool: ValidatedTool;
 
   ready = false;
-
-  constructor(private toolService: ToolService) {}
 
   ngOnChanges() {
     if (this.validatedTool != null) {

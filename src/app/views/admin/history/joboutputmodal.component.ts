@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -20,9 +20,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class JobOutputModalComponent {
-  @Input() output;
+  activeModal = inject(NgbActiveModal);
 
-  constructor(public activeModal: NgbActiveModal) {
-    console.log(this.output);
-  }
+  @Input() output;
 }

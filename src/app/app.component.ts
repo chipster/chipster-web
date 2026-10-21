@@ -1,4 +1,4 @@
-import { Component, HostListener, ChangeDetectionStrategy } from "@angular/core";
+import { Component, HostListener, ChangeDetectionStrategy, inject } from "@angular/core";
 import { HotkeyService } from "./shared/services/hotkey.service";
 import { NavigationComponent } from "./views/navigation/navigation.component";
 import { HotkeyCheatsheetComponent } from "./shared/components/hotkey-cheatsheet/hotkey-cheatsheet.component";
@@ -14,7 +14,7 @@ import { RouterOutlet } from "@angular/router";
   imports: [NavigationComponent, HotkeyCheatsheetComponent, ErrorComponent, ToastsComponent, RouterOutlet],
 })
 export class AppComponent {
-  constructor(private readonly hotkeyService: HotkeyService) {}
+  private readonly hotkeyService = inject(HotkeyService);
 
   @HostListener("document:keydown", ["$event"])
   onKeydown(event: KeyboardEvent) {

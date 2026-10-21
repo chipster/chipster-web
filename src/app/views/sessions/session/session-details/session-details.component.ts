@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { map, mergeMap } from "rxjs/operators";
@@ -23,6 +23,15 @@ import { LocalDatePipe } from "../../../../shared/pipes/local-date.pipe";
   imports: [NGB_DROPDOWN_IMPORTS, BytesPipe, LocalDatePipe],
 })
 export class SessionDetailsComponent {
+  private sessionDataService = inject(SessionDataService);
+  private sessionEventService = inject(SessionEventService);
+  private sessionService = inject(SessionService);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private sessionResource = inject(SessionResource);
+  private routeService = inject(RouteService);
+  private datasetModalService = inject(DatasetModalService);
+
   @Input()
   session: Session;
 
@@ -30,17 +39,6 @@ export class SessionDetailsComponent {
   sessionData: SessionData; // needed for duplicate session
 
   @Output() deleteSession: EventEmitter<Session> = new EventEmitter();
-
-  constructor(
-    private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService,
-    private sessionService: SessionService,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-    private sessionResource: SessionResource,
-    private routeService: RouteService,
-    private datasetModalService: DatasetModalService,
-  ) {}
 
   renameSessionModal() {
     this.sessionService.openRenameModalAndUpdate(this.session);

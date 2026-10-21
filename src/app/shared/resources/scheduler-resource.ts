@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Module } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map, mergeMap, shareReplay, tap } from "rxjs/operators";
@@ -18,13 +18,11 @@ export interface JobQuota {
 
 @Injectable({ providedIn: "root" })
 export class SchedulerResource {
+  private configService = inject(ConfigService);
+  private http = inject(HttpClient);
+
   private jobQuotaCache: Observable<JobQuota>;
   private jobQuotaCacheSync: JobQuota;
-
-  constructor(
-    private configService: ConfigService,
-    private http: HttpClient,
-  ) {}
 
   initJobQuota(): Observable<JobQuota> {
     if (this.jobQuotaCache == null) {

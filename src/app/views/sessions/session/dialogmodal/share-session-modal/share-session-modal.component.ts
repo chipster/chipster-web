@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+  inject,
+} from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, SessionEvent } from "chipster-js-common";
 import log from "loglevel";
@@ -18,6 +27,13 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   imports: [FormsModule, LocalDatePipe],
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
+  private activeModal = inject(NgbActiveModal);
+  private tokenService = inject(TokenService);
+  private restErrorService = inject(RestErrorService);
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+  private dialogModalService = inject(DialogModalService);
+
   @Input()
   session: Session;
   @Input()
@@ -32,15 +48,6 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   public newRule: Rule;
 
   private unsubscribe: Subject<any> = new Subject();
-
-  constructor(
-    private activeModal: NgbActiveModal,
-    private tokenService: TokenService,
-    private restErrorService: RestErrorService,
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-    private dialogModalService: DialogModalService,
-  ) {}
 
   ngOnInit() {
     this.rules = this.session.rules;

@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Module, Tool } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { mergeMap } from "rxjs/operators";
@@ -7,10 +7,8 @@ import { ConfigService } from "../services/config.service";
 
 @Injectable({ providedIn: "root" })
 export class ToolResource {
-  constructor(
-    private configService: ConfigService,
-    private http: HttpClient,
-  ) {}
+  private configService = inject(ConfigService);
+  private http = inject(HttpClient);
 
   getModules(): Observable<Module[]> {
     const apiUrl$ = this.configService.getToolboxUrl();

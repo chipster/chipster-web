@@ -7,6 +7,7 @@ import {
   OnInit,
   ViewChild,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, Tool } from "chipster-js-common";
@@ -30,16 +31,14 @@ import { JobComponent } from "../selectiondetails/job/job.component";
   imports: [JobListComponent, JobComponent],
 })
 export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
-  private unsubscribe: Subject<any> = new Subject();
+  activeModal = inject(NgbActiveModal);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private selectionService = inject(SelectionService);
+  private sessionEventService = inject(SessionEventService);
+  private errorService = inject(ErrorService);
+  private sessionDataService = inject(SessionDataService);
 
-  constructor(
-    public activeModal: NgbActiveModal,
-    private selectionHandlerService: SelectionHandlerService,
-    private selectionService: SelectionService,
-    private sessionEventService: SessionEventService,
-    private errorService: ErrorService,
-    private sessionDataService: SessionDataService,
-  ) {}
+  private unsubscribe: Subject<any> = new Subject();
 
   ngOnInit(): void {
     this.updateJobs();

@@ -1,12 +1,8 @@
-import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import * as d3 from "d3";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
-import { FileResource } from "../../../../../shared/resources/fileresource";
 import { PlotDirective } from "../../../../../shared/visualization/plot.directive";
 import { PlotService } from "../../../../../shared/visualization/plot.service";
-import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
-import { SessionDataService } from "../../session-data.service";
 import { PlotData } from "../model/plotData";
 import Point from "../model/point";
 import { StatusComponent } from "../../../../../shared/components/status.component";
@@ -20,19 +16,11 @@ import { FormsModule } from "@angular/forms";
   imports: [StatusComponent, FormsModule],
 })
 export class ScatterPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
+  private plotService = inject(PlotService);
+
   public chipHeaders: Array<string> = [];
   private xScale: any;
   private yScale: any;
-
-  constructor(
-    fileResource: FileResource,
-    sessionDataService: SessionDataService,
-    private plotService: PlotService,
-    visualizationTSVService: VisualizationTSVService,
-    private restErrorService2: RestErrorService,
-  ) {
-    super(fileResource, sessionDataService, visualizationTSVService);
-  }
 
   ngOnChanges() {
     super.ngOnChanges();
@@ -212,6 +200,6 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
       .createDerivedDataset("newDataset.tsv", [this.dataset], "Scatter Plot", data)
-      .subscribe({ error: (err) => this.restErrorService2.showError("create dataset failed", err) });
+      .subscribe({ error: (err) => this.restErrorService.showError("create dataset failed", err) });
   }
 }

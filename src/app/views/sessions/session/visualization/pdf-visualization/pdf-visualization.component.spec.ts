@@ -1,9 +1,9 @@
+import { TestBed } from "@angular/core/testing";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { State } from "../../../../../model/loadstate";
-import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
 import { SessionDataService } from "../../session-data.service";
 import { PdfVisualizationComponent } from "./pdf-visualization.component";
 
@@ -37,7 +37,14 @@ describe("PdfVisualizationComponent", () => {
       },
     } as unknown as RestErrorService;
 
-    component = new PdfVisualizationComponent(sessionDataServiceStub, restErrorServiceStub, new BytesPipe());
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: SessionDataService, useValue: sessionDataServiceStub },
+        { provide: RestErrorService, useValue: restErrorServiceStub },
+      ],
+    });
+    // created without a template, only the class is tested
+    component = TestBed.runInInjectionContext(() => new PdfVisualizationComponent());
   });
 
   function select(size: number) {

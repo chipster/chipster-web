@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import log from "loglevel";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
@@ -13,15 +13,13 @@ import { ManualComponent } from "../manual/manual.component";
   imports: [ManualComponent],
 })
 export class PrivacyNoticeComponent implements OnInit {
+  private configService = inject(ConfigService);
+  private errorService = inject(ErrorService);
+  private routeService = inject(RouteService);
+
   public htmlPath: string;
   public htmlFile: string;
   public routerPath = "privacy-notice";
-
-  constructor(
-    private configService: ConfigService,
-    private errorService: ErrorService,
-    private routeService: RouteService,
-  ) {}
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_PRIVACE_NOTICE_PATH).subscribe({

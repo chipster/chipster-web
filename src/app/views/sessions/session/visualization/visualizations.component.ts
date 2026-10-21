@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+  inject,
+} from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import { find, includes, every, some } from "lodash-es";
@@ -62,6 +71,14 @@ import { VennDiagramComponent } from "./venn-diagram/venn-diagram.component";
   ],
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
+  selectionService = inject(SelectionService);
+  private store = inject<Store<any>>(Store);
+  private typeTagService = inject(TypeTagService);
+  private errorService = inject(ErrorService);
+  private visualizationEventService = inject(VisualizationEventService);
+  private datasetService = inject(DatasetService);
+  private configService = inject(ConfigService);
+
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";
   @Input()
   sessionData: SessionData;
@@ -80,16 +97,6 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
   private visualizationBlacklist: Array<string>;
-
-  constructor(
-    public selectionService: SelectionService, // used in template
-    private store: Store<any>,
-    private typeTagService: TypeTagService,
-    private errorService: ErrorService,
-    private visualizationEventService: VisualizationEventService,
-    private datasetService: DatasetService,
-    private configService: ConfigService,
-  ) {}
 
   ngOnInit() {
     this.configService

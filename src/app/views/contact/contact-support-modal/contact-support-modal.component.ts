@@ -1,12 +1,12 @@
 import {
   AfterViewInit,
   Component,
-  Inject,
   Input,
   OnInit,
   ViewChild,
   DOCUMENT,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import {
   AbstractControl,
@@ -37,6 +37,17 @@ import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmod
   imports: [FormsModule, ReactiveFormsModule],
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {
+  private activeModal = inject(NgbActiveModal);
+  private sessionWorkerResource = inject(SessionWorkerResource);
+  private restErrorService = inject(RestErrorService);
+  private userService = inject(UserService);
+  private sessionResource = inject(SessionResource);
+  private authenticationService = inject(AuthenticationService);
+  private configService = inject(ConfigService);
+  private dialogModalService = inject(DialogModalService);
+  private fb = inject(UntypedFormBuilder);
+  private document = inject<Document>(DOCUMENT);
+
   public supportForm = this.fb.group({
     message: ["", [Validators.required]],
     email: ["", [Validators.required, Validators.email]],
@@ -53,19 +64,6 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   public user: User;
   public isVerifiedEmail = false;
   public appId;
-
-  constructor(
-    private activeModal: NgbActiveModal,
-    private sessionWorkerResource: SessionWorkerResource,
-    private restErrorService: RestErrorService,
-    private userService: UserService,
-    private sessionResource: SessionResource,
-    private authenticationService: AuthenticationService,
-    private configService: ConfigService,
-    private dialogModalService: DialogModalService,
-    private fb: UntypedFormBuilder,
-    @Inject(DOCUMENT) private document: Document,
-  ) {}
 
   ngOnInit() {
     this.userService

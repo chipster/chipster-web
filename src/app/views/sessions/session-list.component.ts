@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Module, Rule, Session, WsEvent } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
@@ -32,6 +32,18 @@ import { LocalDatePipe } from "../../shared/pipes/local-date.pipe";
   imports: [OpenSessionFileComponent, NgClass, NGB_DROPDOWN_IMPORTS, WorkflowGraphComponent, BytesPipe, LocalDatePipe],
 })
 export class SessionListComponent implements OnInit, OnDestroy {
+  private sessionResource = inject(SessionResource);
+  private dialogModalService = inject(DialogModalService);
+  sessionDataService = inject(SessionDataService);
+  private sessionService = inject(SessionService);
+  private routeService = inject(RouteService);
+  private restErrorService = inject(RestErrorService);
+  private userEventService = inject(UserEventService);
+  private toolsService = inject(ToolsService);
+  private configService = inject(ConfigService);
+  private tokenService = inject(TokenService);
+  private settingsService = inject(SettingsService);
+
   public SessionListMode = SessionListMode; // ref for using enum in template
 
   public mode = SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN;
@@ -61,20 +73,6 @@ export class SessionListComponent implements OnInit, OnDestroy {
   private userEventData = new UserEventData();
 
   private unsubscribe: Subject<any> = new Subject();
-
-  constructor(
-    private sessionResource: SessionResource,
-    private dialogModalService: DialogModalService,
-    public sessionDataService: SessionDataService,
-    private sessionService: SessionService,
-    private routeService: RouteService,
-    private restErrorService: RestErrorService,
-    private userEventService: UserEventService,
-    private toolsService: ToolsService,
-    private configService: ConfigService,
-    private tokenService: TokenService,
-    private settingsService: SettingsService,
-  ) {}
 
   ngOnInit() {
     // subscribe to mode change

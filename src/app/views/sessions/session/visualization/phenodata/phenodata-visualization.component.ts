@@ -10,6 +10,7 @@ import {
   ViewChild,
   ViewEncapsulation,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -44,6 +45,17 @@ export enum PhenodataState {
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+  private sessionDataService = inject(SessionDataService);
+  private stringModalService = inject(DialogModalService);
+  private sessionEventService = inject(SessionEventService);
+  private zone = inject(NgZone);
+  private restErrorService = inject(RestErrorService);
+  private spreadsheetService = inject(SpreadsheetService);
+  private nativeElementService = inject(NativeElementService);
+  private errorService = inject(ErrorService);
+  private getSessionDataService = inject(GetSessionDataService);
+  private datasetService = inject(DatasetService);
+
   @Input() private dataset!: Dataset;
   @Input() private datasetsMap!: Map<string, Dataset>;
 
@@ -120,19 +132,6 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   phenodataString = "";
 
   private unsubscribe: Subject<any> = new Subject();
-
-  constructor(
-    private sessionDataService: SessionDataService,
-    private stringModalService: DialogModalService,
-    private sessionEventService: SessionEventService,
-    private zone: NgZone,
-    private restErrorService: RestErrorService,
-    private spreadsheetService: SpreadsheetService,
-    private nativeElementService: NativeElementService,
-    private errorService: ErrorService,
-    private getSessionDataService: GetSessionDataService,
-    private datasetService: DatasetService,
-  ) {}
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
 

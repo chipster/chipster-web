@@ -6,6 +6,7 @@ import {
   OnDestroy,
   ViewEncapsulation,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -38,6 +39,13 @@ import { StatusComponent } from "../../../../../shared/components/status.compone
   imports: [StatusComponent],
 })
 export class ExpressionProfileComponent implements OnChanges, OnDestroy {
+  private expressionProfileService = inject(ExpressionProfileService);
+  private sessionDataService = inject(SessionDataService);
+  private visualizationTSVService = inject(VisualizationTSVService);
+  private fileResource = inject(FileResource);
+  private restErrorService = inject(RestErrorService);
+  private zone = inject(NgZone);
+
   @Input()
   private dataset: Dataset;
 
@@ -56,15 +64,6 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   // Redraws the chart when its container changes width, see observeResize()
   private resizeObserver: ResizeObserver;
   private lastChartWidth: number;
-
-  constructor(
-    private expressionProfileService: ExpressionProfileService,
-    private sessionDataService: SessionDataService,
-    private visualizationTSVService: VisualizationTSVService,
-    private fileResource: FileResource,
-    private restErrorService: RestErrorService,
-    private zone: NgZone,
-  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions

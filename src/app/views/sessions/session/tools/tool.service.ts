@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, InputBinding, Job, Tool, ToolInput, ToolParameter } from "chipster-js-common";
 import { difference } from "lodash-es";
 import { Observable, of } from "rxjs";
@@ -11,17 +11,13 @@ import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { GetSessionDataService } from "../get-session-data.service";
 import { SelectionOption } from "../SelectionOption";
 import { SelectedToolWithInputs } from "./ToolSelection";
-import { SchedulerResource } from "../../../../shared/resources/scheduler-resource";
 
 @Injectable({ providedIn: "root" })
 export class ToolService {
-  constructor(
-    private typeTagService: TypeTagService,
-    private tsvService: TsvService,
-    private configService: ConfigService,
-    private getSessionDataService: GetSessionDataService,
-    private schedulerResource: SchedulerResource,
-  ) {}
+  private typeTagService = inject(TypeTagService);
+  private tsvService = inject(TsvService);
+  private configService = inject(ConfigService);
+  private getSessionDataService = inject(GetSessionDataService);
 
   isSelectionParameter(parameter: ToolParameter) {
     return parameter.type === "ENUM" || parameter.type === "COLUMN_SEL" || parameter.type === "METACOLUMN_SEL";

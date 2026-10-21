@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable } from "rxjs";
@@ -7,14 +7,14 @@ import { AuthenticationService } from "../../core/authentication/authentication-
 
 @Injectable({ providedIn: "root" })
 export class PreferencesService {
+  private authenticationService = inject(AuthenticationService);
+
   public static readonly KEY_NEWS = "news";
   public static readonly KEY_NEWS_LAST_READ_TIME = "lastNewsReadTime";
 
   public static readonly KEY_LABELS = "labels";
   public static readonly KEY_LABELS_DISPLAY_MODE = "displayMode";
   public static readonly KEY_LABELS_SHOW_LABEL_PANEL = "showLabelPanel";
-
-  constructor(private authenticationService: AuthenticationService) {}
 
   public updateNewsReadTime(readTime: Date): void {
     this.setPreferenceValue(

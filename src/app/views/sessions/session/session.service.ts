@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Session, SessionState } from "chipster-js-common";
 import * as log from "loglevel";
 import { forkJoin, NEVER, Observable } from "rxjs";
@@ -12,14 +12,12 @@ import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 
 @Injectable({ providedIn: "root" })
 export class SessionService {
-  constructor(
-    private sessionResource: SessionResource,
-    private dialogModalService: DialogModalService,
-    private restErrorService: RestErrorService,
-    private sessionWorkerResource: SessionWorkerResource,
-    private configService: ConfigService,
-    private errorService: ErrorService,
-  ) {}
+  private sessionResource = inject(SessionResource);
+  private dialogModalService = inject(DialogModalService);
+  private restErrorService = inject(RestErrorService);
+  private sessionWorkerResource = inject(SessionWorkerResource);
+  private configService = inject(ConfigService);
+  private errorService = inject(ErrorService);
 
   updateSession(session: Session) {
     return this.sessionResource.updateSession(session);

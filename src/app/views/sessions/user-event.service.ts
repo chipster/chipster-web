@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { EventType, Resource, Session, WsEvent } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, Observable, Subject, defer, of } from "rxjs";
@@ -13,6 +13,12 @@ import { UserEventData } from "./user-event-data";
 
 @Injectable({ providedIn: "root" })
 export class UserEventService {
+  private sessionResource = inject(SessionResource);
+  private webSocketService = inject(WebSocketService);
+  private sessionDataService = inject(SessionDataService);
+  private sessionEventService = inject(SessionEventService);
+  private errorService = inject(ErrorService);
+
   topic: string;
 
   ruleStream$: Observable<WsEvent>;
@@ -28,14 +34,6 @@ export class UserEventService {
 
   /** Show the same handleOrDrop() message again only after this many milliseconds */
   private static readonly ERROR_INTERVAL_MS = 30 * 1000;
-
-  constructor(
-    private sessionResource: SessionResource,
-    private webSocketService: WebSocketService,
-    private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService,
-    private errorService: ErrorService,
-  ) {}
 
   unsubscribe() {
     this.webSocketService.unsubscribe();

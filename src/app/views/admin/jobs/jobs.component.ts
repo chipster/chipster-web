@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Job, JobState } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, Observable, of } from "rxjs";
@@ -18,14 +18,12 @@ import { JobService } from "../../sessions/session/job.service";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class JobsComponent implements OnInit {
-  jobs: Job[];
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private authHttpClient = inject(AuthHttpClientService);
+  private sessionResource = inject(SessionResource);
 
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private authHttpClient: AuthHttpClientService,
-    private sessionResource: SessionResource,
-  ) {}
+  jobs: Job[];
 
   ngOnInit() {
     this.update();

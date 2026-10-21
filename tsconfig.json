@@ -11,7 +11,6 @@
     "target": "ES2022",
     "importHelpers": true,
     "typeRoots": ["node_modules/@types"],
-    "useDefineForClassFields": false,
     // TypeScript 6 turns strict on by default, and the code isn't strict yet
     "strict": false,
     // Handsontable is used as a global, not imported. TypeScript 6 doesn't load

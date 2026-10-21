@@ -42,10 +42,6 @@ export default tseslint.config(
     rules: {
       "@angular-eslint/directive-selector": ["error", { type: "attribute", prefix: "ch", style: "camelCase" }],
       "@angular-eslint/component-selector": ["error", { type: "element", prefix: "ch", style: "kebab-case" }],
-      // the services are injected with constructor parameters. moving to
-      // inject() is planned as a separate change after the upgrade to angular
-      // 22, so turn this rule on only as part of that.
-      "@angular-eslint/prefer-inject": "off",
       // every component sets ChangeDetectionStrategy.Eager explicitly, which
       // angular 22's migration added to keep the previous default (the
       // default is OnPush from 22 on), and the rule reports exactly those.

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { User } from "chipster-js-common";
 import { filter, mergeMap } from "rxjs/operators";
@@ -16,18 +16,16 @@ import { ManualComponent } from "../manual/manual.component";
   imports: [ManualComponent],
 })
 export class TermsComponent implements OnInit {
+  private authenticationService = inject(AuthenticationService);
+  private restErrorService = inject(RestErrorService);
+  private configService = inject(ConfigService);
+  private routeService = inject(RouteService);
+  private route = inject(ActivatedRoute);
+
   // increase by one to force everyone to accept again
   static latestTermsVersion = 1;
   termsOfUse: string;
   showAccept = false;
-
-  constructor(
-    private authenticationService: AuthenticationService,
-    private restErrorService: RestErrorService,
-    private configService: ConfigService,
-    private routeService: RouteService,
-    private route: ActivatedRoute,
-  ) {}
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe({
