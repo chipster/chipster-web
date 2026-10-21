@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, PhenodataUtils, Job } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../shared/services/typetag.service";
@@ -12,10 +12,8 @@ import { DatasetService } from "./dataset.service";
  */
 @Injectable({ providedIn: "root" })
 export class QuerySessionDataService {
-  constructor(
-    private datasetService: DatasetService,
-    private typeTagService: TypeTagService,
-  ) {}
+  private datasetService = inject(DatasetService);
+  private typeTagService = inject(TypeTagService);
 
   public getAncestorDatasetsBottomUpBreadthFirst(sessionData: SessionData, dataset: Dataset): Array<Dataset> {
     return PhenodataUtils.getAncestorsBottomUpBreadthFirstWithFilter(

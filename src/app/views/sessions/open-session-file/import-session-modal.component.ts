@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from "@angular/core";
+import { ChangeDetectorRef, Component, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
@@ -17,19 +17,17 @@ import { SecondsPipe } from "../../../shared/pipes/secondspipe.pipe";
   imports: [NgbProgressbar, BytesPipe, SecondsPipe],
 })
 export class ImportSessionModalComponent {
+  private uploadService = inject(UploadService);
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+  activeModal = inject(NgbActiveModal);
+  private restErrorService = inject(RestErrorService);
+
   public flow: any;
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();
   files = [];
-
-  constructor(
-    private uploadService: UploadService,
-    private changeDetectorRef: ChangeDetectorRef,
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-    public activeModal: NgbActiveModal,
-    private restErrorService: RestErrorService,
-  ) {}
 
   fileAdded(file: any) {
     this.uploadService.scheduleViewUpdate(this.changeDetectorRef, this.flow);

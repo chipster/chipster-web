@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Role, Service } from "chipster-js-common";
 import log from "loglevel";
 import { Observable } from "rxjs";
@@ -8,6 +8,9 @@ import { ConfigurationResource } from "../resources/configurationresource";
 
 @Injectable({ providedIn: "root" })
 export class ConfigService {
+  private configurationResource = inject(ConfigurationResource);
+  private tokenService = inject(TokenService);
+
   public static readonly KEY_CUSTOM_CSS = "custom-css";
   public static readonly KEY_APP_NAME = "app-name";
   public static readonly KEY_APP_ID = "app-id";
@@ -27,11 +30,6 @@ export class ConfigService {
   private conf$: Observable<any>;
   private chipsterConf$: Observable<any>;
   private publicServices$: Observable<Service[]>;
-
-  constructor(
-    private configurationResource: ConfigurationResource,
-    private tokenService: TokenService,
-  ) {}
 
   getChipsterConfiguration(): Observable<any> {
     if (!this.chipsterConf$) {

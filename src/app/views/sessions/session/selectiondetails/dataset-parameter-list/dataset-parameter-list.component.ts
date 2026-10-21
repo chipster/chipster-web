@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, ChangeDetectionStrategy, inject } from "@angular/core";
 import { JobParameter, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
 import log from "loglevel";
@@ -14,6 +14,8 @@ import { LinkButtonComponent } from "../../link-button/link-button.component";
   imports: [NgClass, NgStyle, LinkButtonComponent],
 })
 export class DatasetParameterListComponent implements OnChanges {
+  private toolService = inject(ToolService);
+
   @Input() tool: Tool;
   @Input() parameters: Array<JobParameter>;
   @Input() parametersLimit: number;
@@ -30,8 +32,6 @@ export class DatasetParameterListComponent implements OnChanges {
   // noinspection JSMismatchedCollectionQueryUpdate
   parameterListForView: Array<JobParameter> = [];
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
-
-  constructor(private toolService: ToolService) {}
 
   ngOnChanges(changes: any) {
     let parameters = null;

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, Label, Session, Tool } from "chipster-js-common";
 import * as log from "loglevel";
@@ -19,18 +19,16 @@ import { v4 as uuidv4 } from "uuid";
 
 @Injectable({ providedIn: "root" })
 export class DatasetModalService {
+  private ngbModal = inject(NgbModal);
+  private dialogModalService = inject(DialogModalService);
+  private errorService = inject(ErrorService);
+  private typeTagService = inject(TypeTagService);
+  private sessionResource = inject(SessionResource);
+  private restErrorService = inject(RestErrorService);
+  private routeService = inject(RouteService);
+
   // the size limit of the wrangle modal, in MB
   static readonly WRANGLE_FILE_SIZE_LIMIT = 200;
-
-  constructor(
-    private ngbModal: NgbModal,
-    private dialogModalService: DialogModalService,
-    private errorService: ErrorService,
-    private typeTagService: TypeTagService,
-    private sessionResource: SessionResource,
-    private restErrorService: RestErrorService,
-    private routeService: RouteService,
-  ) {}
 
   public openDatasetHistoryModal(dataset: Dataset, sessionData: SessionData, tools: Tool[]): void {
     const modalRef = this.ngbModal.open(DatasetHistoryModalComponent, {

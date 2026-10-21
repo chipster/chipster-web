@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, JobInput, JobParameter, Tool } from "chipster-js-common";
 import * as FileSaver from "file-saver";
@@ -35,6 +35,12 @@ interface HistoryOption {
   imports: [NGB_DROPDOWN_IMPORTS, DatasetParameterListComponent, LocalDatePipe],
 })
 export class DatasetHistoryModalComponent implements OnInit, OnChanges {
+  activeModal = inject(NgbActiveModal);
+  querySessionDataService = inject(QuerySessionDataService);
+  toolService = inject(ToolService);
+  sessionDataService = inject(SessionDataService);
+  errorService = inject(ErrorService);
+
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;
   @Input() private tools: Tool[];
@@ -52,14 +58,6 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   public historyOptionsMap: Map<string, HistoryOption>;
 
   datasetHistorySteps: Array<DatasetHistoryStep> = [];
-
-  constructor(
-    public activeModal: NgbActiveModal,
-    public querySessionDataService: QuerySessionDataService,
-    public toolService: ToolService,
-    public sessionDataService: SessionDataService,
-    public errorService: ErrorService,
-  ) {}
 
   ngOnInit(): void {
     this.historyOptionsMap = new Map();

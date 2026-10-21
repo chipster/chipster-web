@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import * as d3 from "d3";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
@@ -22,6 +22,10 @@ import { FormsModule } from "@angular/forms";
   imports: [StatusComponent, FormsModule],
 })
 export class VolcanoPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
+  private volcanoPlotService = inject(VolcanoPlotService);
+  private plotService = inject(PlotService);
+  private restErrorService2 = inject(RestErrorService);
+
   private volcanoPlotDataRows: Array<VolcanoPlotDataRow> = [];
   public volcanoPlotFCHeaders: Array<string>;
   public volcanoPlotPHeaders: Array<string>;
@@ -29,14 +33,11 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
   private yScale: any;
   showZeroWarning: boolean;
 
-  constructor(
-    private volcanoPlotService: VolcanoPlotService,
-    fileResource: FileResource,
-    sessionDataService: SessionDataService,
-    private plotService: PlotService,
-    visualizationTSVService: VisualizationTSVService,
-    private restErrorService2: RestErrorService,
-  ) {
+  constructor() {
+    const fileResource = inject(FileResource);
+    const sessionDataService = inject(SessionDataService);
+    const visualizationTSVService = inject(VisualizationTSVService);
+
     super(fileResource, sessionDataService, visualizationTSVService);
   }
 

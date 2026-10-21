@@ -10,6 +10,7 @@ import {
   SimpleChanges,
   ViewChild,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import type {
   OnProgressParameters,
@@ -219,6 +220,9 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class PdfViewerComponent implements OnChanges, OnDestroy {
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private ngZone = inject(NgZone);
+
   @Input() src: string;
   // the page shown when not all pages are shown, starting from 1
   @Input() page = 1;
@@ -260,11 +264,6 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   private pendingProgress: OnProgressParameters;
   private progressTimeout: ReturnType<typeof setTimeout>;
   private destroyed = false;
-
-  constructor(
-    private host: ElementRef<HTMLElement>,
-    private ngZone: NgZone,
-  ) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.src) {

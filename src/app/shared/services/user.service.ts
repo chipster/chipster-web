@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Role, User } from "chipster-js-common";
 
@@ -14,13 +14,11 @@ import { ConfigService } from "./config.service";
 
 @Injectable({ providedIn: "root" })
 export class UserService {
-  constructor(
-    private store: Store<any>,
-    private authenticationService: AuthenticationService,
-    private sessionResource: SessionResource,
-    private configService: ConfigService,
-    private authHttpClient: AuthHttpClientService,
-  ) {}
+  private store = inject<Store<any>>(Store);
+  private authenticationService = inject(AuthenticationService);
+  private sessionResource = inject(SessionResource);
+  private configService = inject(ConfigService);
+  private authHttpClient = inject(AuthHttpClientService);
 
   public updateLatestSession(sessionId: string, sourceSessionId?: string) {
     this.updateLatestSessionToStore(sessionId, sourceSessionId);

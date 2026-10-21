@@ -1,6 +1,6 @@
 // Super class for scatterplot and volcanoplot
 
-import { Directive, Input, NgZone, OnChanges, OnDestroy } from "@angular/core";
+import { Directive, Input, NgZone, OnChanges, OnDestroy, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
@@ -53,11 +53,11 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   private resizeObserver: ResizeObserver;
   private lastPlotWidth: number;
 
-  constructor(
-    fileResource: FileResource,
-    sessionDataService: SessionDataService,
-    visualizationTSVService: VisualizationTSVService,
-  ) {
+  constructor() {
+    const fileResource = inject(FileResource);
+    const sessionDataService = inject(SessionDataService);
+    const visualizationTSVService = inject(VisualizationTSVService);
+
     this.fileResource = fileResource;
     this.sessionDataService = sessionDataService;
     this.visualizationTSVService = visualizationTSVService;

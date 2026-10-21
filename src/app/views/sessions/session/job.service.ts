@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Job, MetadataFile } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, interval, of } from "rxjs";
@@ -16,17 +16,15 @@ import { SchedulerResource } from "../../../shared/resources/scheduler-resource"
 
 @Injectable({ providedIn: "root" })
 export class JobService {
-  readonly APPLICATION_VERSIONS_FILENAME = "application-versions.json";
+  private sessionDataService = inject(SessionDataService);
+  private toolService = inject(ToolService);
+  private restErrorService = inject(RestErrorService);
+  private datasetService = inject(DatasetService);
+  private toolSelectionService = inject(ToolSelectionService);
+  private dialogModalService = inject(DialogModalService);
+  private schedulerResource = inject(SchedulerResource);
 
-  constructor(
-    private sessionDataService: SessionDataService,
-    private toolService: ToolService,
-    private restErrorService: RestErrorService,
-    private datasetService: DatasetService,
-    private toolSelectionService: ToolSelectionService,
-    private dialogModalService: DialogModalService,
-    private schedulerResource: SchedulerResource,
-  ) {}
+  readonly APPLICATION_VERSIONS_FILENAME = "application-versions.json";
 
   static isRunning(job: Job): boolean {
     return job.state === "NEW" || job.state === "WAITING" || job.state === "SCHEDULED" || job.state === "RUNNING";

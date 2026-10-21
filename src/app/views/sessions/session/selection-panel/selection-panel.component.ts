@@ -1,5 +1,5 @@
 import { Dataset, Tool, Job } from "chipster-js-common";
-import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { SessionDataService } from "../session-data.service";
@@ -20,6 +20,12 @@ import { FileComponent } from "../selectiondetails/selected-files/selected-files
   imports: [ToolDetailsComponent, JobComponent, FileComponent],
 })
 export class SelectionPanelComponent implements OnInit, OnDestroy {
+  selectionService = inject(SelectionService);
+  sessionDataService = inject(SessionDataService);
+  private toolSelectionService = inject(ToolSelectionService);
+  settingsService = inject(SettingsService);
+  private errorService = inject(ErrorService);
+
   @Input()
   sessionData: SessionData;
   @Input()
@@ -36,14 +42,6 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
   public showJob = false;
 
   private unsubscribe: Subject<any> = new Subject();
-
-  constructor(
-    public selectionService: SelectionService,
-    public sessionDataService: SessionDataService,
-    private toolSelectionService: ToolSelectionService,
-    public settingsService: SettingsService,
-    private errorService: ErrorService,
-  ) {}
 
   ngOnInit() {
     // FIXME after tool selection refactoring

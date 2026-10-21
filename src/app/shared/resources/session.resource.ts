@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Job, JobState, Label, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import { chunk, clone } from "lodash-es";
@@ -16,12 +16,10 @@ import { SchedulerResource } from "./scheduler-resource";
 
 @Injectable({ providedIn: "root" })
 export class SessionResource {
-  constructor(
-    private configService: ConfigService,
-    private http: HttpClient,
-    private tokenService: TokenService,
-    private schedulerResource: SchedulerResource,
-  ) {}
+  private configService = inject(ConfigService);
+  private http = inject(HttpClient);
+  private tokenService = inject(TokenService);
+  private schedulerResource = inject(SchedulerResource);
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
     return this.configService.getSessionDbUrl().pipe(

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { GridOptions, GridReadyEvent } from "ag-grid-community";
 import log from "loglevel";
@@ -34,6 +34,11 @@ enum DeleteStatus {
   imports: [AgGridAngular],
 })
 export class ConfirmDeleteModalComponent implements OnInit {
+  private activeModal = inject(NgbActiveModal);
+  private userService = inject(UserService);
+  private restErrorService = inject(RestErrorService);
+  private sessionDbAdminService = inject(SessionDbAdminService);
+
   @Input() users: any[];
   @Input() deleteAction: DeleteAction;
 
@@ -54,13 +59,6 @@ export class ConfirmDeleteModalComponent implements OnInit {
 
   private cancelDelete$ = new Subject();
   api: any;
-
-  constructor(
-    private activeModal: NgbActiveModal,
-    private userService: UserService,
-    private restErrorService: RestErrorService,
-    private sessionDbAdminService: SessionDbAdminService,
-  ) {}
 
   ngOnInit(): void {
     // set title and message according to the deleteAction

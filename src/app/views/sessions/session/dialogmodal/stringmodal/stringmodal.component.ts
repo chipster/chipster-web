@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { FormsModule } from "@angular/forms";
 
@@ -8,6 +8,8 @@ import { FormsModule } from "@angular/forms";
   imports: [FormsModule],
 })
 export class StringModalComponent implements AfterViewInit {
+  private activeModal = inject(NgbActiveModal);
+
   @Input()
   buttonText: string;
   @Input()
@@ -21,8 +23,6 @@ export class StringModalComponent implements AfterViewInit {
 
   @ViewChild("valueInput")
   valueInput;
-
-  constructor(private activeModal: NgbActiveModal) {}
 
   ngAfterViewInit() {
     setTimeout(() => {

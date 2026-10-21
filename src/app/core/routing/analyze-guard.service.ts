@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
@@ -13,11 +13,9 @@ import { UserService } from "../../shared/services/user.service";
  */
 @Injectable({ providedIn: "root" })
 export class AnalyzeGuard {
-  constructor(
-    private routeService: RouteService,
-    private sessionResource: SessionResource,
-    private userService: UserService,
-  ) {}
+  private routeService = inject(RouteService);
+  private sessionResource = inject(SessionResource);
+  private userService = inject(UserService);
 
   canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean> {
     return this.userService.getLatestSession().pipe(

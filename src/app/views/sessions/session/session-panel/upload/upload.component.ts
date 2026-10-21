@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
 import { UploadModalComponent } from "./upload-modal.component";
@@ -13,6 +13,10 @@ import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-
   imports: [NGB_DROPDOWN_IMPORTS],
 })
 export class UploadComponent implements AfterViewInit, OnInit {
+  private modalService = inject(NgbModal);
+  private uploadService = inject(UploadService);
+  private datasetModalService = inject(DatasetModalService);
+
   @Input() sessionData: SessionData;
 
   @ViewChild("uploadFilesButton") uploadFilesButton;
@@ -21,12 +25,6 @@ export class UploadComponent implements AfterViewInit, OnInit {
   private flow: any;
   private modalOpen = false;
   private modalRef: any;
-
-  constructor(
-    private modalService: NgbModal,
-    private uploadService: UploadService,
-    private datasetModalService: DatasetModalService,
-  ) {}
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(this.fileAdded.bind(this), this.fileSuccess.bind(this));

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
@@ -10,6 +10,8 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   imports: [FormsModule, ReactiveFormsModule, LocalDatePipe],
 })
 export class EditNewsModalComponent implements OnInit {
+  private activeModal = inject(NgbActiveModal);
+
   public modalTitle: string;
   @Input()
   newsItem: NewsItem;
@@ -26,8 +28,6 @@ export class EditNewsModalComponent implements OnInit {
     shortTitle: this.shortTitleControl,
     body: this.bodyControl,
   });
-
-  constructor(private activeModal: NgbActiveModal) {}
 
   ngOnInit(): void {
     if (this.newsItem == null) {

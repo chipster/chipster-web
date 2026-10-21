@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import {
   Dataset,
   EventType,
@@ -32,21 +32,19 @@ import { SessionService } from "./session.service";
 
 @Injectable({ providedIn: "root" })
 export class SessionDataService {
-  private sessionId: string;
+  private sessionResource = inject(SessionResource);
+  private sessionService = inject(SessionService);
+  private fileResource = inject(FileResource);
+  private errorService = inject(ErrorService);
+  private tokenService = inject(TokenService);
+  private sessionEventService = inject(SessionEventService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private toastService = inject(ToastService);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private tabService = inject(TabService);
 
-  constructor(
-    private sessionResource: SessionResource,
-    private sessionService: SessionService,
-    private fileResource: FileResource,
-    private errorService: ErrorService,
-    private tokenService: TokenService,
-    private sessionEventService: SessionEventService,
-    private selectionHandlerService: SelectionHandlerService,
-    private toastService: ToastService,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-    private tabService: TabService,
-  ) {}
+  private sessionId: string;
 
   getSessionId(): string {
     return this.sessionId;

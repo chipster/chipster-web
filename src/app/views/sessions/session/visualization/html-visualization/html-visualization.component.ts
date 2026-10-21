@@ -8,6 +8,7 @@ import {
   OnInit,
   ViewChild,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { fromEvent, Subject, Subscription } from "rxjs";
@@ -72,6 +73,11 @@ import { StatusComponent } from "../../../../../shared/components/status.compone
   imports: [StatusComponent],
 })
 export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy {
+  private fileResource = inject(FileResource);
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+  private ngZone = inject(NgZone);
+
   private static readonly SIZE_MESSAGE_TYPE = "chipster-html-visualization-size";
   private static readonly SCROLL_MESSAGE_TYPE = "chipster-html-visualization-scroll";
   private static readonly MAX_FRAME_SIZE_PX = 100_000;
@@ -299,13 +305,6 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
   private unsubscribe: Subject<any> = new Subject();
   private messageSubscription: Subscription;
   state: LoadState;
-
-  constructor(
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-    private ngZone: NgZone,
-  ) {}
 
   ngOnInit() {
     // listen outside Angular, because the size messages can arrive on every animation frame and

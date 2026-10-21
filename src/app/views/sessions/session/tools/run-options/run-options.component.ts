@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, ChangeDetectionStrategy, inject } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
 import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
@@ -10,12 +10,12 @@ import { ValidatedTool } from "../ToolSelection";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class RunOptionsComponent implements OnChanges {
+  private toolService = inject(ToolService);
+
   @Input() sessionData: SessionData;
   @Input() validatedTool: ValidatedTool;
 
   ready = false;
-
-  constructor(private toolService: ToolService) {}
 
   ngOnChanges() {
     if (this.validatedTool != null) {

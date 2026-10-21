@@ -1,5 +1,5 @@
 import { HttpParams } from "@angular/common/http";
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
 import {
   UntypedFormArray,
   UntypedFormBuilder,
@@ -29,6 +29,13 @@ import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
   imports: [FormsModule, ReactiveFormsModule, NgbInputDatepicker, NgbPagination, BytesPipe],
 })
 export class HistoryComponent implements OnInit {
+  private configService = inject(ConfigService);
+  private errorHandlerService = inject(RestErrorService);
+  private auhtHttpClient = inject(AuthHttpClientService);
+  private formBuilder = inject(UntypedFormBuilder);
+  private modalService = inject(NgbModal);
+  private tokenService = inject(TokenService);
+
   readonly comparisonIs = "is";
   readonly comparisonIsNot = "is not";
   readonly attributeUserName = "createdBy";
@@ -47,15 +54,6 @@ export class HistoryComponent implements OnInit {
   collectionSize = 70;
   jobNumber = 0;
   updateTime = null;
-
-  constructor(
-    private configService: ConfigService,
-    private errorHandlerService: RestErrorService,
-    private auhtHttpClient: AuthHttpClientService,
-    private formBuilder: UntypedFormBuilder,
-    private modalService: NgbModal,
-    private tokenService: TokenService,
-  ) {}
 
   ngOnInit() {
     this.stringFiltersFormArray = this.formBuilder.array([]);

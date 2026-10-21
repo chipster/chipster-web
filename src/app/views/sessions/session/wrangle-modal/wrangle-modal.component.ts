@@ -1,6 +1,6 @@
 // registers the ag-grid modules and theme, before any grid is created
 import "../../../../shared/ag-grid-setup";
-import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
@@ -39,15 +39,13 @@ export interface ColumnItem {
   imports: [AgGridAngular, MultiDropdownComponent, FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class WrangleModalComponent implements OnInit {
-  constructor(
-    public activeModal: NgbActiveModal,
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService,
-    private typeTagService: TypeTagService,
-    private restErrorService: RestErrorService,
-    private tsvService: TsvService,
-    private datasetService: DatasetService,
-  ) {}
+  activeModal = inject(NgbActiveModal);
+  private fileResource = inject(FileResource);
+  private sessionDataService = inject(SessionDataService);
+  private typeTagService = inject(TypeTagService);
+  private restErrorService = inject(RestErrorService);
+  private tsvService = inject(TsvService);
+  private datasetService = inject(DatasetService);
 
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;

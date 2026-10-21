@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import { RouteService } from "../../shared/services/route.service";
 import { TokenService } from "../authentication/token.service";
@@ -8,10 +8,8 @@ import { TokenService } from "../authentication/token.service";
  */
 @Injectable({ providedIn: "root" })
 export class LandGuard {
-  constructor(
-    private tokenService: TokenService,
-    private routeService: RouteService,
-  ) {}
+  private tokenService = inject(TokenService);
+  private routeService = inject(RouteService);
 
   canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): boolean {
     if (this.tokenService.isTokenValid()) {

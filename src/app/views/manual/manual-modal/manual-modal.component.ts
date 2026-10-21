@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Tool } from "chipster-js-common";
 import { ToolService } from "../../sessions/session/tools/tool.service";
@@ -32,10 +32,8 @@ import { AsyncPipe } from "@angular/common";
   ],
 })
 export class ManualModalComponent {
-  @Input() tool: Tool;
+  activeModal = inject(NgbActiveModal);
+  toolService = inject(ToolService);
 
-  constructor(
-    public activeModal: NgbActiveModal,
-    public toolService: ToolService,
-  ) {}
+  @Input() tool: Tool;
 }

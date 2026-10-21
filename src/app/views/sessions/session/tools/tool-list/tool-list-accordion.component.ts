@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
 import { cloneDeep } from "lodash-es";
 import { Subject } from "rxjs";
@@ -21,6 +21,9 @@ import { ToolListItemComponent } from "./tool-list-item/tool-list-item.component
   imports: [NgClass, SearchBoxComponent, ScrollerComponent, ToolListItemComponent, CategoryPipe, ModulePipe],
 })
 export class ToolListAccordionComponent implements OnInit {
+  private pipeService = inject(PipeService);
+  private toolSelectionService = inject(ToolSelectionService);
+
   @Input()
   private sessionData: SessionData;
   @Input()
@@ -48,11 +51,6 @@ export class ToolListAccordionComponent implements OnInit {
   selectedCategory: Category = null; // used in modal to keep track of which category has been selected
 
   selectTool$ = new Subject();
-
-  constructor(
-    private pipeService: PipeService,
-    private toolSelectionService: ToolSelectionService,
-  ) {}
 
   ngOnInit() {
     // TODO why copies?

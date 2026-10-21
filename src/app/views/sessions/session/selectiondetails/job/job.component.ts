@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+  inject,
+} from "@angular/core";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
@@ -27,6 +36,14 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   imports: [DatasetParameterListComponent, LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
 })
 export class JobComponent implements OnInit, OnDestroy {
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private selectionService = inject(SelectionService);
+  private sessionDataService = inject(SessionDataService);
+  private sessionEventService = inject(SessionEventService);
+  private errorService = inject(ErrorService);
+  private toolService = inject(ToolService);
+  private jobService = inject(JobService);
+
   @Input() sessionData: SessionData;
   @Input() tools: Tool[];
   // the jobs modal closes on it
@@ -75,16 +92,6 @@ export class JobComponent implements OnInit, OnDestroy {
   containerMemoryLimit = null;
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
   outputListForView: Array<JobOutput> = [];
-
-  constructor(
-    private selectionHandlerService: SelectionHandlerService,
-    private selectionService: SelectionService,
-    private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService,
-    private errorService: ErrorService,
-    private toolService: ToolService,
-    private jobService: JobService,
-  ) {}
 
   ngOnInit() {
     // job selection events, get's current selection upon subscription

@@ -1,5 +1,5 @@
 import { HttpParams } from "@angular/common/http";
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Role } from "chipster-js-common";
 import { mergeMap } from "rxjs/operators";
@@ -19,6 +19,11 @@ import { StatusComponent } from "../../../shared/components/status.component";
   imports: [FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class StatisticsComponent implements OnInit {
+  private configService = inject(ConfigService);
+  private errorHandlerService = inject(RestErrorService);
+  private auhtHttpClient = inject(AuthHttpClientService);
+  private tokenService = inject(TokenService);
+
   readonly IGNORE_USERS_PARAMS = "ignoreUsers";
 
   years = ["2017", "2018", "2019", "2020", "2021", "2022"];
@@ -38,13 +43,6 @@ export class StatisticsComponent implements OnInit {
   jobCount: number;
 
   state = LoadState.Ready;
-
-  constructor(
-    private configService: ConfigService,
-    private errorHandlerService: RestErrorService,
-    private auhtHttpClient: AuthHttpClientService,
-    private tokenService: TokenService,
-  ) {}
 
   ngOnInit(): void {
     this.configService.get(ConfigService.KEY_STATISTICS_IGNORE_USERS).subscribe({

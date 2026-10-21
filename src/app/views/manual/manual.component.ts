@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { AfterViewInit, Component, Input, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { AfterViewInit, Component, Input, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -29,6 +29,12 @@ import { StaticHtmlComponent } from "./static-html/static-html.component";
   imports: [NgClass, StaticHtmlComponent],
 })
 export class ManualComponent implements OnDestroy, AfterViewInit {
+  private http = inject(HttpClient);
+  private activatedRoute = inject(ActivatedRoute);
+  private configService = inject(ConfigService);
+  private sanitizer = inject(DomSanitizer);
+  private restErrorService = inject(RestErrorService);
+
   private unsubscribe: Subject<any> = new Subject();
 
   @Input()
@@ -49,14 +55,6 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
 
   // set to null to avoid change detection error when the undefined is changed to null
   html: SafeHtml = null;
-
-  constructor(
-    private http: HttpClient,
-    private activatedRoute: ActivatedRoute,
-    private configService: ConfigService,
-    private sanitizer: DomSanitizer,
-    private restErrorService: RestErrorService,
-  ) {}
 
   /**
    * Listen for route changes and show the corresponding page

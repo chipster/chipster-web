@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -6,6 +6,8 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class BooleanModalComponent implements AfterViewInit {
+  private activeModal = inject(NgbActiveModal);
+
   @Input()
   okButtonText: string;
   @Input()
@@ -21,8 +23,6 @@ export class BooleanModalComponent implements AfterViewInit {
 
   @ViewChild("submitButton")
   submitButton;
-
-  constructor(private activeModal: NgbActiveModal) {}
 
   ngAfterViewInit() {
     // set focus to submit button every time the dialog is opened

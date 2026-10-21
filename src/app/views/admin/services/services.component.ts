@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, of } from "rxjs";
@@ -18,16 +18,14 @@ import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
   imports: [NgbPopover],
 })
 export class ServicesComponent implements OnInit {
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private authHttpClient = inject(AuthHttpClientService);
+  private tokenService = inject(TokenService);
+
   services: Service[];
   aliveMap: Map<Service, string>;
   private statusMap: Map<string, Record<string, any>>;
-
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private authHttpClient: AuthHttpClientService,
-    private tokenService: TokenService,
-  ) {}
 
   ngOnInit(): void {
     this.services = [];

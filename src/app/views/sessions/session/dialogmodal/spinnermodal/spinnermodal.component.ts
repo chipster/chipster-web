@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { AfterViewInit, Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Observable } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -8,13 +8,11 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class SpinnerModalComponent implements AfterViewInit {
+  private activeModal = inject(NgbActiveModal);
+  private restErrorService = inject(RestErrorService);
+
   @Input() message: string;
   @Input() observable: Observable<any>;
-
-  constructor(
-    private activeModal: NgbActiveModal,
-    private restErrorService: RestErrorService,
-  ) {}
 
   ngAfterViewInit() {
     this.observable.subscribe({

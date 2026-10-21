@@ -7,6 +7,7 @@ import {
   OnDestroy,
   SimpleChanges,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -29,15 +30,13 @@ import { ManualUtils } from "../manual-utils";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges {
+  private elementRef = inject(ElementRef);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+
   @Input()
   html: SafeHtml;
   private anchors: any;
-
-  constructor(
-    private elementRef: ElementRef,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-  ) {}
 
   ngAfterViewInit() {
     this.registerAnchorEventListeners();

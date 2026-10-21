@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ElementRef, Input, OnChanges, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { every, includes } from "lodash-es";
@@ -28,6 +28,13 @@ import { FormsModule } from "@angular/forms";
   imports: [FilesDetailsComponent, FormsModule],
 })
 export class VennDiagramComponent implements OnChanges {
+  private tsvService = inject(TsvService);
+  private toastService = inject(ToastService);
+  private venndiagramService = inject(VennDiagramService);
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+
   @Input()
   selectedDatasets: Array<Dataset>;
 
@@ -46,15 +53,6 @@ export class VennDiagramComponent implements OnChanges {
   @ViewChild("vizu") el: ElementRef;
 
   private readonly autoDrawLimit = 1 * 1024 * 1024;
-
-  constructor(
-    private tsvService: TsvService,
-    private toastService: ToastService,
-    private venndiagramService: VennDiagramService,
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-  ) {}
 
   ngOnChanges() {
     this.isEnabled = false;

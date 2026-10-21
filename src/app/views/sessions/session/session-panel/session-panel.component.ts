@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset, Label, Module, Tool } from "chipster-js-common";
 import { range } from "lodash-es";
 import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
@@ -51,6 +51,16 @@ import { NgClass } from "@angular/common";
   ],
 })
 export class SessionPanelComponent {
+  sessionDataService = inject(SessionDataService);
+  getSessionDataService = inject(GetSessionDataService);
+  private pipeService = inject(PipeService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  selectionService = inject(SelectionService);
+  private restErrorService = inject(RestErrorService);
+  private workflowGraphService = inject(WorkflowGraphService);
+  private labelsContextMenuService = inject(LabelsContextMenuService);
+  private datasetModalService = inject(DatasetModalService);
+
   @Input()
   sessionData: SessionData;
   @Input()
@@ -62,20 +72,7 @@ export class SessionPanelComponent {
 
   // Whether the "Select files with label" submenu in the toolbar labels
   // dropdown is currently open (controlled via mouseenter/mouseleave).
-  selectByLabelOpen = false;
-
-  // noinspection JSUnusedLocalSymbols
-  constructor(
-    public sessionDataService: SessionDataService, // used by template
-    public getSessionDataService: GetSessionDataService,
-    private pipeService: PipeService,
-    private selectionHandlerService: SelectionHandlerService,
-    public selectionService: SelectionService,
-    private restErrorService: RestErrorService,
-    private workflowGraphService: WorkflowGraphService,
-    private labelsContextMenuService: LabelsContextMenuService,
-    private datasetModalService: DatasetModalService,
-  ) {} // used by template
+  selectByLabelOpen = false; // used by template
 
   get labelMenuItems(): LabelMenuItem[] {
     return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData);

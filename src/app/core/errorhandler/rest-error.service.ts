@@ -1,11 +1,13 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import log from "loglevel";
 import { ErrorService } from "./error.service";
 import { ErrorButton, ErrorMessage } from "./errormessage";
 
 @Injectable({ providedIn: "root" })
 export class RestErrorService {
+  private errorService = inject(ErrorService);
+
   static isForbidden(error: HttpErrorResponse | any) {
     return RestErrorService.isHttpError(error, 403);
   }
@@ -33,8 +35,6 @@ export class RestErrorService {
   static isServerSideError(error: HttpErrorResponse) {
     return !RestErrorService.isClientOrConnectionError(error);
   }
-
-  constructor(private errorService: ErrorService) {}
 
   /**
    * Show an error with sensible actions based on the HTTP response

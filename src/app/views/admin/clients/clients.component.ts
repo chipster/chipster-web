@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Role } from "chipster-js-common";
 import { clone } from "lodash-es";
 import { mergeMap } from "rxjs/operators";
@@ -17,14 +17,12 @@ import { LocalDatePipe } from "../../../shared/pipes/local-date.pipe";
   imports: [LocalDatePipe],
 })
 export class ClientsComponent implements OnInit {
-  users: any[];
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private auhtHttpClient = inject(AuthHttpClientService);
+  private tokenService = inject(TokenService);
 
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private auhtHttpClient: AuthHttpClientService,
-    private tokenService: TokenService,
-  ) {}
+  users: any[];
 
   ngOnInit() {
     this.configService

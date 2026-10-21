@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Observable, of as observableOf } from "rxjs";
 import { mergeMap } from "rxjs/operators";
@@ -8,11 +8,9 @@ import { ConfigService } from "../services/config.service";
 
 @Injectable({ providedIn: "root" })
 export class FileResource {
-  constructor(
-    private configService: ConfigService,
-    private http: HttpClient,
-    private tokenService: TokenService,
-  ) {}
+  private configService = inject(ConfigService);
+  private http = inject(HttpClient);
+  private tokenService = inject(TokenService);
 
   /**
    *

@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { SessionData } from "../../../../model/session/session-data";
@@ -13,9 +13,9 @@ import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/s
   imports: [TextVisualizationComponent, SpreadsheetVisualizationComponent],
 })
 export class VisualizationModalComponent {
+  activeModal = inject(NgbActiveModal);
+
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;
   @Input() visualizationId: string;
-
-  constructor(public activeModal: NgbActiveModal) {}
 }

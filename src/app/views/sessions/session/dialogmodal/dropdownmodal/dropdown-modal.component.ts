@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 
@@ -8,6 +8,8 @@ import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-
   imports: [NGB_DROPDOWN_IMPORTS],
 })
 export class DropdownModalComponent implements OnInit {
+  private activeModal = inject(NgbActiveModal);
+
   @Input()
   buttonText: string;
   @Input()
@@ -21,8 +23,6 @@ export class DropdownModalComponent implements OnInit {
 
   optionKeys = [];
   value: any;
-
-  constructor(private activeModal: NgbActiveModal) {}
 
   ngOnInit() {
     this.optionKeys = Array.from(this.options.keys());

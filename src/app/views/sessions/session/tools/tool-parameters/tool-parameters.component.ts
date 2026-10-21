@@ -7,6 +7,7 @@ import {
   OnInit,
   Output,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
@@ -24,6 +25,9 @@ import { FormsModule } from "@angular/forms";
   imports: [FormsModule],
 })
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
+  toolService = inject(ToolService);
+  private toolSelectionService = inject(ToolSelectionService);
+
   @Input() validatedTool: ValidatedTool;
 
   @Output() parametersChanged: EventEmitter<any> = new EventEmitter();
@@ -35,12 +39,6 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   private parametersChangedThrottle = new Subject<any>();
 
   private unsubscribe: Subject<any> = new Subject();
-
-  // noinspection JSUnusedLocalSymbols
-  constructor(
-    public toolService: ToolService,
-    private toolSelectionService: ToolSelectionService, // private dropDown: NgbDropdown
-  ) {}
 
   ngOnInit() {
     this.parametersChangedThrottle

@@ -8,6 +8,7 @@ import {
   SimpleChanges,
   ViewEncapsulation,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Label, Module, Tool } from "chipster-js-common";
@@ -55,6 +56,30 @@ import { WorkflowGraphService } from "./workflow-graph.service";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
+  private sessionDataService = inject(SessionDataService);
+  private sessionEventService = inject(SessionEventService);
+  private selectionService = inject(SelectionService);
+  private pipeService = inject(PipeService);
+  private workflowGraphService = inject(WorkflowGraphService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private store = inject<Store<any>>(Store);
+  private datasetModalService = inject(DatasetModalService);
+  private dialogModalService = inject(DialogModalService);
+  private nativeElementService = inject(NativeElementService);
+  private restErrorService = inject(RestErrorService);
+  private errorService = inject(ErrorService);
+  private settingService = inject(SettingsService);
+  private datasetService = inject(DatasetService);
+  private visualizationEventService = inject(VisualizationEventService);
+  private getSessionDataService = inject(GetSessionDataService);
+  private toolsService = inject(ToolsService);
+  private datasetContextMenuService = inject(DatasetContextMenuService);
+  private labelsContextMenuService = inject(LabelsContextMenuService);
+  private hotkeyService = inject(HotkeyService);
+  private preferencesService = inject(PreferencesService);
+  private dropdownCloseService = inject(DropdownCloseService);
+  private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
   svg: d3.Selection<SVGSVGElement, {}, HTMLElement, {}>;
   @Input()
   datasetsMap: Map<string, Dataset>;
@@ -87,33 +112,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   // private readonly primaryColor = "#007bff"; // bootstap primary
   private readonly primaryColor = "#006fe6"; // bootstrap primary darken 5%
   private selectedDatasetSourceJob: Job;
-
-  constructor(
-    private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService,
-    private selectionService: SelectionService,
-    private pipeService: PipeService,
-    private workflowGraphService: WorkflowGraphService,
-    private selectionHandlerService: SelectionHandlerService,
-    private store: Store<any>,
-    // private store: Store<Dataset[]>,
-    private datasetModalService: DatasetModalService,
-    private dialogModalService: DialogModalService,
-    private nativeElementService: NativeElementService,
-    private restErrorService: RestErrorService,
-    private errorService: ErrorService,
-    private settingService: SettingsService,
-    private datasetService: DatasetService,
-    private visualizationEventService: VisualizationEventService,
-    private getSessionDataService: GetSessionDataService,
-    private toolsService: ToolsService,
-    private datasetContextMenuService: DatasetContextMenuService,
-    private labelsContextMenuService: LabelsContextMenuService,
-    private hotkeyService: HotkeyService,
-    private preferencesService: PreferencesService,
-    private dropdownCloseService: DropdownCloseService,
-    private elementRef: ElementRef<HTMLElement>,
-  ) {}
 
   // actually selected datasets
   selectedDatasets: Array<Dataset>;

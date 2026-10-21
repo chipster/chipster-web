@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, Output, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -19,6 +19,11 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   imports: [NgClass, LinkButtonComponent, AsyncPipe, LocalDatePipe],
 })
 export class JobListComponent implements OnChanges {
+  private readonly selectionService = inject(SelectionService);
+  private readonly sessionDataService = inject(SessionDataService);
+  private readonly dialogModalService = inject(DialogModalService);
+  private readonly errorService = inject(ErrorService);
+
   @Input() jobs: Job[];
   jobsSorted: Job[];
 
@@ -26,13 +31,6 @@ export class JobListComponent implements OnChanges {
   runningJobCount = 0;
 
   @Output() private readonly jobSelected = new EventEmitter<Job>();
-
-  constructor(
-    private readonly selectionService: SelectionService,
-    private readonly sessionDataService: SessionDataService,
-    private readonly dialogModalService: DialogModalService,
-    private readonly errorService: ErrorService,
-  ) {}
 
   ngOnChanges() {
     this.jobsSorted = [...this.jobs].sort((a, b) => {

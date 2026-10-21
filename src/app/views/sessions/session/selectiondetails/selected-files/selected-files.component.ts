@@ -8,6 +8,7 @@ import {
   Output,
   SimpleChanges,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
@@ -36,6 +37,17 @@ import { VisualizationsComponent } from "../../visualization/visualizations.comp
   imports: [NGB_DROPDOWN_IMPORTS, LabelMenuItemContentComponent, VisualizationsComponent],
 })
 export class FileComponent implements OnInit, OnChanges, OnDestroy {
+  selectionService = inject(SelectionService);
+  private sessionDataService = inject(SessionDataService);
+  private datasetModalService = inject(DatasetModalService);
+  private dialogModalService = inject(DialogModalService);
+  private restErrorService = inject(RestErrorService);
+  private sessionEventService = inject(SessionEventService);
+  private getSessionDataService = inject(GetSessionDataService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private datasetContextMenuService = inject(DatasetContextMenuService);
+  private labelsContextMenuService = inject(LabelsContextMenuService);
+
   @Input()
   dataset: Dataset;
   @Input()
@@ -53,19 +65,6 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   sourceJob: Job;
   modulesMap: Map<string, Module>;
   labelsSubmenuOpen = false;
-
-  constructor(
-    public selectionService: SelectionService, // used in template
-    private sessionDataService: SessionDataService,
-    private datasetModalService: DatasetModalService,
-    private dialogModalService: DialogModalService,
-    private restErrorService: RestErrorService,
-    private sessionEventService: SessionEventService,
-    private getSessionDataService: GetSessionDataService,
-    private selectionHandlerService: SelectionHandlerService,
-    private datasetContextMenuService: DatasetContextMenuService,
-    private labelsContextMenuService: LabelsContextMenuService,
-  ) {}
 
   get labelMenuItems(): LabelMenuItem[] {
     return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData);

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import * as d3 from "d3";
 import Point from "../../views/sessions/session/visualization/model/point";
 import { VisualizationTSVService } from "./visualizationTSV.service";
@@ -32,7 +32,7 @@ export function pointerPosition(event: any, node: Element): Point {
 
 @Injectable({ providedIn: "root" })
 export class PlotService {
-  constructor(private visualizationTSVService: VisualizationTSVService) {}
+  private visualizationTSVService = inject(VisualizationTSVService);
 
   // Get the points inside the selection Rectangle
   getSelectedDataPoints(

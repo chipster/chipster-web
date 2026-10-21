@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { SessionEvent, WsEvent } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, Observable, Subject, throwError as observableThrowError } from "rxjs";
@@ -11,6 +11,10 @@ import { ConfigService } from "./config.service";
 
 @Injectable({ providedIn: "root" })
 export class WebSocketService {
+  private configService = inject(ConfigService);
+  private tokenService = inject(TokenService);
+  private errorService = inject(ErrorService);
+
   topic: string;
   private lastCloseCode: number | null = null;
 
@@ -20,12 +24,6 @@ export class WebSocketService {
   ruleStream$: Observable<SessionEvent>;
   wsSubject$: WebSocketSubject<WsEvent>;
   localSubject$: Subject<WsEvent>;
-
-  constructor(
-    private configService: ConfigService,
-    private tokenService: TokenService,
-    private errorService: ErrorService,
-  ) {}
 
   unsubscribe() {
     // can be null when session loading fails (e.g. expired token)

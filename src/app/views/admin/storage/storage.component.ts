@@ -1,6 +1,6 @@
 // registers the ag-grid modules and theme, before any grid is created
 import "../../../shared/ag-grid-setup";
-import { Component, OnInit, ViewChild, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ViewChild, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
 import { Role } from "chipster-js-common";
@@ -70,6 +70,16 @@ import { StatusComponent } from "../../../shared/components/status.component";
  *
  */
 export class StorageComponent implements OnInit {
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private authHttpClient = inject(AuthHttpClientService);
+  private modalService = inject(NgbModal);
+  private bytesPipe = inject(BytesPipe);
+  private tokenService = inject(TokenService);
+  private authenticationService = inject(AuthenticationService);
+  private userService = inject(UserService);
+  private sessionDbAdminService = inject(SessionDbAdminService);
+
   quotasMap: Map<string, any>;
 
   public combinedGridOptions: GridOptions;
@@ -203,18 +213,6 @@ export class StorageComponent implements OnInit {
   public listFilterText = "";
 
   @ViewChild("modalContent") modalContent: any;
-
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private authHttpClient: AuthHttpClientService,
-    private modalService: NgbModal,
-    private bytesPipe: BytesPipe,
-    private tokenService: TokenService,
-    private authenticationService: AuthenticationService,
-    private userService: UserService,
-    private sessionDbAdminService: SessionDbAdminService,
-  ) {}
 
   ngOnInit() {
     this.refresh();

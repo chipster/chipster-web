@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
@@ -24,6 +24,16 @@ import { NGB_DROPDOWN_IMPORTS } from "../../shared/directives/dropdown-close.dir
   imports: [RouterLinkActive, RouterLink, NGB_DROPDOWN_IMPORTS],
 })
 export class NavigationComponent implements OnInit {
+  private tokenService = inject(TokenService);
+  private authenticationService = inject(AuthenticationService);
+  private configService = inject(ConfigService);
+  private errorService = inject(ErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private modalService = inject(NgbModal);
+  private newsService = inject(NewsService);
+  private preferencesService = inject(PreferencesService);
+  private readonly hotkeyService = inject(HotkeyService);
+
   routerLinkAdmin = RouteService.PATH_ADMIN;
   routerLinkLogin = RouteService.PATH_LOGIN;
   routerLinkManual = RouteService.PATH_MANUAL;
@@ -37,19 +47,7 @@ export class NavigationComponent implements OnInit {
 
   news: NewsItem[];
   unreadNews: boolean = false;
-  unreadNewsCount: number = 0; // Add this new property
-
-  constructor(
-    private tokenService: TokenService,
-    private authenticationService: AuthenticationService,
-    private configService: ConfigService,
-    private errorService: ErrorService,
-    private dialogModalService: DialogModalService,
-    private modalService: NgbModal,
-    private newsService: NewsService,
-    private preferencesService: PreferencesService,
-    private readonly hotkeyService: HotkeyService,
-  ) {}
+  unreadNewsCount: number = 0;
 
   ngOnInit() {
     // apply configurable styles

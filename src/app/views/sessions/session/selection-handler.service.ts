@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import { Store } from "@ngrx/store";
 import {
@@ -15,7 +15,7 @@ import { CLEAR_SELECTED_TOOL } from "../../../state/tool.reducer";
  */
 @Injectable({ providedIn: "root" })
 export class SelectionHandlerService {
-  constructor(private store: Store<any>) {}
+  private store = inject<Store<any>>(Store);
 
   /*
    * @description: clear dataset & job & tool selections from store

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Observable, ReplaySubject } from "rxjs";
 import { SelectionService } from "../selection.service";
 
@@ -6,7 +6,9 @@ import { SelectionService } from "../selection.service";
 export class VisualizationEventService {
   private openPhenodataSubject = new ReplaySubject<boolean>(1);
 
-  constructor(selectionService: SelectionService) {
+  constructor() {
+    const selectionService = inject(SelectionService);
+
     selectionService.selectedDatasets$.subscribe(() => {
       this.phenodataSelected(false);
     });

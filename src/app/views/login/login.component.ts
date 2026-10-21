@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { UntypedFormGroup, FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -23,6 +23,16 @@ import { AuthButtonComponent } from "./auth-button.component";
   imports: [AuthButtonComponent, FormsModule],
 })
 export class LoginComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private authenticationService = inject(AuthenticationService);
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private routeService = inject(RouteService);
+  private tokenService = inject(TokenService);
+  private errorService = inject(ErrorService);
+  private oidcService = inject(OidcService);
+  private newsService = inject(NewsService);
+
   static CONF_KEY_JAAS_DESCRIPTION = "jaas-description";
 
   // hide this login page initially to avoid flash of it when returning from the SSO and
@@ -47,18 +57,6 @@ export class LoginComponent implements OnInit {
   public multipleLoginMethods = false;
 
   jaasDescription: string;
-
-  constructor(
-    private route: ActivatedRoute,
-    private authenticationService: AuthenticationService,
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private routeService: RouteService,
-    private tokenService: TokenService,
-    private errorService: ErrorService,
-    private oidcService: OidcService,
-    private newsService: NewsService,
-  ) {}
 
   ngOnInit() {
     // return url is needed in all cases, so start with it

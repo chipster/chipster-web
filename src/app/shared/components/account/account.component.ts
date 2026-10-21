@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { TokenService } from "../../../core/authentication/token.service";
 
@@ -9,10 +9,8 @@ import { TokenService } from "../../../core/authentication/token.service";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class AccountComponent {
-  constructor(
-    private tokenService: TokenService,
-    private activeModal: NgbActiveModal,
-  ) {}
+  private tokenService = inject(TokenService);
+  private activeModal = inject(NgbActiveModal);
 
   getAccountName(): string {
     return this.tokenService.getAccountName();

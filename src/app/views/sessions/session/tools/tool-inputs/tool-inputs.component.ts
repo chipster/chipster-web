@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, Output, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset, InputBinding, ToolInput } from "chipster-js-common";
 import { difference } from "lodash-es";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -21,14 +21,14 @@ interface BindingModel {
   imports: [FormsModule],
 })
 export class ToolInputsComponent implements OnChanges {
+  private toolService = inject(ToolService);
+
   @Input() sessionData: SessionData;
   @Input() validatedTool: ValidatedTool;
   @Output() updateBindings = new EventEmitter();
 
   bindingModels: BindingModel[];
   ready = false;
-
-  constructor(private toolService: ToolService) {}
 
   ngOnChanges() {
     if (this.validatedTool != null) {

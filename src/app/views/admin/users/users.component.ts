@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
 import { User } from "chipster-js-common";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthenticationService } from "../../../core/authentication/authentication-service";
@@ -13,12 +13,10 @@ import { LocalDatePipe } from "../../../shared/pipes/local-date.pipe";
   imports: [LocalDatePipe],
 })
 export class UsersComponent implements OnInit {
-  users: User[];
+  private restErrorService = inject(RestErrorService);
+  private authenticationService = inject(AuthenticationService);
 
-  constructor(
-    private restErrorService: RestErrorService,
-    private authenticationService: AuthenticationService,
-  ) {}
+  users: User[];
 
   ngOnInit() {
     this.users = [];

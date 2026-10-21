@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { ToolResource } from "../../resources/tool-resource";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -10,14 +10,12 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class ToolSourceComponent implements OnInit {
+  private toolResource = inject(ToolResource);
+  private restErrorService = inject(RestErrorService);
+
   source: string;
   @Input()
   selectedTool: Tool;
-
-  constructor(
-    private toolResource: ToolResource,
-    private restErrorService: RestErrorService,
-  ) {}
 
   ngOnInit() {
     this.toolResource.getSourceCode(this.selectedTool.name.id).subscribe({

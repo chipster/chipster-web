@@ -1,9 +1,9 @@
-import { ErrorHandler, Injectable } from "@angular/core";
+import { ErrorHandler, Injectable, inject } from "@angular/core";
 import { ErrorService } from "./error.service";
 
 @Injectable()
 export class AppErrorHandler implements ErrorHandler {
-  constructor(private errorService: ErrorService) {}
+  private errorService = inject(ErrorService);
 
   handleError(error) {
     let msg;

@@ -7,6 +7,7 @@ import {
   OnDestroy,
   ViewChild,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -35,6 +36,16 @@ import { StatusComponent } from "../../../../../shared/components/status.compone
   imports: [LinkButtonComponent, StatusComponent],
 })
 export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, AfterViewInit {
+  private fileResource = inject(FileResource);
+  private sessionDataService = inject(SessionDataService);
+  private visualizationModalService = inject(VisualizationModalService);
+  private typeTagService = inject(TypeTagService);
+  private zone = inject(NgZone);
+  private restErrorService = inject(RestErrorService);
+  private spreadsheetService = inject(SpreadsheetService);
+  private nativeElementService = inject(NativeElementService);
+  private tsvService = inject(TsvService);
+
   @Input()
   dataset: Dataset;
   @Input()
@@ -69,18 +80,6 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: ht.Methods;
-
-  constructor(
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService,
-    private visualizationModalService: VisualizationModalService,
-    private typeTagService: TypeTagService,
-    private zone: NgZone,
-    private restErrorService: RestErrorService,
-    private spreadsheetService: SpreadsheetService,
-    private nativeElementService: NativeElementService,
-    private tsvService: TsvService,
-  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions

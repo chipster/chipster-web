@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
@@ -23,12 +23,10 @@ export interface ColumnItem {
   imports: [FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class SamplesModalComponent implements OnInit {
-  constructor(
-    public activeModal: NgbActiveModal,
-    private fb: UntypedFormBuilder,
-    private datasetService: DatasetService,
-    private sessionDataService: SessionDataService,
-  ) {}
+  activeModal = inject(NgbActiveModal);
+  private fb = inject(UntypedFormBuilder);
+  private datasetService = inject(DatasetService);
+  private sessionDataService = inject(SessionDataService);
 
   @Input() datasets: Dataset[];
   @Input() sessionData: SessionData;

@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of as observableOf } from "rxjs";
@@ -13,15 +13,15 @@ const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60; // ms
 
 @Injectable({ providedIn: "root" })
 export class AuthenticationService {
+  private configService = inject(ConfigService);
+  private tokenService = inject(TokenService);
+  private httpClient = inject(HttpClient);
+  private authHttpClient = inject(AuthHttpClientService);
+  private restErrorService = inject(RestErrorService);
+
   private tokenRefreshSchedulerId: number;
 
-  constructor(
-    private configService: ConfigService,
-    private tokenService: TokenService,
-    private httpClient: HttpClient,
-    private authHttpClient: AuthHttpClientService,
-    private restErrorService: RestErrorService,
-  ) {
+  constructor() {
     this.init();
   }
 

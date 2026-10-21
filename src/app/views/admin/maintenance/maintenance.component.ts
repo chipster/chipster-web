@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, from, Observable } from "rxjs";
@@ -21,6 +21,11 @@ import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
   imports: [FormsModule, NGB_DROPDOWN_IMPORTS, BytesPipe],
 })
 export class MaintenanceComponent implements OnInit {
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private authHttpClient = inject(AuthHttpClientService);
+  private tokenService = inject(TokenService);
+
   storageIds = [];
   free = new Map();
   total = new Map();
@@ -35,13 +40,6 @@ export class MaintenanceComponent implements OnInit {
   copySource: string;
   copyTarget: string;
   copyMaxSize: number;
-
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private authHttpClient: AuthHttpClientService,
-    private tokenService: TokenService,
-  ) {}
 
   ngOnInit() {
     let fileBroker: Service;

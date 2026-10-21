@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import log from "loglevel";
 import { Observable } from "rxjs";
 import { map, mergeMap, share } from "rxjs/operators";
@@ -13,21 +13,21 @@ import { ErrorService } from "../errorhandler/error.service";
 
 @Injectable({ providedIn: "root" })
 export class OidcService {
+  private httpClient = inject(HttpClient);
+  private restErrorService = inject(RestErrorService);
+  private errorService = inject(ErrorService);
+  private routeService = inject(RouteService);
+  private configService = inject(ConfigService);
+  private tokenService = inject(TokenService);
+  private newsService = inject(NewsService);
+
   readonly keyReturnUrl = "oidcReturnUrl";
   readonly keyLoginSessionId = "chipsterOidcLoginSessionId";
 
   // managers = new Map<string, UserManager>();
   oidcConfigs$: Observable<OidcConfig[]>;
 
-  constructor(
-    private httpClient: HttpClient,
-    private restErrorService: RestErrorService,
-    private errorService: ErrorService,
-    private routeService: RouteService,
-    private configService: ConfigService,
-    private tokenService: TokenService,
-    private newsService: NewsService,
-  ) {
+  constructor() {
     this.init();
   }
 

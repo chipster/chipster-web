@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import log from "loglevel";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState } from "../../../model/loadstate";
@@ -14,17 +14,15 @@ import { NewsItemComponent } from "./news-item.component";
   imports: [NewsItemComponent],
 })
 export class NewsListComponent implements OnInit {
+  private newsService = inject(NewsService);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+
   // @Input() news: NewsItem[];
   @Input() editable = false;
   public news: NewsItem[];
   public state: LoadState;
   public errorMessage: string = "";
-
-  constructor(
-    private newsService: NewsService,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-  ) {}
 
   ngOnInit(): void {
     this.getNews();

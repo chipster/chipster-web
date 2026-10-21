@@ -6,6 +6,7 @@ import {
   ViewChild,
   ViewEncapsulation,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { HotkeyService } from "../../services/hotkey.service";
@@ -18,15 +19,13 @@ import { HotkeyService } from "../../services/hotkey.service";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
+  private readonly hotkeyService = inject(HotkeyService);
+  private readonly modalService = inject(NgbModal);
+
   @ViewChild("content") contentTemplate!: TemplateRef<unknown>;
 
   private readonly unregister: Array<() => void> = [];
   private modalRef: NgbModalRef | null = null;
-
-  constructor(
-    private readonly hotkeyService: HotkeyService,
-    private readonly modalService: NgbModal,
-  ) {}
 
   ngOnInit() {
     const open = () => {

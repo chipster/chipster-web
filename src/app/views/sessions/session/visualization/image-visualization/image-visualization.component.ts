@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -14,6 +14,9 @@ import { StatusComponent } from "../../../../../shared/components/status.compone
   imports: [StatusComponent],
 })
 export class ImageVisualizationComponent implements OnChanges, OnDestroy {
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+
   @Input()
   private dataset: Dataset;
 
@@ -21,11 +24,6 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
 
   private unsubscribe: Subject<any> = new Subject();
   state: LoadState;
-
-  constructor(
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-  ) {}
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions

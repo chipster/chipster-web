@@ -7,6 +7,7 @@ import {
   Output,
   ViewChild,
   ChangeDetectionStrategy,
+  inject,
 } from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
 import { FormsModule } from "@angular/forms";
@@ -19,6 +20,8 @@ import { FormsModule } from "@angular/forms";
   imports: [FormsModule],
 })
 export class SearchBoxComponent implements OnInit, OnDestroy {
+  private readonly hotkeyService = inject(HotkeyService);
+
   @Input()
   placeholder: string;
   @Input()
@@ -38,8 +41,6 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   searchTerm: string;
 
   private unregisterHotkey: (() => void) | null = null;
-
-  constructor(private readonly hotkeyService: HotkeyService) {}
 
   ngOnInit() {
     if (this.focusHotkey) {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot, RouterLink } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import {
@@ -71,6 +71,26 @@ export enum ComponentState {
   ],
 })
 export class SessionComponent implements OnInit, OnDestroy {
+  private sessionEventService = inject(SessionEventService);
+  private sessionDataService = inject(SessionDataService);
+  private sessionResource = inject(SessionResource);
+  private sessionService = inject(SessionService);
+  selectionService = inject(SelectionService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private route = inject(ActivatedRoute);
+  private modalService = inject(NgbModal);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private tokenService = inject(TokenService);
+  routeService = inject(RouteService);
+  private settingsService = inject(SettingsService);
+  private userService = inject(UserService);
+  private toolsService = inject(ToolsService);
+  private configService = inject(ConfigService);
+  private toastService = inject(ToastService);
+  private errorService = inject(ErrorService);
+  private getSessionDataService = inject(GetSessionDataService);
+
   sessionData: SessionData;
   tools: Tool[];
   modules: Module[];
@@ -88,28 +108,6 @@ export class SessionComponent implements OnInit, OnDestroy {
   private PARAM_SOURCE_SESSION = "sourceSession";
 
   private unsubscribe: Subject<null> = new Subject();
-
-  constructor(
-    private sessionEventService: SessionEventService,
-    private sessionDataService: SessionDataService,
-    private sessionResource: SessionResource,
-    private sessionService: SessionService,
-    public selectionService: SelectionService,
-    private selectionHandlerService: SelectionHandlerService,
-    private route: ActivatedRoute,
-    private modalService: NgbModal,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-    private tokenService: TokenService,
-    public routeService: RouteService, // used from template
-    private settingsService: SettingsService,
-    private userService: UserService,
-    private toolsService: ToolsService,
-    private configService: ConfigService,
-    private toastService: ToastService,
-    private errorService: ErrorService,
-    private getSessionDataService: GetSessionDataService,
-  ) {}
 
   ngOnInit(): void {
     this.route.params

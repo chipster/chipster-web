@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { forkJoin, Observable } from "rxjs";
 import { catchError, mergeMap, tap } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
@@ -9,15 +9,13 @@ import { SessionResource } from "./session.resource";
 
 @Injectable({ providedIn: "root" })
 export class SessionWorkerResource {
-  public service: any;
+  private tokenService = inject(TokenService);
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private sessionResource = inject(SessionResource);
+  private http = inject(HttpClient);
 
-  constructor(
-    private tokenService: TokenService,
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private sessionResource: SessionResource,
-    private http: HttpClient,
-  ) {}
+  public service: any;
 
   packageSession(sessionId: string): Observable<any> {
     return forkJoin({

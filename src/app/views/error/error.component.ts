@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
 import { NavigationStart, Router } from "@angular/router";
 import log from "loglevel";
 import { EMPTY, from, Observable, of } from "rxjs";
@@ -17,14 +17,12 @@ import { DialogModalService } from "../sessions/session/dialogmodal/dialogmodal.
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class ErrorComponent implements OnInit {
-  constructor(
-    private errorService: ErrorService,
-    private routeService: RouteService,
-    private router: Router,
-    private toastService: ToastService,
-    private contactSupportService: ContactSupportService,
-    private dialogModalService: DialogModalService,
-  ) {}
+  private errorService = inject(ErrorService);
+  private routeService = inject(RouteService);
+  private router = inject(Router);
+  private toastService = inject(ToastService);
+  private contactSupportService = inject(ContactSupportService);
+  private dialogModalService = inject(DialogModalService);
 
   ngOnInit(): void {
     const navigationStart$ = this.router.events.pipe(filter((event) => event instanceof NavigationStart));

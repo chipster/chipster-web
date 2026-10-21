@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -31,6 +31,12 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   ],
 })
 export class SingleDatasetComponent implements OnInit, OnChanges {
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+  private datasetModalService = inject(DatasetModalService);
+  private toolService = inject(ToolService);
+  private datasetContextMenuService = inject(DatasetContextMenuService);
+
   @Input()
   dataset: Dataset;
   @Input()
@@ -52,14 +58,6 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   notesPlaceholderInactive = "click to edit";
   notesPlaceholderActive = "";
-
-  constructor(
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-    private datasetModalService: DatasetModalService,
-    private toolService: ToolService,
-    private datasetContextMenuService: DatasetContextMenuService,
-  ) {}
 
   ngOnInit() {
     this.sourceJob = this.getSourceJob(this.dataset);

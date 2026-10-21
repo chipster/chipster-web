@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import {
   Dataset,
   EventType,
@@ -24,6 +24,11 @@ import { FileState } from "chipster-js-common/lib/model/dataset";
 
 @Injectable({ providedIn: "root" })
 export class SessionEventService {
+  private sessionResource = inject(SessionResource);
+  private websocketService = inject(WebSocketService);
+  private errorService = inject(ErrorService);
+  private selectionService = inject(SelectionService);
+
   sessionId: string;
 
   datasetStream$: Observable<SessionEvent>;
@@ -44,13 +49,6 @@ export class SessionEventService {
 
   /** Show the same handleOrDrop() message again only after this many milliseconds */
   private static readonly ERROR_INTERVAL_MS = 30 * 1000;
-
-  constructor(
-    private sessionResource: SessionResource,
-    private websocketService: WebSocketService,
-    private errorService: ErrorService,
-    private selectionService: SelectionService,
-  ) {}
 
   unsubscribe() {
     this.websocketService.unsubscribe();
