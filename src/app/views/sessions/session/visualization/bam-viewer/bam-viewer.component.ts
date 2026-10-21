@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as pako from "pako";
 import { Subject } from "rxjs";
@@ -40,11 +40,11 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
   private disabled = false;
 
-  constructor(
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService,
-    private errorHandlerService: RestErrorService,
-  ) {
+  private fileResource = inject(FileResource);
+  private sessionDataService = inject(SessionDataService);
+  private errorHandlerService = inject(RestErrorService);
+
+  constructor() {
     this.bamRecordList = new Array<BamRecord>();
   }
 

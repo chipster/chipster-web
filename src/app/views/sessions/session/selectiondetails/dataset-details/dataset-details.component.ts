@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset } from "chipster-js-common";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
@@ -16,12 +16,10 @@ export class DatasetDetailsComponent implements OnInit {
 
   datasets: Array<Dataset>;
 
-  constructor(
-    public selectionService: SelectionService,
-    private sessionDataService: SessionDataService,
-    private store: Store<any>,
-    private errorService: ErrorService,
-  ) {}
+  selectionService = inject(SelectionService);
+  private sessionDataService = inject(SessionDataService);
+  private store = inject<Store<any>>(Store);
+  private errorService = inject(ErrorService);
 
   ngOnInit() {
     const datasets$ = this.store.select("selectedDatasets");
