@@ -1,11 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { TestBed } from "@angular/core/testing";
+import { beforeEach, describe, expect, it } from "vitest";
 import Point from "../model/point";
 import { ExpressionProfileService } from "./expression-profile.service";
+import { ExpressionProfileTSVService } from "./expression-profile-TSV.service";
 import Line from "./line";
 
 describe("ExpressionProfileService", () => {
-  // distanceToLine() doesn't use the tsv service
-  const service = new ExpressionProfileService(null);
+  let service: ExpressionProfileService;
+
+  beforeEach(() => {
+    // distanceToLine() doesn't use the tsv service
+    TestBed.configureTestingModule({ providers: [{ provide: ExpressionProfileTSVService, useValue: null }] });
+    service = TestBed.inject(ExpressionProfileService);
+  });
 
   describe("distanceToLine", () => {
     const horizontal = new Line("line1", 0, 0, 10, 0);

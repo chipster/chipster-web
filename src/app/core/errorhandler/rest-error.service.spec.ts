@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { HttpErrorResponse } from "@angular/common/http";
+import { TestBed } from "@angular/core/testing";
 import { ErrorMessage } from "./errormessage";
 import { ErrorService } from "./error.service";
 import { RestErrorService } from "./rest-error.service";
@@ -15,7 +16,8 @@ describe("RestErrorService", () => {
         shown = errorMessage;
       },
     } as unknown as ErrorService;
-    service = new RestErrorService(errorServiceStub);
+    TestBed.configureTestingModule({ providers: [{ provide: ErrorService, useValue: errorServiceStub }] });
+    service = TestBed.inject(RestErrorService);
   });
 
   describe("showError with a 400 Bad Request", () => {
