@@ -23,6 +23,12 @@ test.describe("logged out", () => {
     await expect(page).toHaveURL(new RegExp(`/analyze/${sessionId}$`));
     await expect(datasetNode(page, datasetId)).toBeVisible({ timeout: 30_000 });
   });
+
+  // the admin views are loaded lazily, and the guard is on the route that loads them
+  test("an admin link goes to the login", async ({ page }) => {
+    await page.goto("/admin/storage");
+    await expect(page).toHaveURL(/\/login\?returnUrl=%2Fadmin%2Fstorage$/);
+  });
 });
 
 /*

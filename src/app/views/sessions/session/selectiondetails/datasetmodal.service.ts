@@ -9,7 +9,6 @@ import { SessionData } from "../../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
-import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 import { LabelsModalComponent } from "../labels/labels-modal.component";
 import { SessionResource } from "../../../../shared/resources/session.resource";
@@ -20,6 +19,9 @@ import { v4 as uuidv4 } from "uuid";
 
 @Injectable({ providedIn: "root" })
 export class DatasetModalService {
+  // the size limit of the wrangle modal, in MB
+  static readonly WRANGLE_FILE_SIZE_LIMIT = 200;
+
   constructor(
     private ngbModal: NgbModal,
     private dialogModalService: DialogModalService,
@@ -66,7 +68,7 @@ export class DatasetModalService {
     this.openLabelsModal(selectedDatasets, sessionData);
   }
 
-  public openWrangleModal(dataset: Dataset, sessionData: SessionData): void {
+  public async openWrangleModal(dataset: Dataset, sessionData: SessionData): Promise<void> {
     if (!(
       this.typeTagService.has(sessionData, dataset, Tags.TEXT) ||
       this.typeTagService.has(sessionData, dataset, Tags.TSV)
@@ -78,16 +80,19 @@ export class DatasetModalService {
       return;
     }
 
-    if (dataset.size > WrangleModalComponent.FILE_SIZE_LIMIT * 1024 * 1024) {
+    if (dataset.size > DatasetModalService.WRANGLE_FILE_SIZE_LIMIT * 1024 * 1024) {
       this.dialogModalService.openNotificationModal(
         "Converting file not possible",
         "The file is too big to be converted. The size limit is " +
-          WrangleModalComponent.FILE_SIZE_LIMIT +
+          DatasetModalService.WRANGLE_FILE_SIZE_LIMIT +
           " MB at the moment but it will be removed in the future.",
       );
       return;
     }
 
+    // the modal is loaded with import(), so that ag-grid, which only it and the admin storage view need, stays
+    // out of the main bundle: the session list imports this service through the workflow graph
+    const { WrangleModalComponent } = await import("../wrangle-modal/wrangle-modal.component");
     const modalRef = this.ngbModal.open(WrangleModalComponent, {
       size: "xl",
     });

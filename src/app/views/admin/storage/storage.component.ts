@@ -1,3 +1,5 @@
+// registers the ag-grid modules and theme, before any grid is created
+import "../../../shared/ag-grid-setup";
 import { Component, OnInit, ViewChild, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";

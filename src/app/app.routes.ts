@@ -5,7 +5,6 @@ import { LandGuard } from "./core/routing/land-guard.service";
 import { DummyRouteComponent } from "./shared/components/dummy-route.component";
 import { AccessComponent } from "./views/access/access.component";
 import { AccessibilityComponent } from "./views/accessibility/accessibility.component";
-import { adminRoutes } from "./views/admin/admin.routes";
 import { ContactComponent } from "./views/contact/contact.component";
 import { MyllyHasMovedComponent } from "./views/error/mylly.component";
 import { NotFoundComponent } from "./views/error/not-found.component";
@@ -57,8 +56,16 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
 
-  // before the "" and "**" routes
-  ...adminRoutes,
+  /*
+   * Admin is loaded lazily: only admins use it, and it brings ag-grid. AuthGuard runs after
+   * the chunk has loaded, because the router loads children when it matches the route, but
+   * still before the view is shown. Before the "" and "**" routes.
+   */
+  {
+    path: "admin",
+    canActivate: [AuthGuard],
+    loadChildren: () => import("./views/admin/admin.routes").then((m) => m.adminRoutes),
+  },
 
   { path: "notfound", component: NotFoundComponent, pathMatch: "full" },
 
