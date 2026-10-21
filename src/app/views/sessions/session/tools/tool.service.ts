@@ -11,7 +11,6 @@ import { TypeTagService } from "../../../../shared/services/typetag.service";
 import { GetSessionDataService } from "../get-session-data.service";
 import { SelectionOption } from "../SelectionOption";
 import { SelectedToolWithInputs } from "./ToolSelection";
-import { SchedulerResource } from "../../../../shared/resources/scheduler-resource";
 
 @Injectable({ providedIn: "root" })
 export class ToolService {
@@ -19,7 +18,6 @@ export class ToolService {
   private tsvService = inject(TsvService);
   private configService = inject(ConfigService);
   private getSessionDataService = inject(GetSessionDataService);
-  private schedulerResource = inject(SchedulerResource);
 
   isSelectionParameter(parameter: ToolParameter) {
     return parameter.type === "ENUM" || parameter.type === "COLUMN_SEL" || parameter.type === "METACOLUMN_SEL";

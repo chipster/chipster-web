@@ -2,7 +2,6 @@ import { Dataset, Tool, Job } from "chipster-js-common";
 import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-import { SessionDataService } from "../session-data.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SelectionService } from "../selection.service";
 import { ToolSelectionService } from "../tool.selection.service";
@@ -21,7 +20,6 @@ import { FileComponent } from "../selectiondetails/selected-files/selected-files
 })
 export class SelectionPanelComponent implements OnInit, OnDestroy {
   selectionService = inject(SelectionService);
-  sessionDataService = inject(SessionDataService);
   private toolSelectionService = inject(ToolSelectionService);
   settingsService = inject(SettingsService);
   private errorService = inject(ErrorService);

@@ -12,7 +12,6 @@ import { SessionDataService } from "./session-data.service";
 import { ToolSelectionService } from "./tool.selection.service";
 import { ValidatedTool } from "./tools/ToolSelection";
 import { ToolService } from "./tools/tool.service";
-import { SchedulerResource } from "../../../shared/resources/scheduler-resource";
 
 @Injectable({ providedIn: "root" })
 export class JobService {
@@ -22,7 +21,6 @@ export class JobService {
   private datasetService = inject(DatasetService);
   private toolSelectionService = inject(ToolSelectionService);
   private dialogModalService = inject(DialogModalService);
-  private schedulerResource = inject(SchedulerResource);
 
   readonly APPLICATION_VERSIONS_FILENAME = "application-versions.json";
 

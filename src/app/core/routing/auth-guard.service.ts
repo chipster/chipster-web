@@ -1,5 +1,5 @@
 import { Injectable, inject } from "@angular/core";
-import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from "@angular/router";
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import log from "loglevel";
 import { Observable, forkJoin, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
@@ -11,7 +11,6 @@ import { TokenService } from "../authentication/token.service";
 @Injectable({ providedIn: "root" })
 export class AuthGuard {
   private tokenService = inject(TokenService);
-  private router = inject(Router);
   private authenticationService = inject(AuthenticationService);
   private configService = inject(ConfigService);
   private routeService = inject(RouteService);

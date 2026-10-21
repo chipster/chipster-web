@@ -12,9 +12,7 @@ import {
 import { Tool } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
-import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SchedulerResource } from "../../../../../shared/resources/scheduler-resource";
 import { FormsModule } from "@angular/forms";
 
@@ -41,9 +39,7 @@ interface Resources {
   imports: [FormsModule],
 })
 export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
-  toolService = inject(ToolService);
   private schedulerResource = inject(SchedulerResource);
-  private restErrorService = inject(RestErrorService);
 
   @Input() validatedTool: ValidatedTool;
   @Input() origTool: Tool;

@@ -5,7 +5,6 @@ import * as FileSaver from "file-saver";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { QuerySessionDataService } from "../../query-session-data.service";
-import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
 import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
@@ -38,7 +37,6 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   activeModal = inject(NgbActiveModal);
   querySessionDataService = inject(QuerySessionDataService);
   toolService = inject(ToolService);
-  sessionDataService = inject(SessionDataService);
   errorService = inject(ErrorService);
 
   @Input() dataset: Dataset;

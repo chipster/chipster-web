@@ -1,7 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
 import { Dataset, Label, Module, Tool } from "chipster-js-common";
 import { range } from "lodash-es";
-import { RestErrorService } from "../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetsearchPipe } from "../../../../shared/pipes/datasetsearch.pipe";
 import { PipeService } from "../../../../shared/services/pipeservice.service";
@@ -56,7 +55,6 @@ export class SessionPanelComponent {
   private pipeService = inject(PipeService);
   private selectionHandlerService = inject(SelectionHandlerService);
   selectionService = inject(SelectionService);
-  private restErrorService = inject(RestErrorService);
   private workflowGraphService = inject(WorkflowGraphService);
   private labelsContextMenuService = inject(LabelsContextMenuService);
   private datasetModalService = inject(DatasetModalService);

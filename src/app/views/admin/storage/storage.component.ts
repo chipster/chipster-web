@@ -15,7 +15,6 @@ import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 import { SessionDbAdminService } from "../../../shared/services/sessiondb-admin.service";
-import { UserService } from "../../../shared/services/user.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
 import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
@@ -77,7 +76,6 @@ export class StorageComponent implements OnInit {
   private bytesPipe = inject(BytesPipe);
   private tokenService = inject(TokenService);
   private authenticationService = inject(AuthenticationService);
-  private userService = inject(UserService);
   private sessionDbAdminService = inject(SessionDbAdminService);
 
   quotasMap: Map<string, any>;
