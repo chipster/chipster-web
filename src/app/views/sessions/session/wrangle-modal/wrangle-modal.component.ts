@@ -1,3 +1,5 @@
+// registers the ag-grid modules and theme, before any grid is created
+import "../../../../shared/ag-grid-setup";
 import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
@@ -46,8 +48,6 @@ export class WrangleModalComponent implements OnInit {
     private tsvService: TsvService,
     private datasetService: DatasetService,
   ) {}
-
-  public static FILE_SIZE_LIMIT = 200; // MB
 
   @Input() dataset: Dataset;
   @Input() sessionData: SessionData;
