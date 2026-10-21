@@ -159,7 +159,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   manualModalRef: any;
 
   parametersModalRef: NgbModalRef;
-  private jobsModalRef: NgbModalRef | null = null;
+  // the jobs modal of toggleJobs() while it is open or opening
+  private jobsModal: Promise<NgbModalRef> | null = null;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -377,18 +378,20 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   public toggleJobs() {
-    if (this.jobsModalRef) {
-      this.jobsModalRef.close();
+    if (this.jobsModal) {
+      this.jobsModal.then((modalRef) => modalRef.close());
     } else {
       this.selectionHandlerService.setJobSelection([]);
-      this.jobsModalRef = this.dialogModalService.openJobsModal(
+      this.jobsModal = this.dialogModalService.openJobsModal(
         this.sessionDataService.getJobList(this.sessionData),
         this.toolsArray,
         this.sessionData,
       );
-      this.jobsModalRef.hidden.subscribe(() => {
-        this.jobsModalRef = null;
-      });
+      this.jobsModal.then((modalRef) =>
+        modalRef.hidden.subscribe(() => {
+          this.jobsModal = null;
+        }),
+      );
     }
   }
 

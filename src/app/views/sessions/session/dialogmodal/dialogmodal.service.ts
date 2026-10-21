@@ -1,28 +1,27 @@
-import { Injectable } from "@angular/core";
-import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
+import { Injectable, Type } from "@angular/core";
+import { NgbModal, NgbModalOptions, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, SessionEvent, Tool } from "chipster-js-common";
 import { EMPTY, Observable, from as observableFrom } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { SessionData } from "../../../../model/session/session-data";
 import { NewsItem } from "../../../../shared/components/news/NewsItem";
-import { JobsModalComponent } from "../jobs-modal/jobs-modal.component";
-import { BooleanModalComponent } from "./booleanmodal/booleanmodal.component";
-import { ChoiceModalComponent } from "./choicemodal/choice-modal.component";
-import { DeleteFilesModalComponent } from "./delete-files-modal/delete-files-modal.component";
-import { DownloadFromUrlModalComponent } from "./download-from-url-modal/download-from-url.component";
-import { EditNewsModalComponent } from "./edit-news-modal/edit-news-modal.component";
-import { NewsModalComponent } from "./news-modal/news-modal.component";
-import { NotesModalComponent } from "./notes-modal/notes-modal.component";
-import { NotificationModalComponent } from "./notification-modal/notification-modal.component";
-import { PreModalComponent } from "./pre-modal/pre-modal.component";
-import { SharingModalComponent } from "./share-session-modal/share-session-modal.component";
-import { SpinnerModalComponent } from "./spinnermodal/spinnermodal.component";
-import { StringModalComponent } from "./stringmodal/stringmodal.component";
-import { TempCopyModalComponent } from "./temp-copy-modal/temp-copy-modal.component";
-import { DropdownModalComponent } from "./dropdownmodal/dropdown-modal.component";
+
+type Modals = typeof import("./modals");
 
 @Injectable({ providedIn: "root" })
 export class DialogModalService {
+  /*
+   * The modals are loaded with a dynamic import() of modals.ts, not imported at the top of
+   * this file. A modal imports the components of its template, and many of those inject this
+   * service, so a static import here would be an import cycle: a component in an import cycle
+   * can be undefined when a decorator that imports it runs (NG0919), depending on the order in
+   * which the bundler evaluates the files. An import() is not an edge of that graph: the
+   * bundler puts the modals in a chunk of their own, evaluated after the main bundle. The chunk
+   * loads when this service is created, so it is there before the user can click anything, and
+   * a modal opens within the click as before.
+   */
+  private modals = import("./modals");
+
   constructor(private modalService: NgbModal) {}
 
   static observableFromPromiseWithDismissHandling(result: Promise<any>) {
@@ -38,79 +37,124 @@ export class DialogModalService {
     );
   }
 
+  // opens the modal that select() picks from the loaded chunk, sets the fields that init() assigns before the
+  // first change detection as a plain modalService.open() would, and resolves to the modal ref
+  private open<T>(
+    select: (modals: Modals) => Type<T>,
+    init: (modal: T) => void = () => {},
+    options?: NgbModalOptions,
+  ): Promise<NgbModalRef> {
+    return this.modals.then((modals) => {
+      const modalRef = this.modalService.open(select(modals), options);
+      init(modalRef.componentInstance as T);
+      return modalRef;
+    });
+  }
+
+  // opens the modal and returns its result: resolved on close, rejected on dismiss. Like NgbModalRef.result it
+  // has a rejection handler, so that a dismissed modal that no one listens to isn't an unhandled rejection
+  private openResult<T>(select: (modals: Modals) => Type<T>, init?: (modal: T) => void, options?: NgbModalOptions) {
+    const result = this.open(select, init, options).then((modalRef) => modalRef.result);
+    result.then(null, () => {});
+    return result;
+  }
+
+  // opens the modal and returns its result as an observable that completes without a value on dismiss
+  private openObservable<T>(select: (modals: Modals) => Type<T>, init?: (modal: T) => void, options?: NgbModalOptions) {
+    return DialogModalService.observableFromPromiseWithDismissHandling(this.openResult(select, init, options));
+  }
+
   openSessionNameModal(title, name, buttonText = "Rename"): Observable<string> {
     return this.openStringModal(title, "Session name", name, buttonText);
   }
 
   openStringModal(title, description, value, buttonText) {
-    const modalRef = this.modalService.open(StringModalComponent);
-    modalRef.componentInstance.value = value;
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.description = description;
-    modalRef.componentInstance.buttonText = buttonText;
-    modalRef.componentInstance.placeHolder = "";
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.StringModalComponent,
+      (modal) => {
+        modal.value = value;
+        modal.title = title;
+        modal.description = description;
+        modal.buttonText = buttonText;
+        modal.placeHolder = "";
+      },
+    );
   }
 
   openOptionModal(title, description, options, buttonText, placeholder) {
-    const modalRef = this.modalService.open(DropdownModalComponent);
-    modalRef.componentInstance.options = options;
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.description = description;
-    modalRef.componentInstance.buttonText = buttonText;
-    modalRef.componentInstance.placeHolder = placeholder;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.DropdownModalComponent,
+      (modal) => {
+        modal.options = options;
+        modal.title = title;
+        modal.description = description;
+        modal.buttonText = buttonText;
+        modal.placeHolder = placeholder;
+      },
+    );
   }
 
   openNotificationModal(title, message) {
-    const modalRef = this.modalService.open(NotificationModalComponent);
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.message = message;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.NotificationModalComponent,
+      (modal) => {
+        modal.title = title;
+        modal.message = message;
+      },
+    );
   }
 
   openNewsModal(news: NewsItem[]) {
-    const modalRef = this.modalService.open(NewsModalComponent, {
-      size: "lg",
-    });
-    modalRef.componentInstance.news = news;
-
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.NewsModalComponent,
+      (modal) => {
+        modal.news = news;
+      },
+      { size: "lg" },
+    );
   }
 
   openEditNewsModal(newsItem: NewsItem = null) {
-    const modalRef = this.modalService.open(EditNewsModalComponent, {
-      size: "lg",
-    });
-    modalRef.componentInstance.newsItem = newsItem;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.EditNewsModalComponent,
+      (modal) => {
+        modal.newsItem = newsItem;
+      },
+      { size: "lg" },
+    );
   }
 
   downloadFromUrlModal() {
-    const modalRef = this.modalService.open(DownloadFromUrlModalComponent);
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable((m) => m.DownloadFromUrlModalComponent);
   }
 
   openPreModal(title, text) {
-    const modalRef = this.modalService.open(PreModalComponent, {
-      size: "lg",
-    });
-    modalRef.componentInstance.text = text;
-    modalRef.componentInstance.title = title;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.PreModalComponent,
+      (modal) => {
+        modal.text = text;
+        modal.title = title;
+      },
+      { size: "lg" },
+    );
   }
 
   openTempCopyModal(title, message, value, button1Text, button2Text) {
-    const modalRef = this.modalService.open(TempCopyModalComponent);
-    modalRef.componentInstance.value = value;
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.message = message;
-    modalRef.componentInstance.description = "New session name";
-    modalRef.componentInstance.button1Text = button1Text;
-    modalRef.componentInstance.button2Text = button2Text;
-    modalRef.componentInstance.placeHolder = "";
-
-    return observableFrom(modalRef.result);
+    // no dismiss handling: the caller gets the dismissal as an error
+    return observableFrom(
+      this.openResult(
+        (m) => m.TempCopyModalComponent,
+        (modal) => {
+          modal.value = value;
+          modal.title = title;
+          modal.message = message;
+          modal.description = "New session name";
+          modal.button1Text = button1Text;
+          modal.button2Text = button2Text;
+          modal.placeHolder = "";
+        },
+      ),
+    );
   }
 
   openChoiceModal(
@@ -122,20 +166,24 @@ export class DialogModalService {
     cancelButtonText: string,
     action3?: { text: string; disabled?: boolean },
   ) {
-    const modalRef = this.modalService.open(ChoiceModalComponent, { size: "lg" });
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.message = message;
-    modalRef.componentInstance.question = question;
-    modalRef.componentInstance.action1ButtonText = action1.text;
-    modalRef.componentInstance.action1Disabled = action1.disabled ?? false;
-    modalRef.componentInstance.action2ButtonText = action2.text;
-    modalRef.componentInstance.action2Disabled = action2.disabled ?? false;
-    modalRef.componentInstance.cancelButtonText = cancelButtonText;
-    if (action3) {
-      modalRef.componentInstance.action3ButtonText = action3.text;
-      modalRef.componentInstance.action3Disabled = action3.disabled ?? false;
-    }
-    return modalRef.result;
+    return this.openResult(
+      (m) => m.ChoiceModalComponent,
+      (modal) => {
+        modal.title = title;
+        modal.message = message;
+        modal.question = question;
+        modal.action1ButtonText = action1.text;
+        modal.action1Disabled = action1.disabled ?? false;
+        modal.action2ButtonText = action2.text;
+        modal.action2Disabled = action2.disabled ?? false;
+        modal.cancelButtonText = cancelButtonText;
+        if (action3) {
+          modal.action3ButtonText = action3.text;
+          modal.action3Disabled = action3.disabled ?? false;
+        }
+      },
+      { size: "lg" },
+    );
   }
 
   openBooleanModal(
@@ -146,55 +194,70 @@ export class DialogModalService {
     okButtonClass = "btn-info",
     subMessage: string = null,
   ) {
-    const modalRef = this.modalService.open(BooleanModalComponent);
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.message = message;
-    modalRef.componentInstance.subMessage = subMessage;
-    modalRef.componentInstance.okButtonText = okButtonText;
-    modalRef.componentInstance.okButtonClass = okButtonClass;
-    modalRef.componentInstance.cancelButtonText = cancelButtonText;
-
-    return modalRef.result;
+    return this.openResult(
+      (m) => m.BooleanModalComponent,
+      (modal) => {
+        modal.title = title;
+        modal.message = message;
+        modal.subMessage = subMessage;
+        modal.okButtonText = okButtonText;
+        modal.okButtonClass = okButtonClass;
+        modal.cancelButtonText = cancelButtonText;
+      },
+    );
   }
 
   openDeleteFilesModal(datasets: Dataset[]) {
-    const modalRef = this.modalService.open(DeleteFilesModalComponent, { size: "md" });
-    modalRef.componentInstance.datasets = datasets;
-
-    return modalRef.result;
+    return this.openResult(
+      (m) => m.DeleteFilesModalComponent,
+      (modal) => {
+        modal.datasets = datasets;
+      },
+      { size: "md" },
+    );
   }
 
   openNotesModal(session): Observable<string> {
-    const modalRef = this.modalService.open(NotesModalComponent);
-    modalRef.componentInstance.session = session;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.NotesModalComponent,
+      (modal) => {
+        modal.session = session;
+      },
+    );
   }
 
   openSharingModal(session, ruleStream$: Observable<SessionEvent>): Observable<any> {
-    const modalRef = this.modalService.open(SharingModalComponent, {
-      size: "lg",
-    });
-    modalRef.componentInstance.session = session;
-    modalRef.componentInstance.ruleStream$ = ruleStream$;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.SharingModalComponent,
+      (modal) => {
+        modal.session = session;
+        modal.ruleStream$ = ruleStream$;
+      },
+      { size: "lg" },
+    );
   }
 
-  public openJobsModal(jobs: Job[], tools: Tool[], sessionData: SessionData): NgbModalRef {
-    const modalRef = this.modalService.open(JobsModalComponent, { size: "xl" });
-    modalRef.componentInstance.jobs = jobs;
-    modalRef.componentInstance.tools = tools;
-    modalRef.componentInstance.sessionData = sessionData;
-    return modalRef;
+  public openJobsModal(jobs: Job[], tools: Tool[], sessionData: SessionData): Promise<NgbModalRef> {
+    return this.open(
+      (m) => m.JobsModalComponent,
+      (modal) => {
+        modal.jobs = jobs;
+        modal.tools = tools;
+        modal.sessionData = sessionData;
+      },
+      { size: "xl" },
+    );
   }
 
   openSpinnerModal(message, observable) {
-    // don't allow user to close this
-    const modalRef = this.modalService.open(SpinnerModalComponent, {
-      backdrop: "static",
-      keyboard: false,
-    });
-    modalRef.componentInstance.message = message;
-    modalRef.componentInstance.observable = observable;
-    return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
+    return this.openObservable(
+      (m) => m.SpinnerModalComponent,
+      (modal) => {
+        modal.message = message;
+        modal.observable = observable;
+      },
+      // don't allow user to close this
+      { backdrop: "static", keyboard: false },
+    );
   }
 }

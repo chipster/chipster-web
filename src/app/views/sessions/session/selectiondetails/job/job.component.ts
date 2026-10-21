@@ -1,13 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  ChangeDetectionStrategy,
-  forwardRef,
-} from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from "@angular/core";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
@@ -33,10 +24,7 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   templateUrl: "./job.component.html",
   styleUrls: ["./job.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  // forwardRef for every import in an import cycle with this component (the modal
-  // services import the modals to open them): which of them is still undefined when
-  // this decorator runs depends on the bundler, so all of them get it (NG0919)
-  imports: [forwardRef(() => DatasetParameterListComponent), LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
+  imports: [DatasetParameterListComponent, LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
 })
 export class JobComponent implements OnInit, OnDestroy {
   @Input() sessionData: SessionData;

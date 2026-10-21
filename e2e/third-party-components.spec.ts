@@ -159,9 +159,10 @@ test("a pdf file is rendered and paged (pdfjs-dist)", async ({ page, api, sessio
 });
 
 /*
- * The full screen, jobs and news modals import components that lead back to
- * the service that opens them. That import cycle broke the modals once
- * (NG0919), so each of them is opened here.
+ * The full screen, jobs and news modals import components that inject the
+ * service that opens them, so the services load the modals with a dynamic
+ * import(). A static import cycle broke the modals once (NG0919), so each of
+ * them is opened here.
  */
 test("a table opens in a full screen modal (Handsontable, ng-bootstrap)", async ({ page, api, sessionId }) => {
   const content = "gene\tchip.a\ng1\t1\ng2\t3\n";
