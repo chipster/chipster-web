@@ -1,5 +1,4 @@
 import { Routes } from "@angular/router";
-import { AuthGuard } from "../../core/routing/auth-guard.service";
 import { AdminComponent } from "./admin.component";
 import { ClientsComponent } from "./clients/clients.component";
 import { HistoryComponent } from "./history/history.component";
@@ -11,11 +10,11 @@ import { StatisticsComponent } from "./statistics/statistics.component";
 import { StorageComponent } from "./storage/storage.component";
 import { UsersComponent } from "./users/users.component";
 
+// the children of the "admin" route in app.routes.ts, which loads them lazily
 export const adminRoutes: Routes = [
   {
-    path: "admin",
+    path: "",
     component: AdminComponent,
-    canActivate: [AuthGuard],
     children: [
       { path: "", redirectTo: "services", pathMatch: "full" },
       { path: "services", component: ServicesComponent },
