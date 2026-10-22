@@ -56,7 +56,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   });
 
   // set through the modal ref by the code that opens the modal
-  log = signal<string>(undefined);
+  readonly log = signal<string>(undefined);
 
   readonly messageTextarea = viewChild<ElementRef<HTMLTextAreaElement>>("messageTextarea");
 

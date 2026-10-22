@@ -14,7 +14,7 @@ export class EditNewsModalComponent implements OnInit {
 
   public modalTitle: string;
   // set through the modal ref by the code that opens the modal
-  newsItem = signal<NewsItem>(undefined);
+  readonly newsItem = signal<NewsItem>(undefined);
 
   titleControl = new UntypedFormControl("");
   shortTitleControl = new UntypedFormControl("");

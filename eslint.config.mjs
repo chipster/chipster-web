@@ -28,6 +28,8 @@ export default tseslint.config(
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: "module",
+        // type information for @angular-eslint/no-uncalled-signals
+        projectService: true,
       },
     },
     settings: {
@@ -47,6 +49,11 @@ export default tseslint.config(
       // default is OnPush from 22 on), and the rule reports exactly those.
       // moving to OnPush is a separate change after the upgrade too.
       "@angular-eslint/prefer-on-push-component-change-detection": "off",
+      // inputs, outputs and queries are signals, keep the decorators out of new code
+      "@angular-eslint/prefer-signals": "error",
+      "@angular-eslint/prefer-output-emitter-ref": "error",
+      // a signal in a condition without () is a function, always truthy
+      "@angular-eslint/no-uncalled-signals": "error",
 
       // rules kept from the airbnb set that was dropped with eslint 9, see
       // README. these catch mistakes, the style-only airbnb rules are gone.

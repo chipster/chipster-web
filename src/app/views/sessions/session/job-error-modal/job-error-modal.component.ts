@@ -15,8 +15,8 @@ export class JobErrorModalComponent {
   private readonly hideText = "Hide screen output";
 
   // set through the modal ref by the code that opens the modal
-  title = signal<string>(undefined);
-  job = signal<Job>(undefined);
+  readonly title = signal<string>(undefined);
+  readonly job = signal<Job>(undefined);
 
   screenOutputVisible = false;
   screenOutputButtonText = this.screenOutputVisible ? this.hideText : this.showText;

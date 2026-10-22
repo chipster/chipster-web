@@ -29,8 +29,8 @@ export class SamplesModalComponent implements OnInit {
   private sessionDataService = inject(SessionDataService);
 
   // set through the modal ref by the code that opens the modal
-  datasets = signal<Dataset[]>(undefined);
-  sessionData = signal<SessionData>(undefined);
+  readonly datasets = signal<Dataset[]>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
 
   identifiersForm = this.fb.group({
     r1Token: ["R1", Validators.required],

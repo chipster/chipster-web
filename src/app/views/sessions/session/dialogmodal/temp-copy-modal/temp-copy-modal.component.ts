@@ -19,13 +19,13 @@ export class TempCopyModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  button1Text = signal<string>(undefined);
-  button2Text = signal<string>(undefined);
-  description = signal<string>(undefined);
-  value = signal<string>(undefined);
-  title = signal<string>(undefined);
-  message = signal<string>(undefined);
-  placeHolder = signal<string>(undefined);
+  readonly button1Text = signal<string>(undefined);
+  readonly button2Text = signal<string>(undefined);
+  readonly description = signal<string>(undefined);
+  readonly value = signal<string>(undefined);
+  readonly title = signal<string>(undefined);
+  readonly message = signal<string>(undefined);
+  readonly placeHolder = signal<string>(undefined);
 
   readonly valueInput = viewChild<ElementRef<HTMLInputElement>>("valueInput");
 

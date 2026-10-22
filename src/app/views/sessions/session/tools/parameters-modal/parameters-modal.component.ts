@@ -42,9 +42,9 @@ export class ParametersModalComponent {
   activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  validatedTool = signal<ValidatedTool>(undefined);
-  sessionData = signal<SessionData>(undefined);
-  origTool = signal<Tool>(undefined);
+  readonly validatedTool = signal<ValidatedTool>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
+  readonly origTool = signal<Tool>(undefined);
   readonly parametersChanged = output<void>();
   readonly updateBindings = output<SelectedToolWithInputs>();
   readonly resourcesChanged = output<void>();

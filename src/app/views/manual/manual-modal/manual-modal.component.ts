@@ -36,5 +36,5 @@ export class ManualModalComponent {
   toolService = inject(ToolService);
 
   // set through the modal ref by the code that opens the modal
-  tool = signal<Tool>(undefined);
+  readonly tool = signal<Tool>(undefined);
 }

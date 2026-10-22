@@ -36,8 +36,8 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   private dialogModalService = inject(DialogModalService);
 
   // set through the modal ref by the code that opens the modal
-  session = signal<Session>(undefined);
-  ruleStream$ = signal<Observable<SessionEvent>>(undefined);
+  readonly session = signal<Session>(undefined);
+  readonly ruleStream$ = signal<Observable<SessionEvent>>(undefined);
 
   readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
   readonly usernameInput = viewChild<ElementRef<HTMLInputElement>>("usernameInput");

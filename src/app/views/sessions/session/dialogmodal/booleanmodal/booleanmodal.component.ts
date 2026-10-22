@@ -17,12 +17,12 @@ export class BooleanModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  okButtonText = signal<string>(undefined);
-  okButtonClass = signal<string>("btn-info");
-  cancelButtonText = signal<string>(undefined);
-  message = signal<string>(undefined);
-  subMessage = signal<string>(null);
-  title = signal<string>(undefined);
+  readonly okButtonText = signal<string>(undefined);
+  readonly okButtonClass = signal<string>("btn-info");
+  readonly cancelButtonText = signal<string>(undefined);
+  readonly message = signal<string>(undefined);
+  readonly subMessage = signal<string>(null);
+  readonly title = signal<string>(undefined);
 
   readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
 

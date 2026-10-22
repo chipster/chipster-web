@@ -68,8 +68,8 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   jobs: Job[];
   // set through the modal ref by the code that opens the modal
-  tools = signal<Tool[]>(undefined);
-  sessionData = signal<SessionData>(undefined);
+  readonly tools = signal<Tool[]>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
 
   /**
    * Job selection goes through selectionHandlerService, bit overkill atm.

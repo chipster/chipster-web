@@ -10,9 +10,9 @@ export class PreModalComponent {
   private activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  title = signal<string>(undefined);
+  readonly title = signal<string>(undefined);
 
-  text = signal<string>(undefined);
+  readonly text = signal<string>(undefined);
 
   cancel() {
     this.activeModal.dismiss();

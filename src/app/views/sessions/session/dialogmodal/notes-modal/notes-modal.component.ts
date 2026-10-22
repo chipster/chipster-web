@@ -25,7 +25,7 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   private sessionDataService = inject(SessionDataService);
 
   // set through the modal ref by the code that opens the modal
-  session = signal<Session>(undefined);
+  readonly session = signal<Session>(undefined);
 
   readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
   readonly notesArea = viewChild<ElementRef<HTMLTextAreaElement>>("notesArea");

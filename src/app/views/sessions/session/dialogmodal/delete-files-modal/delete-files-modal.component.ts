@@ -10,7 +10,7 @@ export class DeleteFilesModalComponent {
   private activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  datasets = signal<Dataset[]>(undefined);
+  readonly datasets = signal<Dataset[]>(undefined);
 
   delete() {
     this.activeModal.close();

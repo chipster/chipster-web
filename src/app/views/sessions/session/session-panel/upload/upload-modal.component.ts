@@ -32,8 +32,8 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   private errorService = inject(ErrorService);
 
   // set through the modal ref by the code that opens the modal
-  sessionId = signal<string>(undefined);
-  flow = signal<any>(undefined);
+  readonly sessionId = signal<string>(undefined);
+  readonly flow = signal<any>(undefined);
 
   readonly uploadFilesButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFilesButton");
   readonly uploadFolderButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFolderButton");

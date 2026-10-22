@@ -40,8 +40,8 @@ export class ConfirmDeleteModalComponent implements OnInit {
   private sessionDbAdminService = inject(SessionDbAdminService);
 
   // set through the modal ref by the code that opens the modal
-  users = signal<any[]>(undefined);
-  deleteAction = signal<DeleteAction>(undefined);
+  readonly users = signal<any[]>(undefined);
+  readonly deleteAction = signal<DeleteAction>(undefined);
 
   title: string;
   message: string;
