@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
@@ -15,10 +15,8 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   private activeModal = inject(NgbActiveModal);
   private sessionDataService = inject(SessionDataService);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  session: Session;
+  // set through the modal ref by the code that opens the modal
+  session = signal<Session>(undefined);
 
   @ViewChild("submitButton")
   submitButton;
@@ -46,8 +44,8 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit() {
-    this.notes = this.session.notes;
-    this.readOnly = !this.sessionDataService.hasPersonalRule(this.session.rules);
+    this.notes = this.session().notes;
+    this.readOnly = !this.sessionDataService.hasPersonalRule(this.session().rules);
   }
 
   save() {

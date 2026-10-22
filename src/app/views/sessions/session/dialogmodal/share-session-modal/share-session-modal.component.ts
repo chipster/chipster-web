@@ -1,12 +1,12 @@
 import {
   AfterViewInit,
   Component,
-  Input,
   OnDestroy,
   OnInit,
   ViewChild,
   ChangeDetectionStrategy,
   inject,
+  signal,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, SessionEvent } from "chipster-js-common";
@@ -34,14 +34,9 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   private errorService = inject(ErrorService);
   private dialogModalService = inject(DialogModalService);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  session: Session;
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  ruleStream$: Observable<SessionEvent>;
+  // set through the modal ref by the code that opens the modal
+  session = signal<Session>(undefined);
+  ruleStream$ = signal<Observable<SessionEvent>>(undefined);
 
   @ViewChild("submitButton")
   submitButton;
@@ -54,13 +49,15 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   private unsubscribe: Subject<any> = new Subject();
 
   ngOnInit() {
-    this.rules = this.session.rules;
-    this.ruleStream$.pipe(takeUntil(this.unsubscribe)).subscribe({
-      next: () => {
-        this.rules = this.session.rules;
-      },
-      error: (err) => this.errorService.showError("getting rule events failed", err),
-    });
+    this.rules = this.session().rules;
+    this.ruleStream$()
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe({
+        next: () => {
+          this.rules = this.session().rules;
+        },
+        error: (err) => this.errorService.showError("getting rule events failed", err),
+      });
   }
 
   ngOnDestroy() {
@@ -81,7 +78,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   save() {
-    this.activeModal.close(this.session.notes);
+    this.activeModal.close(this.session().notes);
   }
 
   cancel() {
@@ -93,7 +90,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
     this.newRule.username = this.newRule.username.trim();
-    this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe({
+    this.sessionResource.createRule(this.session().sessionId, this.newRule).subscribe({
       next: (resp) => {
         log.info("rule created", resp);
         this.newRule = null;
@@ -117,7 +114,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       .openBooleanModal("Stop sharing", `Stop sharing with ${username}?`, "Stop sharing", "Cancel")
       .then(
         () => {
-          this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe({
+          this.sessionResource.deleteRule(this.session().sessionId, ruleId).subscribe({
             next: () => log.info("rule deleted"),
             error: (err) => this.restErrorService.showError("failed to delete the rule", err),
           });

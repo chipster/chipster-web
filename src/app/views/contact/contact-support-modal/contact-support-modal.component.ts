@@ -1,12 +1,12 @@
 import {
   AfterViewInit,
   Component,
-  Input,
   OnInit,
   ViewChild,
   DOCUMENT,
   ChangeDetectionStrategy,
   inject,
+  signal,
 } from "@angular/core";
 import {
   AbstractControl,
@@ -54,10 +54,8 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     attach: ["", [Validators.required]], // force user to select
   });
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  log: string;
+  // set through the modal ref by the code that opens the modal
+  log = signal<string>(undefined);
 
   @ViewChild("messageTextarea")
   messageTextarea;
@@ -133,7 +131,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
             sessionUrl,
             this.supportForm.value.email,
             this.appId,
-            this.log,
+            this.log(),
           );
         }),
       );

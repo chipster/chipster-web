@@ -12,6 +12,6 @@ export class ContactSupportService {
       backdrop: "static", // don't close on backdrop click
     });
     const modal = modalRef.componentInstance as ContactSupportModalComponent;
-    modal.log = log;
+    modal.log.set(log);
   }
 }
