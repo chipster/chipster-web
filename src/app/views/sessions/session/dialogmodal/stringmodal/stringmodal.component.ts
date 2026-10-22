@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { FormsModule } from "@angular/forms";
 
@@ -10,16 +10,12 @@ import { FormsModule } from "@angular/forms";
 export class StringModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);
 
-  @Input()
-  buttonText: string;
-  @Input()
-  description: string;
-  @Input()
-  value: string;
-  @Input()
-  title: string;
-  @Input()
-  placeHolder: string;
+  // set through the modal ref by the code that opens the modal
+  buttonText = signal<string>(undefined);
+  description = signal<string>(undefined);
+  value = signal<string>(undefined);
+  title = signal<string>(undefined);
+  placeHolder = signal<string>(undefined);
 
   @ViewChild("valueInput")
   valueInput;
@@ -36,7 +32,7 @@ export class StringModalComponent implements AfterViewInit {
   }
 
   save($event) {
-    this.activeModal.close(this.value);
+    this.activeModal.close(this.value());
     if ($event) {
       // otherwise the event may open the dialog again, when the original button
       // gets it(New session button in session list in Chrome with an enter key event)

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnChanges, ChangeDetectionStrategy, input } from "@angular/core";
 import { NgStyle } from "@angular/common";
 
 @Component({
@@ -9,7 +9,7 @@ import { NgStyle } from "@angular/common";
   imports: [NgStyle],
 })
 export class CounterSpinnerComponent implements OnChanges {
-  @Input() count: number;
+  readonly count = input<number>(undefined);
 
   offsetRight = 12;
   offsetTop = 5;
@@ -18,11 +18,11 @@ export class CounterSpinnerComponent implements OnChanges {
   constructor() {}
 
   ngOnChanges() {
-    if (this.count.toString().length === 2) {
+    if (this.count().toString().length === 2) {
       this.offsetRight = 7;
       this.offsetTop = 5;
       this.fontSize = 17;
-    } else if (this.count.toString().length > 2) {
+    } else if (this.count().toString().length > 2) {
       this.offsetRight = 8;
       this.offsetTop = 10;
       this.fontSize = 10;

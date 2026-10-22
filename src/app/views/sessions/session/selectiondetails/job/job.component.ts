@@ -1,12 +1,12 @@
 import {
   Component,
   EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
   Output,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
@@ -44,8 +44,8 @@ export class JobComponent implements OnInit, OnDestroy {
   private toolService = inject(ToolService);
   private jobService = inject(JobService);
 
-  @Input() sessionData: SessionData;
-  @Input() tools: Tool[];
+  readonly sessionData = input<SessionData>(undefined);
+  readonly tools = input<Tool[]>(undefined);
   // the jobs modal closes on it
   @Output() datasetSelected = new EventEmitter<void>();
 
@@ -105,10 +105,10 @@ export class JobComponent implements OnInit, OnDestroy {
 
         if (selectedJobs && selectedJobs.length > 0) {
           jobId = selectedJobs[0].jobId;
-          const job = this.sessionDataService.getJobById(jobId, this.sessionData.jobsMap);
+          const job = this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap);
 
           if (job) {
-            this.tool = this.tools.find((t) => t.name.id === job.toolId);
+            this.tool = this.tools().find((t) => t.name.id === job.toolId);
 
             this.showParameters(job.parameters, this.tool);
             this.showInputs(job.inputs, this.tool);
@@ -145,7 +145,7 @@ export class JobComponent implements OnInit, OnDestroy {
     this.outputListForView = [];
 
     if (jobId) {
-      const job = this.sessionDataService.getJobById(jobId, this.sessionData.jobsMap);
+      const job = this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap);
       if (job) {
         this.job = job;
         this.isRunning = JobService.isRunning(job);
@@ -165,7 +165,7 @@ export class JobComponent implements OnInit, OnDestroy {
           // only jobs since Chipster version 11/2023 define outputs
           log.info("job doesn't define outputs, find from datasets");
           this.sessionDataService
-            .getDatasetList(this.sessionData)
+            .getDatasetList(this.sessionData())
             .filter((d) => d.sourceJob === jobId)
             .forEach((d) => {
               this.outputListForView.push({
@@ -211,7 +211,7 @@ export class JobComponent implements OnInit, OnDestroy {
   }
 
   getDataset(datasetId: string) {
-    return this.sessionData.datasetsMap.get(datasetId);
+    return this.sessionData().datasetsMap.get(datasetId);
   }
 
   hasDataset(datasetId: string) {

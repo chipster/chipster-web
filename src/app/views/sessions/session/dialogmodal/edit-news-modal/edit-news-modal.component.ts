@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
@@ -13,8 +13,8 @@ export class EditNewsModalComponent implements OnInit {
   private activeModal = inject(NgbActiveModal);
 
   public modalTitle: string;
-  @Input()
-  newsItem: NewsItem;
+  // set through the modal ref by the code that opens the modal
+  newsItem = signal<NewsItem>(undefined);
 
   titleControl = new UntypedFormControl("");
   shortTitleControl = new UntypedFormControl("");
@@ -30,15 +30,15 @@ export class EditNewsModalComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    if (this.newsItem == null) {
+    if (this.newsItem() == null) {
       this.modalTitle = "Add news";
     } else {
-      this.titleControl.setValue(this.newsItem.contents.title);
-      this.bodyControl.setValue(this.newsItem.contents.body);
+      this.titleControl.setValue(this.newsItem().contents.title);
+      this.bodyControl.setValue(this.newsItem().contents.body);
       this.modalTitle = "Edit news";
-      this.id = this.newsItem.newsId;
-      this.created = this.newsItem.created;
-      this.modified = this.newsItem.modified;
+      this.id = this.newsItem().newsId;
+      this.created = this.newsItem().created;
+      this.modified = this.newsItem().modified;
     }
   }
 

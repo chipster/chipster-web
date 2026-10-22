@@ -1,5 +1,5 @@
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 
 @Component({
   templateUrl: "./pre-modal.component.html",
@@ -9,11 +9,10 @@ import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core
 export class PreModalComponent {
   private activeModal = inject(NgbActiveModal);
 
-  @Input()
-  title: string;
+  // set through the modal ref by the code that opens the modal
+  title = signal<string>(undefined);
 
-  @Input()
-  text: string;
+  text = signal<string>(undefined);
 
   cancel() {
     this.activeModal.dismiss();

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
@@ -14,12 +14,12 @@ export class NewsModalComponent implements OnInit {
   private activeModal = inject(NgbActiveModal);
   private preferencesService = inject(PreferencesService);
 
-  @Input()
-  news: NewsItem[];
+  // set through the modal ref by the code that opens the modal
+  news = signal<NewsItem[]>(undefined);
   ngOnInit(): void {
     // FIXME scroll ot the top (to the latest) if there are so many news that modal needs to scroll
-    if (this.news != null && this.news.length > 0) {
-      const latestNewsTime: Date = this.news[0].modified != null ? this.news[0].modified : this.news[0].created;
+    if (this.news() != null && this.news().length > 0) {
+      const latestNewsTime: Date = this.news()[0].modified != null ? this.news()[0].modified : this.news()[0].created;
 
       log.info("news read until", latestNewsTime);
       this.preferencesService.updateNewsReadTime(latestNewsTime);

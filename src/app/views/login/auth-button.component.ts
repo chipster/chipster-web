@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, EventEmitter, Output, ChangeDetectionStrategy, input } from "@angular/core";
 
 @Component({
   selector: "ch-auth-button",
@@ -7,9 +7,9 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class AuthButtonComponent {
-  @Input() name: string;
-  @Input() logo: string;
-  @Input() description: string;
+  readonly name = input<string>(undefined);
+  readonly logo = input<string>(undefined);
+  readonly description = input<string>(undefined);
 
   @Output() selectAuth = new EventEmitter();
 

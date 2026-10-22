@@ -12,7 +12,7 @@
           <div class="visualization-panel">
             <ch-spreadsheet-visualization
               [dataset]="selectionService.selectedDatasets[0]"
-              [sessionData]="sessionData"></ch-spreadsheet-visualization>
+              [sessionData]="sessionData()"></ch-spreadsheet-visualization>
           </div>
         </ng-template>
       </li>
@@ -107,7 +107,7 @@
           <div class="visualization-panel">
             <ch-phenodata-visualization
               [dataset]="selectionService.selectedDatasets[0]"
-              [datasetsMap]="sessionData.datasetsMap"></ch-phenodata-visualization>
+              [datasetsMap]="sessionData().datasetsMap"></ch-phenodata-visualization>
           </div>
         </ng-template>
       </li>
@@ -134,8 +134,8 @@
           <div class="visualization-panel">
             <ch-details-visualization
               [datasets]="selectionService.selectedDatasets"
-              [sessionData]="sessionData"
-              [tools]="tools"></ch-details-visualization>
+              [sessionData]="sessionData()"
+              [tools]="tools()"></ch-details-visualization>
           </div>
         </ng-template>
       </li>

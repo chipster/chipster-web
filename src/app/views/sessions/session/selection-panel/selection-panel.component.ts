@@ -1,5 +1,5 @@
 import { Dataset, Tool, Job } from "chipster-js-common";
-import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { SessionData } from "../../../../model/session/session-data";
@@ -24,10 +24,8 @@ export class SelectionPanelComponent implements OnInit, OnDestroy {
   settingsService = inject(SettingsService);
   private errorService = inject(ErrorService);
 
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  tools: Tool[];
+  readonly sessionData = input<SessionData>(undefined);
+  readonly tools = input<Tool[]>(undefined);
 
   // FIXME after tool state refactoring
   // public toolSelection: ToolSelection;

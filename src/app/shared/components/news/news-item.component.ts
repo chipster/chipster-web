@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from "@angular/core";
+import { Component, EventEmitter, Output, ChangeDetectionStrategy, input } from "@angular/core";
 import { NewsItem } from "./NewsItem";
 import { LocalDatePipe } from "../../pipes/local-date.pipe";
 
@@ -9,8 +9,8 @@ import { LocalDatePipe } from "../../pipes/local-date.pipe";
   imports: [LocalDatePipe],
 })
 export class NewsItemComponent {
-  @Input() newsItem: NewsItem;
-  @Input() editable = false;
+  readonly newsItem = input<NewsItem>(undefined);
+  readonly editable = input(false);
   @Output() edit = new EventEmitter<NewsItem>();
   @Output() delete = new EventEmitter<NewsItem>();
 

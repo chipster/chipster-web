@@ -1,4 +1,4 @@
-import { TestBed } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -10,6 +10,7 @@ import { PdfVisualizationComponent } from "./pdf-visualization.component";
 describe("PdfVisualizationComponent", () => {
   const limit = 10 * 1024 * 1024;
 
+  let fixture: ComponentFixture<PdfVisualizationComponent>;
   let component: PdfVisualizationComponent;
   let urlRequests: Subject<string>[];
   let openedInNewTab: Dataset[];
@@ -43,12 +44,14 @@ describe("PdfVisualizationComponent", () => {
         { provide: RestErrorService, useValue: restErrorServiceStub },
       ],
     });
-    // created without a template, only the class is tested
-    component = TestBed.runInInjectionContext(() => new PdfVisualizationComponent());
+    // created with an empty template, only the class is tested
+    TestBed.overrideComponent(PdfVisualizationComponent, { set: { template: "", imports: [] } });
+    fixture = TestBed.createComponent(PdfVisualizationComponent);
+    component = fixture.componentInstance;
   });
 
   function select(size: number) {
-    component.dataset = { datasetId: "d1", name: "file.pdf", size } as Dataset;
+    fixture.componentRef.setInput("dataset", { datasetId: "d1", name: "file.pdf", size } as Dataset);
     component.ngOnChanges();
   }
 
@@ -183,7 +186,7 @@ describe("PdfVisualizationComponent", () => {
     it("opens the file in a new tab and keeps the prompt", () => {
       click("Open in new tab");
 
-      expect(openedInNewTab).toEqual([component.dataset]);
+      expect(openedInNewTab).toEqual([component.dataset()]);
       expect(component.state.isTooLarge()).toBe(true);
       expect(urlRequests.length).toBe(0);
     });
@@ -207,7 +210,7 @@ describe("PdfVisualizationComponent", () => {
       expect(buttonTexts()).toEqual(["Try again", "Open in new tab"]);
 
       click("Open in new tab");
-      expect(openedInNewTab).toEqual([component.dataset]);
+      expect(openedInNewTab).toEqual([component.dataset()]);
       expect(component.state.isFail()).toBe(true);
 
       click("Try again");

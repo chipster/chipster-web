@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, input } from "@angular/core";
 import { LabelMenuItem } from "./labels-context-menu.service";
 
 // Renders the three pieces of a label menu item (checkbox / color dot / name)
@@ -16,11 +16,11 @@ import { LabelMenuItem } from "./labels-context-menu.service";
       [style.border]="checkboxBorder"
       [style.background]="checkboxBackground"
       [style.color]="checkboxColor"
-      [style.position]="item.state === 'indeterminate' ? 'relative' : null">
-      @if (item.state === "checked") {
+      [style.position]="item().state === 'indeterminate' ? 'relative' : null">
+      @if (item().state === "checked") {
         ✓
       }
-      @if (item.state === "indeterminate") {
+      @if (item().state === "indeterminate") {
         <span
           class="d-block"
           style="position:absolute;top:50%;left:50%;width:7px;height:2px;margin-top:-1px;margin-left:-3.5px;background:#fff"></span>
@@ -29,23 +29,23 @@ import { LabelMenuItem } from "./labels-context-menu.service";
     <span
       class="d-inline-block align-middle"
       style="width:0.6em;height:0.6em;border-radius:50%;margin-right:0.25em"
-      [style.background]="item.colorBg"></span>
-    <span>{{ item.label.name }}</span>
+      [style.background]="item().colorBg"></span>
+    <span>{{ item().label.name }}</span>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class LabelMenuItemContentComponent {
-  @Input() item!: LabelMenuItem;
+  readonly item = input.required<LabelMenuItem>();
 
   get checkboxBorder(): string {
-    return this.item.state === "unchecked" ? "1px solid #adb5bd" : "1px solid #0d6efd";
+    return this.item().state === "unchecked" ? "1px solid #adb5bd" : "1px solid #0d6efd";
   }
 
   get checkboxBackground(): string {
-    return this.item.state === "unchecked" ? "#fff" : "#0d6efd";
+    return this.item().state === "unchecked" ? "#fff" : "#0d6efd";
   }
 
   get checkboxColor(): string | null {
-    return this.item.state === "checked" ? "#fff" : null;
+    return this.item().state === "checked" ? "#fff" : null;
   }
 }

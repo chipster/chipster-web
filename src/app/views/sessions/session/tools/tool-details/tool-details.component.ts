@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, ChangeDetectionStrategy } from "@angular/core";
+import { Component, OnDestroy, ChangeDetectionStrategy, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -12,8 +12,8 @@ import { SessionData } from "../../../../../model/session/session-data";
 export class ToolDetailsComponent implements OnDestroy {
   // FIXME after tool state refactoring
   // @Input() toolSelection: ToolSelection;
-  @Input() sessionData: SessionData;
-  @Input() selectedDatasets: Array<Dataset>;
+  readonly sessionData = input<SessionData>(undefined);
+  readonly selectedDatasets = input<Array<Dataset>>(undefined);
 
   private unsubscribe: Subject<any> = new Subject();
 

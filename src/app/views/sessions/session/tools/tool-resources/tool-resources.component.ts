@@ -1,13 +1,13 @@
 import {
   Component,
   EventEmitter,
-  Input,
   OnChanges,
   OnDestroy,
   OnInit,
   Output,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { Subject } from "rxjs";
@@ -41,8 +41,8 @@ interface Resources {
 export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   private schedulerResource = inject(SchedulerResource);
 
-  @Input() validatedTool: ValidatedTool;
-  @Input() origTool: Tool;
+  readonly validatedTool = input<ValidatedTool>(undefined);
+  readonly origTool = input<Tool>(undefined);
 
   @Output() resourcesChanged: EventEmitter<any> = new EventEmitter();
 
@@ -98,25 +98,26 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
       },
     };
 
-    if (this.validatedTool != null) {
+    if (this.validatedTool() != null) {
       this.ready = true;
-      this.showWarning = !this.validatedTool.resourcesValidation.valid;
-      this.warningText = this.validatedTool.resourcesValidation.message;
+      this.showWarning = !this.validatedTool().resourcesValidation.valid;
+      this.warningText = this.validatedTool().resourcesValidation.message;
 
-      if (this.origTool.slotCount == null) {
+      const origTool = this.origTool();
+      if (origTool.slotCount == null) {
         // use lower max limit for tools that doesn't define any # SLOTS
         // just to limit careless use, no need to check in server side
         this.resources.cpu.max = quotas.cpuRatio * quotas.preferredSlots;
         this.resources.memory.max = quotas.memoryRatio * quotas.preferredSlots;
       }
 
-      if (this.origTool.storage == null) {
+      if (origTool.storage == null) {
         // use lower max limit for tools that doesn't define any # STORAGE
         // just to limit careless use, no need to check in server side
         this.resources.storage.max = quotas.preferredStorage;
       }
 
-      let slots = this.validatedTool.tool.slotCount;
+      let slots = this.validatedTool().tool.slotCount;
 
       if (slots == null) {
         // log.info("slots is null, set to " + this.defaultSlots);
@@ -126,7 +127,7 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
       this.resources.cpu.value = slots * quotas.cpuRatio;
       this.resources.memory.value = slots * quotas.memoryRatio;
 
-      let storage = this.validatedTool.tool.storage;
+      let storage = this.validatedTool().tool.storage;
 
       if (storage == null) {
         // log.info("storage is null, set to " + this.defaultStorage);
@@ -148,13 +149,13 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
     // it's ugly to modify the tool, but parameters are stored there too
     switch (id) {
       case "memory":
-        this.validatedTool.tool.slotCount = this.resources[id].value / this.resources[id].outputRatio;
+        this.validatedTool().tool.slotCount = this.resources[id].value / this.resources[id].outputRatio;
         break;
       case "cpu":
-        this.validatedTool.tool.slotCount = this.resources[id].value / this.resources[id].outputRatio;
+        this.validatedTool().tool.slotCount = this.resources[id].value / this.resources[id].outputRatio;
         break;
       case "storage":
-        this.validatedTool.tool.storage = this.resources[id].value / this.resources[id].outputRatio;
+        this.validatedTool().tool.storage = this.resources[id].value / this.resources[id].outputRatio;
         break;
       default:
         break;
@@ -195,9 +196,9 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
     switch (id) {
       case "memory":
       case "cpu":
-        return this.validatedTool.resourcesValidationResults.get("slots");
+        return this.validatedTool().resourcesValidationResults.get("slots");
       case "storage":
-        return this.validatedTool.resourcesValidationResults.get("storage");
+        return this.validatedTool().resourcesValidationResults.get("storage");
       default:
         return null;
     }
@@ -210,18 +211,18 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   resetSlots() {
-    this.validatedTool.tool.slotCount = this.origTool.slotCount;
+    this.validatedTool().tool.slotCount = this.origTool().slotCount;
   }
   resetStorage() {
-    this.validatedTool.tool.storage = this.origTool.storage;
+    this.validatedTool().tool.storage = this.origTool().storage;
   }
 
   isResetSlotsVisible() {
-    return this.origTool.slotCount !== this.validatedTool.tool.slotCount;
+    return this.origTool().slotCount !== this.validatedTool().tool.slotCount;
   }
 
   isResetStorageVisible() {
-    return this.origTool.storage !== this.validatedTool.tool.storage;
+    return this.origTool().storage !== this.validatedTool().tool.storage;
   }
 
   isResetAllVisible() {

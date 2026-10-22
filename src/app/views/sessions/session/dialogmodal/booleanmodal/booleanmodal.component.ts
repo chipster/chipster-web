@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -8,18 +8,13 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 export class BooleanModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);
 
-  @Input()
-  okButtonText: string;
-  @Input()
-  okButtonClass: string = "btn-info";
-  @Input()
-  cancelButtonText: string;
-  @Input()
-  message: string;
-  @Input()
-  subMessage: string = null;
-  @Input()
-  title: string;
+  // set through the modal ref by the code that opens the modal
+  okButtonText = signal<string>(undefined);
+  okButtonClass = signal<string>("btn-info");
+  cancelButtonText = signal<string>(undefined);
+  message = signal<string>(undefined);
+  subMessage = signal<string>(null);
+  title = signal<string>(undefined);
 
   @ViewChild("submitButton")
   submitButton;

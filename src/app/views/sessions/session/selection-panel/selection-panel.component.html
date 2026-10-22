@@ -10,18 +10,20 @@
 
 <!-- tool -->
 @if (showTool || settingsService.splitSelectionPanel$.getValue()) {
-  <ch-tool-details [sessionData]="sessionData" [selectedDatasets]="selectionService.selectedDatasets"></ch-tool-details>
+  <ch-tool-details
+    [sessionData]="sessionData()"
+    [selectedDatasets]="selectionService.selectedDatasets"></ch-tool-details>
 }
 
 <!-- job -->
 @if (showJob) {
-  <ch-job [sessionData]="sessionData"></ch-job>
+  <ch-job [sessionData]="sessionData()"></ch-job>
 }
 
 <!-- file -->
 @if (showFile || settingsService.splitSelectionPanel$.getValue()) {
   <ch-selected-files
     [dataset]="selectionService.selectedDatasets[0]"
-    [sessionData]="sessionData"
-    [tools]="tools"></ch-selected-files>
+    [sessionData]="sessionData()"
+    [tools]="tools()"></ch-selected-files>
 }

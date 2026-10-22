@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { FormsModule } from "@angular/forms";
 
@@ -10,20 +10,14 @@ import { FormsModule } from "@angular/forms";
 export class TempCopyModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);
 
-  @Input()
-  button1Text: string;
-  @Input()
-  button2Text: string;
-  @Input()
-  description: string;
-  @Input()
-  value: string;
-  @Input()
-  title: string;
-  @Input()
-  message: string;
-  @Input()
-  placeHolder: string;
+  // set through the modal ref by the code that opens the modal
+  button1Text = signal<string>(undefined);
+  button2Text = signal<string>(undefined);
+  description = signal<string>(undefined);
+  value = signal<string>(undefined);
+  title = signal<string>(undefined);
+  message = signal<string>(undefined);
+  placeHolder = signal<string>(undefined);
 
   @ViewChild("valueInput")
   valueInput;
@@ -41,7 +35,7 @@ export class TempCopyModalComponent implements AfterViewInit {
 
   save(button: string) {
     this.activeModal.close({
-      value: this.value,
+      value: this.value(),
       button,
     });
   }

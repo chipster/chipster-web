@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, input } from "@angular/core";
 import { Dataset, Tool } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SingleDatasetComponent } from "../../selectiondetails/singledataset/single-dataset.component";
@@ -11,10 +11,7 @@ import { FilesDetailsComponent } from "../../selectiondetails/files-details.comp
   imports: [SingleDatasetComponent, FilesDetailsComponent],
 })
 export class DetailsVisualizationComponent {
-  @Input()
-  datasets: Dataset[];
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  tools: Tool[];
+  readonly datasets = input<Dataset[]>(undefined);
+  readonly sessionData = input<SessionData>(undefined);
+  readonly tools = input<Tool[]>(undefined);
 }

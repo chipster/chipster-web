@@ -1,7 +1,7 @@
-<div [ngClass]="{ container: addContainer }">
+<div [ngClass]="{ container: addContainer() }">
   <div class="row">
     <div class="col">
-      @if (showControls) {
+      @if (showControls()) {
         <div>
           <button class="btn btn-secondary btn-sm float-end" (click)="openNewWindow()">Open in new tab</button>
         </div>

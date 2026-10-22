@@ -1,13 +1,13 @@
 import {
   Component,
   EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
   Output,
   ViewChild,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
 import { FormsModule } from "@angular/forms";
@@ -22,14 +22,10 @@ import { FormsModule } from "@angular/forms";
 export class SearchBoxComponent implements OnInit, OnDestroy {
   private readonly hotkeyService = inject(HotkeyService);
 
-  @Input()
-  placeholder: string;
-  @Input()
-  focusOnInit = false;
-  @Input()
-  focusHotkey: string;
-  @Input()
-  focusHotkeyDescription: string;
+  readonly placeholder = input<string>(undefined);
+  readonly focusOnInit = input(false);
+  readonly focusHotkey = input<string>(undefined);
+  readonly focusHotkeyDescription = input<string>(undefined);
 
   @Output()
   valueChange = new EventEmitter<string>();
@@ -43,8 +39,9 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   private unregisterHotkey: (() => void) | null = null;
 
   ngOnInit() {
-    if (this.focusHotkey) {
-      this.unregisterHotkey = this.hotkeyService.register(this.focusHotkey, this.focusHotkeyDescription, () =>
+    const focusHotkey = this.focusHotkey();
+    if (focusHotkey) {
+      this.unregisterHotkey = this.hotkeyService.register(focusHotkey, this.focusHotkeyDescription(), () =>
         this.focus(),
       );
     }

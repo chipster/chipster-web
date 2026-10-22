@@ -199,7 +199,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     const tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset("newDataset.tsv", [this.dataset], "Scatter Plot", data)
+      .createDerivedDataset("newDataset.tsv", [this.dataset()], "Scatter Plot", data)
       .subscribe({ error: (err) => this.restErrorService.showError("create dataset failed", err) });
   }
 }

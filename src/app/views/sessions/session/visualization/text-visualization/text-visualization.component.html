@@ -15,7 +15,7 @@
         @if (isCompleteFile()) {
           <label style="font-size: smaller">File size {{ getSizeFull() | bytes }}.</label>
         }
-        @if (!modalMode) {
+        @if (!modalMode()) {
           <ch-link-button (click)="showAll()" class="float-end no-underline-link-button">
             <i class="fa-solid fa-expand"></i>
             Full Screen

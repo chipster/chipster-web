@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as pako from "pako";
 import { Subject } from "rxjs";
@@ -16,8 +16,7 @@ import BamRecord from "./bamRecord";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class BamViewerComponent implements OnChanges, OnDestroy {
-  @Input()
-  private dataset: Dataset;
+  readonly dataset = input<Dataset>(undefined);
   private plain: any;
   private samHeaderLen: number;
   private samHeader;
@@ -62,7 +61,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     this.state = new LoadState(State.Loading, "Loading bam file...");
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true)
+      .getData(this.sessionDataService.getSessionId(), this.dataset(), this.maxBytes, true)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {

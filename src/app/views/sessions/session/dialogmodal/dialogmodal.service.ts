@@ -1,6 +1,6 @@
 import { Injectable, Type, inject } from "@angular/core";
 import { NgbModal, NgbModalOptions, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, Job, SessionEvent, Tool } from "chipster-js-common";
+import { Dataset, Job, Session, SessionEvent, Tool } from "chipster-js-common";
 import { EMPTY, Observable, from as observableFrom } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { SessionData } from "../../../../model/session/session-data";
@@ -64,42 +64,48 @@ export class DialogModalService {
     return DialogModalService.observableFromPromiseWithDismissHandling(this.openResult(select, init, options));
   }
 
-  openSessionNameModal(title, name, buttonText = "Rename"): Observable<string> {
+  openSessionNameModal(title: string, name: string, buttonText = "Rename"): Observable<string> {
     return this.openStringModal(title, "Session name", name, buttonText);
   }
 
-  openStringModal(title, description, value, buttonText) {
+  openStringModal(title: string, description: string, value: string, buttonText: string) {
     return this.openObservable(
       (m) => m.StringModalComponent,
       (modal) => {
-        modal.value = value;
-        modal.title = title;
-        modal.description = description;
-        modal.buttonText = buttonText;
-        modal.placeHolder = "";
+        modal.value.set(value);
+        modal.title.set(title);
+        modal.description.set(description);
+        modal.buttonText.set(buttonText);
+        modal.placeHolder.set("");
       },
     );
   }
 
-  openOptionModal(title, description, options, buttonText, placeholder) {
+  openOptionModal(
+    title: string,
+    description: string,
+    options: Map<any, string>,
+    buttonText: string,
+    placeholder: string,
+  ) {
     return this.openObservable(
       (m) => m.DropdownModalComponent,
       (modal) => {
-        modal.options = options;
-        modal.title = title;
-        modal.description = description;
-        modal.buttonText = buttonText;
-        modal.placeHolder = placeholder;
+        modal.options.set(options);
+        modal.title.set(title);
+        modal.description.set(description);
+        modal.buttonText.set(buttonText);
+        modal.placeHolder.set(placeholder);
       },
     );
   }
 
-  openNotificationModal(title, message) {
+  openNotificationModal(title: string, message: string) {
     return this.openObservable(
       (m) => m.NotificationModalComponent,
       (modal) => {
-        modal.title = title;
-        modal.message = message;
+        modal.title.set(title);
+        modal.message.set(message);
       },
     );
   }
@@ -108,7 +114,7 @@ export class DialogModalService {
     return this.openObservable(
       (m) => m.NewsModalComponent,
       (modal) => {
-        modal.news = news;
+        modal.news.set(news);
       },
       { size: "lg" },
     );
@@ -118,7 +124,7 @@ export class DialogModalService {
     return this.openObservable(
       (m) => m.EditNewsModalComponent,
       (modal) => {
-        modal.newsItem = newsItem;
+        modal.newsItem.set(newsItem);
       },
       { size: "lg" },
     );
@@ -128,39 +134,39 @@ export class DialogModalService {
     return this.openObservable((m) => m.DownloadFromUrlModalComponent);
   }
 
-  openPreModal(title, text) {
+  openPreModal(title: string, text: string) {
     return this.openObservable(
       (m) => m.PreModalComponent,
       (modal) => {
-        modal.text = text;
-        modal.title = title;
+        modal.text.set(text);
+        modal.title.set(title);
       },
       { size: "lg" },
     );
   }
 
-  openTempCopyModal(title, message, value, button1Text, button2Text) {
+  openTempCopyModal(title: string, message: string, value: string, button1Text: string, button2Text: string) {
     // no dismiss handling: the caller gets the dismissal as an error
     return observableFrom(
       this.openResult(
         (m) => m.TempCopyModalComponent,
         (modal) => {
-          modal.value = value;
-          modal.title = title;
-          modal.message = message;
-          modal.description = "New session name";
-          modal.button1Text = button1Text;
-          modal.button2Text = button2Text;
-          modal.placeHolder = "";
+          modal.value.set(value);
+          modal.title.set(title);
+          modal.message.set(message);
+          modal.description.set("New session name");
+          modal.button1Text.set(button1Text);
+          modal.button2Text.set(button2Text);
+          modal.placeHolder.set("");
         },
       ),
     );
   }
 
   openChoiceModal(
-    title,
-    message,
-    question,
+    title: string,
+    message: string,
+    question: string,
     action1: { text: string; disabled?: boolean },
     action2: { text: string; disabled?: boolean },
     cancelButtonText: string,
@@ -187,22 +193,22 @@ export class DialogModalService {
   }
 
   openBooleanModal(
-    title,
-    message,
-    okButtonText,
-    cancelButtonText,
+    title: string,
+    message: string,
+    okButtonText: string,
+    cancelButtonText: string,
     okButtonClass = "btn-info",
     subMessage: string = null,
   ) {
     return this.openResult(
       (m) => m.BooleanModalComponent,
       (modal) => {
-        modal.title = title;
-        modal.message = message;
-        modal.subMessage = subMessage;
-        modal.okButtonText = okButtonText;
-        modal.okButtonClass = okButtonClass;
-        modal.cancelButtonText = cancelButtonText;
+        modal.title.set(title);
+        modal.message.set(message);
+        modal.subMessage.set(subMessage);
+        modal.okButtonText.set(okButtonText);
+        modal.okButtonClass.set(okButtonClass);
+        modal.cancelButtonText.set(cancelButtonText);
       },
     );
   }
@@ -211,27 +217,27 @@ export class DialogModalService {
     return this.openResult(
       (m) => m.DeleteFilesModalComponent,
       (modal) => {
-        modal.datasets = datasets;
+        modal.datasets.set(datasets);
       },
       { size: "md" },
     );
   }
 
-  openNotesModal(session): Observable<string> {
+  openNotesModal(session: Session): Observable<string> {
     return this.openObservable(
       (m) => m.NotesModalComponent,
       (modal) => {
-        modal.session = session;
+        modal.session.set(session);
       },
     );
   }
 
-  openSharingModal(session, ruleStream$: Observable<SessionEvent>): Observable<any> {
+  openSharingModal(session: Session, ruleStream$: Observable<SessionEvent>): Observable<any> {
     return this.openObservable(
       (m) => m.SharingModalComponent,
       (modal) => {
-        modal.session = session;
-        modal.ruleStream$ = ruleStream$;
+        modal.session.set(session);
+        modal.ruleStream$.set(ruleStream$);
       },
       { size: "lg" },
     );
@@ -249,7 +255,7 @@ export class DialogModalService {
     );
   }
 
-  openSpinnerModal(message, observable) {
+  openSpinnerModal(message: string, observable: Observable<any>) {
     return this.openObservable(
       (m) => m.SpinnerModalComponent,
       (modal) => {

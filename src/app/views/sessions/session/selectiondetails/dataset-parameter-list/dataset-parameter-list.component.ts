@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnChanges, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { JobParameter, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
 import log from "loglevel";
@@ -16,10 +16,10 @@ import { LinkButtonComponent } from "../../link-button/link-button.component";
 export class DatasetParameterListComponent implements OnChanges {
   private toolService = inject(ToolService);
 
-  @Input() tool: Tool;
-  @Input() parameters: Array<JobParameter>;
-  @Input() parametersLimit: number;
-  @Input() historyMode = false;
+  readonly tool = input<Tool>(undefined);
+  readonly parameters = input<Array<JobParameter>>(undefined);
+  readonly parametersLimit = input<number>(undefined);
+  readonly historyMode = input(false);
 
   noLimit = false;
   showAll = false;
@@ -56,8 +56,9 @@ export class DatasetParameterListComponent implements OnChanges {
   }
 
   updateLimits() {
-    this.limit = this.parametersLimit == null ? this.defaultLimit : this.parametersLimit;
-    this.noLimit = this.parametersLimit < 0;
+    const parametersLimit = this.parametersLimit();
+    this.limit = parametersLimit == null ? this.defaultLimit : parametersLimit;
+    this.noLimit = this.parametersLimit() < 0;
 
     if (this.noLimit || this.showAll) {
       this.limit = this.parameterListForView.length;

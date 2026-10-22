@@ -120,6 +120,9 @@
 
   <!-- visualization tabs -->
   @if (selectionService.selectedDatasets.length > 0) {
-    <ch-visualizations (scrollFix)="doScrollFix.emit()" [sessionData]="sessionData" [tools]="tools"></ch-visualizations>
+    <ch-visualizations
+      (scrollFix)="doScrollFix.emit()"
+      [sessionData]="sessionData()"
+      [tools]="tools()"></ch-visualizations>
   }
 </div>
