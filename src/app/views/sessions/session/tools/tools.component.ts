@@ -123,11 +123,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   public readonly sessionData = input<SessionData>(undefined);
 
-  private readonly toolsArray = input<Tool[]>(undefined); // stupid name, but tools used for internal copy
+  readonly toolsArray = input<Tool[]>(undefined); // stupid name, but tools used for internal copy
 
-  private readonly modulesArray = input<Module[]>(undefined); // stupid name, but modules used for internal copy
+  readonly modulesArray = input<Module[]>(undefined); // stupid name, but modules used for internal copy
 
-  private readonly modulesMap = input<Map<string, Module>>(undefined);
+  readonly modulesMap = input<Map<string, Module>>(undefined);
 
   @ViewChild("searchBox")
   searchBox;

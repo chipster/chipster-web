@@ -279,7 +279,7 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
 </script>
 `;
 
-  private readonly dataset = input<Dataset>(undefined);
+  readonly dataset = input<Dataset>(undefined);
 
   /**
    * The iframe exists while the state is ready. The content is set here instead of a srcdoc

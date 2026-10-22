@@ -1,6 +1,6 @@
 @if (ready) {
   <div class="">
-    <!-- <h1 class="h1-xs">{{validatedTool.tool.name.displayName}}
+    <!-- <h1 class="h1-xs">{{validatedTool().tool.name.displayName}}
     <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()"></button>
   </h1> -->
 
@@ -35,16 +35,16 @@
       </div>
     </div>
 
-    @if (validatedTool.tool) {
+    @if (validatedTool().tool) {
       <form name="paramForm">
-        @if (validatedTool.tool.parameters.length === 0) {
+        @if (validatedTool().tool.parameters.length === 0) {
           <div class="font-italic text-smaller">No parameters</div>
         }
 
-        @if (validatedTool.tool.parameters.length > 0) {
+        @if (validatedTool().tool.parameters.length > 0) {
           <table class="table table-sm">
             <tbody>
-              @for (parameter of validatedTool.tool.parameters; track parameter; let i = $index; let isLast = $last) {
+              @for (parameter of validatedTool().tool.parameters; track parameter; let i = $index; let isLast = $last) {
                 <tr>
                   <td style="width: 60%" [class.no-bottom-border]="isLast">
                     <!-- parameter name -->
@@ -101,9 +101,9 @@
                     }
 
                     <!-- validation message -->
-                    @if (!validatedTool.parametersValidationResults.get(parameter.name.id).valid) {
+                    @if (!validatedTool().parametersValidationResults.get(parameter.name.id).valid) {
                       <div class="alert alert-warning p-1 mb-0 mt-1 text-sm">
-                        {{ validatedTool.parametersValidationResults.get(parameter.name.id).message }}
+                        {{ validatedTool().parametersValidationResults.get(parameter.name.id).message }}
                       </div>
                     }
                   </td>

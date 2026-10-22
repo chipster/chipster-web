@@ -43,11 +43,11 @@
 
           <tr>
             <td class="lighter">Size:</td>
-            <td class="width-max">{{ dataset.size | bytes: 0 }}</td>
+            <td class="width-max">{{ dataset().size | bytes: 0 }}</td>
           </tr>
           <tr>
             <td class="lighter">Date:</td>
-            <td>{{ dataset.created | localDate }}</td>
+            <td>{{ dataset().created | localDate }}</td>
           </tr>
           <tr>
             <td class="lighter">Labels:</td>
@@ -79,12 +79,12 @@
             <td>
               <textarea
                 #notesArea
-                [(ngModel)]="dataset.notes"
+                [(ngModel)]="dataset().notes"
                 class="dataset-notes"
                 rows="6"
                 placeholder="{{ notesPlaceholderInactive }} "
                 (focus)="editNotes(notesInput)"
-                (focusout)="saveNotes(dataset, notesInput)"
+                (focusout)="saveNotes(dataset(), notesInput)"
                 #notesInput></textarea>
             </td>
           </tr>

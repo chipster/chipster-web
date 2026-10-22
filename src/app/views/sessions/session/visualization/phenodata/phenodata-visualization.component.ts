@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
   Component,
-  Input,
   NgZone,
   OnChanges,
   OnDestroy,
@@ -12,6 +11,7 @@ import {
   ChangeDetectionStrategy,
   inject,
   input,
+  linkedSignal,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -57,10 +57,11 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   private getSessionDataService = inject(GetSessionDataService);
   private datasetService = inject(DatasetService);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input() private dataset!: Dataset;
-  private readonly datasetsMap = input.required<Map<string, Dataset>>();
+  readonly dataset = input.required<Dataset>();
+  // the dataset input, replaced by its latest copy from datasetsMap in updateView(): websocket events update the map,
+  // not the input
+  private readonly currentDataset = linkedSignal(() => this.dataset());
+  readonly datasetsMap = input.required<Map<string, Dataset>>();
 
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: any;
@@ -152,14 +153,17 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           // has been changed
 
           // only react to events of this dataset
-          if (this.dataset == null || this.dataset.datasetId !== (event.newValue as Dataset)?.datasetId) {
+          if (
+            this.currentDataset() == null ||
+            this.currentDataset().datasetId !== (event.newValue as Dataset)?.datasetId
+          ) {
             return;
           }
 
           // get the latest datasets from the sessionData, because websocket events
           // don't update selectedDatasets at the moment
           // in this case, could use the one from the event also?
-          const updatedDataset = this.datasetsMap().get(this.dataset.datasetId);
+          const updatedDataset = this.datasetsMap().get(this.currentDataset().datasetId);
           if (updatedDataset == null) {
             return;
           }
@@ -183,7 +187,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (Object.keys(changes).includes("dataset") && this.dataset) {
+    if (Object.keys(changes).includes("dataset") && this.currentDataset()) {
       this.updateViewLater();
     }
   }
@@ -371,9 +375,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
             this.updateViewAfterDelay();
             this.zone.run(() => this.updateWarnings());
           } else if (action === 3 && this.originalPhenodataString != null) {
-            this.datasetService.setPhenodata(this.dataset, this.originalPhenodataString);
+            this.datasetService.setPhenodata(this.currentDataset(), this.originalPhenodataString);
             this.phenodataString = this.originalPhenodataString;
-            this.sessionDataService.updateDataset(this.dataset).subscribe({
+            this.sessionDataService.updateDataset(this.currentDataset()).subscribe({
               next: () => log.info("dataset phenodata updated"),
               error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
             });
@@ -390,9 +394,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
     this.phenodataString = phenodataString;
 
-    if (phenodataString !== this.datasetService.getOwnPhenodata(this.dataset)) {
-      this.datasetService.setPhenodata(this.dataset, phenodataString);
-      this.sessionDataService.updateDataset(this.dataset).subscribe({
+    if (phenodataString !== this.datasetService.getOwnPhenodata(this.currentDataset())) {
+      this.datasetService.setPhenodata(this.currentDataset(), phenodataString);
+      this.sessionDataService.updateDataset(this.currentDataset()).subscribe({
         next: () => log.info("dataset phenodata updated"),
         error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
       });
@@ -404,8 +408,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   private updateWarnings() {
-    this.phenodataFilled = this.datasetService.isPhenodataFilled(this.dataset);
-    this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.dataset);
+    this.phenodataFilled = this.datasetService.isPhenodataFilled(this.currentDataset());
+    this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.currentDataset());
   }
 
   private updateView() {
@@ -440,35 +444,35 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       container.removeChild(container.firstChild);
     }
 
-    if (this.dataset == null) {
+    if (this.currentDataset() == null) {
       this.phenodataState = PhenodataState.DATASET_NULL;
       this.ready = true;
       return;
     }
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    const updatedDataset = this.datasetsMap().get(this.dataset.datasetId);
+    const updatedDataset = this.datasetsMap().get(this.currentDataset().datasetId);
     if (updatedDataset == null) {
       this.phenodataState = PhenodataState.DATASET_NULL;
       this.ready = true;
       return;
     }
-    this.dataset = updatedDataset;
+    this.currentDataset.set(updatedDataset);
 
     // find phenodata for this dataset, could be own or inherited
     let phenodataString;
-    if (this.datasetService.hasOwnPhenodata(this.dataset)) {
-      phenodataString = this.datasetService.getOwnPhenodata(this.dataset);
+    if (this.datasetService.hasOwnPhenodata(this.currentDataset())) {
+      phenodataString = this.datasetService.getOwnPhenodata(this.currentDataset());
       this.phenodataState = PhenodataState.OWN_PHENODATA;
-      if (this.dataset.datasetId !== this.originalDatasetId) {
-        this.originalDatasetId = this.dataset.datasetId;
+      if (this.currentDataset().datasetId !== this.originalDatasetId) {
+        this.originalDatasetId = this.currentDataset().datasetId;
         this.originalPhenodataString = phenodataString;
       }
       this.phenodataString = phenodataString;
-      this.phenodataFilled = this.datasetService.isPhenodataFilled(this.dataset);
-      this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.dataset);
+      this.phenodataFilled = this.datasetService.isPhenodataFilled(this.currentDataset());
+      this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.currentDataset());
     } else {
-      const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(this.dataset);
+      const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(this.currentDataset());
       if (ancestorsWithPhenodata.length > 0) {
         phenodataString = this.datasetService.getOwnPhenodata(ancestorsWithPhenodata[0]);
         this.phenodataState = PhenodataState.INHERITED_PHENODATA;

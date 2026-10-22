@@ -25,9 +25,9 @@ export class ToolListAccordionComponent implements OnInit {
   private toolPipe = inject(ToolPipe);
   private toolSelectionService = inject(ToolSelectionService);
 
-  private readonly sessionData = input<SessionData>(undefined);
-  private readonly toolsArray = input<Tool[]>(undefined);
-  private readonly modulesArray = input<Module[]>(undefined);
+  readonly sessionData = input<SessionData>(undefined);
+  readonly toolsArray = input<Tool[]>(undefined);
+  readonly modulesArray = input<Module[]>(undefined);
 
   // FIXME after tool state refactoring
   // @Input()

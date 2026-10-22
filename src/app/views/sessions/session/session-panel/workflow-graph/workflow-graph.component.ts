@@ -1,7 +1,6 @@
 import {
   Component,
   ElementRef,
-  Input,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -85,10 +84,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   readonly datasetsMap = input<Map<string, Dataset>>(undefined);
   readonly jobsMap = input<Map<string, Job>>(undefined);
   readonly modulesMap = input<Map<string, Module>>(undefined);
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  datasetSearch: string;
+  readonly datasetSearch = input<string>(undefined);
   readonly defaultScale = input<number>(undefined);
   readonly enabled = input<boolean>(undefined);
   readonly sessionData = input<SessionData>(undefined);
@@ -385,10 +381,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private onSearchChanged(): void {
-    if (this.datasetSearch != null && this.datasetSearch.trim().length > 0) {
+    if (this.datasetSearch() != null && this.datasetSearch().trim().length > 0) {
       const filteredDatasets = this.pipeService.findDataset(
         UtilsService.mapValues(this.datasetsMap()),
-        this.datasetSearch,
+        this.datasetSearch(),
       );
       this.filter = UtilsService.arrayToMap(filteredDatasets, "datasetId");
       this.searchEnabled = true;
@@ -1522,8 +1518,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       if (targetNode.sourceJob) {
         const sourceJob = targetNode.sourceJob;
         // iterate over the inputs of the source job
-        sourceJob.inputs.forEach((input) => {
-          const sourceNode = datasetNodesMap.get(input.datasetId);
+        sourceJob.inputs.forEach((jobInput) => {
+          const sourceNode = datasetNodesMap.get(jobInput.datasetId);
           if (sourceNode && targetNode) {
             links.push({
               source: sourceNode,

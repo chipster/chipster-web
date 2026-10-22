@@ -1,6 +1,6 @@
 @if (ready) {
   <div class="">
-    <!-- <h1 class="h1-xs">{{validatedTool.tool.name.displayName}}
+    <!-- <h1 class="h1-xs">{{validatedTool().tool.name.displayName}}
     <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()"></button>
   </h1> -->
 
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    @if (validatedTool.tool) {
+    @if (validatedTool().tool) {
       <form name="paramForm">
         <table class="table table-sm">
           <tbody>

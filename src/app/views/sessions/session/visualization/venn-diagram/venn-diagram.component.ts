@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, ElementRef, OnChanges, ViewChild, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { every, includes } from "lodash-es";
@@ -35,10 +35,7 @@ export class VennDiagramComponent implements OnChanges {
   private restErrorService = inject(RestErrorService);
   private dialogModalService = inject(DialogModalService);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  selectedDatasets: Array<Dataset>;
+  readonly selectedDatasets = input<Array<Dataset>>(undefined);
 
   files: Array<TSVFile> = [];
   vennCircles: Array<VennCircle>;
@@ -64,7 +61,7 @@ export class VennDiagramComponent implements OnChanges {
 
     // only 2 or 3 inputs ok
     const validInputCount =
-      this.selectedDatasets != null && this.selectedDatasets.length >= 2 && this.selectedDatasets.length <= 3;
+      this.selectedDatasets() != null && this.selectedDatasets().length >= 2 && this.selectedDatasets().length <= 3;
 
     if (!validInputCount) {
       this.isEnabled = false;
@@ -73,7 +70,7 @@ export class VennDiagramComponent implements OnChanges {
 
     // if big files, draw button instead of diagram
     this.bigFiles =
-      this.selectedDatasets.reduce((sum: number, dataset: Dataset) => sum + dataset.size, 0) > this.autoDrawLimit;
+      this.selectedDatasets().reduce((sum: number, dataset: Dataset) => sum + dataset.size, 0) > this.autoDrawLimit;
 
     if (!this.bigFiles) {
       this.enable();
@@ -100,7 +97,7 @@ export class VennDiagramComponent implements OnChanges {
   }
 
   private init() {
-    const datasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset);
+    const datasetIds = this.selectedDatasets().map((dataset: Dataset) => dataset);
     const tsvObservables = datasetIds.map((dataset: Dataset) =>
       this.tsvService.getTSV(this.sessionDataService.getSessionId(), dataset),
     );
@@ -111,7 +108,7 @@ export class VennDiagramComponent implements OnChanges {
           .map((tsv: any) => d3.tsvParseRows(tsv))
           .map(
             (tsv: Array<Array<string>>, index: number) =>
-              new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name),
+              new TSVFile(tsv, this.selectedDatasets()[index].datasetId, this.selectedDatasets()[index].name),
           );
 
         this.symbolComparingEnabled = this.enableComparing("symbol");
@@ -272,7 +269,7 @@ export class VennDiagramComponent implements OnChanges {
     }
     const tsvData = d3.tsvFormatRows(data);
     this.sessionDataService
-      .createDerivedDataset("venn.tsv", this.selectedDatasets, "Venn-Diagram", tsvData)
+      .createDerivedDataset("venn.tsv", this.selectedDatasets(), "Venn-Diagram", tsvData)
       .subscribe({ error: (err) => this.restErrorService.showError("Create file failed", err) });
   }
 

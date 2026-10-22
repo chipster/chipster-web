@@ -46,7 +46,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   private restErrorService = inject(RestErrorService);
   private zone = inject(NgZone);
 
-  private readonly dataset = input<Dataset>(undefined);
+  readonly dataset = input<Dataset>(undefined);
 
   private tsv: TSVFile;
   selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions

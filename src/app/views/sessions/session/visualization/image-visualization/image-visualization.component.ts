@@ -17,7 +17,7 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   private sessionDataService = inject(SessionDataService);
   private restErrorService = inject(RestErrorService);
 
-  private readonly dataset = input<Dataset>(undefined);
+  readonly dataset = input<Dataset>(undefined);
 
   public src: string;
 

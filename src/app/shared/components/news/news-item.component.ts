@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, input } from "@angular/core";
+import { Component, EventEmitter, Output, ChangeDetectionStrategy, input } from "@angular/core";
 import { NewsItem } from "./NewsItem";
 import { LocalDatePipe } from "../../pipes/local-date.pipe";
 
@@ -9,10 +9,7 @@ import { LocalDatePipe } from "../../pipes/local-date.pipe";
   imports: [LocalDatePipe],
 })
 export class NewsItemComponent {
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
-  @Input() newsItem: NewsItem;
+  readonly newsItem = input<NewsItem>(undefined);
   readonly editable = input(false);
   @Output() edit = new EventEmitter<NewsItem>();
   @Output() delete = new EventEmitter<NewsItem>();
