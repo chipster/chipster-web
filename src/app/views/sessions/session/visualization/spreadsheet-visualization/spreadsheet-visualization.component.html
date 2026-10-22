@@ -12,7 +12,7 @@
     }
 
     <!-- preview, full file, but preview limiting visible rows -->
-    @if (!modalMode && gotFullFile && limitRows) {
+    @if (!modalMode() && gotFullFile && limitRows) {
       <!-- prettier-ignore -->
       <span style="font-size: smaller">
         Showing the first {{ rowCount }} of {{ rowCountBeforeLimit }} rows@if (limitColumns) {<span> and the first {{ columnLimit }} columns</span>}.
@@ -20,7 +20,7 @@
     }
 
     <!-- preview, line count maybe available in full screen-->
-    @if (!modalMode && !gotFullFile) {
+    @if (!modalMode() && !gotFullFile) {
       <!-- prettier-ignore -->
       <span style="font-size: smaller">
         Showing the first {{ rowCount }} rows@if (limitColumns) {<span> and the first {{ columnLimit }} columns</span>}.
@@ -28,7 +28,7 @@
     }
 
     <!-- modal, total count not available -->
-    @if (modalMode && !gotFullFile) {
+    @if (modalMode() && !gotFullFile) {
       <!-- prettier-ignore -->
       <span style="font-size: smaller">
         Showing the first {{ rowCount }} rows@if (limitColumns) {<span> and the first {{ columnLimit }} columns</span>}. File is too big for total row count.
@@ -36,7 +36,7 @@
     }
 
     <!-- full screen text and link for preview-->
-    @if (!modalMode && (!gotFullFile || limitRows)) {
+    @if (!modalMode() && (!gotFullFile || limitRows)) {
       <span style="font-size: smaller">
         View in
         <ch-link-button class="no-underline-link-button" (click)="showAll()">full screen</ch-link-button>
@@ -44,7 +44,7 @@
       </span>
     }
 
-    @if (!modalMode) {
+    @if (!modalMode()) {
       <ch-link-button (click)="showAll()" class="no-underline-link-button float-end">
         <i class="fa-solid fa-expand"></i>
         Full Screen
@@ -58,12 +58,12 @@
 <!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->
 
 <!-- wrapper div needed for horizontal-scroll, but messes things up when in modalMode -->
-@if (!modalMode) {
+@if (!modalMode()) {
   <div class="horizontal-scroll" #horizontalScroll>
     <div id="{{ tableContainerId }}" class="spreadsheet-table-container"></div>
   </div>
 }
 
-@if (modalMode) {
+@if (modalMode()) {
   <div id="{{ tableContainerId }}" class="spreadsheet-table-container"></div>
 }

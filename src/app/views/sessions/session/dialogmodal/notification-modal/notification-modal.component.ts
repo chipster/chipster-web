@@ -8,8 +8,12 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 export class NotificationModalComponent {
   private activeModal = inject(NgbActiveModal);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   title: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   message: string;
 

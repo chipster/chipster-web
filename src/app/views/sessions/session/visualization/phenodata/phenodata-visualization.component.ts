@@ -11,6 +11,7 @@ import {
   ViewEncapsulation,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -56,8 +57,10 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   private getSessionDataService = inject(GetSessionDataService);
   private datasetService = inject(DatasetService);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() private dataset!: Dataset;
-  @Input() private datasetsMap!: Map<string, Dataset>;
+  private readonly datasetsMap = input.required<Map<string, Dataset>>();
 
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: any;
@@ -156,7 +159,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           // get the latest datasets from the sessionData, because websocket events
           // don't update selectedDatasets at the moment
           // in this case, could use the one from the event also?
-          const updatedDataset = this.datasetsMap.get(this.dataset.datasetId);
+          const updatedDataset = this.datasetsMap().get(this.dataset.datasetId);
           if (updatedDataset == null) {
             return;
           }
@@ -444,7 +447,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     }
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    const updatedDataset = this.datasetsMap.get(this.dataset.datasetId);
+    const updatedDataset = this.datasetsMap().get(this.dataset.datasetId);
     if (updatedDataset == null) {
       this.phenodataState = PhenodataState.DATASET_NULL;
       this.ready = true;

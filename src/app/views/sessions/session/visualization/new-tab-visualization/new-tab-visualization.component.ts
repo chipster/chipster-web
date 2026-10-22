@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 
@@ -11,10 +11,9 @@ import { SessionDataService } from "../../session-data.service";
 export class NewTabVisualizationComponent implements OnInit {
   private sessionDataService = inject(SessionDataService);
 
-  @Input()
-  dataset: Dataset;
+  readonly dataset = input<Dataset>(undefined);
 
   ngOnInit(): void {
-    this.sessionDataService.openNewTab(this.dataset);
+    this.sessionDataService.openNewTab(this.dataset());
   }
 }

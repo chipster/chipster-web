@@ -54,6 +54,8 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     attach: ["", [Validators.required]], // force user to select
   });
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   log: string;
 

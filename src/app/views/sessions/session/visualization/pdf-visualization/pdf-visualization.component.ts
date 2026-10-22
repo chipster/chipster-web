@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import type { OnProgressParameters } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { Subject } from "rxjs";
@@ -28,8 +28,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   private restErrorService = inject(RestErrorService);
   private bytesPipe = inject(BytesPipe);
 
-  @Input()
-  dataset: Dataset;
+  readonly dataset = input<Dataset>(undefined);
 
   src: string;
 
@@ -80,18 +79,18 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.setShowAllButtonText();
 
     // check for empty file
-    if (this.dataset.size < 1) {
+    if (this.dataset().size < 1) {
       this.state = new LoadState(State.EmptyFile);
       return;
     }
 
     // ask before showing large files
-    if (this.dataset.size > this.autoShowLimit) {
+    if (this.dataset().size > this.autoShowLimit) {
       // the size is rounded up, so that it's never shown below the limit
       this.state = new LoadState(
         State.TooLarge,
         "This PDF (" +
-          this.bytesPipe.transform(this.dataset.size, 1, true) +
+          this.bytesPipe.transform(this.dataset().size, 1, true) +
           ") is larger than " +
           this.bytesPipe.transform(this.autoShowLimit, 0) +
           ". Showing it here may be slow or make the page unresponsive. Opening it in a new tab is recommended.",
@@ -111,7 +110,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
         this.load();
       }
     } else if (action === ButtonAction.OpenNewTab) {
-      this.sessionDataService.openNewTab(this.dataset);
+      this.sessionDataService.openNewTab(this.dataset());
     }
   }
 
@@ -129,7 +128,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     this.resetLoad();
     this.state = new LoadState(State.Loading, "Loading pdf file...");
     this.sessionDataService
-      .getDatasetUrl(this.dataset)
+      .getDatasetUrl(this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (url) => {

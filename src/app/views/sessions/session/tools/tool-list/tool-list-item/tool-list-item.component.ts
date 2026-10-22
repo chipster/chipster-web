@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, input } from "@angular/core";
 import { NgStyle } from "@angular/common";
 
 @Component({
@@ -9,8 +9,8 @@ import { NgStyle } from "@angular/common";
   imports: [NgStyle],
 })
 export class ToolListItemComponent {
-  @Input() color: string;
-  @Input() categoryname: string;
+  readonly color = input<string>(undefined);
+  readonly categoryname = input<string>(undefined);
 
   constructor() {}
 }

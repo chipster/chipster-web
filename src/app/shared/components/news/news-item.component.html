@@ -1,7 +1,7 @@
 <div>
   <h5 class="mb-0">
     {{ newsItem.contents.title }}
-    @if (editable) {
+    @if (editable()) {
       <span class="float-end">
         <button (click)="onEdit(newsItem)" class="btn btn-link">Edit</button>
         <button (click)="onDelete(newsItem)" class="btn btn-link">Delete</button>

@@ -8,6 +8,7 @@ import {
   Output,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { Subject } from "rxjs";
@@ -41,8 +42,10 @@ interface Resources {
 export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   private schedulerResource = inject(SchedulerResource);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() validatedTool: ValidatedTool;
-  @Input() origTool: Tool;
+  readonly origTool = input<Tool>(undefined);
 
   @Output() resourcesChanged: EventEmitter<any> = new EventEmitter();
 
@@ -103,14 +106,15 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
       this.showWarning = !this.validatedTool.resourcesValidation.valid;
       this.warningText = this.validatedTool.resourcesValidation.message;
 
-      if (this.origTool.slotCount == null) {
+      const origTool = this.origTool();
+      if (origTool.slotCount == null) {
         // use lower max limit for tools that doesn't define any # SLOTS
         // just to limit careless use, no need to check in server side
         this.resources.cpu.max = quotas.cpuRatio * quotas.preferredSlots;
         this.resources.memory.max = quotas.memoryRatio * quotas.preferredSlots;
       }
 
-      if (this.origTool.storage == null) {
+      if (origTool.storage == null) {
         // use lower max limit for tools that doesn't define any # STORAGE
         // just to limit careless use, no need to check in server side
         this.resources.storage.max = quotas.preferredStorage;
@@ -210,18 +214,18 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   resetSlots() {
-    this.validatedTool.tool.slotCount = this.origTool.slotCount;
+    this.validatedTool.tool.slotCount = this.origTool().slotCount;
   }
   resetStorage() {
-    this.validatedTool.tool.storage = this.origTool.storage;
+    this.validatedTool.tool.storage = this.origTool().storage;
   }
 
   isResetSlotsVisible() {
-    return this.origTool.slotCount !== this.validatedTool.tool.slotCount;
+    return this.origTool().slotCount !== this.validatedTool.tool.slotCount;
   }
 
   isResetStorageVisible() {
-    return this.origTool.storage !== this.validatedTool.tool.storage;
+    return this.origTool().storage !== this.validatedTool.tool.storage;
   }
 
   isResetAllVisible() {

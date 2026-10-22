@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Dataset, Label, Module, Tool } from "chipster-js-common";
 import { range } from "lodash-es";
 import { SessionData } from "../../../../model/session/session-data";
@@ -59,12 +59,9 @@ export class SessionPanelComponent {
   private labelsContextMenuService = inject(LabelsContextMenuService);
   private datasetModalService = inject(DatasetModalService);
 
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  modulesMap: Map<string, Module>;
-  @Input()
-  tools: Tool[];
+  readonly sessionData = input<SessionData>(undefined);
+  readonly modulesMap = input<Map<string, Module>>(undefined);
+  readonly tools = input<Tool[]>(undefined);
 
   datasetSearch: string;
 
@@ -73,7 +70,7 @@ export class SessionPanelComponent {
   selectByLabelOpen = false;
 
   get labelMenuItems(): LabelMenuItem[] {
-    return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData);
+    return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData());
   }
 
   get labelsButtonIconColor(): string | null {
@@ -82,7 +79,7 @@ export class SessionPanelComponent {
   }
 
   get splitButtonLabel(): Label | null {
-    return this.labelsContextMenuService.getDefaultLabel(this.sessionData);
+    return this.labelsContextMenuService.getDefaultLabel(this.sessionData());
   }
 
   applySplitButtonLabel(): void {
@@ -91,26 +88,26 @@ export class SessionPanelComponent {
       return;
     }
     this.labelsContextMenuService
-      .toggleLabel(this.selectionService.selectedDatasets, label, this.sessionData)
+      .toggleLabel(this.selectionService.selectedDatasets, label, this.sessionData())
       .subscribe();
   }
 
   toggleLabel(item: LabelMenuItem): void {
     this.labelsContextMenuService
-      .toggleLabel(this.selectionService.selectedDatasets, item.label, this.sessionData)
+      .toggleLabel(this.selectionService.selectedDatasets, item.label, this.sessionData())
       .subscribe();
   }
 
   selectFilesWithLabel(item: LabelMenuItem): void {
     const labelId = item.label.labelId;
-    const matching = Array.from(this.sessionData.datasetsMap.values()).filter((d) =>
+    const matching = Array.from(this.sessionData().datasetsMap.values()).filter((d) =>
       (d.labelIds ?? []).includes(labelId),
     );
     this.selectionHandlerService.setDatasetSelection(matching);
   }
 
   manageLabels(): void {
-    this.datasetModalService.openLabelsModal(this.selectionService.selectedDatasets, this.sessionData);
+    this.datasetModalService.openLabelsModal(this.selectionService.selectedDatasets, this.sessionData());
   }
 
   search(value: any): void {
@@ -119,7 +116,7 @@ export class SessionPanelComponent {
 
   searchEnter(): void {
     // select highlighted datasets when the enter key is pressed
-    const allDatasets = this.sessionDataService.getDatasetList(this.sessionData);
+    const allDatasets = this.sessionDataService.getDatasetList(this.sessionData());
     this.selectionHandlerService.setDatasetSelection(this.pipeService.findDataset(allDatasets, this.datasetSearch));
     this.datasetSearch = null;
   }
@@ -129,7 +126,7 @@ export class SessionPanelComponent {
       this.selectionHandlerService.toggleDatasetSelection([dataset]);
     } else if (UtilsService.isShiftKey($event)) {
       //  datasets and their ids in the order of the dataset list
-      const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(this.sessionData);
+      const allDatasets = this.sessionDataService.getDatasetListSortedByCreated(this.sessionData());
 
       // only apply to those filtered by dataset search
       const searchDatasets = this.pipeService.findDataset(allDatasets, this.datasetSearch);
@@ -150,15 +147,19 @@ export class SessionPanelComponent {
   }
 
   autoLayoutAll(): void {
-    const allDatasets = Array.from(this.sessionData.datasetsMap.values());
-    this.workflowGraphService.resetDoAndSaveLayout(allDatasets, this.sessionData.datasetsMap, this.sessionData.jobsMap);
+    const allDatasets = Array.from(this.sessionData().datasetsMap.values());
+    this.workflowGraphService.resetDoAndSaveLayout(
+      allDatasets,
+      this.sessionData().datasetsMap,
+      this.sessionData().jobsMap,
+    );
   }
 
   autoLayoutSelected(): void {
     this.workflowGraphService.resetDoAndSaveLayout(
       this.selectionService.selectedDatasets,
-      this.sessionData.datasetsMap,
-      this.sessionData.jobsMap,
+      this.sessionData().datasetsMap,
+      this.sessionData().jobsMap,
     );
   }
 
@@ -168,12 +169,12 @@ export class SessionPanelComponent {
   }
 
   selectAll() {
-    const all = this.sessionDataService.getCompleteDatasets(this.sessionData.datasetsMap);
+    const all = this.sessionDataService.getCompleteDatasets(this.sessionData().datasetsMap);
     this.selectionHandlerService.setDatasetSelection(Array.from(all.values()));
   }
 
   getDatasetListSorted(): Dataset[] {
-    return this.sessionDataService.getDatasetListSortedByCreated(this.sessionData);
+    return this.sessionDataService.getDatasetListSortedByCreated(this.sessionData());
   }
 
   isDatasetsSelected() {

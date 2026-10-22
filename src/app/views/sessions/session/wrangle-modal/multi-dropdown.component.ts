@@ -1,12 +1,12 @@
 import {
   Component,
   EventEmitter,
-  Input,
   OnChanges,
   OnInit,
   Output,
   ViewChild,
   ChangeDetectionStrategy,
+  input,
 } from "@angular/core";
 import log from "loglevel";
 import type { ColumnItem } from "./wrangle-modal.component";
@@ -30,8 +30,8 @@ import { FormsModule } from "@angular/forms";
  * Inputs and outputs should always be ColumnItem[] though
  */
 export class MultiDropdownComponent implements OnInit, OnChanges {
-  @Input() items: ColumnItem[];
-  @Input() multiple?: boolean = true;
+  readonly items = input<ColumnItem[]>(undefined);
+  readonly multiple = input<boolean>(true);
 
   @Output() private selectionChanged = new EventEmitter<ColumnItem[]>();
 
@@ -48,19 +48,19 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   selectAllButtonText = this.selectAllString;
 
   ngOnInit(): void {
-    this.placeholder = this.multiple ? "Select columns" : "Select column";
+    this.placeholder = this.multiple() ? "Select columns" : "Select column";
   }
 
   ngOnChanges(): void {
     this.indexToColumnItemMap.clear();
-    this.items.forEach((item) => this.indexToColumnItemMap.set(item.index, item));
+    this.items().forEach((item) => this.indexToColumnItemMap.set(item.index, item));
 
     // make sure currently selected are included in the options, if not, unselect
     // shouldn't happen, but just in case
     // see selectedItem declaration
     const selectedIndexesAsArray = [].concat(this.selectedIndexes).filter((index) => index != null);
     const includedIndexes = selectedIndexesAsArray.filter((index) =>
-      this.items.includes(this.indexToColumnItemMap.get(index)),
+      this.items().includes(this.indexToColumnItemMap.get(index)),
     );
     if (selectedIndexesAsArray.length !== includedIndexes.length) {
       log.warn("selected column not included in options after options change", selectedIndexesAsArray, includedIndexes);
@@ -70,7 +70,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   }
 
   onSearch(event): void {
-    if (!this.multiple) {
+    if (!this.multiple()) {
       return;
     }
     this.filteredIndexes = event.items.map((item) => item.index);
@@ -78,7 +78,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   }
 
   onKeyDownEnter(event): void {
-    if (!this.multiple) {
+    if (!this.multiple()) {
       return;
     }
     event.stopImmediatePropagation();
@@ -93,15 +93,15 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   }
 
   onOpen(): void {
-    if (!this.multiple) {
+    if (!this.multiple()) {
       return;
     }
     this.selectAllButtonText = this.selectAllString;
-    this.filteredIndexes = this.items.map((item) => item.index);
+    this.filteredIndexes = this.items().map((item) => item.index);
   }
 
   onSelectAll(): void {
-    if (!this.multiple) {
+    if (!this.multiple()) {
       return;
     }
     this.addFilteredToSelectedIndexes();

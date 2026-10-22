@@ -1,7 +1,6 @@
 import {
   Component,
   EventEmitter,
-  Input,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -9,6 +8,7 @@ import {
   SimpleChanges,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
@@ -48,14 +48,10 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   private datasetContextMenuService = inject(DatasetContextMenuService);
   private labelsContextMenuService = inject(LabelsContextMenuService);
 
-  @Input()
-  dataset: Dataset;
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  tools: Tool[];
-  @Input()
-  modules: Module[];
+  readonly dataset = input<Dataset>(undefined);
+  readonly sessionData = input<SessionData>(undefined);
+  readonly tools = input<Tool[]>(undefined);
+  readonly modules = input<Module[]>(undefined);
 
   @Output() doScrollFix = new EventEmitter();
 
@@ -67,19 +63,19 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   labelsSubmenuOpen = false;
 
   get labelMenuItems(): LabelMenuItem[] {
-    return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData);
+    return this.labelsContextMenuService.buildItems(this.selectionService.selectedDatasets, this.sessionData());
   }
 
   toggleLabel(item: LabelMenuItem): void {
     this.labelsContextMenuService
-      .toggleLabel(this.selectionService.selectedDatasets, item.label, this.sessionData)
+      .toggleLabel(this.selectionService.selectedDatasets, item.label, this.sessionData())
       .subscribe();
   }
 
   ngOnChanges(_changes: SimpleChanges): void {
-    this.datasetName = this.dataset.name;
+    this.datasetName = this.dataset().name;
 
-    this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset], this.sessionData.jobsMap);
+    this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset()], this.sessionData().jobsMap);
   }
 
   ngOnInit(): void {
@@ -89,15 +85,16 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (datasetId) => {
-          if (datasetId === this.dataset?.datasetId) {
-            this.datasetName = this.sessionData.datasetsMap.get(this.dataset.datasetId)?.name;
+          const dataset = this.dataset();
+          if (datasetId === dataset?.datasetId) {
+            this.datasetName = this.sessionData().datasetsMap.get(dataset.datasetId)?.name;
           }
         },
       });
   }
 
   renameDataset() {
-    const dataset = clone(this.dataset);
+    const dataset = clone(this.dataset());
     this.dialogModalService
       .openStringModal("Rename file", "File name", dataset.name, "Rename")
       .pipe(
@@ -116,43 +113,43 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   exportDatasets() {
-    this.sessionDataService.exportDatasets([this.dataset]);
+    this.sessionDataService.exportDatasets([this.dataset()]);
   }
 
   showHistory() {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData, this.tools);
+    this.datasetModalService.openDatasetHistoryModal(this.dataset(), this.sessionData(), this.tools());
   }
 
   wrangleDataset() {
-    this.datasetModalService.openWrangleModal(this.dataset, this.sessionData);
+    this.datasetModalService.openWrangleModal(this.dataset(), this.sessionData());
   }
 
   defineDatasetGroups() {
-    this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData);
+    this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData());
   }
 
   copyToNewSession() {
     this.datasetModalService.openCopySelectionToNewSessionModal(
       this.selectionService.selectedDatasets,
-      this.sessionData,
+      this.sessionData(),
     );
   }
 
   copyToExistingSession() {
     this.datasetModalService.openCopySelectionToExistingSessionModal(
       this.selectionService.selectedDatasets,
-      this.sessionData,
+      this.sessionData(),
     );
   }
 
   showJob() {
-    this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
+    this.datasetContextMenuService.showJob(this.sourceJob, this.tools(), this.sessionData());
   }
 
   selectToolAndParameters() {}
 
   manageLabels() {
-    this.datasetModalService.openLabelsModal(this.selectionService.selectedDatasets, this.sessionData);
+    this.datasetModalService.openLabelsModal(this.selectionService.selectedDatasets, this.sessionData());
   }
 
   selectChildren() {

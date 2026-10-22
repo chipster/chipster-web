@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -37,16 +37,14 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   private toolService = inject(ToolService);
   private datasetContextMenuService = inject(DatasetContextMenuService);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   dataset: Dataset;
-  @Input()
-  private jobs: Map<string, Job>;
-  @Input()
-  private sessionData: SessionData;
-  @Input()
-  private tools: Tool[];
-  @Input()
-  parametersLimit: number;
+  private readonly jobs = input<Map<string, Job>>(undefined);
+  private readonly sessionData = input<SessionData>(undefined);
+  private readonly tools = input<Tool[]>(undefined);
+  readonly parametersLimit = input<number>(undefined);
 
   @ViewChild("notesInput")
   notesArea;
@@ -70,7 +68,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
     this.toolCategory = this.sourceJob ? this.sourceJob.toolCategory : "";
     this.toolName = this.sourceJob ? this.sourceJob.toolName : "";
 
-    this.tool = this.toolService.getLiveToolForSourceJob(this.sourceJob, this.tools);
+    this.tool = this.toolService.getLiveToolForSourceJob(this.sourceJob, this.tools());
   }
 
   editNotes(input) {
@@ -87,11 +85,11 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   }
 
   getSourceJob(dataset: Dataset) {
-    return this.sessionDataService.getJobById(dataset.sourceJob, this.jobs);
+    return this.sessionDataService.getJobById(dataset.sourceJob, this.jobs());
   }
 
   showHistory(): void {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData, this.tools);
+    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData(), this.tools());
   }
 
   selectTool() {
@@ -99,14 +97,14 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   }
 
   showJob() {
-    this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
+    this.datasetContextMenuService.showJob(this.sourceJob, this.tools(), this.sessionData());
   }
 
   editLabels(): void {
-    this.datasetModalService.openLabelsModal([this.dataset], this.sessionData);
+    this.datasetModalService.openLabelsModal([this.dataset], this.sessionData());
   }
 
   getDatasetLabels() {
-    return getSortedLabels(this.dataset?.labelIds, this.sessionData.labelsMap);
+    return getSortedLabels(this.dataset?.labelIds, this.sessionData().labelsMap);
   }
 }

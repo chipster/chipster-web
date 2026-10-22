@@ -1,12 +1,12 @@
 import {
   Component,
-  Input,
   NgZone,
   OnChanges,
   OnDestroy,
   ViewEncapsulation,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -46,8 +46,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   private restErrorService = inject(RestErrorService);
   private zone = inject(NgZone);
 
-  @Input()
-  private dataset: Dataset;
+  private readonly dataset = input<Dataset>(undefined);
 
   private tsv: TSVFile;
   selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
@@ -73,20 +72,20 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   }
 
   update() {
-    const datasetName = this.dataset.name;
+    const datasetName = this.dataset().name;
 
     // check for empty file
-    if (this.dataset.size < 1) {
+    if (this.dataset().size < 1) {
       this.state = new LoadState(State.EmptyFile);
       return;
     }
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset)
+      .getData(this.sessionDataService.getSessionId(), this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
-          this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
+          this.tsv = new TSVFile(parsedTSV, this.dataset().datasetId, datasetName);
           this.totalCount = this.tsv.body.size();
           if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
             this.drawLineChart(this.tsv);
@@ -197,7 +196,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .call(drag);
 
     // Custom headers for x-axis
-    const firstDataset: any = this.dataset;
+    const firstDataset: any = this.dataset();
     const phenodataDescriptions = filter(firstDataset.metadata, (metadata: any) => metadata.key === "description");
 
     // Change default headers to values defined in phenodata if description value has been defined
@@ -487,7 +486,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset("dataset.tsv", [this.dataset], "Expression profile", data)
+      .createDerivedDataset("dataset.tsv", [this.dataset()], "Expression profile", data)
       .subscribe(null);
   }
 

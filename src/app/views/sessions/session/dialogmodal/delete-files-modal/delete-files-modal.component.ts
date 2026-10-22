@@ -9,6 +9,8 @@ import { Dataset } from "chipster-js-common";
 export class DeleteFilesModalComponent {
   private activeModal = inject(NgbActiveModal);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   datasets: Dataset[];
 

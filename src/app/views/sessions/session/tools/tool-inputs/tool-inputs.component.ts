@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, OnChanges, Output, ChangeDetectionStrategy, inject } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  ChangeDetectionStrategy,
+  inject,
+  input,
+} from "@angular/core";
 import { Dataset, InputBinding, ToolInput } from "chipster-js-common";
 import { difference } from "lodash-es";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -23,7 +32,9 @@ interface BindingModel {
 export class ToolInputsComponent implements OnChanges {
   private toolService = inject(ToolService);
 
-  @Input() sessionData: SessionData;
+  readonly sessionData = input<SessionData>(undefined);
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() validatedTool: ValidatedTool;
   @Output() updateBindings = new EventEmitter();
 
@@ -39,7 +50,7 @@ export class ToolInputsComponent implements OnChanges {
         input: b.toolInput,
         boundDatasets: b.datasets.slice(),
         compatibleDatasets: this.validatedTool.selectedDatasets.filter((dataset: Dataset) =>
-          this.toolService.isCompatible(this.sessionData, dataset, b.toolInput.type.name),
+          this.toolService.isCompatible(this.sessionData(), dataset, b.toolInput.type.name),
         ),
       }));
     } else {

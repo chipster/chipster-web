@@ -34,7 +34,7 @@
                 @if (sourceJob && sourceJob.parameters.length > 0) {
                   <ch-dataset-parameter-list
                     [parameters]="sourceJob.parameters"
-                    [parametersLimit]="parametersLimit"
+                    [parametersLimit]="parametersLimit()"
                     [tool]="tool"></ch-dataset-parameter-list>
                 }
               </td>

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
 import { cloneDeep } from "lodash-es";
 import { Subject } from "rxjs";
@@ -25,12 +25,9 @@ export class ToolListAccordionComponent implements OnInit {
   private toolPipe = inject(ToolPipe);
   private toolSelectionService = inject(ToolSelectionService);
 
-  @Input()
-  private sessionData: SessionData;
-  @Input()
-  private toolsArray: Tool[];
-  @Input()
-  private modulesArray: Module[];
+  private readonly sessionData = input<SessionData>(undefined);
+  private readonly toolsArray = input<Tool[]>(undefined);
+  private readonly modulesArray = input<Module[]>(undefined);
 
   // FIXME after tool state refactoring
   // @Input()
@@ -55,8 +52,8 @@ export class ToolListAccordionComponent implements OnInit {
 
   ngOnInit() {
     // TODO why copies?
-    this.tools = cloneDeep(this.toolsArray);
-    this.modules = cloneDeep(this.modulesArray);
+    this.tools = cloneDeep(this.toolsArray());
+    this.modules = cloneDeep(this.modulesArray());
 
     // FIXME after tool state refactoring
     // trigger parameter validation

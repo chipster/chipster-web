@@ -8,16 +8,28 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 export class BooleanModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   okButtonText: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   okButtonClass: string = "btn-info";
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   cancelButtonText: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   message: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   subMessage: string = null;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   title: string;
 

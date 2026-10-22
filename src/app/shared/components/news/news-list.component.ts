@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import log from "loglevel";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState } from "../../../model/loadstate";
@@ -19,7 +19,7 @@ export class NewsListComponent implements OnInit {
   private dialogModalService = inject(DialogModalService);
 
   // @Input() news: NewsItem[];
-  @Input() editable = false;
+  readonly editable = input(false);
   public news: NewsItem[];
   public state: LoadState;
   public errorMessage: string = "";
@@ -57,7 +57,7 @@ export class NewsListComponent implements OnInit {
   }
 
   public onEdit(newsItem: NewsItem) {
-    if (!this.editable) {
+    if (!this.editable()) {
       return;
     }
 
@@ -74,7 +74,7 @@ export class NewsListComponent implements OnInit {
   }
 
   public onDelete(news: NewsItem) {
-    if (!this.editable) {
+    if (!this.editable()) {
       return;
     }
 

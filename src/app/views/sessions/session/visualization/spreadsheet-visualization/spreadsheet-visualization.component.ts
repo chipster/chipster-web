@@ -1,13 +1,13 @@
 import {
   AfterViewInit,
   Component,
-  Input,
   NgZone,
   OnChanges,
   OnDestroy,
   ViewChild,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -46,14 +46,10 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
   private nativeElementService = inject(NativeElementService);
   private tsvService = inject(TsvService);
 
-  @Input()
-  dataset: Dataset;
-  @Input()
-  modalMode: boolean;
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  divWidth: any;
+  readonly dataset = input<Dataset>(undefined);
+  readonly modalMode = input<boolean>(undefined);
+  readonly sessionData = input<SessionData>(undefined);
+  readonly divWidth = input<any>(undefined);
 
   @ViewChild("horizontalScroll") horizontalScrollDiv;
 
@@ -105,34 +101,36 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
     this.destroyHot();
 
     // check for empty file
-    if (this.dataset.size < 1) {
+    if (this.dataset().size < 1) {
       this.state = new LoadState(State.EmptyFile);
       return;
     }
 
     // needed also in the preview text
-    this.modalWillHaveFullFile = this.dataset.size <= this.modalFileSizeLimit;
+    this.modalWillHaveFullFile = this.dataset().size <= this.modalFileSizeLimit;
 
     // modal mode could be undefined, we want explicit true or false
+    const modalMode = this.modalMode();
     this.getTruncatedFile = !!(
-      (!this.modalMode && this.dataset.size > this.fileSizeLimit) ||
-      (this.modalMode && this.dataset.size > this.modalFileSizeLimit)
+      (!modalMode && this.dataset().size > this.fileSizeLimit) ||
+      (modalMode && this.dataset().size > this.modalFileSizeLimit)
     );
 
     // limit the full screen downloaded stream size also as it freezes the view
-    const maxLimit = this.modalMode ? this.modalFileSizeLimit : this.fileSizeLimit;
+    const maxLimit = this.modalMode() ? this.modalFileSizeLimit : this.fileSizeLimit;
     const maxBytes = this.getTruncatedFile ? maxLimit : null;
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
+      .getData(this.sessionDataService.getSessionId(), this.dataset(), maxBytes)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {
-          this.gotFullFile = result.length === this.dataset.size;
+          this.gotFullFile = result.length === this.dataset().size;
 
+          const dataset = this.dataset();
           if (!this.getTruncatedFile && !this.gotFullFile) {
             log.warn(
-              `should have gotten full file, but result size is ${result.length} while dataset size is ${this.dataset.size}`,
+              `should have gotten full file, but result size is ${result.length} while dataset size is ${dataset.size}`,
             );
           }
 
@@ -148,18 +146,18 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
           }
 
           // filter out comment lines, e.g. lines starting with ## in a VCF file
-          const skipLinesPrefix = this.typeTagService.get(this.sessionData, this.dataset, Tags.SKIP_LINES);
+          const skipLinesPrefix = this.typeTagService.get(this.sessionData(), dataset, Tags.SKIP_LINES);
           if (skipLinesPrefix) {
             parsedTSV = parsedTSV.filter((row) => !row[0].startsWith(skipLinesPrefix));
           }
 
-          const tsv2File = this.tsvService.getTSV2FileFromArray(this.dataset, this.sessionData, parsedTSV);
+          const tsv2File = this.tsvService.getTSV2FileFromArray(dataset, this.sessionData(), parsedTSV);
 
           let headers = tsv2File.getHeadersForSpreadSheet();
           let body = tsv2File.getBody();
 
           // if not in modal, limit the rows if needed
-          this.limitRows = !this.modalMode && body.length > this.maxRowsLimit;
+          this.limitRows = !this.modalMode() && body.length > this.maxRowsLimit;
           this.rowCountBeforeLimit = body.length;
           if (this.limitRows) {
             body = body.slice(0, this.maxRowsLimit);
@@ -184,7 +182,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
           }
 
           // set the text after full screen link
-          if (!this.modalMode) {
+          if (!this.modalMode()) {
             if (this.gotFullFile && !this.limitRows) {
               this.goToFullScreenText = "";
             } else if (this.gotFullFile && this.limitRows) {
@@ -238,12 +236,12 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
   }
 
   showAll() {
-    this.visualizationModalService.openVisualizationModal(this.dataset, "spreadsheet", this.sessionData);
+    this.visualizationModalService.openVisualizationModal(this.dataset(), "spreadsheet", this.sessionData());
   }
 
   getSettings(headers: string[], content: string[][], container) {
-    const tableHeight = this.modalMode ? container.style.height : content.length * 23 + 30; // extra for header-row and borders
-    const tableWidth = this.modalMode ? null : this.spreadsheetService.guessWidth(headers, content);
+    const tableHeight = this.modalMode() ? container.style.height : content.length * 23 + 30; // extra for header-row and borders
+    const tableWidth = this.modalMode() ? null : this.spreadsheetService.guessWidth(headers, content);
 
     return {
       data: content,

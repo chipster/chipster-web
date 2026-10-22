@@ -13,6 +13,8 @@ export class EditNewsModalComponent implements OnInit {
   private activeModal = inject(NgbActiveModal);
 
   public modalTitle: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   newsItem: NewsItem;
 

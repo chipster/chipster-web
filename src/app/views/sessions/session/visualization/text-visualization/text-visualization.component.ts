@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -31,9 +31,9 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   private visualizationModalService = inject(VisualizationModalService);
   private errorHandlerService = inject(RestErrorService);
 
-  @Input() dataset: Dataset;
-  @Input() showFullData: boolean;
-  @Input() modalMode: boolean;
+  readonly dataset = input<Dataset>(undefined);
+  readonly showFullData = input<boolean>(undefined);
+  readonly modalMode = input<boolean>(undefined);
 
   public data: string;
 
@@ -49,15 +49,15 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
     this.data = null;
 
     // check for empty file
-    if (this.dataset.size < 1) {
+    if (this.dataset().size < 1) {
       this.state = new LoadState(State.EmptyFile);
       return;
     }
 
-    const maxBytes = this.showFullData ? null : this.fileSizeLimit;
+    const maxBytes = this.showFullData() ? null : this.fileSizeLimit;
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, maxBytes)
+      .getData(this.sessionDataService.getSessionId(), this.dataset(), maxBytes)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (response: any) => {
@@ -84,7 +84,7 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   getSizeFull() {
-    return this.dataset.size;
+    return this.dataset().size;
   }
 
   isCompleteFile() {
@@ -92,6 +92,6 @@ export class TextVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   showAll() {
-    this.visualizationModalService.openVisualizationModal(this.dataset, "text");
+    this.visualizationModalService.openVisualizationModal(this.dataset(), "text");
   }
 }

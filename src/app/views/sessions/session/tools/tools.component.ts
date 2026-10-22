@@ -1,12 +1,12 @@
 import {
   Component,
-  Input,
   OnDestroy,
   OnInit,
   ViewChild,
   DOCUMENT,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
@@ -121,17 +121,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public readonly categoryElementIdPrefix = "category-button-";
   public readonly toolElementIdPrefix = "tool-button-";
 
-  @Input()
-  public sessionData: SessionData;
+  public readonly sessionData = input<SessionData>(undefined);
 
-  @Input()
-  private toolsArray: Tool[]; // stupid name, but tools used for internal copy
+  private readonly toolsArray = input<Tool[]>(undefined); // stupid name, but tools used for internal copy
 
-  @Input()
-  private modulesArray: Module[]; // stupid name, but modules used for internal copy
+  private readonly modulesArray = input<Module[]>(undefined); // stupid name, but modules used for internal copy
 
-  @Input()
-  private modulesMap: Map<string, Module>;
+  private readonly modulesMap = input<Map<string, Module>>(undefined);
 
   @ViewChild("searchBox")
   searchBox;
@@ -191,7 +187,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // TODO why the copies?
     // this.tools = cloneDeep(this.toolsArray);
-    this.modules = cloneDeep(this.modulesArray);
+    this.modules = cloneDeep(this.modulesArray());
 
     this.toolSearchList = this.createToolSearchList();
 
@@ -207,7 +203,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.errorService.showError("Cannot select module: " + this.modules, null);
     }
 
-    this.toolsMap = new Map(this.toolsArray.map((tool: Tool) => [tool.name.id, tool]));
+    this.toolsMap = new Map(this.toolsArray().map((tool: Tool) => [tool.name.id, tool]));
 
     this.unregisterHotkeys.push(
       this.hotkeyService.register("t", "Find tool", () => this.searchTool?.open()),
@@ -285,7 +281,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   runJob(runForEach: boolean) {
     if (runForEach) {
-      this.jobService.runForEach(this.validatedTool, this.sessionData);
+      this.jobService.runForEach(this.validatedTool, this.sessionData());
       this.showRunJobToaster(this.validatedTool.selectedDatasets.length);
     } else {
       this.jobService.runJob(this.validatedTool);
@@ -294,7 +290,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   runForEachSample() {
-    this.jobService.runForEachSample(this.validatedTool, this.sessionData);
+    this.jobService.runForEachSample(this.validatedTool, this.sessionData());
 
     this.showRunJobToaster(this.validatedTool.sampleGroups.pairedEndSamples.length);
   }
@@ -312,7 +308,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   updateJobs() {
-    this.jobList = this.sessionDataService.getJobList(this.sessionData);
+    this.jobList = this.sessionDataService.getJobList(this.sessionData());
     this.runningJobs = this.jobList.reduce((runningCount, job) => {
       if (JobService.isRunning(job)) {
         return runningCount + 1;
@@ -373,9 +369,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.selectionHandlerService.setJobSelection([]);
 
     this.dialogModalService.openJobsModal(
-      this.sessionDataService.getJobList(this.sessionData),
-      this.toolsArray,
-      this.sessionData,
+      this.sessionDataService.getJobList(this.sessionData()),
+      this.toolsArray(),
+      this.sessionData(),
     );
   }
 
@@ -385,9 +381,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
     } else {
       this.selectionHandlerService.setJobSelection([]);
       this.jobsModal = this.dialogModalService.openJobsModal(
-        this.sessionDataService.getJobList(this.sessionData),
-        this.toolsArray,
-        this.sessionData,
+        this.sessionDataService.getJobList(this.sessionData()),
+        this.toolsArray(),
+        this.sessionData(),
       );
       this.jobsModal.then((modalRef) =>
         modalRef.hidden.subscribe(() => {
@@ -419,7 +415,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           // get the tool from categroy based on the id
           // other parts of the UI may have their own instances of tools,
           // which don't have the saved parameter values
-          const module = this.modulesMap.get(t.moduleId);
+          const module = this.modulesMap().get(t.moduleId);
 
           if (module == null) {
             this.errorService.showSimpleError(
@@ -483,13 +479,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
           const uptodateDatasets = selectedDatasets.map((dataset): Dataset =>
-            this.sessionData.datasetsMap.get(dataset.datasetId),
+            this.sessionData().datasetsMap.get(dataset.datasetId),
           );
 
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,
             payload: {
-              inputBindings: this.toolService.bindInputs(this.sessionData, selectedTool.tool, uptodateDatasets),
+              inputBindings: this.toolService.bindInputs(this.sessionData(), selectedTool.tool, uptodateDatasets),
               selectedDatasets,
               ...selectedTool,
             },
@@ -563,7 +559,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           // populate params is async, and returns the same tool with params populated
           // if there are no params, just return the same tool as observable
           toolWithInputs.tool.parameters.length > 0
-            ? this.toolSelectionService.populateParameters(toolWithInputs, this.sessionData)
+            ? this.toolSelectionService.populateParameters(toolWithInputs, this.sessionData())
             : of(toolWithInputs),
         ),
       )
@@ -648,7 +644,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           if (toolWithValidatedResources == null) {
             return null;
           }
-          return this.toolSelectionService.getValidatedTool(toolWithValidatedResources, this.sessionData);
+          return this.toolSelectionService.getValidatedTool(toolWithValidatedResources, this.sessionData());
         }),
       )
       .subscribe((validatedTool: ValidatedTool) => {
@@ -706,7 +702,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   onDefineSamples() {
-    this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData);
+    this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData());
   }
 
   private clearStoreToolSelections() {
@@ -742,7 +738,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     });
     const modal = this.parametersModalRef.componentInstance as ParametersModalComponent;
     modal.validatedTool.set(this.validatedTool);
-    modal.sessionData.set(this.sessionData);
+    modal.sessionData.set(this.sessionData());
     modal.origTool.set(origTool);
     modal.parametersChanged.subscribe({
       next: () => this.onParametersChanged(),

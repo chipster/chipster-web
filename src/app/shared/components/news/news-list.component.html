@@ -1,4 +1,4 @@
-@if (editable) {
+@if (editable()) {
   <div class="mt-3 mb-3">
     <button class="btn btn-sm btn-success" (click)="onAdd()">Add</button>
   </div>
@@ -13,7 +13,7 @@
             <td>
               <ch-news-item
                 [newsItem]="n"
-                [editable]="editable"
+                [editable]="editable()"
                 (edit)="onEdit($event)"
                 (delete)="onDelete($event)"></ch-news-item>
             </td>

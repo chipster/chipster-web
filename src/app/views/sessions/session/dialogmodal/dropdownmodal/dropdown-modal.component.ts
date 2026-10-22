@@ -10,14 +10,24 @@ import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-
 export class DropdownModalComponent implements OnInit {
   private activeModal = inject(NgbActiveModal);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   buttonText: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   description: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   options: Map<any, string>;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   title: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   placeHolder: string;
 

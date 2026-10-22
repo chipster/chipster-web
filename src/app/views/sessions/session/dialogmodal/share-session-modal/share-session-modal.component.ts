@@ -34,8 +34,12 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   private errorService = inject(ErrorService);
   private dialogModalService = inject(DialogModalService);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   session: Session;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   ruleStream$: Observable<SessionEvent>;
 

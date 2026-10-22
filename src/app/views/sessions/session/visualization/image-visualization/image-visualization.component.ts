@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -17,8 +17,7 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   private sessionDataService = inject(SessionDataService);
   private restErrorService = inject(RestErrorService);
 
-  @Input()
-  private dataset: Dataset;
+  private readonly dataset = input<Dataset>(undefined);
 
   public src: string;
 
@@ -31,13 +30,13 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
     this.state = new LoadState(State.Loading, "Loading image file...");
 
     // check for empty file
-    if (this.dataset.size < 1) {
+    if (this.dataset().size < 1) {
       this.state = new LoadState(State.EmptyFile);
       return;
     }
 
     this.sessionDataService
-      .getDatasetUrl(this.dataset)
+      .getDatasetUrl(this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (url) => {
@@ -57,6 +56,6 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   openNewTab() {
-    this.sessionDataService.openNewTab(this.dataset);
+    this.sessionDataService.openNewTab(this.dataset());
   }
 }

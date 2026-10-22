@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { AfterViewInit, Component, Input, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { AfterViewInit, Component, Input, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -37,18 +37,18 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
 
   private unsubscribe: Subject<any> = new Subject();
 
-  @Input()
-  private page: string;
-  @Input()
-  showControls = false;
+  private readonly page = input<string>(undefined);
+  readonly showControls = input(false);
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   assetsPath = null;
-  @Input()
-  addContainer = true;
+  readonly addContainer = input(true);
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   routerPath: string = null;
-  @Input()
-  manualStyles = true;
+  readonly manualStyles = input(true);
 
   private readonly ABSOLUTE_PREFIX = "ABSOLUTE";
   private currentPage;
@@ -78,17 +78,13 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
           this.assetsPath = path;
         }),
         mergeMap(() => {
-          log.debug(
-            "route changed",
-            this.activatedRoute.snapshot.url,
-            this.page,
-            this.activatedRoute.snapshot.fragment,
-          );
+          const page = this.page();
+          log.debug("route changed", this.activatedRoute.snapshot.url, page, this.activatedRoute.snapshot.fragment);
           // only way to update the StaticHtmlComponent is to destroy it first
           this.html = null;
 
-          if (this.page) {
-            this.currentPage = this.page;
+          if (page) {
+            this.currentPage = page;
           } else {
             // get the current route path
             this.currentPage = this.activatedRoute.snapshot.url.join("/");
@@ -203,7 +199,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
     for (let i = 1; i <= 6; i++) {
       const headers = htmlDoc.getElementsByTagName("h" + i);
       Array.from(headers).forEach((element) => {
-        if (element.classList && this.manualStyles) {
+        if (element.classList && this.manualStyles()) {
           element.classList.add("ch-html-component");
         }
       });

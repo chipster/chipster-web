@@ -15,6 +15,8 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   private activeModal = inject(NgbActiveModal);
   private sessionDataService = inject(SessionDataService);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   session: Session;
 

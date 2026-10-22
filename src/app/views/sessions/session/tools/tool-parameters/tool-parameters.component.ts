@@ -26,6 +26,8 @@ import { FormsModule } from "@angular/forms";
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   toolService = inject(ToolService);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() validatedTool: ValidatedTool;
 
   @Output() parametersChanged: EventEmitter<any> = new EventEmitter();

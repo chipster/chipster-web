@@ -1,12 +1,12 @@
 import {
   Component,
   EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
   Output,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
@@ -80,10 +80,8 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   private configService = inject(ConfigService);
 
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  tools: Tool[];
+  readonly sessionData = input<SessionData>(undefined);
+  readonly tools = input<Tool[]>(undefined);
 
   @Output()
   scrollFix = new EventEmitter();
@@ -185,7 +183,9 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
     // for now, only details and open in new tab support gzipped files
     if (
-      this.selectedDatasets.some((dataset) => this.sessionData.datasetTypeTags.get(dataset.datasetId).has(Tags.GZIP)) &&
+      this.selectedDatasets.some((dataset) =>
+        this.sessionData().datasetTypeTags.get(dataset.datasetId).has(Tags.GZIP),
+      ) &&
       !(id === VisualizationConstants.DETAILS_ID || id === VisualizationConstants.NEW_TAB_ID)
     ) {
       return false;
@@ -214,7 +214,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   containsTypeTags(tags: Array<string>) {
     return every(this.selectionService.selectedDatasets, (dataset: Dataset) =>
-      some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData, dataset, tag)),
+      some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData(), dataset, tag)),
     );
   }
 

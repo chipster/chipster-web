@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, EventEmitter, Output, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { map, mergeMap } from "rxjs/operators";
@@ -32,24 +32,22 @@ export class SessionDetailsComponent {
   private routeService = inject(RouteService);
   private datasetModalService = inject(DatasetModalService);
 
-  @Input()
-  session: Session;
+  readonly session = input<Session>(undefined);
 
-  @Input()
-  sessionData: SessionData; // needed for duplicate session
+  readonly sessionData = input<SessionData>(undefined); // needed for duplicate session
 
   @Output() deleteSession: EventEmitter<Session> = new EventEmitter();
 
   renameSessionModal() {
-    this.sessionService.openRenameModalAndUpdate(this.session);
+    this.sessionService.openRenameModalAndUpdate(this.session());
   }
 
   notesModal() {
-    this.sessionService.openNotesModalAndUpdate(this.session);
+    this.sessionService.openNotesModalAndUpdate(this.session());
   }
 
   sharingModal() {
-    this.dialogModalService.openSharingModal(this.session, this.sessionEventService.getRuleStream());
+    this.dialogModalService.openSharingModal(this.session(), this.sessionEventService.getRuleStream());
   }
 
   duplicateModal(): void {
@@ -58,13 +56,14 @@ export class SessionDetailsComponent {
     let newSessionId: string; // ugly
 
     this.dialogModalService
-      .openSessionNameModal("Duplicate session", this.session.name + "_copy", "Duplicate")
+      .openSessionNameModal("Duplicate session", this.session().name + "_copy", "Duplicate")
       .pipe(
         mergeMap((name) => {
           let copyOrUpdate$;
-          if (!this.sessionService.isTemporary(this.sessionData.session)) {
+          const sessionData = this.sessionData();
+          if (!this.sessionService.isTemporary(sessionData.session)) {
             log.info("duplicate for normal session, copying session");
-            copyOrUpdate$ = this.sessionResource.copySession(this.sessionData, name, false).pipe(
+            copyOrUpdate$ = this.sessionResource.copySession(sessionData, name, false).pipe(
               map((sessionId) => {
                 newSessionId = sessionId;
                 return sessionId;
@@ -72,9 +71,9 @@ export class SessionDetailsComponent {
             );
           } else {
             log.info("duplicate for temp session, updating session");
-            this.sessionData.session.name = name;
-            this.sessionData.session.state = SessionState.Ready;
-            copyOrUpdate$ = this.sessionService.updateSession(this.sessionData.session).pipe(map(() => true));
+            sessionData.session.name = name;
+            sessionData.session.state = SessionState.Ready;
+            copyOrUpdate$ = this.sessionService.updateSession(sessionData.session).pipe(map(() => true));
           }
 
           return this.dialogModalService.openSpinnerModal("Duplicate session", copyOrUpdate$);
@@ -98,14 +97,14 @@ export class SessionDetailsComponent {
     this.dialogModalService
       .openBooleanModal(
         "Delete session",
-        "Delete session " + this.sessionData.session.name + "?",
+        "Delete session " + this.sessionData().session.name + "?",
         "Delete",
         "Cancel",
         "btn-danger",
       )
       .then(
         () => {
-          this.deleteSession.emit(this.session);
+          this.deleteSession.emit(this.session());
         },
         () => {
           // modal dismissed
@@ -114,10 +113,10 @@ export class SessionDetailsComponent {
   }
 
   mergeSessionModal() {
-    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData);
+    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData());
   }
 
   getSessionSize() {
-    return this.sessionDataService.getSessionSize(this.sessionData);
+    return this.sessionDataService.getSessionSize(this.sessionData());
   }
 }

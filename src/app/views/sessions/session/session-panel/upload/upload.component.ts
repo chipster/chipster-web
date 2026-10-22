@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, input } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
 import { UploadModalComponent } from "./upload-modal.component";
@@ -17,7 +17,7 @@ export class UploadComponent implements AfterViewInit, OnInit {
   private uploadService = inject(UploadService);
   private datasetModalService = inject(DatasetModalService);
 
-  @Input() sessionData: SessionData;
+  readonly sessionData = input<SessionData>(undefined);
 
   @ViewChild("uploadFilesButton") uploadFilesButton;
   @ViewChild("uploadFolderButton") uploadFolderButton;
@@ -39,7 +39,7 @@ export class UploadComponent implements AfterViewInit, OnInit {
       });
 
       this.modal = this.modalRef.componentInstance as UploadModalComponent;
-      this.modal.sessionId.set(this.sessionData.session.sessionId);
+      this.modal.sessionId.set(this.sessionData().session.sessionId);
       this.modal.flow.set(this.flow);
       this.modalOpen = true;
 
@@ -73,6 +73,6 @@ export class UploadComponent implements AfterViewInit, OnInit {
   }
 
   mergeSession() {
-    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData);
+    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData());
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, input } from "@angular/core";
 import { Label } from "chipster-js-common";
 import { resolveLabelColor, textColorForBackground } from "./label-palette";
 
@@ -9,10 +9,10 @@ import { resolveLabelColor, textColorForBackground } from "./label-palette";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class LabelPillComponent {
-  @Input() label: Label;
+  readonly label = input<Label>(undefined);
 
   get background(): string {
-    return resolveLabelColor(this.label?.color);
+    return resolveLabelColor(this.label()?.color);
   }
 
   get text(): string {

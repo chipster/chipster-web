@@ -2,7 +2,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
   NgZone,
   OnChanges,
   OnDestroy,
@@ -11,6 +10,7 @@ import {
   ViewChild,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import type {
   OnProgressParameters,
@@ -223,12 +223,12 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private ngZone = inject(NgZone);
 
-  @Input() src: string;
+  readonly src = input<string>(undefined);
   // the page shown when not all pages are shown, starting from 1
-  @Input() page = 1;
+  readonly page = input(1);
   // relative to the size of the page, or to the width of the viewer when the page doesn't fit
-  @Input() zoom = 1;
-  @Input() showAll = false;
+  readonly zoom = input(1);
+  readonly showAll = input(false);
 
   @Output() loaded = new EventEmitter<PDFDocumentProxy>();
   @Output() loadFailed = new EventEmitter<unknown>();
@@ -267,7 +267,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.src) {
-      this.load(this.src);
+      this.load(this.src());
       return;
     }
     // pdf.js has the document before its pages, and the pages get these when they are ready
@@ -279,8 +279,9 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       if (changes.showAll) {
         this.updateScrollMode();
       }
-      if (changes.page && this.page !== this.pdfViewer.currentPageNumber) {
-        this.pdfViewer.currentPageNumber = this.page;
+      const page = this.page();
+      if (changes.page && page !== this.pdfViewer.currentPageNumber) {
+        this.pdfViewer.currentPageNumber = page;
       }
     });
     this.updateScale();
@@ -299,7 +300,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     const loadingTask = await this.ngZone.runOutsideAngular(async () => {
       try {
         this.pdfjs ??= await loadPdfjs();
-        if (this.destroyed || src !== this.src) {
+        if (this.destroyed || src !== this.src()) {
           return null;
         }
         this.pdfViewer ??= this.createViewer();
@@ -319,7 +320,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
         return task;
       } catch (error) {
         // not for a file that is gone already
-        if (!this.destroyed && src === this.src) {
+        if (!this.destroyed && src === this.src()) {
           this.emit(this.loadFailed, error);
         }
         return null;
@@ -380,7 +381,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       "pagesinit",
       () => {
         this.updateScrollMode();
-        this.pdfViewer.currentPageNumber = this.page;
+        this.pdfViewer.currentPageNumber = this.page();
         this.updateScale();
       },
       { signal },
@@ -404,7 +405,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     eventBus.on(
       "pagechanging",
       ({ pageNumber }) => {
-        if (pageNumber !== this.page) {
+        if (pageNumber !== this.page()) {
           this.emit(this.pageChange, pageNumber);
         }
       },
@@ -450,7 +451,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
    * changes.
    */
   private scrollToTarget({ pageNumber, destArray }: ScrollTarget) {
-    const pageView = this.showAll ? this.pdfViewer.getPageView(pageNumber - 1) : null;
+    const pageView = this.showAll() ? this.pdfViewer.getPageView(pageNumber - 1) : null;
     if (!pageView) {
       return;
     }
@@ -477,7 +478,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
   private updateScrollMode() {
     const { ScrollMode } = this.pdfjs.viewer;
-    this.pdfViewer.scrollMode = this.showAll ? ScrollMode.VERTICAL : ScrollMode.PAGE;
+    this.pdfViewer.scrollMode = this.showAll() ? ScrollMode.VERTICAL : ScrollMode.PAGE;
   }
 
   /*
@@ -494,7 +495,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     if (!this.pdfViewer?.pdfDocument || this.pdfViewer.pagesCount === 0 || viewerWidth === 0) {
       return;
     }
-    const pageIndexes = this.showAll
+    const pageIndexes = this.showAll()
       ? Array.from({ length: this.pdfViewer.pagesCount }, (_, index) => index)
       : [this.pdfViewer.currentPageNumber - 1];
     let pageWidth = 0;
@@ -504,7 +505,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       pageWidth = Math.max(pageWidth, viewport.clone({ scale: this.pdfjs.lib.PixelsPerInch.PDF_TO_CSS_UNITS }).width);
     }
     this.ngZone.runOutsideAngular(() => {
-      this.pdfViewer.currentScale = this.zoom * Math.min(1, viewerWidth / pageWidth);
+      this.pdfViewer.currentScale = this.zoom() * Math.min(1, viewerWidth / pageWidth);
     });
     this.updateLayout();
   }

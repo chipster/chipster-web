@@ -1,6 +1,6 @@
 // Super class for scatterplot and volcanoplot
 
-import { Directive, Input, NgZone, OnChanges, OnDestroy, inject } from "@angular/core";
+import { Directive, NgZone, OnChanges, OnDestroy, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
@@ -20,8 +20,7 @@ import { VisualizationTSVService } from "./visualizationTSV.service";
 
 @Directive()
 export abstract class PlotDirective implements OnChanges, OnDestroy {
-  @Input()
-  dataset: Dataset;
+  readonly dataset = input<Dataset>(undefined);
   tsv: TSVFile;
   plotData: Array<PlotData> = [];
   plot;
@@ -77,22 +76,22 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       rowLimit = 50000;
     }
 
-    const datasetName = this.dataset.name;
+    const datasetName = this.dataset().name;
 
     // check for empty file
-    if (this.dataset.size < 1) {
+    if (this.dataset().size < 1) {
       this.state = new LoadState(State.EmptyFile);
       return;
     }
 
     // Get the file, this can be in a shared dataservice
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset)
+      .getData(this.sessionDataService.getSessionId(), this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
-          this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
+          this.tsv = new TSVFile(parsedTSV, this.dataset().datasetId, datasetName);
           if (this.tsv.body.size() > rowLimit) {
             if (showMore) {
               this.state = new LoadState(

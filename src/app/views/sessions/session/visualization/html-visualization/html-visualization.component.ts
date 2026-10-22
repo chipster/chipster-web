@@ -1,7 +1,6 @@
 import {
   Component,
   ElementRef,
-  Input,
   NgZone,
   OnChanges,
   OnDestroy,
@@ -9,6 +8,7 @@ import {
   ViewChild,
   ChangeDetectionStrategy,
   inject,
+  input,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { fromEvent, Subject, Subscription } from "rxjs";
@@ -279,8 +279,7 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
 </script>
 `;
 
-  @Input()
-  private dataset: Dataset;
+  private readonly dataset = input<Dataset>(undefined);
 
   /**
    * The iframe exists while the state is ready. The content is set here instead of a srcdoc
@@ -321,13 +320,13 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
     this.html = null;
 
     // check for empty file
-    if (this.dataset.size < 1) {
+    if (this.dataset().size < 1) {
       this.state = new LoadState(State.EmptyFile);
       return;
     }
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset)
+      .getData(this.sessionDataService.getSessionId(), this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (html: string) => {

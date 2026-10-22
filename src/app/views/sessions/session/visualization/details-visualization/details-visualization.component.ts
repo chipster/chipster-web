@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, ChangeDetectionStrategy, input } from "@angular/core";
 import { Dataset, Tool } from "chipster-js-common";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SingleDatasetComponent } from "../../selectiondetails/singledataset/single-dataset.component";
@@ -11,10 +11,11 @@ import { FilesDetailsComponent } from "../../selectiondetails/files-details.comp
   imports: [SingleDatasetComponent, FilesDetailsComponent],
 })
 export class DetailsVisualizationComponent {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   datasets: Dataset[];
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  tools: Tool[];
+  readonly sessionData = input<SessionData>(undefined);
+  readonly tools = input<Tool[]>(undefined);
 }

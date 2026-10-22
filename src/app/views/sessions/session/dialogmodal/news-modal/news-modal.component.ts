@@ -14,6 +14,8 @@ export class NewsModalComponent implements OnInit {
   private activeModal = inject(NgbActiveModal);
   private preferencesService = inject(PreferencesService);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   news: NewsItem[];
   ngOnInit(): void {

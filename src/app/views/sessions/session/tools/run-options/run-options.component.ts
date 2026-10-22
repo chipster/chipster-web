@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ChangeDetectionStrategy } from "@angular/core";
+import { Component, Input, OnChanges, ChangeDetectionStrategy, input } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
 import { ValidatedTool } from "../ToolSelection";
 
@@ -9,7 +9,9 @@ import { ValidatedTool } from "../ToolSelection";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class RunOptionsComponent implements OnChanges {
-  @Input() sessionData: SessionData;
+  readonly sessionData = input<SessionData>(undefined);
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() validatedTool: ValidatedTool;
 
   ready = false;
