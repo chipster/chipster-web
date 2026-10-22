@@ -741,7 +741,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     modal.sessionData.set(this.sessionData());
     modal.origTool.set(origTool);
     modal.parametersChanged.subscribe(() => this.onParametersChanged());
-    modal.updateBindings.subscribe((toolWithInputs: SelectedToolWithInputs) => this.setBindings(toolWithInputs));
+    modal.updateBindings.subscribe((toolWithInputs) => this.setBindings(toolWithInputs));
     modal.resourcesChanged.subscribe(() => this.onResourcesChanged());
   }
 }
