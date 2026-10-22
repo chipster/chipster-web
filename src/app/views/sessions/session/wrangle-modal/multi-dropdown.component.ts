@@ -24,7 +24,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   readonly items = input<ColumnItem[]>(undefined);
   readonly multiple = input<boolean>(true);
 
-  private readonly selectionChanged = output<ColumnItem[]>();
+  readonly selectionChanged = output<ColumnItem[]>();
 
   @ViewChild("dropdown") dropdown;
 

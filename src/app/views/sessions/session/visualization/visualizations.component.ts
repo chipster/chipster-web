@@ -74,7 +74,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   readonly sessionData = input<SessionData>(undefined);
   readonly tools = input<Tool[]>(undefined);
 
-  readonly scrollFix = output();
+  readonly scrollFix = output<void>();
 
   active: string; // id of the active vis tab
   visualizations: Array<Visualization> = VisualizationConstants.VISUALIZATIONS;

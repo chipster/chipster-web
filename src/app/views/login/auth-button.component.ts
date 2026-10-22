@@ -11,7 +11,7 @@ export class AuthButtonComponent {
   readonly logo = input<string>(undefined);
   readonly description = input<string>(undefined);
 
-  readonly selectAuth = output();
+  readonly selectAuth = output<void>();
 
   public onSelect() {
     this.selectAuth.emit();

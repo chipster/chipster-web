@@ -34,7 +34,7 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   readonly validatedTool = input<ValidatedTool>(undefined);
   readonly origTool = input<Tool>(undefined);
 
-  readonly resourcesChanged = output<any>();
+  readonly resourcesChanged = output<void>();
 
   ready = false;
   showWarning: boolean;

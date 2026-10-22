@@ -18,7 +18,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly validatedTool = input<ValidatedTool>(undefined);
 
-  readonly parametersChanged = output<any>();
+  readonly parametersChanged = output<void>();
 
   ready = false;
   showWarning: boolean;

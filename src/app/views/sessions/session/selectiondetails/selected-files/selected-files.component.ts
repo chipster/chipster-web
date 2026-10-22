@@ -52,7 +52,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   readonly tools = input<Tool[]>(undefined);
   readonly modules = input<Module[]>(undefined);
 
-  readonly doScrollFix = output();
+  readonly doScrollFix = output<void>();
 
   datasetName: string;
 

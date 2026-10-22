@@ -30,7 +30,7 @@ export class JobListComponent implements OnChanges {
   durationMap = new Map<string, Observable<string>>();
   runningJobCount = 0;
 
-  private readonly jobSelected = output<Job>();
+  readonly jobSelected = output<Job>();
 
   ngOnChanges() {
     this.jobsSorted = [...this.jobs()].sort((a, b) => {

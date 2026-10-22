@@ -31,7 +31,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   private modalOpen = false;
   private modalRef: NgbModalRef;
   private modal: ImportSessionModalComponent;
-  readonly done = output();
+  readonly done = output<string[]>();
 
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();

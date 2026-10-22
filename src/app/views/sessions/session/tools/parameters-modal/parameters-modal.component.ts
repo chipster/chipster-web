@@ -45,9 +45,9 @@ export class ParametersModalComponent {
   validatedTool = signal<ValidatedTool>(undefined);
   sessionData = signal<SessionData>(undefined);
   origTool = signal<Tool>(undefined);
-  readonly parametersChanged = output();
-  readonly updateBindings = output();
-  readonly resourcesChanged = output();
+  readonly parametersChanged = output<void>();
+  readonly updateBindings = output<SelectedToolWithInputs>();
+  readonly resourcesChanged = output<void>();
 
   setBindings(toolWithInputs: SelectedToolWithInputs) {
     this.updateBindings.emit(toolWithInputs);

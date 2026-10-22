@@ -4,6 +4,7 @@ import {
   NgZone,
   OnChanges,
   OnDestroy,
+  OutputEmitterRef,
   SimpleChanges,
   ViewChild,
   ChangeDetectionStrategy,
@@ -617,7 +618,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
    * previous page. An event can come also while Angular gives the inputs,
    * and the parent can't change its view in the middle of that.
    */
-  private emit<T>(emitter: EventEmitter<T>, value: T) {
+  private emit<T>(emitter: OutputEmitterRef<T>, value: T) {
     queueMicrotask(() => {
       if (!this.destroyed) {
         this.ngZone.run(() => emitter.emit(value));

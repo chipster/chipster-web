@@ -4,7 +4,7 @@ import { difference } from "lodash-es";
 import { SessionData } from "../../../../../model/session/session-data";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { ToolService } from "../tool.service";
-import { ValidatedTool } from "../ToolSelection";
+import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
 import { FormsModule } from "@angular/forms";
 
 interface BindingModel {
@@ -25,7 +25,7 @@ export class ToolInputsComponent implements OnChanges {
 
   readonly sessionData = input<SessionData>(undefined);
   readonly validatedTool = input<ValidatedTool>(undefined);
-  readonly updateBindings = output();
+  readonly updateBindings = output<SelectedToolWithInputs>();
 
   bindingModels: BindingModel[];
   ready = false;
