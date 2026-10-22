@@ -1,13 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnDestroy,
-  OnInit,
-  Output,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-} from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset, Tool } from "chipster-js-common";
 import { find, includes, every, some } from "lodash-es";
@@ -83,8 +74,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   readonly sessionData = input<SessionData>(undefined);
   readonly tools = input<Tool[]>(undefined);
 
-  @Output()
-  scrollFix = new EventEmitter();
+  readonly scrollFix = output();
 
   active: string; // id of the active vis tab
   visualizations: Array<Visualization> = VisualizationConstants.VISUALIZATIONS;

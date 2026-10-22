@@ -1,13 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnChanges,
-  OnInit,
-  Output,
-  ViewChild,
-  ChangeDetectionStrategy,
-  input,
-} from "@angular/core";
+import { Component, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, input, output } from "@angular/core";
 import log from "loglevel";
 import type { ColumnItem } from "./wrangle-modal.component";
 import { NgSelectComponent, NgHeaderTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
@@ -33,7 +24,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   readonly items = input<ColumnItem[]>(undefined);
   readonly multiple = input<boolean>(true);
 
-  @Output() private selectionChanged = new EventEmitter<ColumnItem[]>();
+  private readonly selectionChanged = output<ColumnItem[]>();
 
   @ViewChild("dropdown") dropdown;
 

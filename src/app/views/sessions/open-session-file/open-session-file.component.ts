@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  EventEmitter,
-  OnInit,
-  Output,
-  ViewChild,
-  ChangeDetectionStrategy,
-  inject,
-} from "@angular/core";
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, output } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { of, throwError } from "rxjs";
@@ -40,7 +31,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   private modalOpen = false;
   private modalRef: NgbModalRef;
   private modal: ImportSessionModalComponent;
-  @Output() done = new EventEmitter();
+  readonly done = output();
 
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();

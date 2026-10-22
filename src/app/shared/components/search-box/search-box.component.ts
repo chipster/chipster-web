@@ -1,14 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-} from "@angular/core";
+import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
 import { FormsModule } from "@angular/forms";
 
@@ -27,10 +17,8 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   readonly focusHotkey = input<string>(undefined);
   readonly focusHotkeyDescription = input<string>(undefined);
 
-  @Output()
-  valueChange = new EventEmitter<string>();
-  @Output()
-  enterKey = new EventEmitter<void>();
+  readonly valueChange = output<string>();
+  readonly enterKey = output<void>();
 
   @ViewChild("searchInput") searchInput;
 

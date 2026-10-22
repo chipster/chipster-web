@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ChangeDetectionStrategy, input } from "@angular/core";
+import { Component, ChangeDetectionStrategy, input, output } from "@angular/core";
 
 @Component({
   selector: "ch-auth-button",
@@ -11,7 +11,7 @@ export class AuthButtonComponent {
   readonly logo = input<string>(undefined);
   readonly description = input<string>(undefined);
 
-  @Output() selectAuth = new EventEmitter();
+  readonly selectAuth = output();
 
   public onSelect() {
     this.selectAuth.emit();

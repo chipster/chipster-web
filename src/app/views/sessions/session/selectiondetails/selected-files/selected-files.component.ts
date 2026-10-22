@@ -1,14 +1,13 @@
 import {
   Component,
-  EventEmitter,
   OnChanges,
   OnDestroy,
   OnInit,
-  Output,
   SimpleChanges,
   ChangeDetectionStrategy,
   inject,
   input,
+  output,
 } from "@angular/core";
 import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
@@ -53,7 +52,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   readonly tools = input<Tool[]>(undefined);
   readonly modules = input<Module[]>(undefined);
 
-  @Output() doScrollFix = new EventEmitter();
+  readonly doScrollFix = output();
 
   datasetName: string;
 

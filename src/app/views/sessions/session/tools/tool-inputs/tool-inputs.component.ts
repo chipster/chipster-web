@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnChanges, Output, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, OnChanges, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
 import { Dataset, InputBinding, ToolInput } from "chipster-js-common";
 import { difference } from "lodash-es";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -25,7 +25,7 @@ export class ToolInputsComponent implements OnChanges {
 
   readonly sessionData = input<SessionData>(undefined);
   readonly validatedTool = input<ValidatedTool>(undefined);
-  @Output() updateBindings = new EventEmitter();
+  readonly updateBindings = output();
 
   bindingModels: BindingModel[];
   ready = false;

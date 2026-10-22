@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject, signal, output } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
@@ -45,9 +45,9 @@ export class ParametersModalComponent {
   validatedTool = signal<ValidatedTool>(undefined);
   sessionData = signal<SessionData>(undefined);
   origTool = signal<Tool>(undefined);
-  @Output() parametersChanged = new EventEmitter();
-  @Output() updateBindings = new EventEmitter();
-  @Output() resourcesChanged = new EventEmitter();
+  readonly parametersChanged = output();
+  readonly updateBindings = output();
+  readonly resourcesChanged = output();
 
   setBindings(toolWithInputs: SelectedToolWithInputs) {
     this.updateBindings.emit(toolWithInputs);
