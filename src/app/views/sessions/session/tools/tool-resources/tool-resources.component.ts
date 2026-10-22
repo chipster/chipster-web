@@ -1,14 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-} from "@angular/core";
+import { Component, OnChanges, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
@@ -44,7 +34,7 @@ export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {
   readonly validatedTool = input<ValidatedTool>(undefined);
   readonly origTool = input<Tool>(undefined);
 
-  @Output() resourcesChanged: EventEmitter<any> = new EventEmitter();
+  readonly resourcesChanged = output<void>();
 
   ready = false;
   showWarning: boolean;

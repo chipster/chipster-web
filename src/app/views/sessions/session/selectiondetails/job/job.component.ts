@@ -1,13 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnDestroy,
-  OnInit,
-  Output,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-} from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
 import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
@@ -47,7 +38,7 @@ export class JobComponent implements OnInit, OnDestroy {
   readonly sessionData = input<SessionData>(undefined);
   readonly tools = input<Tool[]>(undefined);
   // the jobs modal closes on it
-  @Output() datasetSelected = new EventEmitter<void>();
+  readonly datasetSelected = output<void>();
 
   job: Job;
   isRunning: boolean;

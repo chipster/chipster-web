@@ -1,16 +1,16 @@
 import {
   Component,
   ElementRef,
-  EventEmitter,
   NgZone,
   OnChanges,
   OnDestroy,
-  Output,
+  OutputEmitterRef,
   SimpleChanges,
   ViewChild,
   ChangeDetectionStrategy,
   inject,
   input,
+  output,
 } from "@angular/core";
 import type {
   OnProgressParameters,
@@ -230,13 +230,13 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   readonly zoom = input(1);
   readonly showAll = input(false);
 
-  @Output() loaded = new EventEmitter<PDFDocumentProxy>();
-  @Output() loadFailed = new EventEmitter<unknown>();
-  @Output() loadProgress = new EventEmitter<OnProgressParameters>();
+  readonly loaded = output<PDFDocumentProxy>();
+  readonly loadFailed = output<unknown>();
+  readonly loadProgress = output<OnProgressParameters>();
   // the height of the shown pages with their margins, as pdf.js lays them out, whenever it changes
-  @Output() heightChange = new EventEmitter<number>();
+  readonly heightChange = output<number>();
   // pdf.js changes the page itself too, for example when a link in the pdf is clicked
-  @Output() pageChange = new EventEmitter<number>();
+  readonly pageChange = output<number>();
 
   @ViewChild("container", { static: true })
   container: ElementRef<HTMLDivElement>;
@@ -618,7 +618,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
    * previous page. An event can come also while Angular gives the inputs,
    * and the parent can't change its view in the middle of that.
    */
-  private emit<T>(emitter: EventEmitter<T>, value: T) {
+  private emit<T>(emitter: OutputEmitterRef<T>, value: T) {
     queueMicrotask(() => {
       if (!this.destroyed) {
         this.ngZone.run(() => emitter.emit(value));

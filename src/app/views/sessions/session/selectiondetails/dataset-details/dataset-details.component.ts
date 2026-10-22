@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, output } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset } from "chipster-js-common";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
@@ -12,7 +12,7 @@ import { SessionDataService } from "../../session-data.service";
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class DatasetDetailsComponent implements OnInit {
-  @Output() delete: EventEmitter<any> = new EventEmitter();
+  readonly delete = output<void>();
 
   datasets: Array<Dataset>;
 

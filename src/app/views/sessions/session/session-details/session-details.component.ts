@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { map, mergeMap } from "rxjs/operators";
@@ -36,7 +36,7 @@ export class SessionDetailsComponent {
 
   readonly sessionData = input<SessionData>(undefined); // needed for duplicate session
 
-  @Output() deleteSession: EventEmitter<Session> = new EventEmitter();
+  readonly deleteSession = output<Session>();
 
   renameSessionModal() {
     this.sessionService.openRenameModalAndUpdate(this.session());

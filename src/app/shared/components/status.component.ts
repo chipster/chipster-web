@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ChangeDetectionStrategy, input } from "@angular/core";
+import { Component, ChangeDetectionStrategy, input, output } from "@angular/core";
 import { LoadState, StatusButton } from "../../model/loadstate";
 
 @Component({
@@ -24,7 +24,7 @@ export class StatusComponent {
   readonly state = input<LoadState>(undefined);
 
   // emits the action of the clicked button
-  @Output() buttonEvent = new EventEmitter<string>();
+  readonly buttonEvent = output<string>();
 
   onButton(button: StatusButton) {
     this.buttonEvent.emit(button.action);

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnChanges, Output, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, OnChanges, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -30,7 +30,7 @@ export class JobListComponent implements OnChanges {
   durationMap = new Map<string, Observable<string>>();
   runningJobCount = 0;
 
-  @Output() private readonly jobSelected = new EventEmitter<Job>();
+  readonly jobSelected = output<Job>();
 
   ngOnChanges() {
     this.jobsSorted = [...this.jobs()].sort((a, b) => {
