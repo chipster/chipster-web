@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, JobInput, JobParameter, Tool } from "chipster-js-common";
 import * as FileSaver from "file-saver";
@@ -33,15 +33,16 @@ interface HistoryOption {
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NGB_DROPDOWN_IMPORTS, DatasetParameterListComponent, LocalDatePipe],
 })
-export class DatasetHistoryModalComponent implements OnInit, OnChanges {
+export class DatasetHistoryModalComponent implements OnInit {
   activeModal = inject(NgbActiveModal);
   querySessionDataService = inject(QuerySessionDataService);
   toolService = inject(ToolService);
   errorService = inject(ErrorService);
 
-  @Input() dataset: Dataset;
-  @Input() sessionData: SessionData;
-  @Input() private tools: Tool[];
+  // set through the modal ref by the code that opens the modal
+  dataset = signal<Dataset>(undefined);
+  sessionData = signal<SessionData>(undefined);
+  tools = signal<Tool[]>(undefined);
 
   public historyOptions: Array<HistoryOption> = [
     { id: "sourceJobName", name: "Tool", enabled: true },
@@ -63,10 +64,6 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
     this.datasetHistorySteps = this.getHistoryData();
   }
 
-  ngOnChanges(): void {
-    this.datasetHistorySteps = this.getHistoryData();
-  }
-
   updateOption(option: HistoryOption): void {
     option.enabled = !option.enabled;
   }
@@ -82,7 +79,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
     }
 
     const blob = new Blob([this.getHistoryAsString()], { type: "text/plain;charset=utf-8" });
-    FileSaver.saveAs(blob, "history-" + this.dataset.name + "-" + this.dataset.datasetId + ".txt");
+    FileSaver.saveAs(blob, "history-" + this.dataset().name + "-" + this.dataset().datasetId + ".txt");
   }
 
   copyToClipboard() {
@@ -101,7 +98,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
     const line = "----------------------------------------------------------------------------\n";
     const doubleLine = "============================================================================\n";
 
-    const header = "History of " + this.dataset.name + "\n" + doubleLine + "\n";
+    const header = "History of " + this.dataset().name + "\n" + doubleLine + "\n";
 
     const steps: string = this.getHistoryData().reduce((s: string, step: DatasetHistoryStep, i) => {
       // tool
@@ -183,10 +180,10 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   }
 
   private getHistoryData(): Array<DatasetHistoryStep> {
-    const historySteps: Array<DatasetHistoryStep> = [this.dataset]
-      .concat(this.querySessionDataService.getAncestorDatasetsBottomUpBreadthFirst(this.sessionData, this.dataset))
+    const historySteps: Array<DatasetHistoryStep> = [this.dataset()]
+      .concat(this.querySessionDataService.getAncestorDatasetsBottomUpBreadthFirst(this.sessionData(), this.dataset()))
       .map((dataset) => {
-        const sourceJob = this.sessionData.jobsMap.get(dataset.sourceJob);
+        const sourceJob = this.sessionData().jobsMap.get(dataset.sourceJob);
 
         return {
           datasetName: dataset.name,
@@ -197,7 +194,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
           inputFileNamesString:
             sourceJob != null ? sourceJob.inputs.map((jobInput: JobInput) => jobInput.displayName).join(" ") : "",
           sourceCode: sourceJob != null ? sourceJob.sourceCode : null,
-          tool: this.toolService.getLiveToolForSourceJob(sourceJob, this.tools),
+          tool: this.toolService.getLiveToolForSourceJob(sourceJob, this.tools()),
         };
       });
 

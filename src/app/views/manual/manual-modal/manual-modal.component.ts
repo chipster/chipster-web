@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Tool } from "chipster-js-common";
 import { ToolService } from "../../sessions/session/tools/tool.service";
@@ -35,5 +35,6 @@ export class ManualModalComponent {
   activeModal = inject(NgbActiveModal);
   toolService = inject(ToolService);
 
-  @Input() tool: Tool;
+  // set through the modal ref by the code that opens the modal
+  tool = signal<Tool>(undefined);
 }

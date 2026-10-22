@@ -15,9 +15,9 @@ export class VisualizationModalService {
     return this.modal.then((m) => {
       const modalRef = this.ngbModal.open(m.VisualizationModalComponent, { size: "xl" });
       const modal = modalRef.componentInstance as VisualizationModalComponent;
-      modal.dataset = dataset;
-      modal.visualizationId = visualizationId;
-      modal.sessionData = sessionData;
+      modal.dataset.set(dataset);
+      modal.visualizationId.set(visualizationId);
+      modal.sessionData.set(sessionData);
       return modalRef;
     });
   }

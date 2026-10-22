@@ -547,8 +547,9 @@ export class StorageComponent implements OnInit {
 
   private openConfirmModal(deleteAction: DeleteAction, users: any[]) {
     const modalRef = this.modalService.open(ConfirmDeleteModalComponent, { size: "lg", backdrop: "static" });
-    modalRef.componentInstance.deleteAction = deleteAction;
-    modalRef.componentInstance.users = users;
+    const modal = modalRef.componentInstance as ConfirmDeleteModalComponent;
+    modal.deleteAction.set(deleteAction);
+    modal.users.set(users);
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Label } from "chipster-js-common";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -20,9 +20,10 @@ export class LabelEditorModalComponent implements OnInit {
   private sessionResource = inject(SessionResource);
   private errorService = inject(ErrorService);
 
-  @Input() sessionData: SessionData;
+  // set through the modal ref by the code that opens the modal
+  sessionData = signal<SessionData>(undefined);
   // when set, the modal edits this label; when null, it creates a new one
-  @Input() label: Label = null;
+  label = signal<Label>(null);
 
   readonly maxNameLength = 30;
   name = "";
@@ -30,19 +31,19 @@ export class LabelEditorModalComponent implements OnInit {
   saving = false;
 
   ngOnInit(): void {
-    if (this.label != null) {
-      this.name = this.label.name ?? "";
-      this.color = this.label.color ?? DEFAULT_LABEL_COLOR;
+    if (this.label() != null) {
+      this.name = this.label().name ?? "";
+      this.color = this.label().color ?? DEFAULT_LABEL_COLOR;
     } else {
       // new label: pick the first palette color not yet used in the session
-      const usedColors = new Set(Array.from(this.sessionData.labelsMap.values()).map((l) => l.color));
+      const usedColors = new Set(Array.from(this.sessionData().labelsMap.values()).map((l) => l.color));
       const firstUnused = LABEL_PALETTE.find((c) => !usedColors.has(c.hex));
       this.color = firstUnused?.hex ?? DEFAULT_LABEL_COLOR;
     }
   }
 
   get isEdit(): boolean {
-    return this.label != null;
+    return this.label() != null;
   }
 
   // Picker contents. When editing a label whose stored color isn't in the
@@ -59,11 +60,11 @@ export class LabelEditorModalComponent implements OnInit {
 
   previewLabel(): Label {
     return {
-      sessionId: this.sessionData.session.sessionId,
-      labelId: this.label?.labelId ?? "",
+      sessionId: this.sessionData().session.sessionId,
+      labelId: this.label()?.labelId ?? "",
       name: this.name || "New label",
       color: this.color,
-      created: this.label?.created ?? null,
+      created: this.label()?.created ?? null,
     };
   }
 
@@ -76,14 +77,14 @@ export class LabelEditorModalComponent implements OnInit {
     if (!name) {
       return;
     }
-    const sessionId = this.sessionData.session.sessionId;
+    const sessionId = this.sessionData().session.sessionId;
     this.saving = true;
 
     if (this.isEdit) {
-      const updated: Label = { ...this.label, name, color: this.color };
+      const updated: Label = { ...this.label(), name, color: this.color };
       this.sessionResource.updateLabel(sessionId, updated).subscribe({
         next: () => {
-          this.sessionData.labelsMap.set(updated.labelId, updated);
+          this.sessionData().labelsMap.set(updated.labelId, updated);
           this.activeModal.close(updated);
         },
         error: (err) => {
@@ -100,7 +101,7 @@ export class LabelEditorModalComponent implements OnInit {
           // the authoritative copy (incl. server-set created), same as datasets
           // and jobs
           const created: Label = { ...newLabel, labelId };
-          this.sessionData.labelsMap.set(labelId, created);
+          this.sessionData().labelsMap.set(labelId, created);
           this.activeModal.close(created);
         },
         error: (err) => {

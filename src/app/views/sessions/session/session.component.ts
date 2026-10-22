@@ -401,8 +401,9 @@ export class SessionComponent implements OnInit, OnDestroy {
     const modalRef = this.modalService.open(JobErrorModalComponent, {
       size: "lg",
     });
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.job = job;
+    const modal = modalRef.componentInstance as JobErrorModalComponent;
+    modal.title.set(title);
+    modal.job.set(job);
   }
 
   private getSessionData(sessionId: string): Observable<SessionData> {

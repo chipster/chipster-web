@@ -1,6 +1,6 @@
 // registers the ag-grid modules and theme, before any grid is created
 import "../../../../shared/ag-grid-setup";
-import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
@@ -47,8 +47,9 @@ export class WrangleModalComponent implements OnInit {
   private tsvService = inject(TsvService);
   private datasetService = inject(DatasetService);
 
-  @Input() dataset: Dataset;
-  @Input() sessionData: SessionData;
+  // set through the modal ref by the code that opens the modal
+  dataset = signal<Dataset>(undefined);
+  sessionData = signal<SessionData>(undefined);
 
   @ViewChild("agGrid") agGrid;
 
@@ -90,7 +91,7 @@ export class WrangleModalComponent implements OnInit {
     this.state = new LoadState(State.Loading, "Loading data...");
 
     // check for empty file
-    if (this.dataset.size < 1) {
+    if (this.dataset().size < 1) {
       this.state = new LoadState(State.EmptyFile);
       return;
     }
@@ -99,15 +100,15 @@ export class WrangleModalComponent implements OnInit {
 
     // get file contents
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, this.dataset.size)
+      .getData(this.sessionDataService.getSessionId(), this.dataset(), this.dataset().size)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {
           // sanity check
 
-          if (result.length !== this.dataset.size) {
+          if (result.length !== this.dataset().size) {
             log.warn(
-              `before wrangle download content size is ${result.length} while dataset size is ${this.dataset.size}`,
+              `before wrangle download content size is ${result.length} while dataset size is ${this.dataset().size}`,
             );
           }
 
@@ -115,12 +116,12 @@ export class WrangleModalComponent implements OnInit {
           let parsedTSV = d3.tsvParseRows(result);
 
           // filter out comment lines, e.g. lines starting with ## in a VCF file
-          const skipLinesPrefix = this.typeTagService.get(this.sessionData, this.dataset, Tags.SKIP_LINES);
+          const skipLinesPrefix = this.typeTagService.get(this.sessionData(), this.dataset(), Tags.SKIP_LINES);
           if (skipLinesPrefix) {
             parsedTSV = parsedTSV.filter((row) => !row[0].startsWith(skipLinesPrefix));
           }
 
-          this.tsv2File = this.tsvService.getTSV2FileFromArray(this.dataset, this.sessionData, parsedTSV);
+          this.tsv2File = this.tsvService.getTSV2FileFromArray(this.dataset(), this.sessionData(), parsedTSV);
 
           const headers = this.tsv2File.getHeadersForSpreadSheet();
 
@@ -304,9 +305,9 @@ export class WrangleModalComponent implements OnInit {
           log.info("Creating converted dataset");
 
           const newFileName =
-            this.dataset.name.endsWith(".txt") || this.dataset.name.endsWith(".tsv")
-              ? this.dataset.name.slice(0, -4) + "-converted.tsv"
-              : this.dataset.name + "-converted.tsv";
+            this.dataset().name.endsWith(".txt") || this.dataset().name.endsWith(".tsv")
+              ? this.dataset().name.slice(0, -4) + "-converted.tsv"
+              : this.dataset().name + "-converted.tsv";
 
           // phenodata
           const phenodataString = this.getPhenodataString();
@@ -319,7 +320,7 @@ export class WrangleModalComponent implements OnInit {
 
           return this.sessionDataService.createDerivedDataset(
             newFileName,
-            [this.dataset],
+            [this.dataset()],
             "Convert to Chipster format",
             wrangledFileString,
             "Import",
@@ -390,7 +391,7 @@ export class WrangleModalComponent implements OnInit {
         phenodataRows +
         fixedSampleHeader +
         "\t" +
-        this.dataset.name +
+        this.dataset().name +
         "\t" +
         "not applicable" +
         "\t" +

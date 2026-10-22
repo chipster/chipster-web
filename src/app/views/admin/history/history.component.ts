@@ -209,7 +209,8 @@ export class HistoryComponent implements OnInit {
     const modalRef = this.modalService.open(JobOutputModalComponent, {
       size: "xl",
     });
-    modalRef.componentInstance.output = jobhistory.screenOutput;
+    const modal = modalRef.componentInstance as JobOutputModalComponent;
+    modal.output.set(jobhistory.screenOutput);
   }
 
   onPageChange(page) {

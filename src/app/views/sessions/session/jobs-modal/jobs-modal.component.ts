@@ -2,12 +2,12 @@ import {
   AfterViewInit,
   Component,
   HostListener,
-  Input,
   OnDestroy,
   OnInit,
   ViewChild,
   ChangeDetectionStrategy,
   inject,
+  signal,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, Tool } from "chipster-js-common";
@@ -67,8 +67,9 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(JobListComponent) jobListComponent!: JobListComponent;
 
   jobs: Job[];
-  @Input() tools: Tool[];
-  @Input() sessionData: SessionData;
+  // set through the modal ref by the code that opens the modal
+  tools = signal<Tool[]>(undefined);
+  sessionData = signal<SessionData>(undefined);
 
   /**
    * Job selection goes through selectionHandlerService, bit overkill atm.
@@ -92,7 +93,7 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateJobs() {
-    this.jobs = this.sessionDataService.getJobList(this.sessionData);
+    this.jobs = this.sessionDataService.getJobList(this.sessionData());
   }
 
   private subscribeToJobEvents() {

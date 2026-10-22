@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { SessionData } from "../../../../model/session/session-data";
@@ -15,7 +15,8 @@ import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/s
 export class VisualizationModalComponent {
   activeModal = inject(NgbActiveModal);
 
-  @Input() dataset: Dataset;
-  @Input() sessionData: SessionData;
-  @Input() visualizationId: string;
+  // set through the modal ref by the code that opens the modal
+  dataset = signal<Dataset>(undefined);
+  sessionData = signal<SessionData>(undefined);
+  visualizationId = signal<string>(undefined);
 }

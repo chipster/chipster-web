@@ -8,7 +8,7 @@ import {
   ChangeDetectionStrategy,
   inject,
 } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { of, throwError } from "rxjs";
 import { mergeMap } from "rxjs/operators";
@@ -38,7 +38,8 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
 
   private flow;
   private modalOpen = false;
-  private modalRef: any;
+  private modalRef: NgbModalRef;
+  private modal: ImportSessionModalComponent;
   @Output() done = new EventEmitter();
 
   fileStatus = new Map<any, string>();
@@ -58,9 +59,10 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
         size: "lg",
       });
 
-      this.modalRef.componentInstance.flow = this.flow;
-      this.modalRef.componentInstance.fileStatus = this.fileStatus;
-      this.modalRef.componentInstance.finishedFiles = this.finishedFiles;
+      this.modal = this.modalRef.componentInstance as ImportSessionModalComponent;
+      this.modal.flow = this.flow;
+      this.modal.fileStatus = this.fileStatus;
+      this.modal.finishedFiles = this.finishedFiles;
       this.modalOpen = true;
 
       this.modalRef.result.then(
@@ -76,7 +78,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     this.warnings = new Map();
 
     // notify the modal that file was added
-    this.modalRef.componentInstance.fileAdded(file);
+    this.modal.fileAdded(file);
   }
 
   fileSuccess(file: any) {
@@ -112,7 +114,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
             this.finishedFiles.clear();
             this.done.emit(sessionIds);
             if (this.modalOpen) {
-              this.modalRef.componentInstance.closeModal();
+              this.modal.closeModal();
             }
 
             // if there were warnings

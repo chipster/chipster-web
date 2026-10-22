@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
@@ -28,8 +28,9 @@ export class SamplesModalComponent implements OnInit {
   private datasetService = inject(DatasetService);
   private sessionDataService = inject(SessionDataService);
 
-  @Input() datasets: Dataset[];
-  @Input() sessionData: SessionData;
+  // set through the modal ref by the code that opens the modal
+  datasets = signal<Dataset[]>(undefined);
+  sessionData = signal<SessionData>(undefined);
 
   identifiersForm = this.fb.group({
     r1Token: ["R1", Validators.required],
@@ -62,13 +63,13 @@ export class SamplesModalComponent implements OnInit {
     this.state = new LoadState(State.Loading, "Loading data...");
 
     // check for nonunique file names
-    const nonUniqueNames = this.findNonUniqueNames(this.datasets);
+    const nonUniqueNames = this.findNonUniqueNames(this.datasets());
     if (nonUniqueNames.length > 0) {
       this.nonUniqueWarning = true;
       this.nonUniqueWarningText = `Selected files contain nonunique names: ${nonUniqueNames.join(", ")}`;
     }
 
-    const sampleGroups: SampleGroups = this.datasetService.getSampleGroups(this.datasets);
+    const sampleGroups: SampleGroups = this.datasetService.getSampleGroups(this.datasets());
 
     this.unpairedFiles = sampleGroups.sampleDataMissing;
     this.pairedEndSamples = sampleGroups.pairedEndSamples;
@@ -143,7 +144,7 @@ export class SamplesModalComponent implements OnInit {
   }
 
   onResetAll() {
-    this.unpairedFiles = this.datasets;
+    this.unpairedFiles = this.datasets();
     this.singleEndSamples = [];
     this.pairedEndSamples = [];
     this.pairMissingSamples = [];

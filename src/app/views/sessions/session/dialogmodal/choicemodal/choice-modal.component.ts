@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -8,16 +8,17 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 export class ChoiceModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);
 
-  @Input() title: string;
-  @Input() message: string;
-  @Input() action1ButtonText: string;
-  @Input() action1Disabled = false;
-  @Input() action2ButtonText: string;
-  @Input() action2Disabled = false;
-  @Input() action3ButtonText: string;
-  @Input() action3Disabled = false;
-  @Input() cancelButtonText: string;
-  @Input() question: string;
+  // set through the modal ref by the code that opens the modal
+  title = signal<string>(undefined);
+  message = signal<string>(undefined);
+  action1ButtonText = signal<string>(undefined);
+  action1Disabled = signal(false);
+  action2ButtonText = signal<string>(undefined);
+  action2Disabled = signal(false);
+  action3ButtonText = signal<string>(undefined);
+  action3Disabled = signal(false);
+  cancelButtonText = signal<string>(undefined);
+  question = signal<string>(undefined);
 
   @ViewChild("submitButton") submitButton;
 

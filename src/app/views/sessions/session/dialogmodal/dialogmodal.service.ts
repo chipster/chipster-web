@@ -169,17 +169,17 @@ export class DialogModalService {
     return this.openResult(
       (m) => m.ChoiceModalComponent,
       (modal) => {
-        modal.title = title;
-        modal.message = message;
-        modal.question = question;
-        modal.action1ButtonText = action1.text;
-        modal.action1Disabled = action1.disabled ?? false;
-        modal.action2ButtonText = action2.text;
-        modal.action2Disabled = action2.disabled ?? false;
-        modal.cancelButtonText = cancelButtonText;
+        modal.title.set(title);
+        modal.message.set(message);
+        modal.question.set(question);
+        modal.action1ButtonText.set(action1.text);
+        modal.action1Disabled.set(action1.disabled ?? false);
+        modal.action2ButtonText.set(action2.text);
+        modal.action2Disabled.set(action2.disabled ?? false);
+        modal.cancelButtonText.set(cancelButtonText);
         if (action3) {
-          modal.action3ButtonText = action3.text;
-          modal.action3Disabled = action3.disabled ?? false;
+          modal.action3ButtonText.set(action3.text);
+          modal.action3Disabled.set(action3.disabled ?? false);
         }
       },
       { size: "lg" },
@@ -242,8 +242,8 @@ export class DialogModalService {
       (m) => m.JobsModalComponent,
       (modal) => {
         modal.jobs = jobs;
-        modal.tools = tools;
-        modal.sessionData = sessionData;
+        modal.tools.set(tools);
+        modal.sessionData.set(sessionData);
       },
       { size: "xl" },
     );
@@ -253,8 +253,8 @@ export class DialogModalService {
     return this.openObservable(
       (m) => m.SpinnerModalComponent,
       (modal) => {
-        modal.message = message;
-        modal.observable = observable;
+        modal.message.set(message);
+        modal.observable.set(observable);
       },
       // don't allow user to close this
       { backdrop: "static", keyboard: false },
