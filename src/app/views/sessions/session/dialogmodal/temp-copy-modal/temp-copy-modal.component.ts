@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ChangeDetectionStrategy, inject, signal, viewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  viewChild,
+  ElementRef,
+} from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { FormsModule } from "@angular/forms";
 
@@ -19,7 +27,7 @@ export class TempCopyModalComponent implements AfterViewInit {
   message = signal<string>(undefined);
   placeHolder = signal<string>(undefined);
 
-  readonly valueInput = viewChild("valueInput");
+  readonly valueInput = viewChild<ElementRef<HTMLInputElement>>("valueInput");
 
   ngAfterViewInit() {
     setTimeout(() => {

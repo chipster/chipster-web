@@ -8,6 +8,7 @@ import {
   inject,
   input,
   viewChild,
+  ElementRef,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -51,7 +52,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
   readonly sessionData = input<SessionData>(undefined);
   readonly divWidth = input<any>(undefined);
 
-  readonly horizontalScrollDiv = viewChild("horizontalScroll");
+  readonly horizontalScrollDiv = viewChild<ElementRef<HTMLDivElement>>("horizontalScroll");
 
   // takes ~100 ms with ADSL
   private readonly fileSizeLimit = 1 * 1024 * 1024;

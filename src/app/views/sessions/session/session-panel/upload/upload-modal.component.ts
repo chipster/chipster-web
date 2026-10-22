@@ -7,6 +7,7 @@ import {
   inject,
   signal,
   viewChild,
+  ElementRef,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
@@ -34,8 +35,8 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   sessionId = signal<string>(undefined);
   flow = signal<any>(undefined);
 
-  readonly uploadFilesButton = viewChild("uploadFilesButton");
-  readonly uploadFolderButton = viewChild("uploadFolderButton");
+  readonly uploadFilesButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFilesButton");
+  readonly uploadFolderButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFolderButton");
 
   files = [];
 

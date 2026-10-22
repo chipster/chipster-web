@@ -5,10 +5,11 @@ import {
   OnChanges,
   OnDestroy,
   OnInit,
-  ViewChild,
   ChangeDetectionStrategy,
   inject,
   input,
+  effect,
+  viewChild,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { fromEvent, Subject, Subscription } from "rxjs";
@@ -287,17 +288,21 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
    * whole file next to the copy in the srcdoc attribute for as long as the file is shown.
    * Reports can be tens of megabytes.
    */
-  // TODO: Skipped for migration because:
-  //  Accessor queries cannot be migrated as they are too complex.
-  @ViewChild("htmlframe")
-  set htmlframe(frame: ElementRef<HTMLIFrameElement>) {
-    this.frame = frame?.nativeElement;
-    if (this.frame && this.html != null) {
-      // the html goes only to the sandboxed iframe, see the comment on the class. The sandbox
-      // attribute is static in the template, so it's set before the content.
-      this.frame.srcdoc = this.html;
-      this.html = null;
-    }
+  private readonly htmlframe = viewChild<ElementRef<HTMLIFrameElement>>("htmlframe");
+
+  constructor() {
+    // runs when the iframe is created or removed, in the same tick of the change detection. It
+    // tracks only the query: html is a plain field, and ngOnChanges always drops the iframe
+    // before new content is loaded, so the content is never there before the iframe.
+    effect(() => {
+      this.frame = this.htmlframe()?.nativeElement;
+      if (this.frame && this.html != null) {
+        // the html goes only to the sandboxed iframe, see the comment on the class. The sandbox
+        // attribute is static in the template, so it's set before the content.
+        this.frame.srcdoc = this.html;
+        this.html = null;
+      }
+    });
   }
 
   private frame: HTMLIFrameElement;

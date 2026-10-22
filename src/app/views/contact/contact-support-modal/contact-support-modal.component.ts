@@ -7,6 +7,7 @@ import {
   inject,
   signal,
   viewChild,
+  ElementRef,
 } from "@angular/core";
 import {
   AbstractControl,
@@ -57,7 +58,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   // set through the modal ref by the code that opens the modal
   log = signal<string>(undefined);
 
-  readonly messageTextarea = viewChild("messageTextarea");
+  readonly messageTextarea = viewChild<ElementRef<HTMLTextAreaElement>>("messageTextarea");
 
   public session: Session;
   public user: User;

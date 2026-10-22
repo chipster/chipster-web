@@ -1,4 +1,13 @@
-import { Component, OnChanges, OnInit, ChangeDetectionStrategy, inject, input, viewChild } from "@angular/core";
+import {
+  Component,
+  OnChanges,
+  OnInit,
+  ChangeDetectionStrategy,
+  inject,
+  input,
+  viewChild,
+  ElementRef,
+} from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -43,7 +52,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   readonly tools = input<Tool[]>(undefined);
   readonly parametersLimit = input<number>(undefined);
 
-  readonly notesArea = viewChild("notesInput");
+  readonly notesArea = viewChild<ElementRef<HTMLTextAreaElement>>("notesInput");
 
   sourceJob: Job;
   tool: Tool;

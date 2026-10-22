@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy, inject, signal, viewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  viewChild,
+  ElementRef,
+} from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
@@ -18,8 +27,8 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
   // set through the modal ref by the code that opens the modal
   session = signal<Session>(undefined);
 
-  readonly submitButton = viewChild("submitButton");
-  readonly notesArea = viewChild("notesArea");
+  readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
+  readonly notesArea = viewChild<ElementRef<HTMLTextAreaElement>>("notesArea");
 
   public notes: string;
   public readOnly: boolean;

@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ChangeDetectionStrategy, inject, signal, viewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  viewChild,
+  ElementRef,
+} from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -16,7 +24,7 @@ export class BooleanModalComponent implements AfterViewInit {
   subMessage = signal<string>(null);
   title = signal<string>(undefined);
 
-  readonly submitButton = viewChild("submitButton");
+  readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
 
   ngAfterViewInit() {
     // set focus to submit button every time the dialog is opened

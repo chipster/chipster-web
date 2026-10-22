@@ -129,8 +129,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   readonly modulesMap = input<Map<string, Module>>(undefined);
 
-  readonly searchBox = viewChild("searchBox");
-
   readonly searchTool = viewChild<NgSelectComponent>("searchTool");
 
   private readonly unregisterHotkeys: Array<() => void> = [];
@@ -268,12 +266,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
   onResourcesChanged() {
     if (this.resourcesChanged$ != null) {
       this.resourcesChanged$.next(null);
-    }
-  }
-
-  openChange(isOpen) {
-    if (isOpen) {
-      this.searchBox().focus();
     }
   }
 

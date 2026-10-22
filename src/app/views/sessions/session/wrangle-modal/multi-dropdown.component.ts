@@ -26,7 +26,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
 
   readonly selectionChanged = output<ColumnItem[]>();
 
-  readonly dropdown = viewChild("dropdown");
+  readonly dropdown = viewChild<NgSelectComponent>("dropdown");
 
   private readonly selectAllString = "Select all";
   private readonly selectAllFilteredString = "Select all filtered";

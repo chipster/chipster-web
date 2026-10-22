@@ -7,6 +7,7 @@ import {
   inject,
   signal,
   viewChild,
+  ElementRef,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, SessionEvent } from "chipster-js-common";
@@ -38,8 +39,8 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   session = signal<Session>(undefined);
   ruleStream$ = signal<Observable<SessionEvent>>(undefined);
 
-  readonly submitButton = viewChild("submitButton");
-  readonly usernameInput = viewChild("usernameInput");
+  readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
+  readonly usernameInput = viewChild<ElementRef<HTMLInputElement>>("usernameInput");
 
   public rules: Rule[];
   public newRule: Rule;

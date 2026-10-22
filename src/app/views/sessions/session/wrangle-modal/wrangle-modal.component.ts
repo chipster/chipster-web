@@ -51,7 +51,7 @@ export class WrangleModalComponent implements OnInit {
   dataset = signal<Dataset>(undefined);
   sessionData = signal<SessionData>(undefined);
 
-  readonly agGrid = viewChild("agGrid");
+  readonly agGrid = viewChild<AgGridAngular>("agGrid");
 
   private readonly SAMPLE_PREFIX = "chip.";
   private readonly INCLUDE = "included";

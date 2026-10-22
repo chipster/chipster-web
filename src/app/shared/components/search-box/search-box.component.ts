@@ -1,4 +1,14 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output, viewChild } from "@angular/core";
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  ChangeDetectionStrategy,
+  inject,
+  input,
+  output,
+  viewChild,
+  ElementRef,
+} from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
 import { FormsModule } from "@angular/forms";
 
@@ -20,7 +30,7 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   readonly valueChange = output<string>();
   readonly enterKey = output<void>();
 
-  readonly searchInput = viewChild("searchInput");
+  readonly searchInput = viewChild<ElementRef<HTMLInputElement>>("searchInput");
 
   searchTerm: string;
 
