@@ -2,11 +2,11 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  ViewChild,
   DOCUMENT,
   ChangeDetectionStrategy,
   inject,
   input,
+  viewChild,
 } from "@angular/core";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
@@ -129,11 +129,9 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   readonly modulesMap = input<Map<string, Module>>(undefined);
 
-  @ViewChild("searchBox")
-  searchBox;
+  readonly searchBox = viewChild("searchBox");
 
-  @ViewChild("searchTool")
-  searchTool: NgSelectComponent;
+  readonly searchTool = viewChild<NgSelectComponent>("searchTool");
 
   private readonly unregisterHotkeys: Array<() => void> = [];
 
@@ -206,7 +204,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.toolsMap = new Map(this.toolsArray().map((tool: Tool) => [tool.name.id, tool]));
 
     this.unregisterHotkeys.push(
-      this.hotkeyService.register("t", "Find tool", () => this.searchTool?.open()),
+      this.hotkeyService.register("t", "Find tool", () => this.searchTool()?.open()),
       this.hotkeyService.register("j", "Open jobs", () => this.toggleJobs()),
     );
   }
@@ -275,7 +273,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   openChange(isOpen) {
     if (isOpen) {
-      this.searchBox.focus();
+      this.searchBox().focus();
     }
   }
 

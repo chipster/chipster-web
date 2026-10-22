@@ -3,10 +3,10 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  ViewChild,
   ChangeDetectionStrategy,
   inject,
   signal,
+  viewChild,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, SessionEvent } from "chipster-js-common";
@@ -38,10 +38,8 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   session = signal<Session>(undefined);
   ruleStream$ = signal<Observable<SessionEvent>>(undefined);
 
-  @ViewChild("submitButton")
-  submitButton;
-  @ViewChild("usernameInput")
-  usernameInput;
+  readonly submitButton = viewChild("submitButton");
+  readonly usernameInput = viewChild("usernameInput");
 
   public rules: Rule[];
   public newRule: Rule;
@@ -73,7 +71,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       // should be fixed in ng-bootstrap 3.3.0
       // https://github.com/ng-bootstrap/ng-bootstrap/issues/1776
       // https:github.com/ng-bootstrap/ng-bootstrap/issues/2728
-      this.submitButton.nativeElement.focus();
+      this.submitButton().nativeElement.focus();
     });
   }
 
@@ -103,7 +101,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     this.newRule = new Rule();
     this.newRule.readWrite = true;
     // setTimeout() makes this async so that the element is added to the dom before we try to get it
-    setTimeout(() => this.usernameInput.nativeElement.focus(), 0);
+    setTimeout(() => this.usernameInput().nativeElement.focus(), 0);
   }
 
   deleteRule(ruleId: string) {

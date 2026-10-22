@@ -6,11 +6,11 @@ import {
   OnDestroy,
   OutputEmitterRef,
   SimpleChanges,
-  ViewChild,
   ChangeDetectionStrategy,
   inject,
   input,
   output,
+  viewChild,
 } from "@angular/core";
 import type {
   OnProgressParameters,
@@ -238,12 +238,10 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   // pdf.js changes the page itself too, for example when a link in the pdf is clicked
   readonly pageChange = output<number>();
 
-  @ViewChild("container", { static: true })
-  container: ElementRef<HTMLDivElement>;
+  readonly container = viewChild<ElementRef<HTMLDivElement>>("container");
 
   // pdf.js puts the shown pages in it
-  @ViewChild("viewer", { static: true })
-  viewerElement: ElementRef<HTMLDivElement>;
+  readonly viewerElement = viewChild<ElementRef<HTMLDivElement>>("viewer");
 
   pdfViewer: PDFViewer;
 
@@ -363,7 +361,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     });
     // the abortSignal is missing from the type declarations of pdf.js
     const options: ConstructorParameters<PdfjsViewer["PDFViewer"]>[0] & { abortSignal: AbortSignal } = {
-      container: this.container.nativeElement,
+      container: this.container().nativeElement,
       eventBus,
       linkService: this.linkService,
       // a 10px margin under each page instead of the borders
@@ -520,7 +518,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
    * the pages. It's 0 for the scrollbars that are drawn over the content.
    */
   private updateLayout() {
-    const container = this.container.nativeElement;
+    const container = this.container().nativeElement;
     // only a horizontal scrollbar, because the vertical one is hidden
     const padding = container.offsetHeight - container.clientHeight + "px";
     const host = this.host.nativeElement;
@@ -529,7 +527,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     }
 
     // the shown pages: on a single page, pdf.js keeps only that page here
-    const pages = Array.from(this.viewerElement.nativeElement.querySelectorAll<HTMLElement>(":scope > .page"));
+    const pages = Array.from(this.viewerElement().nativeElement.querySelectorAll<HTMLElement>(":scope > .page"));
     // the same margin under each page, from the stylesheet of pdf.js
     const margin = pages.length > 0 ? parseFloat(getComputedStyle(pages[0]).marginBottom) : 0;
     let height = 0;

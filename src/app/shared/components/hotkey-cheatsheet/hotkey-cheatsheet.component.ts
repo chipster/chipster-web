@@ -3,10 +3,10 @@ import {
   OnDestroy,
   OnInit,
   TemplateRef,
-  ViewChild,
   ViewEncapsulation,
   ChangeDetectionStrategy,
   inject,
+  viewChild,
 } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { HotkeyService } from "../../services/hotkey.service";
@@ -22,7 +22,7 @@ export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
   private readonly hotkeyService = inject(HotkeyService);
   private readonly modalService = inject(NgbModal);
 
-  @ViewChild("content") contentTemplate!: TemplateRef<unknown>;
+  readonly contentTemplate = viewChild.required<TemplateRef<unknown>>("content");
 
   private readonly unregister: Array<() => void> = [];
   private modalRef: NgbModalRef | null = null;
@@ -64,7 +64,7 @@ export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
     if (this.modalRef) {
       this.modalRef.close();
     } else {
-      this.modalRef = this.modalService.open(this.contentTemplate, { windowClass: "ch-hotkey-cheatsheet" });
+      this.modalRef = this.modalService.open(this.contentTemplate(), { windowClass: "ch-hotkey-cheatsheet" });
       this.modalRef.hidden.subscribe(() => {
         this.modalRef = null;
       });

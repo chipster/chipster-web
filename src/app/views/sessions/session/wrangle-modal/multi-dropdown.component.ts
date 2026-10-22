@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, input, output } from "@angular/core";
+import { Component, OnChanges, OnInit, ChangeDetectionStrategy, input, output, viewChild } from "@angular/core";
 import log from "loglevel";
 import type { ColumnItem } from "./wrangle-modal.component";
 import { NgSelectComponent, NgHeaderTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
@@ -26,7 +26,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
 
   readonly selectionChanged = output<ColumnItem[]>();
 
-  @ViewChild("dropdown") dropdown;
+  readonly dropdown = viewChild("dropdown");
 
   private readonly selectAllString = "Select all";
   private readonly selectAllFilteredString = "Select all filtered";
@@ -74,7 +74,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
     }
     event.stopImmediatePropagation();
     this.addFilteredToSelectedIndexes();
-    this.dropdown.close();
+    this.dropdown().close();
   }
 
   onSelectionChange(): void {
@@ -96,11 +96,11 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
       return;
     }
     this.addFilteredToSelectedIndexes();
-    this.dropdown.close();
+    this.dropdown().close();
   }
 
   onDone(): void {
-    this.dropdown.close();
+    this.dropdown().close();
   }
 
   private emit(selected: number[]): void {

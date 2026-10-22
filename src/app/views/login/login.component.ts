@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, ElementRef, OnInit, ChangeDetectionStrategy, inject, viewChild } from "@angular/core";
 import { UntypedFormGroup, FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -47,11 +47,9 @@ export class LoginComponent implements OnInit {
   private returnUrl: string;
   public ssoLoginUrl: string;
 
-  @ViewChild("myForm")
-  private myForm: UntypedFormGroup;
+  private readonly myForm = viewChild<UntypedFormGroup>("myForm");
 
-  @ViewChild("usernameInput")
-  private usernameInput: ElementRef;
+  private readonly usernameInput = viewChild<ElementRef>("usernameInput");
   oidcConfigs: OidcConfig[];
 
   public multipleLoginMethods = false;
@@ -137,12 +135,12 @@ export class LoginComponent implements OnInit {
     this.showLoginForm = true;
     // allow Angular to create the element first
     setTimeout(() => {
-      this.usernameInput.nativeElement.focus();
+      this.usernameInput().nativeElement.focus();
     }, 0);
   }
 
   login() {
-    this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe({
+    this.authenticationService.login(this.myForm().value.username, this.myForm().value.password).subscribe({
       next: () => {
         // Route to Session creation page
         log.info("logged in");
@@ -163,13 +161,14 @@ export class LoginComponent implements OnInit {
   // Hack for the Enter key press for the button type='button'
   keyDownFunction(event) {
     if (event.keyCode === 13) {
-      if (this.myForm.value.username && this.myForm.value.password) {
+      const myForm = this.myForm();
+      if (myForm.value.username && myForm.value.password) {
         this.login();
-      } else if (!this.myForm.value.username && !this.myForm.value.password) {
+      } else if (!myForm.value.username && !myForm.value.password) {
         this.error = "Please enter username and password to log in";
-      } else if (!this.myForm.value.username) {
+      } else if (!myForm.value.username) {
         this.error = "Please enter username";
-      } else if (!this.myForm.value.password) {
+      } else if (!myForm.value.password) {
         this.error = "Please enter password";
       }
     }

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output, viewChild } from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
 import { FormsModule } from "@angular/forms";
 
@@ -20,7 +20,7 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   readonly valueChange = output<string>();
   readonly enterKey = output<void>();
 
-  @ViewChild("searchInput") searchInput;
+  readonly searchInput = viewChild("searchInput");
 
   searchTerm: string;
 
@@ -42,7 +42,7 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   focus() {
     // why this doesn't work without setTimeout()?
     setTimeout(() => {
-      this.searchInput.nativeElement.focus();
+      this.searchInput().nativeElement.focus();
     }, 0);
   }
 

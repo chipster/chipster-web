@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { AfterViewInit, Component, ChangeDetectionStrategy, inject, signal, viewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -20,10 +20,10 @@ export class ChoiceModalComponent implements AfterViewInit {
   cancelButtonText = signal<string>(undefined);
   question = signal<string>(undefined);
 
-  @ViewChild("submitButton") submitButton;
+  readonly submitButton = viewChild("submitButton");
 
   ngAfterViewInit() {
-    setTimeout(() => this.submitButton.nativeElement.focus());
+    setTimeout(() => this.submitButton().nativeElement.focus());
   }
 
   action1() {

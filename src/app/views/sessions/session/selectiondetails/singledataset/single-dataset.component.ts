@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, OnChanges, OnInit, ChangeDetectionStrategy, inject, input, viewChild } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -43,8 +43,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   readonly tools = input<Tool[]>(undefined);
   readonly parametersLimit = input<number>(undefined);
 
-  @ViewChild("notesInput")
-  notesArea;
+  readonly notesArea = viewChild("notesInput");
 
   sourceJob: Job;
   tool: Tool;
@@ -72,7 +71,7 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   }
 
   saveNotes(dataset: Dataset, notesInput) {
-    this.notesArea.nativeElement.scrollTop = 0;
+    this.notesArea().nativeElement.scrollTop = 0;
 
     this.sessionDataService
       .updateDataset(dataset)

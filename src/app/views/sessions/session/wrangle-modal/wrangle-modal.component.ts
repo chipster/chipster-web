@@ -1,6 +1,6 @@
 // registers the ag-grid modules and theme, before any grid is created
 import "../../../../shared/ag-grid-setup";
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal, viewChild } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
@@ -51,7 +51,7 @@ export class WrangleModalComponent implements OnInit {
   dataset = signal<Dataset>(undefined);
   sessionData = signal<SessionData>(undefined);
 
-  @ViewChild("agGrid") agGrid;
+  readonly agGrid = viewChild("agGrid");
 
   private readonly SAMPLE_PREFIX = "chip.";
   private readonly INCLUDE = "included";
@@ -410,6 +410,6 @@ export class WrangleModalComponent implements OnInit {
   }
 
   private updatePreviewStyles(): void {
-    this.agGrid.api.redrawRows(); // refreshCells() wasn't enough
+    this.agGrid().api.redrawRows(); // refreshCells() wasn't enough
   }
 }

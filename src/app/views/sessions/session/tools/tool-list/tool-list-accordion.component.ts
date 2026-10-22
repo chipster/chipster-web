@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy, inject, input, viewChild } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
 import { cloneDeep } from "lodash-es";
 import { Subject } from "rxjs";
@@ -37,8 +37,7 @@ export class ToolListAccordionComponent implements OnInit {
   // @Output()
   // private selectToolOutput = new EventEmitter<ToolSelection>();
 
-  @ViewChild("searchBox")
-  private searchBox: SearchBoxComponent;
+  private readonly searchBox = viewChild<SearchBoxComponent>("searchBox");
 
   modules: Array<Module> = [];
   tools: Array<Tool> = [];
@@ -123,7 +122,7 @@ export class ToolListAccordionComponent implements OnInit {
 
   openChange(isOpen) {
     if (isOpen) {
-      this.searchBox.focus();
+      this.searchBox().focus();
     }
   }
 }

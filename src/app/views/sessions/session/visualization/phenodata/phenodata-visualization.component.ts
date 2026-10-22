@@ -6,12 +6,12 @@ import {
   OnDestroy,
   OnInit,
   SimpleChanges,
-  ViewChild,
   ViewEncapsulation,
   ChangeDetectionStrategy,
   inject,
   input,
   linkedSignal,
+  viewChild,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -137,7 +137,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   private unsubscribe: Subject<any> = new Subject();
 
-  @ViewChild("horizontalScroll") horizontalScrollDiv;
+  readonly horizontalScrollDiv = viewChild("horizontalScroll");
 
   ngOnInit() {
     this.updateViewAfterDelay();
@@ -181,8 +181,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   ngAfterViewInit() {
     // not created in modal
-    if (this.horizontalScrollDiv) {
-      this.nativeElementService.disableGestures(this.horizontalScrollDiv.nativeElement);
+    const horizontalScrollDiv = this.horizontalScrollDiv();
+    if (horizontalScrollDiv) {
+      this.nativeElementService.disableGestures(horizontalScrollDiv.nativeElement);
     }
   }
 

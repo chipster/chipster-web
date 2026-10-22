@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, output } from "@angular/core";
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy, inject, output, viewChild } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { of, throwError } from "rxjs";
@@ -24,8 +24,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   private sessionResource = inject(SessionResource);
   private dialogModalService = inject(DialogModalService);
 
-  @ViewChild("browseFilesButton")
-  browseFilesButton;
+  readonly browseFilesButton = viewChild("browseFilesButton");
 
   private flow;
   private modalOpen = false;
@@ -150,6 +149,6 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    this.flow.assignBrowse(this.browseFilesButton);
+    this.flow.assignBrowse(this.browseFilesButton());
   }
 }

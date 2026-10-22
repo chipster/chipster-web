@@ -287,6 +287,8 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
    * whole file next to the copy in the srcdoc attribute for as long as the file is shown.
    * Reports can be tens of megabytes.
    */
+  // TODO: Skipped for migration because:
+  //  Accessor queries cannot be migrated as they are too complex.
   @ViewChild("htmlframe")
   set htmlframe(frame: ElementRef<HTMLIFrameElement>) {
     this.frame = frame?.nativeElement;
