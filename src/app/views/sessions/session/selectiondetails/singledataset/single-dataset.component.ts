@@ -1,13 +1,4 @@
-import {
-  Component,
-  OnChanges,
-  OnInit,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-  viewChild,
-  ElementRef,
-} from "@angular/core";
+import { Component, ElementRef, computed, inject, input, viewChild } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -28,7 +19,6 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   selector: "ch-single-dataset",
   templateUrl: "./single-dataset.component.html",
   styleUrls: ["./single-dataset.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NGB_DROPDOWN_IMPORTS,
     DatasetParameterListComponent,
@@ -39,7 +29,7 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
     LocalDatePipe,
   ],
 })
-export class SingleDatasetComponent implements OnInit, OnChanges {
+export class SingleDatasetComponent {
   private sessionDataService = inject(SessionDataService);
   private restErrorService = inject(RestErrorService);
   private datasetModalService = inject(DatasetModalService);
@@ -54,26 +44,22 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
 
   readonly notesArea = viewChild<ElementRef<HTMLTextAreaElement>>("notesInput");
 
-  sourceJob: Job;
-  tool: Tool;
-  toolCategory: string;
-  toolName: string;
+  /*
+   * The latest copy from datasetsMap, because the dataset of the selection isn't updated by the
+   * dataset events: labels and notes changed elsewhere, or the server's copy after a local change.
+   */
+  readonly latestDataset = computed(
+    () => this.sessionData()?.datasetsMap().get(this.dataset()?.datasetId) ?? this.dataset(),
+  );
+  readonly sourceJob = computed<Job>(() =>
+    this.sessionDataService.getJobById(this.latestDataset().sourceJob, this.jobs()),
+  );
+  readonly toolCategory = computed(() => this.sourceJob()?.toolCategory ?? "");
+  readonly toolName = computed(() => this.sourceJob()?.toolName ?? "");
+  readonly tool = computed<Tool>(() => this.toolService.getLiveToolForSourceJob(this.sourceJob(), this.tools()));
 
   notesPlaceholderInactive = "click to edit";
   notesPlaceholderActive = "";
-
-  ngOnInit() {
-    this.sourceJob = this.getSourceJob(this.dataset());
-  }
-
-  ngOnChanges() {
-    this.sourceJob = this.getSourceJob(this.dataset());
-
-    this.toolCategory = this.sourceJob ? this.sourceJob.toolCategory : "";
-    this.toolName = this.sourceJob ? this.sourceJob.toolName : "";
-
-    this.tool = this.toolService.getLiveToolForSourceJob(this.sourceJob, this.tools());
-  }
 
   editNotes(notesInput) {
     notesInput.placeholder = this.notesPlaceholderActive;
@@ -88,27 +74,23 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
     notesInput.placeholder = this.notesPlaceholderInactive;
   }
 
-  getSourceJob(dataset: Dataset) {
-    return this.sessionDataService.getJobById(dataset.sourceJob, this.jobs());
-  }
-
   showHistory(): void {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset(), this.sessionData(), this.tools());
+    this.datasetModalService.openDatasetHistoryModal(this.latestDataset(), this.sessionData(), this.tools());
   }
 
   selectTool() {
-    this.datasetContextMenuService.selectTool(this.sourceJob);
+    this.datasetContextMenuService.selectTool(this.sourceJob());
   }
 
   showJob() {
-    this.datasetContextMenuService.showJob(this.sourceJob, this.tools(), this.sessionData());
+    this.datasetContextMenuService.showJob(this.sourceJob(), this.tools(), this.sessionData());
   }
 
   editLabels(): void {
-    this.datasetModalService.openLabelsModal([this.dataset()], this.sessionData());
+    this.datasetModalService.openLabelsModal([this.latestDataset()], this.sessionData());
   }
 
   getDatasetLabels() {
-    return getSortedLabels(this.dataset()?.labelIds, this.sessionData().labelsMap());
+    return getSortedLabels(this.latestDataset()?.labelIds, this.sessionData().labelsMap());
   }
 }

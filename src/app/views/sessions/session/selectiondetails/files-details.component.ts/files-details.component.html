@@ -10,7 +10,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (dataset of datasets(); track dataset.datasetId) {
+      @for (dataset of latestDatasets(); track dataset.datasetId) {
         <tr>
           <td class="">{{ dataset.name }}</td>
           <td class="text-muted">{{ dataset.size | bytes: 0 }}</td>
