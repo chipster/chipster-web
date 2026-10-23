@@ -1,14 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-  output,
-  viewChild,
-  ElementRef,
-} from "@angular/core";
+import { Component, OnDestroy, OnInit, inject, input, output, viewChild, ElementRef } from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
 import { FormsModule } from "@angular/forms";
 
@@ -16,7 +6,6 @@ import { FormsModule } from "@angular/forms";
   selector: "ch-search-box",
   templateUrl: "./search-box.component.html",
   styleUrls: ["./search-box.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule],
 })
 export class SearchBoxComponent implements OnInit, OnDestroy {

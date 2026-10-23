@@ -6,9 +6,10 @@ import {
   OnInit,
   SimpleChanges,
   ViewEncapsulation,
-  ChangeDetectionStrategy,
+  computed,
   inject,
   input,
+  signal,
 } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Label, Module, Tool } from "chipster-js-common";
@@ -53,7 +54,6 @@ import { WorkflowGraphService } from "./workflow-graph.service";
   templateUrl: "./workflow-graph.component.html",
   styleUrls: ["./workflow-graph.component.less"],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private sessionDataService = inject(SessionDataService);
@@ -159,9 +159,31 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   searchEnabled = false;
   selectionEnabled = false;
 
-  labelDisplayMode: "dots" | "pills" = "dots";
-  showLabelPanel = true;
-  labelLegend: Label[] = [];
+  /*
+   * Signals, because the buttons of the session panel change them, and those clicks aren't events
+   * of this view
+   */
+  readonly labelDisplayMode = signal<"dots" | "pills">("dots");
+  readonly showLabelPanel = signal(true);
+
+  // the labels that are in use in the session, for the legend
+  readonly labelLegend = computed<Label[]>(() => {
+    const sessionData = this.sessionData();
+    if (!sessionData) {
+      return [];
+    }
+    const inUseIds = new Set<string>();
+    sessionData.datasetsMap().forEach((dataset) => {
+      (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
+    });
+    return Array.from(sessionData.labelsMap().values())
+      .filter((label) => inUseIds.has(label.labelId))
+      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+  });
+
+  // for the template, selectedDatasets is updated in a subscription
+  private readonly selectedDatasetsSignal = this.store.selectSignal<Dataset[]>((state) => state.selectedDatasets);
+  readonly hasSelectedDatasets = computed(() => this.selectedDatasetsSignal()?.length > 0);
 
   selectionRect: any;
 
@@ -204,13 +226,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // component defaults stay in effect.
     this.preferencesService.getLabelDisplayMode().subscribe((mode) => {
       if (mode != null) {
-        this.labelDisplayMode = mode;
+        this.labelDisplayMode.set(mode);
         this.renderLabels();
       }
     });
     this.preferencesService.getShowLabelPanel().subscribe((value) => {
       if (value != null) {
-        this.showLabelPanel = value;
+        this.showLabelPanel.set(value);
       }
     });
 
@@ -1208,19 +1230,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   toggleLabelDisplayMode(): void {
-    this.labelDisplayMode = this.labelDisplayMode === "dots" ? "pills" : "dots";
+    this.labelDisplayMode.update((mode) => (mode === "dots" ? "pills" : "dots"));
     this.renderLabels();
-    this.preferencesService.setLabelDisplayMode(this.labelDisplayMode);
+    this.preferencesService.setLabelDisplayMode(this.labelDisplayMode());
   }
 
   toggleLabelPanel(): void {
-    this.showLabelPanel = !this.showLabelPanel;
-    this.preferencesService.setShowLabelPanel(this.showLabelPanel);
+    this.showLabelPanel.update((show) => !show);
+    this.preferencesService.setShowLabelPanel(this.showLabelPanel());
   }
 
   renderLabels(): void {
-    this.refreshLabelLegend();
-
     if (!this.d3LabelsGroup) {
       return;
     }
@@ -1234,7 +1254,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // Force dots in read-only mode (the session-list preview), so a saved
     // "pills" preference doesn't leak into the preview.
-    if (this.labelDisplayMode === "dots" || !this.enabled()) {
+    if (this.labelDisplayMode() === "dots" || !this.enabled()) {
       this.renderLabelDots();
     } else {
       this.renderLabelPills();
@@ -1255,21 +1275,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   toggleLabelsModal(): void {
     this.datasetModalService.toggleLabelsModal(this.selectedDatasets ?? [], this.sessionData());
-  }
-
-  private refreshLabelLegend(): void {
-    const sessionData = this.sessionData();
-    if (!sessionData || !sessionData.labelsMap()) {
-      this.labelLegend = [];
-      return;
-    }
-    const inUseIds = new Set<string>();
-    sessionData.datasetsMap().forEach((dataset) => {
-      (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
-    });
-    this.labelLegend = Array.from(sessionData.labelsMap().values())
-      .filter((label) => inUseIds.has(label.labelId))
-      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
   }
 
   // Per-node container for a node's label dots/pills. Children are drawn at

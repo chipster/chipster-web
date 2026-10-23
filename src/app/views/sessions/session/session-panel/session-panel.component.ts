@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import { Dataset, Label, Module, Tool } from "chipster-js-common";
 import { range } from "lodash-es";
 import { SessionData } from "../../../../model/session/session-data";
@@ -32,7 +32,6 @@ import { NgClass } from "@angular/common";
   selector: "ch-session-panel",
   templateUrl: "./session-panel.component.html",
   styleUrls: ["./session-panel.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     SearchBoxComponent,
     NgbNav,
