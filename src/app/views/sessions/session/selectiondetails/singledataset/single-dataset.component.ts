@@ -109,6 +109,6 @@ export class SingleDatasetComponent implements OnInit, OnChanges {
   }
 
   getDatasetLabels() {
-    return getSortedLabels(this.dataset()?.labelIds, this.sessionData().labelsMap);
+    return getSortedLabels(this.dataset()?.labelIds, this.sessionData().labelsMap());
   }
 }

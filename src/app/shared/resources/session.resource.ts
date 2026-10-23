@@ -137,11 +137,11 @@ export class SessionResource {
         }
 
         data.session = session;
-        data.datasetsMap = UtilsService.arrayToMap(completeDatasets, "datasetId");
-        data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
-        data.labelsMap = UtilsService.arrayToMap(labels, "labelId");
+        data.datasetsMap.set(UtilsService.arrayToMap(completeDatasets, "datasetId"));
+        data.jobsMap.set(UtilsService.arrayToMap(jobs, "jobId"));
+        data.labelsMap.set(UtilsService.arrayToMap(labels, "labelId"));
 
-        data.datasetTypeTags = types;
+        data.datasetTypeTags.set(types);
 
         return data;
       }),
@@ -585,9 +585,9 @@ export class SessionResource {
   copySession(sessionData: SessionData, name: string, temporary: boolean): Observable<string> {
     log.info(
       "copying session, original has:",
-      sessionData.datasetsMap.size,
+      sessionData.datasetsMap().size,
       "datasets,",
-      sessionData.jobsMap.size,
+      sessionData.jobsMap().size,
       "jobs",
     );
     const newSession: Session = clone(sessionData.session);
@@ -624,7 +624,7 @@ export class SessionResource {
     // policy: destination wins -- if a label with the same labelId already exists
     // in the target, skip the create and let the copied file attach to whatever
     // the destination's version looks like now.
-    const sourceLabels: Label[] = Array.from(sessionData.labelsMap?.values() ?? []);
+    const sourceLabels: Label[] = Array.from(sessionData.labelsMap()?.values() ?? []);
     const labelsToCreate = sourceLabels
       .filter((label: Label) => !targetLabelsMap.has(label.labelId))
       .map((label: Label) => ({ ...label, sessionId: null }));
@@ -632,7 +632,7 @@ export class SessionResource {
     const createLabelsRequest = labelsToCreate.length > 0 ? this.createLabels(targetSessionId, labelsToCreate) : of([]);
 
     // datasets keep their labelIds verbatim -- they now resolve in the destination
-    const oldDatasets = Array.from(sessionData.datasetsMap.values());
+    const oldDatasets = Array.from(sessionData.datasetsMap().values());
     const clones = oldDatasets.map((dataset: Dataset) => {
       const _clone = clone(dataset);
       _clone.sessionId = null;
@@ -654,7 +654,7 @@ export class SessionResource {
         }, new Map());
 
         // create jobs
-        const oldJobs: Job[] = Array.from(sessionData.jobsMap.values());
+        const oldJobs: Job[] = Array.from(sessionData.jobsMap().values());
         const jobCopies = oldJobs
           .filter((oldJob) => !JobService.isRunning(oldJob))
           .map((oldJob: Job) => {

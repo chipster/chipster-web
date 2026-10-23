@@ -194,7 +194,7 @@ export class DatasetModalService {
           const copy = this.sessionResource.copyToExistingSession(
             targetSessionData.session.sessionId,
             selectedSessionData,
-            targetSessionData.labelsMap ?? new Map(),
+            targetSessionData.labelsMap() ?? new Map(),
           );
 
           // return observable of the new sessionId
@@ -236,7 +236,7 @@ export class DatasetModalService {
           const copy = this.sessionResource.copyToExistingSession(
             sessionData.session.sessionId,
             sourceSessionData,
-            sessionData.labelsMap ?? new Map(),
+            sessionData.labelsMap() ?? new Map(),
           );
 
           // return observable of the new sessionId
@@ -251,10 +251,10 @@ export class DatasetModalService {
 
   moveFilesSideBySide(targetSessionData: SessionData, sessionDataToMove: SessionData) {
     // find out the width of the target session workflow
-    const minSourceX = Math.min(...Array.from(sessionDataToMove.datasetsMap.values()).map((d) => d.x));
+    const minSourceX = Math.min(...Array.from(sessionDataToMove.datasetsMap().values()).map((d) => d.x));
 
     // find out the minX of the moving session workflow
-    const maxTargetX = Math.max(...Array.from(targetSessionData.datasetsMap.values()).map((d) => d.x));
+    const maxTargetX = Math.max(...Array.from(targetSessionData.datasetsMap().values()).map((d) => d.x));
 
     // width of the target session
     // minus empty space on the left side of source session
@@ -263,7 +263,7 @@ export class DatasetModalService {
 
     // move other session sideways
     // we can modify sourceSessionData directly, because its our own copy which we just got from the server
-    Array.from(sessionDataToMove.datasetsMap.values()).forEach((dataset) => {
+    Array.from(sessionDataToMove.datasetsMap().values()).forEach((dataset) => {
       // xOffset is -Infinity if the current session is empty
       if (xOffset != null && xOffset > 0 && dataset.x != null) {
         dataset.x = dataset.x + xOffset;
@@ -277,7 +277,7 @@ export class DatasetModalService {
     // clone objects in case we wan't to modify them (change ID and location of selected datasets when merging to existing session)
     const sourceJobs: Map<string, Job> = new Map(
       sourceJobIds.map((jobId: string) => {
-        const jobClone = cloneDeep(sessionData.jobsMap.get(jobId));
+        const jobClone = cloneDeep(sessionData.jobsMap().get(jobId));
         return [jobId, jobClone];
       }),
     );
@@ -291,22 +291,22 @@ export class DatasetModalService {
     // narrow labelsMap to only labels referenced by the selected datasets
     const referencedLabelIds = new Set(selectedDatasets.flatMap((d: Dataset) => d.labelIds ?? []));
     const filteredLabelsMap = new Map<string, Label>();
-    if (sessionData.labelsMap) {
-      sessionData.labelsMap.forEach((label, id) => {
+    if (sessionData.labelsMap()) {
+      sessionData.labelsMap().forEach((label, id) => {
         if (referencedLabelIds.has(id)) {
           filteredLabelsMap.set(id, label);
         }
       });
     }
 
-    return {
-      session: sessionData.session,
-      datasetsMap: selectedDatasetsMap,
-      jobsMap: sourceJobs,
-      labelsMap: filteredLabelsMap,
-      datasetTypeTags: null,
-      cachedFileHeaders: null,
-    };
+    const selection = new SessionData();
+    selection.session = sessionData.session;
+    selection.datasetsMap.set(selectedDatasetsMap);
+    selection.jobsMap.set(sourceJobs);
+    selection.labelsMap.set(filteredLabelsMap);
+    selection.datasetTypeTags.set(null);
+    selection.cachedFileHeaders = null;
+    return selection;
   }
 
   /**
@@ -320,8 +320,8 @@ export class DatasetModalService {
     */
 
     // map from old ID (key) to new ID (value)
-    const datasetIdMap = new Map(Array.from(sessionData.datasetsMap.keys()).map((key) => [key, uuidv4()]));
-    const jobIdMap = new Map(Array.from(sessionData.jobsMap.keys()).map((key) => [key, uuidv4()]));
+    const datasetIdMap = new Map(Array.from(sessionData.datasetsMap().keys()).map((key) => [key, uuidv4()]));
+    const jobIdMap = new Map(Array.from(sessionData.jobsMap().keys()).map((key) => [key, uuidv4()]));
 
     // maps for updated objects
     const newDatasetsMap = new Map<string, Dataset>();
@@ -329,7 +329,7 @@ export class DatasetModalService {
 
     // update datasets and their sourceJobIds
     datasetIdMap.forEach((newId, oldId) => {
-      const dataset = sessionData.datasetsMap.get(oldId);
+      const dataset = sessionData.datasetsMap().get(oldId);
       dataset.datasetId = newId;
       if (dataset.sourceJob != null) {
         const newSourceJobId = jobIdMap.get(dataset.sourceJob);
@@ -344,7 +344,7 @@ export class DatasetModalService {
 
     // update jobs and their input datasetIds
     jobIdMap.forEach((newId, oldId) => {
-      const job = sessionData.jobsMap.get(oldId);
+      const job = sessionData.jobsMap().get(oldId);
       job.jobId = newId;
       if (job.inputs != null) {
         job.inputs.forEach((input) => {
@@ -373,7 +373,7 @@ export class DatasetModalService {
       newJobsMap.set(job.jobId, job);
     });
 
-    sessionData.datasetsMap = newDatasetsMap;
-    sessionData.jobsMap = newJobsMap;
+    sessionData.datasetsMap.set(newDatasetsMap);
+    sessionData.jobsMap.set(newJobsMap);
   }
 }

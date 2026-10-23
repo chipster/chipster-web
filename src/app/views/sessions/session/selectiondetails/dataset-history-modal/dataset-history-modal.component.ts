@@ -183,7 +183,7 @@ export class DatasetHistoryModalComponent implements OnInit {
     const historySteps: Array<DatasetHistoryStep> = [this.dataset()]
       .concat(this.querySessionDataService.getAncestorDatasetsBottomUpBreadthFirst(this.sessionData(), this.dataset()))
       .map((dataset) => {
-        const sourceJob = this.sessionData().jobsMap.get(dataset.sourceJob);
+        const sourceJob = this.sessionData().jobsMap().get(dataset.sourceJob);
 
         return {
           datasetName: dataset.name,
