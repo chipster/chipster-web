@@ -2,11 +2,12 @@ import {
   AfterViewInit,
   Component,
   OnInit,
-  ViewChild,
   DOCUMENT,
   ChangeDetectionStrategy,
   inject,
   signal,
+  viewChild,
+  ElementRef,
 } from "@angular/core";
 import {
   AbstractControl,
@@ -55,10 +56,9 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   });
 
   // set through the modal ref by the code that opens the modal
-  log = signal<string>(undefined);
+  readonly log = signal<string>(undefined);
 
-  @ViewChild("messageTextarea")
-  messageTextarea;
+  readonly messageTextarea = viewChild<ElementRef<HTMLTextAreaElement>>("messageTextarea");
 
   public session: Session;
   public user: User;
@@ -109,7 +109,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   ngAfterViewInit() {
     // setTimeout() to avoid scrolling in the current Bootstrap version
     setTimeout(() => {
-      this.messageTextarea.nativeElement.focus();
+      this.messageTextarea().nativeElement.focus();
     }, 0);
   }
 

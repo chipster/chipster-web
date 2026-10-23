@@ -23,5 +23,5 @@ export class JobOutputModalComponent {
   activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  output = signal<string>(undefined);
+  readonly output = signal<string>(undefined);
 }

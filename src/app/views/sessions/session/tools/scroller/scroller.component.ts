@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewChild, ChangeDetectionStrategy } from "@angular/core";
+import { Component, HostListener, ChangeDetectionStrategy, viewChild, ElementRef } from "@angular/core";
 
 /**
  * Scroller component that prevents the parent component from scrolling
@@ -11,10 +11,10 @@ import { Component, HostListener, ViewChild, ChangeDetectionStrategy } from "@an
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class ScrollerComponent {
-  @ViewChild("scroll") scrollElement;
+  readonly scrollElement = viewChild<ElementRef<HTMLDivElement>>("scroll");
 
   @HostListener("wheel", ["$event"]) onMousewheel(event) {
-    const element = this.scrollElement.nativeElement;
+    const element = this.scrollElement().nativeElement;
     const scrollTop = element.scrollTop;
     const maxScrollTop = element.scrollHeight - element.clientHeight;
 

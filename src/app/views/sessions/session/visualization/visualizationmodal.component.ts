@@ -16,7 +16,7 @@ export class VisualizationModalComponent {
   activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  dataset = signal<Dataset>(undefined);
-  sessionData = signal<SessionData>(undefined);
-  visualizationId = signal<string>(undefined);
+  readonly dataset = signal<Dataset>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
+  readonly visualizationId = signal<string>(undefined);
 }

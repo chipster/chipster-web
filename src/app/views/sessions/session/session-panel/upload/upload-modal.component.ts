@@ -3,10 +3,11 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  ViewChild,
   ChangeDetectionStrategy,
   inject,
   signal,
+  viewChild,
+  ElementRef,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
@@ -31,11 +32,11 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   private errorService = inject(ErrorService);
 
   // set through the modal ref by the code that opens the modal
-  sessionId = signal<string>(undefined);
-  flow = signal<any>(undefined);
+  readonly sessionId = signal<string>(undefined);
+  readonly flow = signal<any>(undefined);
 
-  @ViewChild("uploadFilesButton") uploadFilesButton;
-  @ViewChild("uploadFolderButton") uploadFolderButton;
+  readonly uploadFilesButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFilesButton");
+  readonly uploadFolderButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFolderButton");
 
   files = [];
 
@@ -69,8 +70,8 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.flow().assignBrowse(this.uploadFilesButton);
-    this.flow().assignBrowse(this.uploadFolderButton, true);
+    this.flow().assignBrowse(this.uploadFilesButton());
+    this.flow().assignBrowse(this.uploadFolderButton(), true);
   }
 
   cancelUpload(file: any) {

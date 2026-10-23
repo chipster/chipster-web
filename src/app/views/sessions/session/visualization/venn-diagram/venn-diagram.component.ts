@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, ViewChild, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, ElementRef, OnChanges, ChangeDetectionStrategy, inject, input, viewChild } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { every, includes } from "lodash-es";
@@ -49,7 +49,7 @@ export class VennDiagramComponent implements OnChanges {
   private widthInterval;
   private visualizationWidth: number;
 
-  @ViewChild("vizu") el: ElementRef;
+  readonly el = viewChild<ElementRef>("vizu");
 
   private readonly autoDrawLimit = 1 * 1024 * 1024;
 

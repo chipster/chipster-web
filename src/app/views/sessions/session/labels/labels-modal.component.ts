@@ -34,8 +34,8 @@ export class LabelsModalComponent implements OnInit {
   private labelsContextMenuService = inject(LabelsContextMenuService);
 
   // set through the modal ref by the code that opens the modal
-  sessionData = signal<SessionData>(undefined);
-  selectedDatasets = signal<Dataset[]>([]);
+  readonly sessionData = signal<SessionData>(undefined);
+  readonly selectedDatasets = signal<Dataset[]>([]);
 
   readonly maxLabelsPerSession = 50;
 

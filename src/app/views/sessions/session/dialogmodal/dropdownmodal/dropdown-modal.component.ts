@@ -11,11 +11,11 @@ export class DropdownModalComponent implements OnInit {
   private activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  buttonText = signal<string>(undefined);
-  description = signal<string>(undefined);
-  options = signal<Map<any, string>>(undefined);
-  title = signal<string>(undefined);
-  placeHolder = signal<string>(undefined);
+  readonly buttonText = signal<string>(undefined);
+  readonly description = signal<string>(undefined);
+  readonly options = signal<Map<any, string>>(undefined);
+  readonly title = signal<string>(undefined);
+  readonly placeHolder = signal<string>(undefined);
 
   optionKeys = [];
   value: any;

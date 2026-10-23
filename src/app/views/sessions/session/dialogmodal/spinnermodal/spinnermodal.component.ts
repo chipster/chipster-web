@@ -12,8 +12,8 @@ export class SpinnerModalComponent implements AfterViewInit {
   private restErrorService = inject(RestErrorService);
 
   // set through the modal ref by the code that opens the modal
-  message = signal<string>(undefined);
-  observable = signal<Observable<any>>(undefined);
+  readonly message = signal<string>(undefined);
+  readonly observable = signal<Observable<any>>(undefined);
 
   ngAfterViewInit() {
     this.observable().subscribe({

@@ -40,9 +40,9 @@ export class DatasetHistoryModalComponent implements OnInit {
   errorService = inject(ErrorService);
 
   // set through the modal ref by the code that opens the modal
-  dataset = signal<Dataset>(undefined);
-  sessionData = signal<SessionData>(undefined);
-  tools = signal<Tool[]>(undefined);
+  readonly dataset = signal<Dataset>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
+  readonly tools = signal<Tool[]>(undefined);
 
   public historyOptions: Array<HistoryOption> = [
     { id: "sourceJobName", name: "Tool", enabled: true },

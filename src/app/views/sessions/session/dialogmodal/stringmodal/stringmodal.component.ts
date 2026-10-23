@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  viewChild,
+  ElementRef,
+} from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { FormsModule } from "@angular/forms";
 
@@ -11,14 +19,13 @@ export class StringModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);
 
   // set through the modal ref by the code that opens the modal
-  buttonText = signal<string>(undefined);
-  description = signal<string>(undefined);
-  value = signal<string>(undefined);
-  title = signal<string>(undefined);
-  placeHolder = signal<string>(undefined);
+  readonly buttonText = signal<string>(undefined);
+  readonly description = signal<string>(undefined);
+  readonly value = signal<string>(undefined);
+  readonly title = signal<string>(undefined);
+  readonly placeHolder = signal<string>(undefined);
 
-  @ViewChild("valueInput")
-  valueInput;
+  readonly valueInput = viewChild<ElementRef<HTMLInputElement>>("valueInput");
 
   ngAfterViewInit() {
     setTimeout(() => {
@@ -26,8 +33,8 @@ export class StringModalComponent implements AfterViewInit {
       // should be fixed in ng-bootstrap 3.3.0
       // https://github.com/ng-bootstrap/ng-bootstrap/issues/1776
       // https:github.com/ng-bootstrap/ng-bootstrap/issues/2728
-      this.valueInput.nativeElement.focus();
-      this.valueInput.nativeElement.select();
+      this.valueInput().nativeElement.focus();
+      this.valueInput().nativeElement.select();
     });
   }
 

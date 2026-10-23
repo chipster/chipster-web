@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  inject,
+  input,
+  viewChild,
+  ElementRef,
+} from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
 import { UploadModalComponent } from "./upload-modal.component";
@@ -19,8 +28,8 @@ export class UploadComponent implements AfterViewInit, OnInit {
 
   readonly sessionData = input<SessionData>(undefined);
 
-  @ViewChild("uploadFilesButton") uploadFilesButton;
-  @ViewChild("uploadFolderButton") uploadFolderButton;
+  readonly uploadFilesButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFilesButton");
+  readonly uploadFolderButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFolderButton");
 
   private flow: any;
   private modalOpen = false;
@@ -64,8 +73,8 @@ export class UploadComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    this.flow.assignBrowse(this.uploadFilesButton);
-    this.flow.assignBrowse(this.uploadFolderButton, true);
+    this.flow.assignBrowse(this.uploadFilesButton());
+    this.flow.assignBrowse(this.uploadFolderButton(), true);
   }
 
   downloadFromUrl() {

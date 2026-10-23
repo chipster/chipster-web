@@ -1,6 +1,6 @@
 // registers the ag-grid modules and theme, before any grid is created
 import "../../../shared/ag-grid-setup";
-import { Component, OnInit, ViewChild, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject, viewChild } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
 import { Role } from "chipster-js-common";
@@ -210,7 +210,7 @@ export class StorageComponent implements OnInit {
   public listFilterVisible = false;
   public listFilterText = "";
 
-  @ViewChild("modalContent") modalContent: any;
+  readonly modalContent = viewChild<any>("modalContent");
 
   ngOnInit() {
     this.refresh();
@@ -466,7 +466,7 @@ export class StorageComponent implements OnInit {
   }
 
   private selectUser(user: string) {
-    this.modalService.open(this.modalContent, { size: "xl" });
+    this.modalService.open(this.modalContent(), { size: "xl" });
 
     this.selectedUser = user;
     this.userSessionsState = new LoadState(State.Loading);

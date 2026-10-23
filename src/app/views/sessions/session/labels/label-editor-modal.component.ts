@@ -21,9 +21,9 @@ export class LabelEditorModalComponent implements OnInit {
   private errorService = inject(ErrorService);
 
   // set through the modal ref by the code that opens the modal
-  sessionData = signal<SessionData>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
   // when set, the modal edits this label; when null, it creates a new one
-  label = signal<Label>(null);
+  readonly label = signal<Label>(null);
 
   readonly maxNameLength = 30;
   name = "";

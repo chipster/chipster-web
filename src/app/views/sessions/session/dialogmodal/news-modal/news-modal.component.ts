@@ -15,7 +15,7 @@ export class NewsModalComponent implements OnInit {
   private preferencesService = inject(PreferencesService);
 
   // set through the modal ref by the code that opens the modal
-  news = signal<NewsItem[]>(undefined);
+  readonly news = signal<NewsItem[]>(undefined);
   ngOnInit(): void {
     // FIXME scroll ot the top (to the latest) if there are so many news that modal needs to scroll
     if (this.news() != null && this.news().length > 0) {
