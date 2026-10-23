@@ -1,5 +1,4 @@
 import { Component, computed, inject, input, output } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -39,9 +38,6 @@ export class JobListComponent {
   );
 
   readonly runningJobCount = computed(() => this.jobsSorted().filter((job) => JobService.isRunning(job)).length);
-
-  // the arrow keys of the jobs modal and its auto-selection change it without an event in this view
-  private readonly selectedJobs = toSignal(this.selectionService.selectedJobs$, { requireSync: true });
 
   readonly jobSelected = output<Job>();
 
@@ -114,7 +110,9 @@ export class JobListComponent {
       );
   }
 
+  // the arrow keys of the jobs modal and its auto-selection change the selection without an event
+  // in this view, but SelectionService reads it from a signal
   isSelectedJobById(jobId: string): boolean {
-    return this.selectedJobs().some((job) => job.jobId === jobId);
+    return this.selectionService.isSelectedJobById(jobId);
   }
 }
