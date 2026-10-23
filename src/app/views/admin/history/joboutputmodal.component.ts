@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -17,7 +17,6 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
       <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class JobOutputModalComponent {
   activeModal = inject(NgbActiveModal);

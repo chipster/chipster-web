@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
+import { Component } from "@angular/core";
 
 @Component({
   selector: "ch-not-found",
   templateUrl: "./not-found.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class NotFoundComponent {
   constructor() {}

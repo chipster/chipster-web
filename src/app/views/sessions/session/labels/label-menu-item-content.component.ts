@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input } from "@angular/core";
+import { Component, input } from "@angular/core";
 import { LabelMenuItem } from "./labels-context-menu.service";
 
 // Renders the three pieces of a label menu item (checkbox / color dot / name)
@@ -32,7 +32,6 @@ import { LabelMenuItem } from "./labels-context-menu.service";
       [style.background]="item().colorBg"></span>
     <span>{{ item().label.name }}</span>
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class LabelMenuItemContentComponent {
   readonly item = input.required<LabelMenuItem>();

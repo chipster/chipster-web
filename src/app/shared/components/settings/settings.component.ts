@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnDestroy, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Subject } from "rxjs";
 import { SessionListMode, SettingsService } from "../../services/settings.service";
@@ -8,7 +8,6 @@ import { FormsModule } from "@angular/forms";
   selector: "ch-settings",
   templateUrl: "./settings.component.html",
   styleUrls: ["./settings.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule],
 })
 export class SettingsComponent implements OnDestroy {
