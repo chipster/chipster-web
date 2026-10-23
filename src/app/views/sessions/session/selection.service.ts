@@ -1,49 +1,30 @@
-import { takeUntil } from "rxjs/operators";
 import { Dataset, Job } from "chipster-js-common";
 import { some } from "lodash-es";
-import { Injectable, OnDestroy, inject } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { Observable, Subject } from "rxjs";
-import { ErrorService } from "../../../core/errorhandler/error.service";
+import { Observable } from "rxjs";
 
 @Injectable({ providedIn: "root" })
-export class SelectionService implements OnDestroy {
+export class SelectionService {
   private store = inject<Store<any>>(Store);
-  private errorService = inject(ErrorService);
 
-  // Selected datasets and jobs
-  selectedDatasets: Array<Dataset>; // USE SELECTION-HANDLER SERVICE TO MODIFY
-  selectedJobs: Array<Job>; // USE SELECTION-HANDLER SERVICE TO MODIFY
+  // Selected datasets and jobs. USE SELECTION-HANDLER SERVICE TO MODIFY
+  private readonly selectedDatasetsSignal = this.store.selectSignal<Array<Dataset>>((state) => state.selectedDatasets);
+  private readonly selectedJobsSignal = this.store.selectSignal<Array<Job>>((state) => state.selectedJobs);
 
-  selectedDatasets$: Observable<Array<Dataset>>;
-  selectedJobs$: Observable<Array<Job>>;
+  selectedDatasets$: Observable<Array<Dataset>> = this.store.select("selectedDatasets");
+  selectedJobs$: Observable<Array<Job>> = this.store.select("selectedJobs");
 
-  private unsubscribe: Subject<any> = new Subject();
+  /*
+   * Getters of signals, so that the views that read the selection, also through the methods below,
+   * are notified when it changes, like the List tab when a file is selected in the workflow graph
+   */
+  get selectedDatasets(): Array<Dataset> {
+    return this.selectedDatasetsSignal();
+  }
 
-  constructor() {
-    // Sync selected datasets from store
-    this.selectedDatasets$ = this.store.select("selectedDatasets");
-    this.store
-      .select("selectedDatasets")
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe({
-        next: (datasets: Array<Dataset>) => {
-          this.selectedDatasets = datasets;
-        },
-        error: (error: any) => this.errorService.showError("Error fetching datasets from store", error),
-      });
-
-    // Sync selected jobs from store
-    this.selectedJobs$ = this.store.select("selectedJobs");
-    this.store
-      .select("selectedJobs")
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe({
-        next: (jobs: Array<Job>) => {
-          this.selectedJobs = jobs;
-        },
-        error: (err) => this.errorService.showError("Error fetching selected jobs from store", err),
-      });
+  get selectedJobs(): Array<Job> {
+    return this.selectedJobsSignal();
   }
 
   isJobSelected(): boolean {
@@ -66,10 +47,5 @@ export class SelectionService implements OnDestroy {
 
   isSelectedJobById(jobId: string): boolean {
     return some(this.selectedJobs, (job: Job) => job.jobId === jobId);
-  }
-
-  ngOnDestroy() {
-    this.unsubscribe.next(null);
-    this.unsubscribe.complete();
   }
 }

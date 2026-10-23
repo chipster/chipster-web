@@ -1,5 +1,4 @@
 import { Component, computed, inject, input, linkedSignal, output } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
 import { Job, JobInput, JobParameter, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
@@ -35,8 +34,7 @@ export class JobComponent {
   // the jobs modal closes on it
   readonly datasetSelected = output<void>();
 
-  private readonly selectedJobs = toSignal(this.selectionService.selectedJobs$, { requireSync: true });
-  private readonly selectedJobId = computed(() => this.selectedJobs()?.[0]?.jobId ?? null);
+  private readonly selectedJobId = computed(() => this.selectionService.selectedJobs?.[0]?.jobId ?? null);
 
   // the latest copy of the selected job: job events replace it in jobsMap
   readonly job = computed<Job>(() => {
