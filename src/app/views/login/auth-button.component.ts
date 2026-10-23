@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy, input, output } from "@angular/core";
+import { Component, input, output } from "@angular/core";
 
 @Component({
   selector: "ch-auth-button",
   templateUrl: "./auth-button.component.html",
   styleUrls: ["./auth-button.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class AuthButtonComponent {
   readonly name = input<string>(undefined);

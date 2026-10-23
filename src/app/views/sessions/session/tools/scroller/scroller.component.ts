@@ -1,4 +1,4 @@
-import { Component, HostListener, ChangeDetectionStrategy, viewChild, ElementRef } from "@angular/core";
+import { Component, HostListener, viewChild, ElementRef } from "@angular/core";
 
 /**
  * Scroller component that prevents the parent component from scrolling
@@ -8,7 +8,6 @@ import { Component, HostListener, ChangeDetectionStrategy, viewChild, ElementRef
 @Component({
   selector: "ch-scroller",
   templateUrl: "./scroller.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class ScrollerComponent {
   readonly scrollElement = viewChild<ElementRef<HTMLDivElement>>("scroll");

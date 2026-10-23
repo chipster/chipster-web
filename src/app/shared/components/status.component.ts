@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from "@angular/core";
+import { Component, input, output } from "@angular/core";
 import { LoadState, StatusButton } from "../../model/loadstate";
 
 @Component({
@@ -18,7 +18,6 @@ import { LoadState, StatusButton } from "../../model/loadstate";
       }
     `,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class StatusComponent {
   readonly state = input<LoadState>(undefined);

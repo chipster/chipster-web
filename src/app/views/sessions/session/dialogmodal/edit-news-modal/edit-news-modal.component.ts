@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
@@ -6,7 +6,6 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   templateUrl: "./edit-news-modal.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, ReactiveFormsModule, LocalDatePipe],
 })
 export class EditNewsModalComponent implements OnInit {
