@@ -29,7 +29,7 @@ export class DatasetContextMenuService {
   showJob(job: Job, tools: Tool[], sessionData: SessionData) {
     this.selectionHandlerService.setJobSelection([job]);
 
-    this.dialogModalService.openJobsModal(this.sessionDataService.getJobList(sessionData), tools, sessionData);
+    this.dialogModalService.openJobsModal(tools, sessionData);
   }
 
   selectTool(job: Job) {

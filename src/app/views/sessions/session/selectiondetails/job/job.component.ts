@@ -1,17 +1,15 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
-import { Job, JobInput, JobParameter, SessionEvent, Tool } from "chipster-js-common";
+import { Component, computed, inject, input, linkedSignal, output } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { Job, JobInput, JobParameter, Tool } from "chipster-js-common";
 import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
 import log from "loglevel";
-import { EMPTY, Observable, Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { ErrorService } from "../../../../../core/errorhandler/error.service";
+import { EMPTY, Observable } from "rxjs";
 import { SessionData } from "../../../../../model/session/session-data";
 import { JobService } from "../../job.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
-import { SessionEventService } from "../../session-event.service";
 import { ToolService } from "../../tools/tool.service";
 import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
 import { LinkButtonComponent } from "../../link-button/link-button.component";
@@ -23,15 +21,12 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
   selector: "ch-job",
   templateUrl: "./job.component.html",
   styleUrls: ["./job.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [DatasetParameterListComponent, LinkButtonComponent, AsyncPipe, BytesPipe, LocalDatePipe],
 })
-export class JobComponent implements OnInit, OnDestroy {
+export class JobComponent {
   private selectionHandlerService = inject(SelectionHandlerService);
   private selectionService = inject(SelectionService);
   private sessionDataService = inject(SessionDataService);
-  private sessionEventService = inject(SessionEventService);
-  private errorService = inject(ErrorService);
   private toolService = inject(ToolService);
   private jobService = inject(JobService);
 
@@ -40,32 +35,60 @@ export class JobComponent implements OnInit, OnDestroy {
   // the jobs modal closes on it
   readonly datasetSelected = output<void>();
 
-  job: Job;
-  isRunning: boolean;
-  failed: boolean;
-  state: string;
-  screenOutput: string;
-  duration: Observable<string> = EMPTY;
-  tool: Tool;
+  private readonly selectedJobs = toSignal(this.selectionService.selectedJobs$, { requireSync: true });
+  private readonly selectedJobId = computed(() => this.selectedJobs()?.[0]?.jobId ?? null);
+
+  // the latest copy of the selected job: job events replace it in jobsMap
+  readonly job = computed<Job>(() => {
+    const jobId = this.selectedJobId();
+    return jobId ? (this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap()) ?? null) : null;
+  });
+
+  readonly isRunning = computed(() => this.job() != null && JobService.isRunning(this.job()));
+  readonly failed = computed(() => this.job() != null && !JobService.isSuccessful(this.job()));
+  readonly state = computed(() => (this.job() ? capitalize(this.job().state) : null));
+  readonly duration = computed<Observable<string>>(() => (this.job() ? JobService.getDuration(this.job()) : EMPTY));
+  readonly applicationVersions = computed<Array<{ application: string; version: string }>>(() =>
+    this.job() ? this.jobService.getApplicationVersions(this.job()) : [],
+  );
+  readonly rSessionInfo = computed(
+    () => this.applicationVersions().find((v) => v.application === "R Session Info")?.version ?? null,
+  );
+  readonly isRTool = computed(() => this.job()?.toolId?.endsWith(".R") ?? false);
+  private readonly screenOutput = computed(() => this.job()?.screenOutput ?? null);
+  readonly hasInputLines = computed(
+    () =>
+      this.screenOutput()
+        ?.split("\n")
+        .some((line) => line.startsWith(">")) ?? false,
+  );
+  // hide them again when another job is selected
+  readonly hideInputLines = linkedSignal(() => {
+    this.selectedJobId();
+    return true;
+  });
+  readonly filteredScreenOutput = computed(() => this.filterScreenOutput(this.screenOutput(), this.hideInputLines()));
+
+  readonly tool = computed(() => {
+    const job = this.job();
+    return job ? this.tools()?.find((t) => t.name.id === job.toolId) : undefined;
+  });
+  readonly parameterListForView = computed(() => this.getParameters(this.job()?.parameters ?? [], this.tool()));
+  readonly inputListForView = computed(() => this.getInputs(this.job()?.inputs ?? [], this.tool()));
+  readonly outputListForView = computed(() => this.getOutputs(this.job()));
+
   parameterLimit = 12;
   rSessionInfoVisible = false;
-  applicationVersions: Array<{ application: string; version: string }> = [];
-  rSessionInfo: string = null;
-  hideInputLines = true;
-  filteredScreenOutput: string = null;
-  hasInputLines = false;
-  isRTool = false;
 
   toggleInputLines() {
-    this.hideInputLines = !this.hideInputLines;
-    this.filteredScreenOutput = this.filterScreenOutput();
+    this.hideInputLines.update((hide) => !hide);
   }
 
-  private filterScreenOutput(): string {
-    if (!this.hideInputLines || !this.screenOutput) {
-      return this.screenOutput;
+  private filterScreenOutput(screenOutput: string, hideInputLines: boolean): string {
+    if (!hideInputLines || !screenOutput) {
+      return screenOutput;
     }
-    const lines = this.screenOutput.split("\n");
+    const lines = screenOutput.split("\n");
     let prevWasInput = false; // this for clarity instead of reduce
     return lines
       .filter((line) => {
@@ -76,123 +99,31 @@ export class JobComponent implements OnInit, OnDestroy {
       .join("\n");
   }
 
-  private unsubscribe: Subject<any> = new Subject();
-  // noinspection JSMismatchedCollectionQueryUpdate
-  parameterListForView: Array<JobParameter> = [];
-  inputListForView: Array<JobInput> = [];
-  containerMemoryLimit = null;
-  isDefaultValueMap: Map<JobParameter, boolean> = new Map();
-  outputListForView: Array<JobOutput> = [];
-
-  ngOnInit() {
-    // job selection events, get's current selection upon subscription
-    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe({
-      next: (selectedJobs: Array<Job>) => {
-        this.isDefaultValueMap.clear();
-        this.parameterListForView = [];
-        this.inputListForView = [];
-        this.hideInputLines = true;
-        let jobId = null;
-
-        if (selectedJobs && selectedJobs.length > 0) {
-          jobId = selectedJobs[0].jobId;
-          const job = this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap());
-
-          if (job) {
-            this.tool = this.tools().find((t) => t.name.id === job.toolId);
-
-            this.showParameters(job.parameters, this.tool);
-            this.showInputs(job.inputs, this.tool);
-
-            if (!this.tool) {
-              log.warn(`no tool found with ID ${job.toolId}`);
-            }
-          } else {
-            log.warn("source job is null");
-          }
-        }
-        this.update(jobId);
-      },
-      error: (err) => this.errorService.showError("updating selected jobs failed", err),
-    });
-
-    // job modification events
-    this.sessionEventService
-      .getJobStream()
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe({
-        next: (sessionEvent: SessionEvent) => {
-          if (this.job && sessionEvent.event.resourceId === this.job.jobId) {
-            this.update(this.job.jobId);
-          }
-        },
-        error: (err) => this.errorService.showError("getting job events failed", err),
-      });
-  }
-
-  // get job from session data and update state fields
-  update(jobId: string) {
-    // rebuilt from the job below; job events call this again for the same job
-    this.outputListForView = [];
-
-    if (jobId) {
-      const job = this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap());
-      if (job) {
-        this.job = job;
-        this.isRunning = JobService.isRunning(job);
-        this.failed = !JobService.isSuccessful(job);
-        this.state = capitalize(job.state);
-        this.screenOutput = job.screenOutput;
-        this.isRTool = job.toolId?.endsWith(".R") ?? false;
-        this.hasInputLines = this.screenOutput?.split("\n").some((line) => line.startsWith(">")) ?? false;
-        this.filteredScreenOutput = this.filterScreenOutput();
-        this.duration = JobService.getDuration(job);
-        this.applicationVersions = this.jobService.getApplicationVersions(job);
-        this.rSessionInfo = this.applicationVersions.find((v) => v.application === "R Session Info")?.version ?? null;
-
-        if (job.outputs != null) {
-          this.outputListForView = job.outputs;
-        } else {
-          // only jobs since Chipster version 11/2023 define outputs
-          log.info("job doesn't define outputs, find from datasets");
-          this.sessionDataService
-            .getDatasetList(this.sessionData())
-            .filter((d) => d.sourceJob === jobId)
-            .forEach((d) => {
-              this.outputListForView.push({
-                outputId: null,
-                displayName: null,
-                datasetId: d.datasetId,
-              });
-            });
-        }
-
-        return;
-      }
+  private getOutputs(job: Job): Array<JobOutput> {
+    if (job == null) {
+      return [];
     }
-
-    // no job found, clear
-    this.job = null;
-    this.isRunning = false;
-    this.state = null;
-    this.failed = false;
-    this.screenOutput = null;
-    this.duration = EMPTY;
-    this.applicationVersions = [];
-    this.rSessionInfo = null;
+    if (job.outputs != null) {
+      return job.outputs;
+    }
+    // only jobs since Chipster version 11/2023 define outputs
+    log.info("job doesn't define outputs, find from datasets");
+    return this.sessionDataService
+      .getDatasetList(this.sessionData())
+      .filter((d) => d.sourceJob === job.jobId)
+      .map((d) => ({
+        outputId: null,
+        displayName: null,
+        datasetId: d.datasetId,
+      }));
   }
 
   close() {
     this.selectionHandlerService.setJobSelection([]);
   }
 
-  ngOnDestroy() {
-    this.unsubscribe.next(null);
-    this.unsubscribe.complete();
-  }
-
   cancelJob() {
-    this.sessionDataService.cancelJob(this.job);
+    this.sessionDataService.cancelJob(this.job());
   }
 
   selectDataset(datasetId: string) {
@@ -213,12 +144,11 @@ export class JobComponent implements OnInit, OnDestroy {
     return this.getDataset(datasetId).name;
   }
 
-  showParameters(parameters: JobParameter[], tool: Tool) {
-    this.isDefaultValueMap = new Map();
+  private getParameters(parameters: JobParameter[], tool: Tool): Array<JobParameter> {
+    const parameterListForView: Array<JobParameter> = [];
 
     parameters.forEach((jobParameter) => {
       const _clone = clone(jobParameter);
-      let isDefault = false;
 
       if (tool) {
         const toolParameter = tool.parameters.find((p) => p.name.id === jobParameter.parameterId);
@@ -242,25 +172,27 @@ export class JobComponent implements OnInit, OnDestroy {
               );
             }
           }
-          isDefault = this.toolService.isDefaultValue(toolParameter, jobParameter.value);
         }
       }
-      this.isDefaultValueMap.set(_clone, isDefault);
-      this.parameterListForView.push(_clone);
+      parameterListForView.push(_clone);
     });
 
-    this.parameterListForView
+    parameterListForView
       .filter((p) => p.displayName == null)
       .forEach((p) => {
         p.displayName = p.parameterId;
       });
+
+    return parameterListForView;
   }
 
-  showInputs(inputs: JobInput[], tool: Tool) {
+  private getInputs(inputs: JobInput[], tool: Tool): Array<JobInput> {
     /* The new Chipster has misleadingly saved dataset name in input.displayName at
     least between 2018-2023. Try to find the displayName from the current tool
     instead, otherwise show the plain inputId.
     */
+    const inputListForView: Array<JobInput> = [];
+
     inputs.forEach((jobInput) => {
       const _clone = clone(jobInput);
 
@@ -275,14 +207,16 @@ export class JobComponent implements OnInit, OnDestroy {
         }
       }
 
-      this.inputListForView.push(_clone);
+      inputListForView.push(_clone);
     });
 
-    this.inputListForView
+    inputListForView
       .filter((i) => i.displayName == null)
       .forEach((i) => {
         i.displayName = i.inputId;
       });
+
+    return inputListForView;
   }
 
   toggleRSessionInfo() {
