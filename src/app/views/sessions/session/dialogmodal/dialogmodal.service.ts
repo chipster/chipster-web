@@ -1,6 +1,6 @@
 import { Injectable, Type, inject } from "@angular/core";
 import { NgbModal, NgbModalOptions, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
-import { Dataset, Job, Session, SessionEvent, Tool } from "chipster-js-common";
+import { Dataset, Session, SessionEvent, Tool } from "chipster-js-common";
 import { EMPTY, Observable, from as observableFrom } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { SessionData } from "../../../../model/session/session-data";
@@ -243,11 +243,10 @@ export class DialogModalService {
     );
   }
 
-  public openJobsModal(jobs: Job[], tools: Tool[], sessionData: SessionData): Promise<NgbModalRef> {
+  public openJobsModal(tools: Tool[], sessionData: SessionData): Promise<NgbModalRef> {
     return this.open(
       (m) => m.JobsModalComponent,
       (modal) => {
-        modal.jobs = jobs;
         modal.tools.set(tools);
         modal.sessionData.set(sessionData);
       },

@@ -1,4 +1,4 @@
-import { Component, OnChanges, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, OnChanges, inject, input } from "@angular/core";
 import { JobParameter, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
 import log from "loglevel";
@@ -10,7 +10,6 @@ import { LinkButtonComponent } from "../../link-button/link-button.component";
   selector: "ch-dataset-parameter-list",
   templateUrl: "./dataset-parameter-list.component.html",
   styleUrls: ["./dataset-parameter-list.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgClass, NgStyle, LinkButtonComponent],
 })
 export class DatasetParameterListComponent implements OnChanges {

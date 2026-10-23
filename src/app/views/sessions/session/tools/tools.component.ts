@@ -358,11 +358,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // scroll to latest jobs at top, if some other job was selected before
     this.selectionHandlerService.setJobSelection([]);
 
-    this.dialogModalService.openJobsModal(
-      this.sessionDataService.getJobList(this.sessionData()),
-      this.toolsArray(),
-      this.sessionData(),
-    );
+    this.dialogModalService.openJobsModal(this.toolsArray(), this.sessionData());
   }
 
   public toggleJobs() {
@@ -370,11 +366,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.jobsModal.then((modalRef) => modalRef.close());
     } else {
       this.selectionHandlerService.setJobSelection([]);
-      this.jobsModal = this.dialogModalService.openJobsModal(
-        this.sessionDataService.getJobList(this.sessionData()),
-        this.toolsArray(),
-        this.sessionData(),
-      );
+      this.jobsModal = this.dialogModalService.openJobsModal(this.toolsArray(), this.sessionData());
       this.jobsModal.then((modalRef) =>
         modalRef.hidden.subscribe(() => {
           this.jobsModal = null;

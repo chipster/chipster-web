@@ -1,7 +1,7 @@
 <div class="mb-1 d-flex justify-content-between align-items-center">
-  <span class="text-sm fw-bold">Jobs running: {{ runningJobCount }}</span>
+  <span class="text-sm fw-bold">Jobs running: {{ runningJobCount() }}</span>
 
-  @if (runningJobCount > 0) {
+  @if (runningJobCount() > 0) {
     <button class="btn btn-sm btn-secondary" (click)="cancelAllJobs()">Cancel all</button>
   }
 </div>
@@ -17,7 +17,7 @@
   </thead>
   <tbody>
     <!-- add id to be able to scroll to the selected job -->
-    @for (job of jobsSorted; track job.jobId) {
+    @for (job of jobsSorted(); track job.jobId) {
       <tr
         class="cursor-pointer hoverable-row"
         (click)="selectJob(job)"
