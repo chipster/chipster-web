@@ -6,7 +6,7 @@
           <tr>
             <td class="lighter">Created&nbsp;with:</td>
             <td class="width-max">
-              {{ toolCategory }} / {{ toolName }}
+              {{ toolCategory() }} / {{ toolName() }}
               <!-- context dropdown -->
               <div ngbDropdown class="d-inline-block">
                 <button
@@ -21,21 +21,21 @@
                   <i class="fas fa-lg fa-ellipsis-h" aria-hidden="true"></i>
                 </button>
                 <div ngbDropdownMenu aria-labelledby="viewDropdownMenuButton">
-                  <button ngbDropdownItem (click)="selectTool()" [class.disabled]="!tool">Select tool</button>
-                  <button ngbDropdownItem (click)="showJob()" [class.disabled]="!sourceJob">Show job</button>
+                  <button ngbDropdownItem (click)="selectTool()" [class.disabled]="!tool()">Select tool</button>
+                  <button ngbDropdownItem (click)="showJob()" [class.disabled]="!sourceJob()">Show job</button>
                 </div>
               </div>
             </td>
           </tr>
-          @if (sourceJob && sourceJob.parameters.length > 0) {
+          @if (sourceJob() && sourceJob().parameters.length > 0) {
             <tr>
               <td class="lighter">Parameters:</td>
               <td id="parameters-container">
-                @if (sourceJob && sourceJob.parameters.length > 0) {
+                @if (sourceJob() && sourceJob().parameters.length > 0) {
                   <ch-dataset-parameter-list
-                    [parameters]="sourceJob.parameters"
+                    [parameters]="sourceJob().parameters"
                     [parametersLimit]="parametersLimit()"
-                    [tool]="tool"></ch-dataset-parameter-list>
+                    [tool]="tool()"></ch-dataset-parameter-list>
                 }
               </td>
             </tr>
@@ -43,11 +43,11 @@
 
           <tr>
             <td class="lighter">Size:</td>
-            <td class="width-max">{{ dataset().size | bytes: 0 }}</td>
+            <td class="width-max">{{ latestDataset().size | bytes: 0 }}</td>
           </tr>
           <tr>
             <td class="lighter">Date:</td>
-            <td>{{ dataset().created | localDate }}</td>
+            <td>{{ latestDataset().created | localDate }}</td>
           </tr>
           <tr>
             <td class="lighter">Labels:</td>
@@ -79,12 +79,12 @@
             <td>
               <textarea
                 #notesArea
-                [(ngModel)]="dataset().notes"
+                [(ngModel)]="latestDataset().notes"
                 class="dataset-notes"
                 rows="6"
                 placeholder="{{ notesPlaceholderInactive }} "
                 (focus)="editNotes(notesInput)"
-                (focusout)="saveNotes(dataset(), notesInput)"
+                (focusout)="saveNotes(latestDataset(), notesInput)"
                 #notesInput></textarea>
             </td>
           </tr>
