@@ -100,7 +100,7 @@ export class SessionPanelComponent {
 
   selectFilesWithLabel(item: LabelMenuItem): void {
     const labelId = item.label.labelId;
-    const matching = Array.from(this.sessionData().datasetsMap.values()).filter((d) =>
+    const matching = Array.from(this.sessionData().datasetsMap().values()).filter((d) =>
       (d.labelIds ?? []).includes(labelId),
     );
     this.selectionHandlerService.setDatasetSelection(matching);
@@ -147,19 +147,19 @@ export class SessionPanelComponent {
   }
 
   autoLayoutAll(): void {
-    const allDatasets = Array.from(this.sessionData().datasetsMap.values());
+    const allDatasets = Array.from(this.sessionData().datasetsMap().values());
     this.workflowGraphService.resetDoAndSaveLayout(
       allDatasets,
-      this.sessionData().datasetsMap,
-      this.sessionData().jobsMap,
+      this.sessionData().datasetsMap(),
+      this.sessionData().jobsMap(),
     );
   }
 
   autoLayoutSelected(): void {
     this.workflowGraphService.resetDoAndSaveLayout(
       this.selectionService.selectedDatasets,
-      this.sessionData().datasetsMap,
-      this.sessionData().jobsMap,
+      this.sessionData().datasetsMap(),
+      this.sessionData().jobsMap(),
     );
   }
 
@@ -169,7 +169,7 @@ export class SessionPanelComponent {
   }
 
   selectAll() {
-    const all = this.sessionDataService.getCompleteDatasets(this.sessionData().datasetsMap);
+    const all = this.sessionDataService.getCompleteDatasets(this.sessionData().datasetsMap());
     this.selectionHandlerService.setDatasetSelection(Array.from(all.values()));
   }
 

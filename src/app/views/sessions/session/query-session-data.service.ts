@@ -17,8 +17,8 @@ export class QuerySessionDataService {
     return PhenodataUtils.getAncestorsBottomUpBreadthFirstWithFilter(
       [dataset],
       () => true,
-      sessionData.jobsMap,
-      sessionData.datasetsMap,
+      sessionData.jobsMap(),
+      sessionData.datasetsMap(),
     );
   }
 
@@ -30,7 +30,7 @@ export class QuerySessionDataService {
    * @param dataset
    */
   getPhenodata(sessionData: SessionData, dataset: Dataset): string {
-    return PhenodataUtils.getPhenodata(dataset, sessionData.jobsMap, sessionData.datasetsMap, (candidate) =>
+    return PhenodataUtils.getPhenodata(dataset, sessionData.jobsMap(), sessionData.datasetsMap(), (candidate) =>
       this.isPhenodataType(sessionData, candidate),
     );
   }
@@ -43,7 +43,7 @@ export class QuerySessionDataService {
    * @param dataset
    */
   getPhenodataDataset(sessionData: SessionData, dataset: Dataset): Dataset {
-    return PhenodataUtils.getPhenodataDataset(dataset, sessionData.jobsMap, sessionData.datasetsMap, (candidate) =>
+    return PhenodataUtils.getPhenodataDataset(dataset, sessionData.jobsMap(), sessionData.datasetsMap(), (candidate) =>
       this.isPhenodataType(sessionData, candidate),
     );
   }
@@ -51,8 +51,8 @@ export class QuerySessionDataService {
   getAncestorDatasetsWithPhenodata(sessionData: SessionData, dataset: Dataset): Dataset[] {
     return PhenodataUtils.getAncestorDatasetsWithPhenodata(
       dataset,
-      sessionData.jobsMap,
-      sessionData.datasetsMap,
+      sessionData.jobsMap(),
+      sessionData.datasetsMap(),
       (candidate) => this.isPhenodataType(sessionData, candidate),
     );
   }

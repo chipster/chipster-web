@@ -204,7 +204,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     if (this.sessionDataService.isReadOnlySession(this.sessionData.session)) {
       log.info("skip check for temporary-zip-exports because this a read-only session");
     } else {
-      this.sessionData.datasetsMap.forEach((dataset) => {
+      this.sessionData.datasetsMap().forEach((dataset) => {
         dataset.metadataFiles.forEach((mf) => {
           if (mf.name === "temporary-zip-export") {
             const created = UtilsService.parseISOStringToDate(dataset.created);
@@ -390,7 +390,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   getJob(jobId: string): Job {
-    return this.sessionData.jobsMap.get(jobId);
+    return this.sessionData.jobsMap().get(jobId);
   }
 
   exportDatasets(datasets: Dataset[]): void {
@@ -434,7 +434,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   // first-time users see usable labels immediately. The session must be
   // writable; the read-only path above never reaches this step (NEVER).
   private seedDefaultLabelsIfEmpty(sessionData: SessionData): Observable<SessionData> {
-    if (sessionData.labelsMap.size > 0) {
+    if (sessionData.labelsMap().size > 0) {
       return of(sessionData);
     }
     const sessionId = sessionData.session.sessionId;
@@ -448,9 +448,11 @@ export class SessionComponent implements OnInit, OnDestroy {
     return this.sessionResource.createLabels(sessionId, drafts).pipe(
       // the bulk endpoint returns the assigned ids in the same order as the posted labels
       tap((created: { labelId: string }[]) => {
+        const labelsMap = new Map(sessionData.labelsMap());
         created.forEach((c, i) => {
-          sessionData.labelsMap.set(c.labelId, { ...drafts[i], labelId: c.labelId });
+          labelsMap.set(c.labelId, { ...drafts[i], labelId: c.labelId });
         });
+        sessionData.labelsMap.set(labelsMap);
       }),
       map(() => sessionData),
       // seeding is best-effort; don't block opening the session if it fails

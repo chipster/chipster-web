@@ -81,8 +81,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   svg: d3.Selection<SVGSVGElement, {}, HTMLElement, {}>;
-  readonly datasetsMap = input<Map<string, Dataset>>(undefined);
-  readonly jobsMap = input<Map<string, Job>>(undefined);
   readonly modulesMap = input<Map<string, Module>>(undefined);
   readonly datasetSearch = input<string>(undefined);
   readonly defaultScale = input<number>(undefined);
@@ -317,7 +315,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             // update these to know if context menu items should be disabled or not
             this.selectedDatasetSourceJob = this.datasetContextMenuService.getSourceJob(
               this.selectedDatasets,
-              this.jobsMap(),
+              this.sessionData().jobsMap(),
             );
           },
           error: (err) => this.errorService.showError("get dataset selections failed", err),
@@ -383,7 +381,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   private onSearchChanged(): void {
     if (this.datasetSearch() != null && this.datasetSearch().trim().length > 0) {
       const filteredDatasets = this.pipeService.findDataset(
-        UtilsService.mapValues(this.datasetsMap()),
+        UtilsService.mapValues(this.sessionData().datasetsMap()),
         this.datasetSearch(),
       );
       this.filter = UtilsService.arrayToMap(filteredDatasets, "datasetId");
@@ -574,8 +572,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   update(): void {
     // layout new datasets or anything from the CLI client
-    const jobsMap = this.jobsMap();
-    const datasetsMap = this.datasetsMap();
+    const jobsMap = this.sessionData().jobsMap();
+    const datasetsMap = this.sessionData().datasetsMap();
     if (this.enabled()) {
       this.workflowGraphService.doAndSaveLayout(Array.from(datasetsMap.values()), datasetsMap, jobsMap);
     } else {
@@ -586,7 +584,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         jobsMap,
       );
       // update our copy of datasets
-      layoutedDatasets.forEach((d) => this.datasetsMap().set(d.datasetId, d));
+      layoutedDatasets.forEach((d) => this.sessionData().datasetsMap().set(d.datasetId, d));
     }
 
     const datasetNodes = this.getDatasetNodes(
@@ -1182,7 +1180,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.restErrorService.showError("dataset upate error", err);
 
         // update failed. Restore the original positions
-        originalDatasets.forEach((d) => this.sessionData().datasetsMap.set(d.datasetId, d));
+        this.sessionData().datasetsMap.update((m) => {
+          const restored = new Map(m);
+          originalDatasets.forEach((d) => restored.set(d.datasetId, d));
+          return restored;
+        });
         this.update();
         this.renderGraph();
       },
@@ -1226,7 +1228,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.d3LabelsGroup.selectAll("*").remove();
 
     const sessionData = this.sessionData();
-    if (!sessionData || !sessionData.labelsMap) {
+    if (!sessionData || !sessionData.labelsMap()) {
       return;
     }
 
@@ -1257,15 +1259,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   private refreshLabelLegend(): void {
     const sessionData = this.sessionData();
-    if (!sessionData || !sessionData.labelsMap) {
+    if (!sessionData || !sessionData.labelsMap()) {
       this.labelLegend = [];
       return;
     }
     const inUseIds = new Set<string>();
-    sessionData.datasetsMap.forEach((dataset) => {
+    sessionData.datasetsMap().forEach((dataset) => {
       (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
     });
-    this.labelLegend = Array.from(sessionData.labelsMap.values())
+    this.labelLegend = Array.from(sessionData.labelsMap().values())
       .filter((label) => inUseIds.has(label.labelId))
       .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
   }
@@ -1298,7 +1300,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private renderLabelDots(): void {
-    const labelsMap = this.sessionData().labelsMap;
+    const labelsMap = this.sessionData().labelsMap();
     const maxVisible = 5;
     const dotRadius = 7; // diameter matches the pill height (14)
     const dotStep = 7; // horizontal advance per stacked dot; smaller = more overlap, last dot fully visible
@@ -1360,7 +1362,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private renderLabelPills(): void {
-    const labelsMap = this.sessionData().labelsMap;
+    const labelsMap = this.sessionData().labelsMap();
     const maxVisible = 2;
     const pillHeight = 14;
     const pillStep = 17; // horizontal advance per stacked pill; ~2 chars of the pill underneath remain visible
@@ -1578,7 +1580,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   private buildTooltipHtml(node: DatasetNode): string {
     const sessionData = this.sessionData();
-    const labels = sessionData?.labelsMap ? getSortedLabels(node.dataset.labelIds, sessionData.labelsMap) : [];
+    const labels = sessionData?.labelsMap() ? getSortedLabels(node.dataset.labelIds, sessionData.labelsMap()) : [];
     const name = escapeHtml(node.name ?? "");
     if (labels.length === 0) {
       return name;

@@ -74,7 +74,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(_changes: SimpleChanges): void {
     this.datasetName = this.dataset().name;
 
-    this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset()], this.sessionData().jobsMap);
+    this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset()], this.sessionData().jobsMap());
   }
 
   ngOnInit(): void {
@@ -86,7 +86,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
         next: (datasetId) => {
           const dataset = this.dataset();
           if (datasetId === dataset?.datasetId) {
-            this.datasetName = this.sessionData().datasetsMap.get(dataset.datasetId)?.name;
+            this.datasetName = this.sessionData().datasetsMap().get(dataset.datasetId)?.name;
           }
         },
       });

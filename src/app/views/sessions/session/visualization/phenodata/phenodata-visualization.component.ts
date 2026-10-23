@@ -26,6 +26,7 @@ import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.s
 import { escapeHtml, unescapeHtml } from "../../../../../shared/utilities/html";
 import { DatasetService } from "../../dataset.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { SessionData } from "../../../../../model/session/session-data";
 import { GetSessionDataService } from "../../get-session-data.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
@@ -62,7 +63,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   // the dataset input, replaced by its latest copy from datasetsMap in updateView(): websocket events update the map,
   // not the input
   private readonly currentDataset = linkedSignal(() => this.dataset());
-  readonly datasetsMap = input.required<Map<string, Dataset>>();
+  // not the map itself, because the event subscription below needs the latest one, see SessionData
+  readonly sessionData = input.required<SessionData>();
 
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: any;
@@ -164,7 +166,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           // get the latest datasets from the sessionData, because websocket events
           // don't update selectedDatasets at the moment
           // in this case, could use the one from the event also?
-          const updatedDataset = this.datasetsMap().get(this.currentDataset().datasetId);
+          const updatedDataset = this.sessionData().datasetsMap().get(this.currentDataset().datasetId);
           if (updatedDataset == null) {
             return;
           }
@@ -453,7 +455,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     }
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    const updatedDataset = this.datasetsMap().get(this.currentDataset().datasetId);
+    const updatedDataset = this.sessionData().datasetsMap().get(this.currentDataset().datasetId);
     if (updatedDataset == null) {
       this.phenodataState = PhenodataState.DATASET_NULL;
       this.ready = true;

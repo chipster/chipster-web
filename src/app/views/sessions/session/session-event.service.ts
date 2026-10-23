@@ -272,7 +272,7 @@ export class SessionEventService {
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
-          const local = sessionData.datasetsMap.get(event.resourceId);
+          const local = sessionData.datasetsMap().get(event.resourceId);
           // datasetsMap.set() is deferred to updateTypeTags() so that the dataset
           // is never visible in the UI before its type tags are ready
           return this.createEvent(event, local, remote);
@@ -280,15 +280,15 @@ export class SessionEventService {
       );
     }
     if (event.type === EventType.Delete) {
-      const localCopy = sessionData.datasetsMap.get(event.resourceId);
-      sessionData.datasetsMap.delete(event.resourceId);
+      const localCopy = sessionData.datasetsMap().get(event.resourceId);
+      sessionData.datasetsMap.update((m) => this.withoutKey(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);
     return EMPTY;
   }
 
-  updateTypeTags(sessionId, sessionEvent, sessionData) {
+  updateTypeTags(sessionId: string, sessionEvent: SessionEvent, sessionData: SessionData) {
     // update type tags before
     const newValue = <Dataset>sessionEvent.newValue;
 
@@ -303,8 +303,8 @@ export class SessionEventService {
       // so the dataset is never visible in the UI before its type tags are ready
       return this.sessionResource.getTypeTagsForDataset(sessionId, newValue).pipe(
         map((typeTags) => {
-          sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
-          sessionData.datasetsMap.set(newValue.datasetId, newValue);
+          sessionData.datasetTypeTags.update((m) => new Map(m).set(newValue.datasetId, typeTags));
+          sessionData.datasetsMap.update((m) => new Map(m).set(newValue.datasetId, newValue));
           return sessionEvent;
         }),
         catchError((err) => {
@@ -318,7 +318,7 @@ export class SessionEventService {
       );
     }
     // dataset deleted, type tags can be removed
-    sessionData.datasetTypeTags.delete(sessionEvent.event.resourceId);
+    sessionData.datasetTypeTags.update((m) => this.withoutKey(m, sessionEvent.event.resourceId));
     return observableOf(sessionEvent);
   }
 
@@ -326,15 +326,15 @@ export class SessionEventService {
     if (event.type === EventType.Create || event.type === EventType.Update) {
       return this.sessionResource.getLabel(sessionId, event.resourceId).pipe(
         mergeMap((remote: Label) => {
-          const local = sessionData.labelsMap.get(event.resourceId);
-          sessionData.labelsMap.set(event.resourceId, remote);
+          const local = sessionData.labelsMap().get(event.resourceId);
+          sessionData.labelsMap.update((m) => new Map(m).set(event.resourceId, remote));
           return this.createEvent(event, local, remote);
         }),
       );
     }
     if (event.type === EventType.Delete) {
-      const localCopy = sessionData.labelsMap.get(event.resourceId);
-      sessionData.labelsMap.delete(event.resourceId);
+      const localCopy = sessionData.labelsMap().get(event.resourceId);
+      sessionData.labelsMap.update((m) => this.withoutKey(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);
@@ -345,7 +345,7 @@ export class SessionEventService {
     if (event.type === EventType.Create) {
       return this.sessionResource.getJob(sessionId, event.resourceId).pipe(
         mergeMap((remote: Job) => {
-          sessionData.jobsMap.set(event.resourceId, remote);
+          sessionData.jobsMap.update((m) => new Map(m).set(event.resourceId, remote));
           return this.createEvent(event, null, remote);
         }),
       );
@@ -353,19 +353,28 @@ export class SessionEventService {
     if (event.type === EventType.Update) {
       return this.sessionResource.getJob(sessionId, event.resourceId).pipe(
         mergeMap((remote: Job) => {
-          const local = sessionData.jobsMap.get(event.resourceId);
-          sessionData.jobsMap.set(event.resourceId, remote);
+          const local = sessionData.jobsMap().get(event.resourceId);
+          sessionData.jobsMap.update((m) => new Map(m).set(event.resourceId, remote));
           return this.createEvent(event, local, remote);
         }),
       );
     }
     if (event.type === EventType.Delete) {
-      const localCopy = sessionData.jobsMap.get(event.resourceId);
-      sessionData.jobsMap.delete(event.resourceId);
+      const localCopy = sessionData.jobsMap().get(event.resourceId);
+      sessionData.jobsMap.update((m) => this.withoutKey(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event.type, event);
     return EMPTY;
+  }
+
+  /**
+   * A copy of the map without the key, for updating the signals of SessionData
+   */
+  private withoutKey<V>(source: Map<string, V>, key: string): Map<string, V> {
+    const copy = new Map(source);
+    copy.delete(key);
+    return copy;
   }
 
   /**

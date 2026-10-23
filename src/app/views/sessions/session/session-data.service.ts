@@ -384,11 +384,11 @@ export class SessionDataService {
   }
 
   getDatasetList(sessionData: SessionData): Dataset[] {
-    return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap));
+    return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap()));
   }
 
   getJobList(sessionData: SessionData): Job[] {
-    return UtilsService.mapValues(sessionData.jobsMap);
+    return UtilsService.mapValues(sessionData.jobsMap());
   }
 
   getDatasetListSortedByCreated(sessionData: SessionData): Dataset[] {

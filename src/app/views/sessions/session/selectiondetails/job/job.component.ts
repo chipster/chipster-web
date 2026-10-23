@@ -96,7 +96,7 @@ export class JobComponent implements OnInit, OnDestroy {
 
         if (selectedJobs && selectedJobs.length > 0) {
           jobId = selectedJobs[0].jobId;
-          const job = this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap);
+          const job = this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap());
 
           if (job) {
             this.tool = this.tools().find((t) => t.name.id === job.toolId);
@@ -136,7 +136,7 @@ export class JobComponent implements OnInit, OnDestroy {
     this.outputListForView = [];
 
     if (jobId) {
-      const job = this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap);
+      const job = this.sessionDataService.getJobById(jobId, this.sessionData().jobsMap());
       if (job) {
         this.job = job;
         this.isRunning = JobService.isRunning(job);
@@ -202,7 +202,7 @@ export class JobComponent implements OnInit, OnDestroy {
   }
 
   getDataset(datasetId: string) {
-    return this.sessionData().datasetsMap.get(datasetId);
+    return this.sessionData().datasetsMap().get(datasetId);
   }
 
   hasDataset(datasetId: string) {

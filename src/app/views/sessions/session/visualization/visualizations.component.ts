@@ -174,7 +174,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     // for now, only details and open in new tab support gzipped files
     if (
       this.selectedDatasets.some((dataset) =>
-        this.sessionData().datasetTypeTags.get(dataset.datasetId).has(Tags.GZIP),
+        this.sessionData().datasetTypeTags().get(dataset.datasetId).has(Tags.GZIP),
       ) &&
       !(id === VisualizationConstants.DETAILS_ID || id === VisualizationConstants.NEW_TAB_ID)
     ) {

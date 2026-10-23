@@ -67,9 +67,9 @@
   <button
     type="button"
     class="btn btn-primary me-auto"
-    [disabled]="sessionData().labelsMap.size >= maxLabelsPerSession"
+    [disabled]="sessionData().labelsMap().size >= maxLabelsPerSession"
     [title]="
-      sessionData().labelsMap.size >= maxLabelsPerSession
+      sessionData().labelsMap().size >= maxLabelsPerSession
         ? 'Maximum ' + maxLabelsPerSession + ' labels per session reached'
         : ''
     "

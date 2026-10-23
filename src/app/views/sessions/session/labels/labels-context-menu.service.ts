@@ -36,10 +36,10 @@ export class LabelsContextMenuService {
   private lastUsedLabelId: string | null = null;
 
   getLastUsedLabel(sessionData: SessionData): Label | null {
-    if (!this.lastUsedLabelId || !sessionData?.labelsMap) {
+    if (!this.lastUsedLabelId || !sessionData?.labelsMap()) {
       return null;
     }
-    return sessionData.labelsMap.get(this.lastUsedLabelId) ?? null;
+    return sessionData.labelsMap().get(this.lastUsedLabelId) ?? null;
   }
 
   // Default label for surfaces that need to pick one (e.g. the workflow
@@ -51,10 +51,10 @@ export class LabelsContextMenuService {
     if (lastUsed) {
       return lastUsed;
     }
-    if (!sessionData?.labelsMap || sessionData.labelsMap.size === 0) {
+    if (!sessionData?.labelsMap() || sessionData.labelsMap().size === 0) {
       return null;
     }
-    return Array.from(sessionData.labelsMap.values()).sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))[0];
+    return Array.from(sessionData.labelsMap().values()).sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))[0];
   }
 
   // For callers that apply or remove labels without going through toggleLabel()
@@ -65,13 +65,13 @@ export class LabelsContextMenuService {
   }
 
   buildItems(datasets: Dataset[], sessionData: SessionData): LabelMenuItem[] {
-    const labels = Array.from(sessionData.labelsMap.values()).sort((a, b) =>
+    const labels = Array.from(sessionData.labelsMap().values()).sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
     // Precompute which labels are applied to at least one dataset in the session;
     // saves O(labels * datasets) re-scans by callers that need it per row.
     const inUseIds = new Set<string>();
-    sessionData.datasetsMap.forEach((dataset) => {
+    sessionData.datasetsMap().forEach((dataset) => {
       (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
     });
     return labels.map((label) => {

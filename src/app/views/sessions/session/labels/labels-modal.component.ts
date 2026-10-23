@@ -48,7 +48,7 @@ export class LabelsModalComponent implements OnInit {
   }
 
   private refreshRows(): void {
-    const labels = Array.from(this.sessionData().labelsMap.values()).sort((a, b) =>
+    const labels = Array.from(this.sessionData().labelsMap().values()).sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
 
@@ -104,19 +104,9 @@ export class LabelsModalComponent implements OnInit {
   private confirmDeleteLabel(row: LabelRow): void {
     this.sessionResource.deleteLabel(this.sessionData().session.sessionId, row.label.labelId).subscribe({
       next: () => {
-        this.sessionData().labelsMap.delete(row.label.labelId);
         // server cascade removes the id from datasets and emits dataset UPDATE events,
         // but also scrub local copies so UI updates immediately
-        this.selectedDatasets().forEach((d) => {
-          if (d.labelIds) {
-            d.labelIds = d.labelIds.filter((id) => id !== row.label.labelId);
-          }
-        });
-        this.sessionData().datasetsMap.forEach((d) => {
-          if (d.labelIds) {
-            d.labelIds = d.labelIds.filter((id) => id !== row.label.labelId);
-          }
-        });
+        this.removeLabelsLocally(new Set([row.label.labelId]));
         this.rows = this.rows.filter((r) => r !== row);
       },
       error: (err) => this.errorService.showError("Deleting label failed", err),
@@ -140,6 +130,34 @@ export class LabelsModalComponent implements OnInit {
       );
   }
 
+  /**
+   * Remove the labels from labelsMap and from the datasets that use them.
+   *
+   * The datasets in datasetsMap are replaced with copies, so that the views that show them are
+   * notified. The selected datasets are the same objects as in the map until now, so change them
+   * in place too, because the selection keeps them.
+   */
+  private removeLabelsLocally(labelIds: Set<string>): void {
+    const sessionData = this.sessionData();
+    sessionData.labelsMap.update((m) => new Map(Array.from(m).filter(([id]) => !labelIds.has(id))));
+    this.selectedDatasets().forEach((d) => {
+      if (d.labelIds) {
+        d.labelIds = d.labelIds.filter((id) => !labelIds.has(id));
+      }
+    });
+    sessionData.datasetsMap.update(
+      (m) =>
+        new Map(
+          Array.from(m).map(([datasetId, d]) => [
+            datasetId,
+            d.labelIds?.some((id) => labelIds.has(id))
+              ? { ...d, labelIds: d.labelIds.filter((id) => !labelIds.has(id)) }
+              : d,
+          ]),
+        ),
+    );
+  }
+
   private confirmDeleteAllLabels(): void {
     const sessionId = this.sessionData().session.sessionId;
     const labelIds = this.rows.map((r) => r.label.labelId);
@@ -161,17 +179,7 @@ export class LabelsModalComponent implements OnInit {
       next: (results) => {
         // mirror the local-state scrub done in confirmDeleteLabel, for every deleted id
         const deleted = new Set(results.filter((id): id is string => id != null));
-        deleted.forEach((id) => this.sessionData().labelsMap.delete(id));
-        this.selectedDatasets().forEach((d) => {
-          if (d.labelIds) {
-            d.labelIds = d.labelIds.filter((id) => !deleted.has(id));
-          }
-        });
-        this.sessionData().datasetsMap.forEach((d) => {
-          if (d.labelIds) {
-            d.labelIds = d.labelIds.filter((id) => !deleted.has(id));
-          }
-        });
+        this.removeLabelsLocally(deleted);
         // keep any rows that weren't deleted (failed, or created meanwhile)
         this.rows = this.rows.filter((r) => !deleted.has(r.label.labelId));
         this.saving = false;

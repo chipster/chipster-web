@@ -23,6 +23,6 @@ export class FilesDetailsComponent {
     if (!sessionData) {
       return [];
     }
-    return getSortedLabels(dataset.labelIds, sessionData.labelsMap);
+    return getSortedLabels(dataset.labelIds, sessionData.labelsMap());
   }
 }

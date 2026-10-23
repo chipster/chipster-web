@@ -469,7 +469,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
           const uptodateDatasets = selectedDatasets.map((dataset): Dataset =>
-            this.sessionData().datasetsMap.get(dataset.datasetId),
+            this.sessionData().datasetsMap().get(dataset.datasetId),
           );
 
           this.store.dispatch({
