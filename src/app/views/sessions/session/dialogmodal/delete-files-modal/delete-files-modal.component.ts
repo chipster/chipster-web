@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 
 @Component({
   templateUrl: "./delete-files-modal.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class DeleteFilesModalComponent {
   private activeModal = inject(NgbActiveModal);

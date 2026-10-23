@@ -1,11 +1,10 @@
-import { Component, ChangeDetectionStrategy, input } from "@angular/core";
+import { Component, input } from "@angular/core";
 import { NgStyle } from "@angular/common";
 
 @Component({
   selector: "ch-tool-list-item",
   templateUrl: "tool-list-item.component.html",
   styleUrls: ["./tool-list-item.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgStyle],
 })
 export class ToolListItemComponent {
