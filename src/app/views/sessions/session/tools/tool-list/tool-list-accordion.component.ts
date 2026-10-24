@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, input, viewChild } from "@angular/core";
+import { Component, OnInit, inject, input, viewChild } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
 import { cloneDeep } from "lodash-es";
 import { Subject } from "rxjs";
@@ -16,7 +16,6 @@ import { ToolListItemComponent } from "./tool-list-item/tool-list-item.component
   selector: "ch-tool-list-accordion",
   templateUrl: "./tool-list-accordion.component.html",
   styleUrls: ["./tool-list-accordion.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgClass, SearchBoxComponent, ScrollerComponent, ToolListItemComponent, CategoryPipe, ModulePipe],
 })
 export class ToolListAccordionComponent implements OnInit {

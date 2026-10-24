@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
+import { Component, OnChanges, OnDestroy, OnInit, inject, input, output } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
@@ -25,7 +25,6 @@ interface Resources {
   selector: "ch-tool-resources",
   templateUrl: "./tool-resources.component.html",
   styleUrls: ["./tool-resources.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule],
 })
 export class ToolResourcesComponent implements OnInit, OnChanges, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
+import { Component, OnChanges, OnDestroy, OnInit, inject, input, output } from "@angular/core";
 import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
@@ -10,7 +10,6 @@ import { FormsModule } from "@angular/forms";
   selector: "ch-tool-parameters",
   templateUrl: "./tool-parameters.component.html",
   styleUrls: ["./tool-parameters.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule],
 })
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, OnChanges, ChangeDetectionStrategy, input } from "@angular/core";
+import { Component, OnChanges, input } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
 import { ValidatedTool } from "../ToolSelection";
 
@@ -6,7 +6,6 @@ import { ValidatedTool } from "../ToolSelection";
   selector: "ch-run-options",
   templateUrl: "./run-options.component.html",
   styleUrls: ["./run-options.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class RunOptionsComponent implements OnChanges {
   readonly sessionData = input<SessionData>(undefined);

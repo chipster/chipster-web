@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, output } from "@angular/core";
+import { Component, inject, signal, output } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
@@ -22,7 +22,6 @@ import { ToolResourcesComponent } from "../tool-resources/tool-resources.compone
   selector: "ch-parameters-modal",
   templateUrl: "./parameters-modal.component.html",
   styleUrls: ["./parameters-modal.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgbAccordionDirective,
     NgbAccordionItem,

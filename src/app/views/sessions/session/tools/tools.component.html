@@ -1,6 +1,6 @@
 <h3 class="panel-title"><span>Tools</span></h3>
 <div class="chipster-highlight mb-3">
-  @if (selectedModule) {
+  @if (selectedModule()) {
     <div class="container-fluid">
       <div class="row mb-2">
         <!-- module buttons -->
@@ -41,8 +41,8 @@
                   class="btn"
                   (click)="selectModuleAndFirstCategoryAndFirstTool(module)"
                   [ngClass]="{
-                    'btn-primary': module.moduleId === selectedModule.moduleId,
-                    'btn-light': module.moduleId !== selectedModule.moduleId,
+                    'btn-primary': module.moduleId === selectedModule().moduleId,
+                    'btn-light': module.moduleId !== selectedModule().moduleId,
                   }">
                   <span class="text-nowrap">
                     {{ module.name }}
@@ -89,7 +89,7 @@
         <!-- jobs button -->
         <div class="col col-right" id="jobButton">
           <span class="float-end position-relative">
-            <ch-counter-spinner [count]="runningJobs"></ch-counter-spinner>
+            <ch-counter-spinner [count]="runningJobs()"></ch-counter-spinner>
           </span>
           <button
             class="btn btn-link no-underline-link-button float-end pe-3 me-4"
@@ -115,13 +115,13 @@
         <!-- category list -->
         <div class="col col-left">
           <div class="list-group" id="category-list">
-            @for (category of selectedModule.categories; track category) {
+            @for (category of selectedModule().categories; track category) {
               <button
                 type="button"
                 class="list-group-item list-group-item-action tool-list-item"
                 [ngClass]="{
-                  active: category === selectedCategory,
-                  compact: settingsService.compactToolList$.getValue(),
+                  active: category === selectedCategory(),
+                  compact: compactToolListSetting(),
                 }"
                 (click)="selectCategoryAndFirstTool(category)"
                 id="{{ categoryElementIdPrefix + category.name }}">
@@ -134,15 +134,15 @@
         <!-- tool list -->
         <div class="col col-middle">
           <div style="position: relative; height: 100%">
-            @if (selectedCategory) {
+            @if (selectedCategory()) {
               <div class="list-group" id="tool-list" style="position: absolute; height: 100%; width: 100%">
-                @for (tool of selectedCategory.tools; track tool) {
+                @for (tool of selectedCategory().tools; track tool) {
                   <button
                     type="button"
                     class="list-group-item list-group-item-action tool-list-item"
                     [ngClass]="{
-                      active: tool.name.id === selectedTool?.tool.name.id,
-                      compact: settingsService.compactToolList$.getValue(),
+                      active: tool.name.id === selectedTool()?.tool.name.id,
+                      compact: compactToolListSetting(),
                     }"
                     (click)="selectTool(tool)"
                     id="{{ toolElementIdPrefix + tool.name.id }}">
@@ -159,46 +159,46 @@
           <div style="position: relative; height: 100%">
             <div style="position: absolute; height: 100%; width: 100%; overflow: auto">
               <div class="row mb-2">
-                @if (validatedTool == null || selectedTool.tool.name.id !== validatedTool.tool.name.id) {
+                @if (validatedTool() == null || selectedTool().tool.name.id !== validatedTool().tool.name.id) {
                   <div class="col d-flex">
                     <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
                     &nbsp; Validating tool inputs...
                   </div>
                 }
-                @if (validatedTool != null && selectedTool.tool.name.id === validatedTool.tool.name.id) {
+                @if (validatedTool() != null && selectedTool().tool.name.id === validatedTool().tool.name.id) {
                   <div class="col d-flex">
                     <!-- parameters -->
                     <button
                       class="btn btn-sm btn-outline-secondary me-1"
                       (click)="openParametersModal()"
                       title="Edit parameters and inputs"
-                      [disabled]="!selectedTool">
+                      [disabled]="!selectedTool()">
                       <!-- class="fas fa-fw fa-sliders-h" -->
 
-                      @if (paramButtonWarning) {
+                      @if (paramButtonWarning()) {
                         <span class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span>
                       }
-                      @if (!paramButtonWarning && !paramButtonChanged) {
+                      @if (!paramButtonWarning() && !paramButtonChanged()) {
                         <span class="fas fa-fw fa-edit" aria-hidden="true"></span>
                       }
-                      @if (!paramButtonWarning && paramButtonChanged) {
+                      @if (!paramButtonWarning() && paramButtonChanged()) {
                         <span class="fas fa-fw fa-edit text-primary" aria-hidden="true"></span>
                       }
                       Parameters
                     </button>
 
                     <!-- run -->
-                    @if (!runIsDropdown) {
+                    @if (!runIsDropdown()) {
                       <button
                         class="btn btn-success run-button btn-sm button-wide flex-grow-1"
                         (click)="runJob(false)"
-                        [disabled]="!runEnabled">
+                        [disabled]="!runEnabled()">
                         <span class="fas fa-play"></span>
                         Run
                       </button>
                     }
 
-                    @if (runIsDropdown) {
+                    @if (runIsDropdown()) {
                       <div ngbDropdown autoClose="true" container="body" class="d-flex flex-grow-1">
                         <button
                           class="btn btn-success run-button btn-sm button-wide flex-grow-1"
@@ -214,44 +214,44 @@
                           <button
                             ngbDropdownItem
                             (click)="runJob(false)"
-                            [disabled]="!validatedTool.singleJobValidation.valid">
+                            [disabled]="!validatedTool().singleJobValidation.valid">
                             Run tool
-                            @if (validatedTool.singleJobValidation.valid) {
+                            @if (validatedTool().singleJobValidation.valid) {
                               <span class="text-muted text-sm">1 job</span>
                             }
                           </button>
                           <button
                             ngbDropdownItem
                             (click)="runJob(true)"
-                            [disabled]="!validatedTool.runForEachValidation.valid">
+                            [disabled]="!validatedTool().runForEachValidation.valid">
                             Run tool for each file
-                            @if (validatedTool.runForEachValidation.valid) {
-                              <span class="text-muted text-sm">{{ validatedTool.selectedDatasets.length }} jobs</span>
+                            @if (validatedTool().runForEachValidation.valid) {
+                              <span class="text-muted text-sm">{{ validatedTool().selectedDatasets.length }} jobs</span>
                             }
                           </button>
                           <button
                             ngbDropdownItem
                             (click)="runForEachSample()"
-                            [disabled]="!validatedTool.runForEachSampleValidation.valid">
+                            [disabled]="!validatedTool().runForEachSampleValidation.valid">
                             Run tool for each sample
-                            @if (validatedTool.runForEachSampleValidation.valid) {
+                            @if (validatedTool().runForEachSampleValidation.valid) {
                               <span class="text-muted text-sm">
                                 {{
-                                  validatedTool.sampleGroups.pairedEndSamples.length +
-                                    validatedTool.sampleGroups.singleEndSamples.length
+                                  validatedTool().sampleGroups.pairedEndSamples.length +
+                                    validatedTool().sampleGroups.singleEndSamples.length
                                 }}
                                 jobs
                               </span>
                             }
                           </button>
-                          @if (defineHintVisible) {
+                          @if (defineHintVisible()) {
                             <div class="dropdown-divider"></div>
                           }
-                          @if (defineHintVisible) {
+                          @if (defineHintVisible()) {
                             <button
                               ngbDropdownItem
                               (click)="onDefineSamples()"
-                              [disabled]="validatedTool.runForEachSampleValidation.valid">
+                              [disabled]="validatedTool().runForEachSampleValidation.valid">
                               Define samples to enable run for each sample
                             </button>
                           }
@@ -264,9 +264,9 @@
 
               <div class="row">
                 <div class="col">
-                  @if (selectedTool) {
+                  @if (selectedTool()) {
                     <div>
-                      <span>{{ selectedTool.tool.description }}</span>
+                      <span>{{ selectedTool().tool.description }}</span>
                       <ch-link-button class="no-underline-link-button" (click)="openManualModal()">
                         &#x20;More&nbsp;info&hellip;
                       </ch-link-button>
