@@ -1,16 +1,8 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  DOCUMENT,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-  viewChild,
-} from "@angular/core";
+import { Component, OnDestroy, OnInit, DOCUMENT, computed, inject, input, signal, viewChild } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
-import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
+import { Category, Dataset, Module, SessionEvent, Tool } from "chipster-js-common";
 import { NgSelectComponent, NgLabelTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
 import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
@@ -85,7 +77,6 @@ enum ModuleSelectionMode {
   templateUrl: "./tools.component.html",
   styleUrls: ["./tools.component.less"],
   providers: [NgbDropdownConfig],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgSelectComponent,
     FormsModule,
@@ -135,23 +126,27 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   private toolsMap: Map<string, Tool>;
 
-  public selectedTool: SelectedTool;
-  public validatedTool: ValidatedTool;
+  // signals, because the subscriptions below set them, and other views select tools too
+  public readonly selectedTool = signal<SelectedTool>(undefined);
+  public readonly validatedTool = signal<ValidatedTool>(undefined);
 
   public toolSearchList: Array<ToolSearchListItem>;
 
-  public runEnabled: boolean;
-  public runIsDropdown: boolean;
-  public defineHintVisible = false;
-  public paramButtonWarning: boolean;
-  public paramButtonChanged: boolean;
-  public runningJobs = 0;
-  public jobList: Job[];
+  public readonly runEnabled = signal(false);
+  public readonly runIsDropdown = signal(false);
+  public readonly defineHintVisible = signal(false);
+  public readonly paramButtonWarning = signal(false);
+  public readonly paramButtonChanged = signal(false);
+  // job events update jobsMap
+  public readonly runningJobs = computed(
+    () => this.sessionDataService.getJobList(this.sessionData()).filter((job) => JobService.isRunning(job)).length,
+  );
 
   modules: Array<Module> = [];
 
-  selectedModule: Module = null; // used in modal to keep track of which module has been selected
-  selectedCategory: Category = null; // used in modal to keep track of which category has been selected
+  // signals, because selecting a tool elsewhere, e.g. "Select tool" in the file details, changes them too
+  readonly selectedModule = signal<Module>(null); // used in modal to keep track of which module has been selected
+  readonly selectedCategory = signal<Category>(null); // used in modal to keep track of which category has been selected
 
   public ModuleSelectionMode = ModuleSelectionMode; // for template references
   public moduleSelectionMode: ModuleSelectionMode = ModuleSelectionMode.Dropdown;
@@ -159,7 +154,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   compactToolList = true;
 
-  public searchBoxModel: ToolSearchListItem;
+  // the settings modal changes it
+  readonly compactToolListSetting = toSignal(this.settingsService.compactToolList$, { requireSync: true });
+
+  // cleared in a setTimeout
+  public readonly searchBoxModel = signal<ToolSearchListItem>(null);
   private lastJobStartedToast: Toast;
 
   // use to signal that parameters have been changed and need to be validated
@@ -188,10 +187,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.toolSearchList = this.createToolSearchList();
 
     this.subscribeToToolEvents();
-
-    this.updateJobs();
-
-    this.subscribeToJobEvents();
 
     if (this.modules[0] != null) {
       this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
@@ -224,22 +219,22 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectModule(module: Module) {
-    this.selectedModule = module;
+    this.selectedModule.set(module);
   }
 
   selectModuleAndFirstCategoryAndFirstTool(module: Module) {
-    this.selectedModule = module;
+    this.selectedModule.set(module);
     if (module.categories.length > 0) {
       this.selectCategoryAndFirstTool(module.categories[0]);
     }
   }
 
   selectCategory(category: Category) {
-    this.selectedCategory = category;
+    this.selectedCategory.set(category);
   }
 
   selectCategoryAndFirstTool(category: Category) {
-    this.selectedCategory = category;
+    this.selectedCategory.set(category);
 
     if (category.tools.length > 0) {
       this.selectTool(category.tools[0]);
@@ -247,7 +242,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectTool(tool: Tool) {
-    this.toolSelectionService.selectTool(this.selectedModule, this.selectedCategory, tool);
+    this.toolSelectionService.selectTool(this.selectedModule(), this.selectedCategory(), tool);
   }
 
   setBindings(toolWithInputs: SelectedToolWithInputs) {
@@ -271,18 +266,18 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   runJob(runForEach: boolean) {
     if (runForEach) {
-      this.jobService.runForEach(this.validatedTool, this.sessionData());
-      this.showRunJobToaster(this.validatedTool.selectedDatasets.length);
+      this.jobService.runForEach(this.validatedTool(), this.sessionData());
+      this.showRunJobToaster(this.validatedTool().selectedDatasets.length);
     } else {
-      this.jobService.runJob(this.validatedTool);
+      this.jobService.runJob(this.validatedTool());
       this.showRunJobToaster();
     }
   }
 
   runForEachSample() {
-    this.jobService.runForEachSample(this.validatedTool, this.sessionData());
+    this.jobService.runForEachSample(this.validatedTool(), this.sessionData());
 
-    this.showRunJobToaster(this.validatedTool.sampleGroups.pairedEndSamples.length);
+    this.showRunJobToaster(this.validatedTool().sampleGroups.pairedEndSamples.length);
   }
 
   private showRunJobToaster(jobCount = 1) {
@@ -297,22 +292,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateJobs() {
-    this.jobList = this.sessionDataService.getJobList(this.sessionData());
-    this.runningJobs = this.jobList.reduce((runningCount, job) => {
-      if (JobService.isRunning(job)) {
-        return runningCount + 1;
-      }
-      return runningCount;
-    }, 0);
-  }
-
   openManualModal() {
     this.manualModalRef = this.modalService.open(ManualModalComponent, {
       size: "lg",
     });
     const modal = this.manualModalRef.componentInstance as ManualModalComponent;
-    modal.tool.set(this.selectedTool.tool);
+    modal.tool.set(this.selectedTool().tool);
   }
 
   private createToolSearchList(): ToolSearchListItem[] {
@@ -385,7 +370,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   public searchBoxBlur() {
-    this.searchBoxModel = null;
+    this.searchBoxModel.set(null);
   }
 
   private subscribeToToolEvents() {
@@ -430,7 +415,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           const toolElementId = this.toolElementIdPrefix + t.toolId;
 
           setTimeout(() => {
-            this.searchBoxModel = null;
+            this.searchBoxModel.set(null);
             this.document.getElementById(toolElementId).focus();
           });
         }
@@ -441,11 +426,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .select("selectedTool")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((t: SelectedTool) => {
-        this.selectedTool = t;
-        this.runEnabled = false;
-        this.paramButtonWarning = false;
-        this.paramButtonChanged = false;
-        this.runIsDropdown = false;
+        this.selectedTool.set(t);
+        this.runEnabled.set(false);
+        this.paramButtonWarning.set(false);
+        this.paramButtonChanged.set(false);
+        this.runIsDropdown.set(false);
       });
 
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
@@ -647,39 +632,31 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .select("validatedTool")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((tool: ValidatedTool) => {
-        this.validatedTool = tool;
+        this.validatedTool.set(tool);
 
         // componentInstance is undefined for closed modal
         const modal = this.parametersModalRef?.componentInstance as ParametersModalComponent;
         if (modal != null) {
-          modal.validatedTool.set(this.validatedTool);
+          modal.validatedTool.set(tool);
         }
 
-        this.runIsDropdown = tool && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
+        this.runIsDropdown.set(tool && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid));
 
-        this.runEnabled =
+        this.runEnabled.set(
           tool &&
-          tool.resourcesValidation.valid &&
-          (tool.singleJobValidation.valid || tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
-        this.paramButtonWarning = !this.runEnabled;
-        this.paramButtonChanged = this.toolSelectionService.parametersHaveBeenChanged(tool);
-        this.defineHintVisible =
+            tool.resourcesValidation.valid &&
+            (tool.singleJobValidation.valid ||
+              tool.runForEachValidation.valid ||
+              tool.runForEachSampleValidation.valid),
+        );
+        this.paramButtonWarning.set(!this.runEnabled());
+        this.paramButtonChanged.set(this.toolSelectionService.parametersHaveBeenChanged(tool));
+        this.defineHintVisible.set(
           tool != null &&
-          this.validatedTool.sampleGroups.singleEndSamples.length < 1 &&
-          this.validatedTool.sampleGroups.pairedEndSamples.length < 1 &&
-          this.validatedTool.sampleGroups.pairMissingSamples.length < 1;
-      });
-  }
-
-  private subscribeToJobEvents() {
-    this.sessionEventService
-      .getJobStream()
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe({
-        next: () => {
-          this.updateJobs();
-        },
-        error: (err) => this.errorService.showError("failed to update jobs", err),
+            tool.sampleGroups.singleEndSamples.length < 1 &&
+            tool.sampleGroups.pairedEndSamples.length < 1 &&
+            tool.sampleGroups.pairMissingSamples.length < 1,
+        );
       });
   }
 
@@ -713,13 +690,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   openParametersModal() {
-    const origTool = this.toolsMap.get(this.validatedTool.tool.name.id);
+    const origTool = this.toolsMap.get(this.validatedTool().tool.name.id);
 
     this.parametersModalRef = this.ngbModal.open(ParametersModalComponent, {
       size: "lg",
     });
     const modal = this.parametersModalRef.componentInstance as ParametersModalComponent;
-    modal.validatedTool.set(this.validatedTool);
+    modal.validatedTool.set(this.validatedTool());
     modal.sessionData.set(this.sessionData());
     modal.origTool.set(origTool);
     modal.parametersChanged.subscribe(() => this.onParametersChanged());
