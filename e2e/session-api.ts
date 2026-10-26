@@ -123,6 +123,61 @@ export async function getDatasets(api: Api, sessionId: string): Promise<{ datase
   return response.json();
 }
 
+// changes some fields of the dataset, which the page learns about from the dataset event
+export async function updateDataset(api: Api, sessionId: string, datasetId: string, changes: object): Promise<void> {
+  const current = await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`);
+  expect(current.ok()).toBe(true);
+  const response = await api.put("session-db", `/sessions/${sessionId}/datasets/${datasetId}`, {
+    ...(await current.json()),
+    ...changes,
+  });
+  expect(response.ok(), `update dataset ${response.status()}`).toBe(true);
+}
+
+export async function createLabel(api: Api, sessionId: string, name: string, color = "#ff0000"): Promise<string> {
+  const response = await api.post("session-db", `/sessions/${sessionId}/labels`, { sessionId, name, color });
+  expect(response.ok(), `create label ${response.status()}`).toBe(true);
+  return (await response.json()).labelId;
+}
+
+export async function renameLabel(api: Api, sessionId: string, labelId: string, name: string): Promise<void> {
+  const current = await api.get("session-db", `/sessions/${sessionId}/labels/${labelId}`);
+  expect(current.ok()).toBe(true);
+  const response = await api.put("session-db", `/sessions/${sessionId}/labels/${labelId}`, {
+    ...(await current.json()),
+    name,
+  });
+  expect(response.ok(), `rename label ${response.status()}`).toBe(true);
+}
+
+// a job of a tool that doesn't have to exist: the tool is run nowhere, the page only shows the job
+export const TEST_JOB = {
+  toolId: "test.R",
+  toolName: "Test tool",
+  toolCategory: "Test",
+  module: "misc",
+  state: "RUNNING",
+  parameters: [],
+  inputs: [],
+  outputs: [],
+};
+
+export async function createJob(api: Api, sessionId: string, job: object = TEST_JOB): Promise<string> {
+  const response = await api.post("session-db", `/sessions/${sessionId}/jobs`, job);
+  expect(response.ok(), `create job ${response.status()} ${await response.text()}`).toBe(true);
+  return (await response.json()).jobId;
+}
+
+export async function updateJob(api: Api, sessionId: string, jobId: string, changes: object): Promise<void> {
+  const current = await api.get("session-db", `/sessions/${sessionId}/jobs/${jobId}`);
+  expect(current.ok()).toBe(true);
+  const response = await api.put("session-db", `/sessions/${sessionId}/jobs/${jobId}`, {
+    ...(await current.json()),
+    ...changes,
+  });
+  expect(response.ok(), `update job ${response.status()}`).toBe(true);
+}
+
 /*
  * A session file like the one the app downloads: session-worker packages the
  * session to a zip, which it adds to the same session as a dataset.
@@ -135,6 +190,11 @@ export async function packageSession(api: Api, sessionId: string): Promise<Buffe
   const zip = await api.get("file-broker", `/sessions/${sessionId}/datasets/${datasetId}`);
   expect(zip.ok()).toBe(true);
   return zip.body();
+}
+
+// a tab of the visualizations of the selected files, like "Details" or "Scatter Plot"
+export function visualizationTab(page: Page, name: string) {
+  return page.locator("ch-visualizations").getByRole("tab", { name, exact: true });
 }
 
 export function datasetNode(page: Page, datasetId: string) {
