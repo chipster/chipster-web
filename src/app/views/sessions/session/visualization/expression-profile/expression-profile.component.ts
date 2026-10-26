@@ -1,4 +1,4 @@
-import { Component, NgZone, OnChanges, OnDestroy, ViewEncapsulation, inject, input, signal } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ViewEncapsulation, inject, input, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { filter, map, find, difference, uniq, floor, intersection, range, flatMap, minBy } from "lodash-es";
@@ -34,7 +34,6 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   private visualizationTSVService = inject(VisualizationTSVService);
   private fileResource = inject(FileResource);
   private restErrorService = inject(RestErrorService);
-  private zone = inject(NgZone);
 
   readonly dataset = input<Dataset>(undefined);
 
@@ -133,10 +132,10 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       const width = entries[0]?.contentRect.width;
       if (width && width !== this.lastChartWidth && this.tsv) {
         this.lastChartWidth = width;
-        // ResizeObserver fires outside Angular's zone; redraw inside it so the
-        // d3 drag handlers are re-registered in the zone (otherwise selecting
-        // would not trigger change detection) and bound state stays in sync.
-        this.zone.run(() => this.drawLineChart(this.tsv));
+        // ResizeObserver fires outside Angular's zone, and so do the d3 handlers
+        // registered here. They don't need the zone, because the state they
+        // change is in signals.
+        this.drawLineChart(this.tsv);
       }
     });
     this.resizeObserver.observe(element);

@@ -280,7 +280,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         if (source === "edit" || source === "Autofill.fill" || source === "CopyPaste.paste") {
           this.latestEdit = new Date().getTime();
           this.updateDataset();
-          this.zone.run(() => this.updateWarnings());
+          this.updateWarnings();
         }
       },
     };
@@ -330,7 +330,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     });
 
     this.updateDataset();
-    this.zone.run(() => this.updateWarnings());
+    this.updateWarnings();
   }
 
   /**
@@ -377,7 +377,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
             });
             this.updateDataset();
             this.updateViewAfterDelay();
-            this.zone.run(() => this.updateWarnings());
+            this.updateWarnings();
           } else if (action === 3 && this.originalPhenodataString != null) {
             this.datasetService.setPhenodata(this.currentDataset(), this.originalPhenodataString);
             this.phenodataString = this.originalPhenodataString;
