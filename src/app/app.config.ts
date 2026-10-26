@@ -3,7 +3,7 @@ import {
   ApplicationConfig,
   ErrorHandler,
   provideCheckNoChangesConfig,
-  provideZoneChangeDetection,
+  provideZonelessChangeDetection,
 } from "@angular/core";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 import { provideStore } from "@ngrx/store";
@@ -25,7 +25,7 @@ import {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection(),
+    provideZonelessChangeDetection(),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: "enabled" })),
     provideStore(
       {
