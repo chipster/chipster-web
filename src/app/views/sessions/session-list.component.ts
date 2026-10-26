@@ -588,11 +588,20 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   rename(session: Session) {
-    this.sessionService.openRenameModalAndUpdate(session);
+    this.sessionService.openRenameModalAndUpdate(session).subscribe((updated) => this.sessionUpdated(updated));
   }
 
   notes(session: Session) {
-    this.sessionService.openNotesModalAndUpdate(session);
+    this.sessionService.openNotesModalAndUpdate(session).subscribe((updated) => this.sessionUpdated(updated));
+  }
+
+  // the user's events have only the rules, see SessionService
+  private sessionUpdated(session: Session) {
+    this.userEventData.sessions.set(session.sessionId, session);
+    this.updateSessions();
+    if (this.selectedSession()?.sessionId === session.sessionId) {
+      this.selectedSession.set(session);
+    }
   }
 
   download(session: Session) {
