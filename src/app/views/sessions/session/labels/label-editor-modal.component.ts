@@ -60,7 +60,7 @@ export class LabelEditorModalComponent implements OnInit {
 
   previewLabel(): Label {
     return {
-      sessionId: this.sessionData().session.sessionId,
+      sessionId: this.sessionData().session().sessionId,
       labelId: this.label()?.labelId ?? "",
       name: this.name || "New label",
       color: this.color,
@@ -77,7 +77,7 @@ export class LabelEditorModalComponent implements OnInit {
     if (!name) {
       return;
     }
-    const sessionId = this.sessionData().session.sessionId;
+    const sessionId = this.sessionData().session().sessionId;
     this.saving = true;
 
     if (this.isEdit) {

@@ -103,7 +103,9 @@ export class SessionEventService {
 
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),
-      mergeMap((data) => this.handleOrDrop("rule event error", () => this.handleRuleEvent(data, sessionData.session))),
+      mergeMap((data) =>
+        this.handleOrDrop("rule event error", () => this.handleRuleEventOfSessionData(data, sessionData)),
+      ),
       share(),
     );
 
@@ -205,19 +207,52 @@ export class SessionEventService {
     return observableOf(new SessionEvent(event, oldValue, newValue));
   }
 
+  /**
+   * Apply a rule event to a session of the sessions list, changing it in place
+   */
   handleRuleEvent(event: any, session: Session): Observable<SessionEvent> {
-    log.info("handle rule event", event, session);
+    return this.applyRuleEvent(
+      event,
+      session.sessionId,
+      () => session.rules,
+      (rules) => {
+        session.rules = rules;
+      },
+    );
+  }
+
+  /*
+   * Apply a rule event to the open session. Takes sessionData rather than the session, because a
+   * session event replaces the session: the rules of the latest one are updated, and the signal
+   * notifies the views.
+   */
+  private handleRuleEventOfSessionData(event: any, sessionData: SessionData): Observable<SessionEvent> {
+    return this.applyRuleEvent(
+      event,
+      sessionData.session().sessionId,
+      () => sessionData.session().rules,
+      (rules) => sessionData.session.update((s) => ({ ...s, rules })),
+    );
+  }
+
+  private applyRuleEvent(
+    event: any,
+    sessionId: string,
+    getRules: () => Rule[],
+    setRules: (rules: Rule[]) => void,
+  ): Observable<SessionEvent> {
+    log.info("handle rule event", event, sessionId);
     if (event.type === EventType.Create) {
-      return this.sessionResource.getRule(session.sessionId, event.resourceId).pipe(
+      return this.sessionResource.getRule(sessionId, event.resourceId).pipe(
         mergeMap((rule: Rule) => {
-          session.rules.push(rule);
+          setRules([...getRules(), rule]);
           return this.createEvent(event, null, rule);
         }),
       );
     }
     if (event.type === EventType.Delete) {
-      const rule = session.rules.find((r) => r.ruleId === event.resourceId);
-      session.rules = session.rules.filter((r) => r.ruleId !== event.resourceId);
+      const rule = getRules().find((r) => r.ruleId === event.resourceId);
+      setRules(getRules().filter((r) => r.ruleId !== event.resourceId));
       return this.createEvent(event, rule, null);
     }
     log.warn("unknown event type", event);
@@ -229,8 +264,8 @@ export class SessionEventService {
       if (event.state !== SessionState.Delete) {
         return this.sessionResource.getSession(sessionId).pipe(
           mergeMap((remote: Session) => {
-            const local = sessionData.session;
-            sessionData.session = remote;
+            const local = sessionData.session();
+            sessionData.session.set(remote);
             log.info("session updated", remote.name, remote.state);
             return this.createEvent(event, local, remote);
           }),

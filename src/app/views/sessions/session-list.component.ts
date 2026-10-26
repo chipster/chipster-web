@@ -123,7 +123,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
           this.workflowPreviewLoading = false;
           // don't show if the selection has already changed
-          if (this.selectedSession && sData.session && this.selectedSession.sessionId === sData.session.sessionId) {
+          if (this.selectedSession && sData.session() && this.selectedSession.sessionId === sData.session().sessionId) {
             this.sessionData = sData;
             this.sessionSize = this.sessionDataService.getSessionSize(this.sessionData);
           }
@@ -615,7 +615,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         mergeMap((name) => {
           duplicateName = name;
           // use sessionData from preview if available
-          if (this.sessionData && this.sessionData.session.sessionId === session.sessionId) {
+          if (this.sessionData && this.sessionData.session().sessionId === session.sessionId) {
             log.info("using session data from preview for duplicate");
             return of(this.sessionData);
           }
