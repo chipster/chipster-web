@@ -1,14 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  DOCUMENT,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-  viewChild,
-  ElementRef,
-} from "@angular/core";
+import { AfterViewInit, Component, OnInit, DOCUMENT, inject, signal, viewChild, ElementRef } from "@angular/core";
 import {
   AbstractControl,
   UntypedFormBuilder,
@@ -34,7 +24,6 @@ import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmod
 @Component({
   templateUrl: "./contact-support-modal.component.html",
   styleUrls: ["./contact-support-modal.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, ReactiveFormsModule],
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {
@@ -60,9 +49,9 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
 
   readonly messageTextarea = viewChild<ElementRef<HTMLTextAreaElement>>("messageTextarea");
 
-  public session: Session;
+  readonly session = signal<Session>(undefined);
   public user: User;
-  public isVerifiedEmail = false;
+  readonly isVerifiedEmail = signal(false);
   public appId;
 
   ngOnInit() {
@@ -76,8 +65,8 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
           return of(null);
         }),
         tap((session) => {
-          this.session = session;
-          if (this.session == null) {
+          this.session.set(session);
+          if (this.session() == null) {
             this.supportForm.patchValue({
               attach: "no",
             });
@@ -91,7 +80,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
             this.supportForm.patchValue({
               email: user.mail,
             });
-            this.isVerifiedEmail = true;
+            this.isVerifiedEmail.set(true);
           }
         }),
         mergeMap(() => this.configService.get(ConfigService.KEY_APP_ID).pipe(take(1))),
@@ -117,8 +106,8 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     if (this.supportForm.valid) {
       let copySessionId$: Observable<string>;
 
-      if (this.session != null && this.supportForm.value.attach === "yes") {
-        copySessionId$ = this.copyToSupportSessions(this.session.sessionId);
+      if (this.session() != null && this.supportForm.value.attach === "yes") {
+        copySessionId$ = this.copyToSupportSessions(this.session().sessionId);
       } else {
         copySessionId$ = of(null);
       }

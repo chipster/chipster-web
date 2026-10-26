@@ -1,13 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  TemplateRef,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  viewChild,
-} from "@angular/core";
+import { Component, OnDestroy, OnInit, TemplateRef, ViewEncapsulation, inject, viewChild } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { HotkeyService } from "../../services/hotkey.service";
 
@@ -16,7 +7,6 @@ import { HotkeyService } from "../../services/hotkey.service";
   templateUrl: "./hotkey-cheatsheet.component.html",
   styleUrls: ["./hotkey-cheatsheet.component.less"],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class HotkeyCheatsheetComponent implements OnInit, OnDestroy {
   private readonly hotkeyService = inject(HotkeyService);

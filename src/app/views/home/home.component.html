@@ -17,11 +17,11 @@
   </div>
 -->
 
-  @if (homeHeaderPath) {
+  @if (homeHeaderPath()) {
     <div>
       <ch-manual
-        [assetsPath]="homeHeaderPath"
-        [page]="homeHeaderFile"
+        [assetsPath]="homeHeaderPath()"
+        [page]="homeHeaderFile()"
         [showControls]="false"
         [addContainer]="false"
         [routerPath]="homeRouterPath"
@@ -70,11 +70,11 @@
     </div>
   </div>
 
-  @if (homePath && homeFile && homeRouterPath) {
+  @if (homePath() && homeFile() && homeRouterPath) {
     <div>
       <ch-manual
-        [assetsPath]="homePath"
-        [page]="homeFile"
+        [assetsPath]="homePath()"
+        [page]="homeFile()"
         [showControls]="false"
         [addContainer]="false"
         [routerPath]="homeRouterPath"

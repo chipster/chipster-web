@@ -1,11 +1,11 @@
-@if (!show && !initFailed) {
+@if (!show() && !initFailed()) {
   <div>&nbsp;Initializing login...</div>
 }
 
-@if (show) {
+@if (show()) {
   <div>
     <!-- auth method selection-->
-    @if (!showLoginForm) {
+    @if (!showLoginForm()) {
       <div>
         <h3 class="text-center mt-4">Select authentication method</h3>
 
@@ -21,9 +21,9 @@
           }
           <div>
             <ch-auth-button
-              name="{{ appName }} login"
+              name="{{ appName() }} login"
               logo="/assets/html/login/LoginLocal.svg"
-              [description]="jaasDescription"
+              [description]="jaasDescription()"
               (selectAuth)="openLocalLogin()"></ch-auth-button>
           </div>
         </div>
@@ -31,22 +31,22 @@
     }
 
     <!-- local login form-->
-    @if (showLoginForm) {
+    @if (showLoginForm()) {
       <div>
-        <h3 class="text-center mt-4">{{ appName }} login</h3>
+        <h3 class="text-center mt-4">{{ appName() }} login</h3>
 
-        @if (show) {
+        @if (show()) {
           <div style="margin-left: auto; margin-right: auto" class="col mt-3" id="login">
             <form #myForm="ngForm" (keydown)="keyDownFunction($event)">
               <div class="form-group" placement="right">
                 <!-- the html is trusted -->
-                <ng-template #popoverContent><div [innerHtml]="jaasDescription"></div></ng-template>
+                <ng-template #popoverContent><div [innerHtml]="jaasDescription()"></div></ng-template>
 
                 <label for="username">
-                  @if (multipleLoginMethods) {
-                    <span>{{ appName }} username</span>
+                  @if (multipleLoginMethods()) {
+                    <span>{{ appName() }} username</span>
                   }
-                  @if (!multipleLoginMethods) {
+                  @if (!multipleLoginMethods()) {
                     <span>Username</span>
                   }
                 </label>
@@ -71,10 +71,10 @@
                   required />
               </div>
 
-              @if (error) {
+              @if (error()) {
                 <div class="alert alert-warning">
                   <strong>Login failed</strong>
-                  <p>{{ error }}</p>
+                  <p>{{ error() }}</p>
                 </div>
               }
 
@@ -82,7 +82,7 @@
                 <button class="btn btn-primary btn-login" type="button" (click)="login()" [disabled]="myForm.invalid">
                   Log In
                 </button>
-                @if (multipleLoginMethods) {
+                @if (multipleLoginMethods()) {
                   <div class="mt-4 text-smaller">
                     <button class="btn btn-link" (click)="backToAuthSelect()">
                       <!-- <i class="fa fa-arrow-left" aria-hidden="true"></i> -->

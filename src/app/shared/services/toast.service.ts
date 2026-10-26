@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { isNil, omitBy } from "lodash-es";
 import { AsyncSubject, Observable, Subject } from "rxjs";
 
@@ -119,7 +119,15 @@ export class Toast {
  */
 @Injectable({ providedIn: "root" })
 export class ToastService {
-  toasts: Toast[] = [];
+  /*
+   * A signal behind a getter, so that the view of the toasts is notified when a toast is shown or
+   * closed, from wherever it happens
+   */
+  private readonly toastsSignal = signal<Toast[]>([]);
+
+  get toasts(): Toast[] {
+    return this.toastsSignal();
+  }
 
   info(message: ToastMessage, title = "", options: ToastOptions = {}): Toast {
     return this.show(new Toast("info", message, title, options));
@@ -136,12 +144,12 @@ export class ToastService {
     if (!this.toasts.includes(toast)) {
       return;
     }
-    this.toasts = this.toasts.filter((t) => t !== toast);
+    this.toastsSignal.update((toasts) => toasts.filter((t) => t !== toast));
     toast.closed();
   }
 
   private show(toast: Toast): Toast {
-    this.toasts = [toast, ...this.toasts];
+    this.toastsSignal.update((toasts) => [toast, ...toasts]);
     return toast;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import log from "loglevel";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
@@ -11,7 +11,6 @@ import { RouterLink } from "@angular/router";
   selector: "ch-home",
   templateUrl: "./home.component.html",
   styleUrls: ["./home.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ManualComponent, RouterLink],
 })
 export class HomeComponent implements OnInit {
@@ -23,11 +22,11 @@ export class HomeComponent implements OnInit {
   routerLinkLogin: string;
   routerLinkSessions: string;
   routerLinkAnalyze: string;
-  homePath: string;
-  homeFile: string;
+  readonly homePath = signal<string>(undefined);
+  readonly homeFile = signal<string>(undefined);
 
-  homeHeaderPath: string;
-  homeHeaderFile: string;
+  readonly homeHeaderPath = signal<string>(undefined);
+  readonly homeHeaderFile = signal<string>(undefined);
   homeRouterPath: string;
 
   ngOnInit() {
@@ -36,9 +35,9 @@ export class HomeComponent implements OnInit {
     this.configService.get(ConfigService.KEY_HOME_PATH).subscribe({
       next: (path) => {
         if (path) {
-          this.homeFile = this.routeService.basename(path);
-          this.homePath = this.routeService.dirname(path) + "/";
-          log.info("loading custom home page", this.homePath, this.homeFile);
+          this.homeFile.set(this.routeService.basename(path));
+          this.homePath.set(this.routeService.dirname(path) + "/");
+          log.info("loading custom home page", this.homePath(), this.homeFile());
         }
       },
       error: (err) => this.errorService.showError("failed to get the path of the home page", err),
@@ -47,9 +46,9 @@ export class HomeComponent implements OnInit {
     this.configService.get(ConfigService.KEY_HOME_HEADER_PATH).subscribe({
       next: (path) => {
         if (path) {
-          this.homeHeaderFile = this.routeService.basename(path);
-          this.homeHeaderPath = this.routeService.dirname(path) + "/";
-          log.info("loading custom home page header", this.homePath, this.homeFile);
+          this.homeHeaderFile.set(this.routeService.basename(path));
+          this.homeHeaderPath.set(this.routeService.dirname(path) + "/");
+          log.info("loading custom home page header", this.homePath(), this.homeFile());
         }
       },
       error: (err) => this.errorService.showError("failed to get the path of the home page header", err),

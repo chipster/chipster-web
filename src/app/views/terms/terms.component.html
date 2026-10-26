@@ -1,10 +1,10 @@
-@if (termsOfUse) {
+@if (termsOfUse()) {
   <div class="col-md-6 offset-md-3 margin-top">
     <div class="margin-top">
-      <ch-manual assetsPath="/" page="{{ termsOfUse }}" [showControls]="false"></ch-manual>
+      <ch-manual assetsPath="/" page="{{ termsOfUse() }}" [showControls]="false"></ch-manual>
     </div>
 
-    @if (showAccept) {
+    @if (showAccept()) {
       <div class="text-center margin-top margin-bottom">
         <button class="btn btn-primary" type="button" (click)="accept()">Accept terms of use</button>
       </div>

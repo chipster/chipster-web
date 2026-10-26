@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { User } from "chipster-js-common";
 import { filter, mergeMap } from "rxjs/operators";
@@ -12,7 +12,6 @@ import { ManualComponent } from "../manual/manual.component";
   selector: "ch-terms",
   templateUrl: "./terms.component.html",
   styleUrls: ["./terms.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ManualComponent],
 })
 export class TermsComponent implements OnInit {
@@ -24,13 +23,13 @@ export class TermsComponent implements OnInit {
 
   // increase by one to force everyone to accept again
   static latestTermsVersion = 1;
-  termsOfUse: string;
-  showAccept = false;
+  readonly termsOfUse = signal<string>(undefined);
+  readonly showAccept = signal(false);
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe({
       next: (path) => {
-        this.termsOfUse = path;
+        this.termsOfUse.set(path);
       },
       error: (err) => this.restErrorService.showError("failed to get the configuration", err),
     });
@@ -43,8 +42,8 @@ export class TermsComponent implements OnInit {
         }),
       )
       .subscribe((params) => {
-        this.showAccept = !!params.showAccept;
-        console.log(this.showAccept);
+        this.showAccept.set(!!params.showAccept);
+        console.log(this.showAccept());
       });
   }
 

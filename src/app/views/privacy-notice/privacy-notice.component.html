@@ -1,8 +1,8 @@
-@if (htmlPath && htmlFile && routerPath) {
+@if (htmlPath() && htmlFile() && routerPath) {
   <div>
     <ch-manual
-      [assetsPath]="htmlPath"
-      [page]="htmlFile"
+      [assetsPath]="htmlPath()"
+      [page]="htmlFile()"
       [showControls]="false"
       [addContainer]="true"
       [routerPath]="routerPath"

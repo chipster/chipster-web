@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { AfterViewInit, Component, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { AfterViewInit, Component, OnDestroy, inject, input, signal } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -25,7 +25,6 @@ import { StaticHtmlComponent } from "./static-html/static-html.component";
   selector: "ch-manual",
   templateUrl: "./manual.component.html",
   styleUrls: ["./manual.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgClass, StaticHtmlComponent],
 })
 export class ManualComponent implements OnDestroy, AfterViewInit {
@@ -52,7 +51,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
   private currentPage;
 
   // set to null to avoid change detection error when the undefined is changed to null
-  html: SafeHtml = null;
+  readonly html = signal<SafeHtml>(null);
 
   /**
    * Listen for route changes and show the corresponding page
@@ -78,7 +77,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
           const page = this.page();
           log.debug("route changed", this.activatedRoute.snapshot.url, page, this.activatedRoute.snapshot.fragment);
           // only way to update the StaticHtmlComponent is to destroy it first
-          this.html = null;
+          this.html.set(null);
 
           if (page) {
             this.currentPage = page;
@@ -96,7 +95,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
         map((htmlDoc) => this.rewrite(htmlDoc, this.currentPage)),
         // show
         map((html) => {
-          this.html = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(html));
+          this.html.set(this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(html)));
         }),
       )
       .subscribe({

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
@@ -20,7 +20,6 @@ import { NGB_DROPDOWN_IMPORTS } from "../../shared/directives/dropdown-close.dir
   selector: "ch-navigation",
   templateUrl: "./navigation.component.html",
   styleUrls: ["./navigation.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterLinkActive, RouterLink, NGB_DROPDOWN_IMPORTS],
 })
 export class NavigationComponent implements OnInit {
@@ -42,12 +41,12 @@ export class NavigationComponent implements OnInit {
   routerLinkHome = RouteService.PATH_HOME;
   routerLinkSessions = RouteService.PATH_SESSIONS;
   routerLinkAnalyze = RouteService.PATH_ANALYZE;
-  appName = "";
-  appNameReady = false;
+  readonly appName = signal("");
+  readonly appNameReady = signal(false);
 
   news: NewsItem[];
   unreadNews: boolean = false;
-  unreadNewsCount: number = 0;
+  readonly unreadNewsCount = signal<number>(0);
 
   ngOnInit() {
     // apply configurable styles
@@ -74,9 +73,9 @@ export class NavigationComponent implements OnInit {
     this.configService.get(ConfigService.KEY_APP_NAME).subscribe({
       next: (name) => {
         if (name) {
-          this.appName = name;
+          this.appName.set(name);
           document.title = name;
-          this.appNameReady = true;
+          this.appNameReady.set(true);
         }
       },
       error: (err) => {
@@ -108,9 +107,11 @@ export class NavigationComponent implements OnInit {
               // Calculate both unread flag and count
               this.unreadNews =
                 lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(this.news[0]);
-              this.unreadNewsCount = this.news.filter(
-                (item) => lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(item),
-              ).length;
+              this.unreadNewsCount.set(
+                this.news.filter(
+                  (item) => lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(item),
+                ).length,
+              );
             },
           });
         }
@@ -155,7 +156,7 @@ export class NavigationComponent implements OnInit {
       this.dialogModalService.openNewsModal(this.news).subscribe({
         complete: () => {
           this.unreadNews = false;
-          this.unreadNewsCount = 0; // Reset the count when news modal is closed
+          this.unreadNewsCount.set(0); // Reset the count when news modal is closed
         },
       });
     } else {

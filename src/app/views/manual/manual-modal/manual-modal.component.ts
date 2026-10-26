@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Tool } from "chipster-js-common";
 import { ToolService } from "../../sessions/session/tools/tool.service";
@@ -18,7 +18,6 @@ import { AsyncPipe } from "@angular/common";
   selector: "ch-manual-modal-component",
   templateUrl: "./manual-modal.component.html",
   styleUrls: ["./manual-modal.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgbNav,
     NgbNavItem,
