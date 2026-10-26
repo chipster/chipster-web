@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, OnChanges, OnDestroy, inject, input, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import type { OnProgressParameters } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { Subject } from "rxjs";
@@ -20,7 +20,6 @@ enum ButtonAction {
   selector: "ch-pdf-visualization",
   templateUrl: "./pdf-visualization.component.html",
   styleUrls: ["./pdf-visualization.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [StatusComponent, PdfViewerComponent],
 })
 export class PdfVisualizationComponent implements OnChanges, OnDestroy {
@@ -30,7 +29,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   readonly dataset = input<Dataset>(undefined);
 
-  src: string;
+  readonly src = signal<string>(undefined);
 
   page: number;
   totalPages;
@@ -49,8 +48,8 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   showAllButtonText: string;
 
   private unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
-  urlReady = false;
+  readonly state = signal<LoadState>(undefined);
+  readonly urlReady = signal(false);
 
   private readonly showAllPagesText: string = "Show all pages";
   private readonly showSinglePagesText: string = "Show single page";
@@ -80,21 +79,23 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
     // check for empty file
     if (this.dataset().size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
     // ask before showing large files
     if (this.dataset().size > this.autoShowLimit) {
       // the size is rounded up, so that it's never shown below the limit
-      this.state = new LoadState(
-        State.TooLarge,
-        "This PDF (" +
-          this.bytesPipe.transform(this.dataset().size, 1, true) +
-          ") is larger than " +
-          this.bytesPipe.transform(this.autoShowLimit, 0) +
-          ". Showing it here may be slow or make the page unresponsive. Opening it in a new tab is recommended.",
-        [this.showHereButton, this.openNewTabButton],
+      this.state.set(
+        new LoadState(
+          State.TooLarge,
+          "This PDF (" +
+            this.bytesPipe.transform(this.dataset().size, 1, true) +
+            ") is larger than " +
+            this.bytesPipe.transform(this.autoShowLimit, 0) +
+            ". Showing it here may be slow or make the page unresponsive. Opening it in a new tab is recommended.",
+          [this.showHereButton, this.openNewTabButton],
+        ),
       );
       return;
     }
@@ -106,7 +107,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
     if (action === ButtonAction.ShowHere) {
       // only from the states that show the button, so that a second click
       // before the button disappears doesn't start a second load
-      if (this.state.isTooLarge() || this.state.isFail()) {
+      if (this.state().isTooLarge() || this.state().isFail()) {
         this.load();
       }
     } else if (action === ButtonAction.OpenNewTab) {
@@ -118,7 +119,7 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
   private resetLoad() {
     // any positive value will do until the viewer tells the height of its pages, 0 would keep them from being rendered
     this.height = 500;
-    this.urlReady = false;
+    this.urlReady.set(false);
     this.loadedBytes = 0;
     this.totalBytes = 0;
     this.totalPages = null;
@@ -126,14 +127,14 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   private load() {
     this.resetLoad();
-    this.state = new LoadState(State.Loading, "Loading pdf file...");
+    this.state.set(new LoadState(State.Loading, "Loading pdf file..."));
     this.sessionDataService
       .getDatasetUrl(this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (url) => {
-          this.src = url;
-          this.urlReady = true;
+          this.src.set(url);
+          this.urlReady.set(true);
         },
         error: (error: any) => this.pdfLoadFailed(error),
       });
@@ -158,14 +159,14 @@ export class PdfVisualizationComponent implements OnChanges, OnDestroy {
 
   pdfLoadComplete(pdf: { numPages: number }) {
     this.totalPages = pdf.numPages;
-    this.state = new LoadState(State.Ready);
+    this.state.set(new LoadState(State.Ready));
   }
 
   pdfLoadFailed(error: any) {
-    this.urlReady = false;
+    this.urlReady.set(false);
     // keep the way out, so that the user doesn't have to select the file again
-    this.state = new LoadState(State.Fail, "Loading pdf file failed", [this.tryAgainButton, this.openNewTabButton]);
-    this.restErrorService.showError(this.state.message, error);
+    this.state.set(new LoadState(State.Fail, "Loading pdf file failed", [this.tryAgainButton, this.openNewTabButton]));
+    this.restErrorService.showError(this.state().message, error);
   }
 
   // pdf.js changes the page itself too, for example when a link in the pdf is clicked

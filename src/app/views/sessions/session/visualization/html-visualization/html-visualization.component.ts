@@ -5,11 +5,11 @@ import {
   OnChanges,
   OnDestroy,
   OnInit,
-  ChangeDetectionStrategy,
   inject,
   input,
   effect,
   viewChild,
+  signal,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { fromEvent, Subject, Subscription } from "rxjs";
@@ -70,7 +70,6 @@ import { StatusComponent } from "../../../../../shared/components/status.compone
   selector: "ch-htmlvisualization",
   templateUrl: "./html-visualization.component.html",
   styleUrls: ["./html-visualization.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [StatusComponent],
 })
 export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy {
@@ -310,7 +309,7 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
   private lastScrollTime = 0;
   private unsubscribe: Subject<any> = new Subject();
   private messageSubscription: Subscription;
-  state: LoadState;
+  readonly state = signal<LoadState>(undefined);
 
   ngOnInit() {
     // listen outside Angular, because the size messages can arrive on every animation frame and
@@ -323,12 +322,12 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading html file...");
+    this.state.set(new LoadState(State.Loading, "Loading html file..."));
     this.html = null;
 
     // check for empty file
     if (this.dataset().size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
@@ -339,11 +338,11 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
         next: (html: string) => {
           // given to the iframe when the ready state has created it
           this.html = HtmlvisualizationComponent.FRAME_SCRIPT + html;
-          this.state = new LoadState(State.Ready);
+          this.state.set(new LoadState(State.Ready));
         },
         error: (error: any) => {
-          this.state = new LoadState(State.Fail, "Loading html file failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading html file failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }
