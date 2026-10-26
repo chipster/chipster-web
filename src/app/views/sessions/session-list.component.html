@@ -14,11 +14,11 @@
 
       <!-- session list -->
       <div class="session-list">
-        @if (sessionListLoading) {
+        @if (sessionListLoading()) {
           <div style="font-size: smaller; font-style: italic">Loading...</div>
         }
 
-        @for (sharedByUsername of sessionsByUserKeys; track sharedByUsername) {
+        @for (sharedByUsername of sessionsByUserKeys(); track sharedByUsername) {
           <div>
             <!-- sessions section header (Your sessions, Example sessions...) -->
             <h5>
@@ -27,7 +27,7 @@
             </h5>
 
             <!-- info text if no personal sessions -->
-            @if (noPersonalSessions && sharedByUsername === null) {
+            @if (noPersonalSessions() && sharedByUsername === null) {
               <table class="table table-sm">
                 <tbody>
                   <tr class="session-list-item">
@@ -38,9 +38,9 @@
             }
 
             <!-- session rows -->
-            <table class="table table-sm" [ngClass]="{ 'table-hover': !selectionDisabled }">
+            <table class="table table-sm" [ngClass]="{ 'table-hover': !selectionDisabled() }">
               <tbody>
-                @for (session of sessionsByUser.get(sharedByUsername); track session.sessionId) {
+                @for (session of sessionsByUser().get(sharedByUsername); track session.sessionId) {
                   <tr
                     (mouseover)="onSessionMouseover(session)"
                     (mouseout)="onSessionMouseout()"
@@ -54,7 +54,7 @@
                         {{ session.name }}
 
                         <!-- buttons -->
-                        @if (!this.deletingSessions.has(session)) {
+                        @if (!this.deletingSessions().has(session)) {
                           <span>
                             <!-- delete button -->
                             <button
@@ -82,7 +82,7 @@
                               <button
                                 (click)="$event.stopImmediatePropagation()"
                                 [ngClass]="{ 'visible-button': buttonsVisible(session) }"
-                                [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
+                                [ngClass]="{ 'show-on-row-hover': !selectionDisabled() }"
                                 class="btn btn-sm btn-outline-dark btn-no-border hidden float-end"
                                 id="sessionDropdown"
                                 title="Actions"
@@ -127,11 +127,11 @@
                         }
 
                         <!-- preview button -->
-                        @if (mode === SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW) {
+                        @if (mode() === SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW) {
                           <button
                             (click)="$event.stopImmediatePropagation(); selectSession(session)"
                             [ngClass]="{ 'visible-button': buttonsVisible(session) }"
-                            [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
+                            [ngClass]="{ 'show-on-row-hover': !selectionDisabled() }"
                             class="btn btn-sm btn-outline-dark btn-no-border hidden float-end"
                             title="Preview">
                             <span class="fas fa-eye"></span>
@@ -143,7 +143,7 @@
                           <button
                             (click)="$event.stopImmediatePropagation(); acceptSession(session)"
                             [ngClass]="{ 'visible-button': buttonsVisible(session) }"
-                            [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
+                            [ngClass]="{ 'show-on-row-hover': !selectionDisabled() }"
                             class="btn btn-sm btn-secondary hidden float-end me-3"
                             title="Accept">
                             <!-- <span class="fas fa-play"></span> -->
@@ -152,11 +152,11 @@
                         }
 
                         <!-- open button -->
-                        @if (mode === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN) {
+                        @if (mode() === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN) {
                           <button
                             (click)="$event.stopImmediatePropagation(); openSession(session.sessionId)"
                             [ngClass]="{ 'visible-button': buttonsVisible(session) }"
-                            [ngClass]="{ 'show-on-row-hover': !selectionDisabled }"
+                            [ngClass]="{ 'show-on-row-hover': !selectionDisabled() }"
                             class="btn btn-sm btn-secondary hidden float-end me-3"
                             title="Open">
                             <!-- <span class="fas fa-play"></span> -->
@@ -165,7 +165,7 @@
                         }
 
                         <!-- deleting text instead of buttons for sessions which are being deleted -->
-                        @if (deletingSessions.has(session)) {
+                        @if (deletingSessions().has(session)) {
                           <span class="float-end" style="font-size: smaller; font-style: italic">
                             <!-- use hidden button to keep the row height static -->
                             <button class="btn btn-sm btn-outline-dark btn-no-border hidden">
@@ -189,11 +189,11 @@
     <!-- right side panel-->
     <div class="col">
       <div id="workflow-dataset-panel" class="text-muted">
-        @if (mode !== SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN) {
+        @if (mode() !== SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN) {
           <p>To open a session, click on the session name.</p>
         }
 
-        @if (mode === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN) {
+        @if (mode() === SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN) {
           <p>Click on the session name to see a preview.</p>
         }
 
@@ -215,20 +215,20 @@
           .
         </p>
 
-        @if (stats !== null) {
+        @if (stats() !== null) {
           <table class="table table-sm text-sm mt-2">
             <tr>
               <td class="lighter pe-2">Sessions:</td>
-              <td class="lighter" style="width: 100%">{{ sessionsByUser.get(null).length }}</td>
+              <td class="lighter" style="width: 100%">{{ sessionsByUser().get(null).length }}</td>
             </tr>
             <tr>
               <td class="lighter">Total Size:</td>
-              @if (stats !== null) {
+              @if (stats() !== null) {
                 <td class="lighter" style="width: 100%">
-                  {{ stats["size"] | bytes: 0 }}
+                  {{ stats()["size"] | bytes: 0 }}
                 </td>
               }
-              @if (stats === null) {
+              @if (stats() === null) {
                 <td class="lighter" style="width: 100%">Loading...</td>
               }
             </tr>
@@ -237,9 +237,9 @@
       </div>
 
       <div id="session-preview" style="position: relative">
-        @if (selectedSession) {
+        @if (selectedSession()) {
           <div id="preview-container">
-            @if (mode !== SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW) {
+            @if (mode() !== SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW) {
               <button
                 id="close-button"
                 type="button"
@@ -250,8 +250,8 @@
             }
 
             <h5 class="align-middle">
-              {{ selectedSession.name }}
-              @if (mode === SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW) {
+              {{ selectedSession().name }}
+              @if (mode() === SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW) {
                 <span class="text-smaller lighter float-end">
                   <i>preview</i>
                 </span>
@@ -259,27 +259,30 @@
             </h5>
 
             <div class="workflow-preview-panel">
-              @if (workflowPreviewLoading) {
+              @if (workflowPreviewLoading()) {
                 <div style="font-size: smaller; font-style: italic">Loading preview...</div>
               }
 
-              @if (workflowPreviewFailed) {
+              @if (workflowPreviewFailed()) {
                 <div style="font-size: smaller; font-style: italic">
                   <i>Loading preview failed.</i>
                 </div>
               }
 
-              @if (sessionData && !(sessionData.datasetsMap().size > 0)) {
+              @if (sessionData() && !(sessionData().datasetsMap().size > 0)) {
                 <div style="font-size: smaller; font-style: italic">No data in this session.</div>
               }
 
               @if (
-                sessionData && sessionData.datasetsMap() && sessionData.jobsMap() && sessionData.datasetsMap().size > 0
+                sessionData() &&
+                sessionData().datasetsMap() &&
+                sessionData().jobsMap() &&
+                sessionData().datasetsMap().size > 0
               ) {
                 <div class="workflow-graph-panel">
                   <ch-workflow-graph
-                    [modulesMap]="modulesMap"
-                    [sessionData]="sessionData"
+                    [modulesMap]="modulesMap()"
+                    [sessionData]="sessionData()"
                     [defaultScale]="0.5"
                     [enabled]="false"></ch-workflow-graph>
                 </div>
@@ -289,20 +292,20 @@
             <table id="datesTable" class="table table-sm text-sm mt-2">
               <tr>
                 <td class="lighter pe-2">Created:</td>
-                <td style="width: 100%">{{ selectedSession.created | localDate }}</td>
+                <td style="width: 100%">{{ selectedSession().created | localDate }}</td>
               </tr>
               <tr>
                 <td class="lighter pe-2">Last&nbsp;opened:</td>
-                <td style="width: 100%">{{ selectedSession.accessed | localDate }}</td>
+                <td style="width: 100%">{{ selectedSession().accessed | localDate }}</td>
               </tr>
               <tr>
                 <td class="lighter">Size:</td>
-                @if (sessionSize !== null && sessionData !== undefined) {
+                @if (sessionSize() !== null && sessionData() !== undefined) {
                   <td style="width: 100%">
-                    {{ sessionSize | bytes: 0 }}
+                    {{ sessionSize() | bytes: 0 }}
                   </td>
                 }
-                @if (sessionSize === null || sessionData === undefined) {
+                @if (sessionSize() === null || sessionData() === undefined) {
                   <td style="width: 100%">Loading...</td>
                 }
               </tr>
@@ -310,7 +313,7 @@
 
             <div>
               <!-- Create new element for each paragraph to preserve new line characters -->
-              @for (line of selectedSession.notes?.split("\n"); track $index) {
+              @for (line of selectedSession().notes?.split("\n"); track $index) {
                 <p>
                   {{ line }}
                 </p>
@@ -329,7 +332,7 @@
       <div class="mb-3">
         <small>Sessions you have shared with others waiting for the recipient to accept.</small>
       </div>
-      @if (sessionShares.length === 0) {
+      @if (sessionShares().length === 0) {
         <table class="table table-sm">
           <tbody>
             <tr class="session-list-item">
@@ -340,9 +343,9 @@
       }
 
       <!-- session rows -->
-      <table class="table table-sm" [ngClass]="{ 'table-hover': !selectionDisabled }">
+      <table class="table table-sm" [ngClass]="{ 'table-hover': !selectionDisabled() }">
         <tbody>
-          @if (sessionShares.length > 0) {
+          @if (sessionShares().length > 0) {
             <tr>
               <th>Shared to</th>
               <th>Session</th>
@@ -350,7 +353,7 @@
               <th></th>
             </tr>
           }
-          @for (session of sessionShares; track session.rules[0].ruleId) {
+          @for (session of sessionShares(); track session.rules[0].ruleId) {
             <tr [ngClass]="{ highlight: rowHighlighted(session) }" class="session-list-item">
               <td>
                 <span>{{ session.rules[0].username }}</span>
@@ -364,7 +367,7 @@
               </td>
               <td>
                 <!-- buttons -->
-                @if (!this.deletingSessions.has(session)) {
+                @if (!this.deletingSessions().has(session)) {
                   <span>
                     <!-- delete button -->
                     <button
@@ -377,7 +380,7 @@
                 }
 
                 <!-- deleting text instead of buttons for sessions which are being deleted -->
-                @if (deletingSessions.has(session)) {
+                @if (deletingSessions().has(session)) {
                   <span class="float-end" style="font-size: smaller; font-style: italic">
                     <!-- use hidden button to keep the row height static -->
                     <button class="btn btn-sm btn-outline-dark btn-no-border hidden">

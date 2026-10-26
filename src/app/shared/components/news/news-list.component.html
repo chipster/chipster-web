@@ -4,11 +4,11 @@
   </div>
 }
 
-@if (state.isReady() && news != null && news.length > 0) {
+@if (state().isReady() && news() != null && news().length > 0) {
   <div>
     <table class="table table">
       <tbody>
-        @for (n of news; track n.newsId) {
+        @for (n of news(); track n.newsId) {
           <tr>
             <td>
               <ch-news-item
@@ -24,13 +24,13 @@
   </div>
 }
 
-@if (state.isReady() && (news == null || news.length < 1)) {
+@if (state().isReady() && (news() == null || news().length < 1)) {
   <div>No news yet.</div>
 }
 
-@if (state.isLoading()) {
+@if (state().isLoading()) {
   <div>Loading news...</div>
 }
-@if (state.isFail()) {
-  <div>{{ errorMessage }}</div>
+@if (state().isFail()) {
+  <div>{{ errorMessage() }}</div>
 }

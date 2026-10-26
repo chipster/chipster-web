@@ -13,16 +13,16 @@
       <th style="width: 8rem; min-width: 6rem">Actions</th>
     </thead>
     <tbody>
-      @for (file of files; track file) {
+      @for (file of files(); track file.file) {
         <tr>
           <td>
             {{ file.relativePath }}
           </td>
           <td>
-            @if (!(file.error || file.isComplete())) {
-              <ngb-progressbar [value]="file.progress() * 100" [max]="100"></ngb-progressbar>
+            @if (!(file.error || file.complete)) {
+              <ngb-progressbar [value]="file.progress * 100" [max]="100"></ngb-progressbar>
             }
-            @if (file.isComplete() && !file.error) {
+            @if (file.complete && !file.error) {
               <span>
                 <i class="fas fa-check-circle text-success" aria-hidden="true"></i>
               </span>
@@ -41,21 +41,21 @@
           </td>
           <td>
             <div>
-              @if (file.progress() !== 0 && !file.paused && !file.isComplete()) {
-                <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="file.pause()">
+              @if (file.progress !== 0 && !file.paused && !file.complete) {
+                <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="pause(file.file)">
                   <i class="fas fa-pause" aria-hidden="true"></i>
                 </button>
               }
-              @if (file.paused && !file.isComplete()) {
-                <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="file.resume()">
+              @if (file.paused && !file.complete) {
+                <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="resume(file.file)">
                   <i class="fas fa-play" aria-hidden="true"></i>
                 </button>
               }
-              @if (!file.isComplete()) {
+              @if (!file.complete) {
                 <button
                   type="button"
                   class="btn btn-outline-dark btn-no-border btn-sm float-end"
-                  (click)="cancelUpload(file)">
+                  (click)="cancelUpload(file.file)">
                   <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
               }
@@ -69,22 +69,22 @@
   <div class="row">
     <div class="col">
       <!-- <span *ngIf="flow.getSize()" class="badge badge-info float-start">Total Size: {{flow.getSize() | bytes}}</span> -->
-      @if (flow().timeRemaining()) {
+      @if (timeRemaining()) {
         <span class="float-start">
-          <i>Time remaining: {{ flow().timeRemaining() | secondspipe }}</i>
+          <i>Time remaining: {{ timeRemaining() | secondspipe }}</i>
         </span>
       }
 
       <div class="float-end text-nowrap">
-        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow().cancel()">
+        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="cancelAll()">
           <i class="fas fa-times" aria-hidden="true"></i>
           Cancel all
         </button>
-        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow().resume()">
+        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="resumeAll()">
           <i class="fas fa-play" aria-hidden="true"></i>
           Resume all
         </button>
-        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="flow().pause()">
+        <button class="btn btn-outline-secondary btn-sm controlButton ms-1" (click)="pauseAll()">
           <i class="fas fa-pause" aria-hidden="true"></i>
           Pause all
         </button>
