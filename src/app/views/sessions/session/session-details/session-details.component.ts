@@ -38,11 +38,11 @@ export class SessionDetailsComponent {
   readonly deleteSession = output<Session>();
 
   renameSessionModal() {
-    this.sessionService.openRenameModalAndUpdate(this.session());
+    this.sessionService.openRenameModalAndUpdate(this.session()).subscribe();
   }
 
   notesModal() {
-    this.sessionService.openNotesModalAndUpdate(this.session());
+    this.sessionService.openNotesModalAndUpdate(this.session()).subscribe();
   }
 
   sharingModal() {
