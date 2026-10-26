@@ -182,7 +182,7 @@ export class SessionDataService {
   }
 
   hasReadWriteAccess(sessionData: SessionData) {
-    const rules = this.getApplicableRules(sessionData.session.rules);
+    const rules = this.getApplicableRules(sessionData.session().rules);
     return rules.some((rule) => rule.readWrite);
   }
 

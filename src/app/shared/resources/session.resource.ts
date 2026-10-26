@@ -136,7 +136,7 @@ export class SessionResource {
           console.warn("skipped " + (datasets.length - completeDatasets.length) + " non-complete datasets");
         }
 
-        data.session = session;
+        data.session.set(session);
         data.datasetsMap.set(UtilsService.arrayToMap(completeDatasets, "datasetId"));
         data.jobsMap.set(UtilsService.arrayToMap(jobs, "jobId"));
         data.labelsMap.set(UtilsService.arrayToMap(labels, "labelId"));
@@ -590,7 +590,7 @@ export class SessionResource {
       sessionData.jobsMap().size,
       "jobs",
     );
-    const newSession: Session = clone(sessionData.session);
+    const newSession: Session = clone(sessionData.session());
     newSession.sessionId = null;
     newSession.name = name || "unnamed session";
     newSession.state = SessionState.Import;

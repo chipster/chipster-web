@@ -165,7 +165,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     return this.sessionResource.loadSession(sessionId, true).pipe(
       mergeMap((data: SessionData) => {
         sessionData = data;
-        const name = utcDate + "_" + userId + "_" + sessionData.session.name;
+        const name = utcDate + "_" + userId + "_" + sessionData.session().name;
         return this.sessionResource.copySession(sessionData, name, false);
       }),
       tap((id: string) => {

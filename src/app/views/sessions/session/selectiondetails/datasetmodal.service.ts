@@ -142,7 +142,7 @@ export class DatasetModalService {
 
   public openCopySelectionToNewSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
     this.dialogModalService
-      .openSessionNameModal("Copy selected files to a new session", sessionData.session.name + "_part", "Copy")
+      .openSessionNameModal("Copy selected files to a new session", sessionData.session().name + "_part", "Copy")
       .pipe(
         mergeMap((name: string) => {
           log.info("copying selected datasets and jobs");
@@ -192,7 +192,7 @@ export class DatasetModalService {
           this.changeIds(selectedSessionData);
 
           const copy = this.sessionResource.copyToExistingSession(
-            targetSessionData.session.sessionId,
+            targetSessionData.session().sessionId,
             selectedSessionData,
             targetSessionData.labelsMap() ?? new Map(),
           );
@@ -234,7 +234,7 @@ export class DatasetModalService {
           this.changeIds(sourceSessionData);
 
           const copy = this.sessionResource.copyToExistingSession(
-            sessionData.session.sessionId,
+            sessionData.session().sessionId,
             sourceSessionData,
             sessionData.labelsMap() ?? new Map(),
           );
@@ -300,7 +300,7 @@ export class DatasetModalService {
     }
 
     const selection = new SessionData();
-    selection.session = sessionData.session;
+    selection.session.set(sessionData.session());
     selection.datasetsMap.set(selectedDatasetsMap);
     selection.jobsMap.set(sourceJobs);
     selection.labelsMap.set(filteredLabelsMap);

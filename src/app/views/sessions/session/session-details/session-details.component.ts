@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { map, mergeMap } from "rxjs/operators";
@@ -19,7 +19,6 @@ import { LocalDatePipe } from "../../../../shared/pipes/local-date.pipe";
   selector: "ch-session-details",
   templateUrl: "./session-details.component.html",
   styleUrls: ["./session-details.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NGB_DROPDOWN_IMPORTS, BytesPipe, LocalDatePipe],
 })
 export class SessionDetailsComponent {
@@ -61,7 +60,7 @@ export class SessionDetailsComponent {
         mergeMap((name) => {
           let copyOrUpdate$;
           const sessionData = this.sessionData();
-          if (!this.sessionService.isTemporary(sessionData.session)) {
+          if (!this.sessionService.isTemporary(sessionData.session())) {
             log.info("duplicate for normal session, copying session");
             copyOrUpdate$ = this.sessionResource.copySession(sessionData, name, false).pipe(
               map((sessionId) => {
@@ -71,9 +70,8 @@ export class SessionDetailsComponent {
             );
           } else {
             log.info("duplicate for temp session, updating session");
-            sessionData.session.name = name;
-            sessionData.session.state = SessionState.Ready;
-            copyOrUpdate$ = this.sessionService.updateSession(sessionData.session).pipe(map(() => true));
+            sessionData.session.update((s) => ({ ...s, name, state: SessionState.Ready }));
+            copyOrUpdate$ = this.sessionService.updateSession(sessionData.session()).pipe(map(() => true));
           }
 
           return this.dialogModalService.openSpinnerModal("Duplicate session", copyOrUpdate$);
@@ -97,7 +95,7 @@ export class SessionDetailsComponent {
     this.dialogModalService
       .openBooleanModal(
         "Delete session",
-        "Delete session " + this.sessionData().session.name + "?",
+        "Delete session " + this.sessionData().session().name + "?",
         "Delete",
         "Cancel",
         "btn-danger",

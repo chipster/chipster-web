@@ -123,7 +123,7 @@ export class LabelsContextMenuService {
     const state = this.computeState(datasets, label);
     const shouldRemove = state === "checked";
 
-    const sessionId = sessionData.session.sessionId;
+    const sessionId = sessionData.session().sessionId;
     const updates: Dataset[] = [];
 
     for (const dataset of datasets) {

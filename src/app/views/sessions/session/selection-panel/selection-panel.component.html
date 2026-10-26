@@ -1,5 +1,5 @@
 <!-- no selection, show something -->
-@if (!(showTool || showFile || showJob)) {
+@if (!(showTool || showFile || showJob())) {
   <div>
     <h3 class="panel-title">Selection</h3>
     <div class="chipster-highlight">
@@ -9,19 +9,19 @@
 }
 
 <!-- tool -->
-@if (showTool || settingsService.splitSelectionPanel$.getValue()) {
+@if (showTool || splitSelectionPanel()) {
   <ch-tool-details
     [sessionData]="sessionData()"
     [selectedDatasets]="selectionService.selectedDatasets"></ch-tool-details>
 }
 
 <!-- job -->
-@if (showJob) {
+@if (showJob()) {
   <ch-job [sessionData]="sessionData()"></ch-job>
 }
 
 <!-- file -->
-@if (showFile || settingsService.splitSelectionPanel$.getValue()) {
+@if (showFile || splitSelectionPanel()) {
   <ch-selected-files
     [dataset]="selectionService.selectedDatasets[0]"
     [sessionData]="sessionData()"

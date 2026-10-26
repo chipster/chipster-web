@@ -38,7 +38,7 @@ export class UploadComponent implements AfterViewInit, OnInit {
       });
 
       this.modal = this.modalRef.componentInstance as UploadModalComponent;
-      this.modal.sessionId.set(this.sessionData().session.sessionId);
+      this.modal.sessionId.set(this.sessionData().session().sessionId);
       this.modal.flow.set(this.flow);
       this.modalOpen = true;
 

@@ -1,10 +1,10 @@
-@if (state !== ComponentState.READY && state !== ComponentState.NOT_FOUND) {
+@if (state() !== ComponentState.READY && state() !== ComponentState.NOT_FOUND) {
   <div class="container-fluid">
-    {{ state }}
+    {{ state() }}
   </div>
 }
 
-@if (state === ComponentState.NOT_FOUND) {
+@if (state() === ComponentState.NOT_FOUND) {
   <div class="container-fluid">
     <h3 class="h3-xs">Session not found</h3>
     <p>
@@ -15,11 +15,11 @@
   </div>
 }
 
-@if (state === ComponentState.READY) {
+@if (state() === ComponentState.READY) {
   <div class="session-view container-fluid">
     <as-split>
       <!-- split 1 -->
-      <as-split-area [size]="split1Size" class="d-flex flex-column">
+      <as-split-area [size]="split1Size()" class="d-flex flex-column">
         <!-- workflow and files -->
         <ch-session-panel
           [sessionData]="sessionData"
@@ -29,8 +29,8 @@
       </as-split-area>
 
       <!-- split 2-->
-      <as-split-area id="myDiv" [size]="split2Size" class="scrollable">
-        @if (!split3Visible) {
+      <as-split-area id="myDiv" [size]="split2Size()" class="scrollable">
+        @if (!split3Visible()) {
           <div>
             <div class="row">
               <div class="col">
@@ -48,7 +48,7 @@
 
                 @if (selectionService.selectedDatasets.length < 1) {
                   <ch-session-details
-                    [session]="sessionData.session"
+                    [session]="sessionData.session()"
                     [sessionData]="sessionData"
                     (deleteSession)="onDeleteSession()"></ch-session-details>
                 }
@@ -69,8 +69,8 @@
       </as-split-area>
 
       <!-- split 3-->
-      @if (split3Visible) {
-        <as-split-area [size]="split3Size" class="split-3 scrollable">
+      @if (split3Visible()) {
+        <as-split-area [size]="split3Size()" class="split-3 scrollable">
           <div class="row">
             <div class="col">
               <ch-tool-list-accordion
