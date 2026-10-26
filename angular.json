@@ -178,8 +178,7 @@
       "setParserOptionsProject": true
     },
     "@schematics/angular:component": {
-      "type": "component",
-      "changeDetection": "Eager"
+      "type": "component"
     },
     "@schematics/angular:directive": {
       "type": "directive"
