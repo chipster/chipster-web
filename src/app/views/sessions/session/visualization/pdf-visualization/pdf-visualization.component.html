@@ -1,4 +1,4 @@
-@if (state.isReady()) {
+@if (state().isReady()) {
   <div>
     <div class="row" id="pdf-view-navigation">
       <div class="col-md-5">
@@ -67,14 +67,14 @@
     </div>
   </div>
 } @else {
-  <ch-status [state]="state" (buttonEvent)="onStatusButton($event)"></ch-status>
-  @if (state.isLoading()) {
+  <ch-status [state]="state()" (buttonEvent)="onStatusButton($event)"></ch-status>
+  @if (state().isLoading()) {
     <progress value="{{ loadedBytes }}" max="{{ totalBytes }}"></progress>
   }
 }
-@if (urlReady) {
+@if (urlReady()) {
   <ch-pdf-viewer
-    [src]="src"
+    [src]="src()"
     [zoom]="zoom"
     [showAll]="showAll"
     [page]="page"

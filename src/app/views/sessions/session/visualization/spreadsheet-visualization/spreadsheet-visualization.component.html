@@ -1,4 +1,4 @@
-@if (state.isReady()) {
+@if (state().isReady()) {
   <div>
     <!-- preview and modal full file -->
     @if (gotFullFile && !limitRows && rowCount > 0) {
@@ -52,7 +52,7 @@
     }
   </div>
 } @else {
-  <ch-status [state]="state"></ch-status>
+  <ch-status [state]="state()"></ch-status>
 }
 
 <!-- tableContainer must always be around or new Handsontable fails, so no ngIf for it -->

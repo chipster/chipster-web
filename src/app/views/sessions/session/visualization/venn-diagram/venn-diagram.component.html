@@ -1,4 +1,4 @@
-@if (bigFiles && !isEnabled) {
+@if (bigFiles && !isEnabled()) {
   <div>
     <div class="align-middle">
       <button class="btn btn-sm btn-secondary" (click)="enable()">Draw</button>
@@ -13,13 +13,13 @@
     <div class="w-100" id="visualization"></div>
   </div>
 
-  @if (isEnabled) {
+  @if (isEnabled()) {
     <div class="col-md-4">
       <div class="">Common denominator</div>
 
       <select name="keyColumn" [(ngModel)]="columnKey" (ngModelChange)="resetSelection()">
-        <option value="identifier" [disabled]="!identifierComparingEnabled">identifier</option>
-        <option value="symbol" [disabled]="!symbolComparingEnabled">symbol</option>
+        <option value="identifier" [disabled]="!identifierComparingEnabled()">identifier</option>
+        <option value="symbol" [disabled]="!symbolComparingEnabled()">symbol</option>
       </select>
 
       @if (diagramSelection.values.length > 0) {

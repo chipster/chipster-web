@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { SessionData } from "../../../../model/session/session-data";
@@ -9,7 +9,6 @@ import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/s
   selector: "ch-visualizationmodal",
   templateUrl: "./visualizationmodal.component.html",
   styleUrls: ["./visualizationmodal.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [TextVisualizationComponent, SpreadsheetVisualizationComponent],
 })
 export class VisualizationModalComponent {

@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, OnChanges, OnDestroy, inject, input, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -10,7 +10,6 @@ import { StatusComponent } from "../../../../../shared/components/status.compone
 @Component({
   selector: "ch-image-visualization",
   templateUrl: "./image-visualization.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [StatusComponent],
 })
 export class ImageVisualizationComponent implements OnChanges, OnDestroy {
@@ -19,19 +18,19 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
 
   readonly dataset = input<Dataset>(undefined);
 
-  public src: string;
+  readonly src = signal<string>(undefined);
 
   private unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
+  readonly state = signal<LoadState>(undefined);
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading image file...");
+    this.state.set(new LoadState(State.Loading, "Loading image file..."));
 
     // check for empty file
     if (this.dataset().size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
@@ -40,12 +39,12 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (url) => {
-          this.src = url;
-          this.state = new LoadState(State.Ready);
+          this.src.set(url);
+          this.state.set(new LoadState(State.Ready));
         },
         error: (error: any) => {
-          this.state = new LoadState(State.Fail, "Loading image file failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading image file failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }

@@ -1,6 +1,6 @@
 // Super class for scatterplot and volcanoplot
 
-import { Directive, NgZone, OnChanges, OnDestroy, inject, input } from "@angular/core";
+import { Directive, NgZone, OnChanges, OnDestroy, inject, input, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
@@ -31,11 +31,11 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   dragStartPoint: Point;
   dragEndPoint: Point;
   selectedDataPointIds: Array<string>;
-  selectedDataRows: Array<TSVRow> = [];
+  readonly selectedDataRows = signal<Array<TSVRow>>([]);
   // symbols and identifiers of the selected rows, shown in the selection list
-  viewSelectionList: Array<SelectionRow> = [];
+  readonly viewSelectionList = signal<Array<SelectionRow>>([]);
   // files without a symbol column show the identifier column only
-  showSymbolColumn = false;
+  readonly showSymbolColumn = signal(false);
 
   svgPadding = 50;
   protected fileResource = inject(FileResource);
@@ -45,14 +45,14 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   private zone = inject(NgZone);
 
   protected unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
+  readonly state = signal<LoadState>(undefined);
 
   // Redraws the plot when its container changes width, see observePlotResize()
   private resizeObserver: ResizeObserver;
   private lastPlotWidth: number;
 
   ngOnChanges() {
-    this.state = new LoadState(State.Loading, "Loading data...");
+    this.state.set(new LoadState(State.Loading, "Loading data..."));
     setTimeout(() => this.show(false), 100);
   }
 
@@ -64,8 +64,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
 
     // clear any previous selection so it isn't re-applied to a new dataset
     this.selectedDataPointIds = undefined;
-    this.selectedDataRows = [];
-    this.viewSelectionList = [];
+    this.selectedDataRows.set([]);
+    this.viewSelectionList.set([]);
 
     // reset the cached width so the resize observer redraws the new dataset
     // even when the container returns to a width it had for a previous one
@@ -80,7 +80,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
 
     // check for empty file
     if (this.dataset().size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
@@ -94,15 +94,19 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
           this.tsv = new TSVFile(parsedTSV, this.dataset().datasetId, datasetName);
           if (this.tsv.body.size() > rowLimit) {
             if (showMore) {
-              this.state = new LoadState(
-                State.Fail,
-                "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points",
+              this.state.set(
+                new LoadState(
+                  State.Fail,
+                  "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points",
+                ),
               );
             } else {
-              this.state = new LoadState(
-                State.TooLarge,
-                "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
-                [{ text: "Show anyway", action: "showAnyway" }],
+              this.state.set(
+                new LoadState(
+                  State.TooLarge,
+                  "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
+                  [{ text: "Show anyway", action: "showAnyway" }],
+                ),
               );
             }
           } else {
@@ -110,8 +114,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
           }
         },
         error: (error: any) => {
-          this.state = new LoadState(State.Fail, "Loading data failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading data failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }
@@ -319,15 +323,17 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     // also clear the ids, otherwise redrawPlot() re-applies the highlight of a
     // selection that was cleared without selecting anything new
     this.selectedDataPointIds = [];
-    this.selectedDataRows = [];
-    this.viewSelectionList = [];
+    this.selectedDataRows.set([]);
+    this.viewSelectionList.set([]);
   }
 
   /** @description update the selection list shown next to the plot* */
   setViewSelectionList(): void {
-    this.showSymbolColumn = this.visualizationTSVService.containsSymbolColumn(this.tsv);
+    this.showSymbolColumn.set(this.visualizationTSVService.containsSymbolColumn(this.tsv));
     // from the rows of showSelection(), which has just looked them up
-    this.viewSelectionList = this.visualizationTSVService.getSelectionRowsFromTSVRows(this.tsv, this.selectedDataRows);
+    this.viewSelectionList.set(
+      this.visualizationTSVService.getSelectionRowsFromTSVRows(this.tsv, this.selectedDataRows()),
+    );
   }
 
   /**
@@ -378,7 +384,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   protected showSelection(ids: Array<string>): void {
     (this.selectedDataPointIds ?? []).forEach((id) => this.removeSelectionStyle(id));
     this.selectedDataPointIds = ids;
-    this.selectedDataRows = this.tsv.body.getTSVRows(ids);
+    this.selectedDataRows.set(this.tsv.body.getTSVRows(ids));
     this.setViewSelectionList();
     ids.forEach((id) => this.setSelectionStyle(id));
   }

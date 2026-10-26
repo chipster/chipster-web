@@ -7,10 +7,10 @@
   </div>
 </div>
 
-@if (state.isReady()) {
+@if (state().isReady()) {
   <div class="scrollable">
-    <img [src]="src" />
+    <img [src]="src()" />
   </div>
 } @else {
-  <ch-status [state]="state"></ch-status>
+  <ch-status [state]="state()"></ch-status>
 }

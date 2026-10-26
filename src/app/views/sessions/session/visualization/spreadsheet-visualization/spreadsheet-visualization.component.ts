@@ -4,11 +4,11 @@ import {
   NgZone,
   OnChanges,
   OnDestroy,
-  ChangeDetectionStrategy,
   inject,
   input,
   viewChild,
   ElementRef,
+  signal,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -33,7 +33,6 @@ import { StatusComponent } from "../../../../../shared/components/status.compone
   selector: "ch-spreadsheet-visualization",
   templateUrl: "./spreadsheet-visualization.component.html",
   styleUrls: ["./spreadsheet-visualization.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [LinkButtonComponent, StatusComponent],
 })
 export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, AfterViewInit {
@@ -73,7 +72,11 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
   readonly tableContainerId: string = "tableContainer-" + Math.random().toString(36).substr(2);
 
   private unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
+  /*
+   * The fields above that the template shows are set in the same callback right before the state
+   * becomes ready, and shown only when it is, so this signal notifies the view of them too
+   */
+  readonly state = signal<LoadState>(undefined);
 
   // MUST be handled outside Angular zone to prevent a change detection loop
   hot: ht.Methods;
@@ -81,7 +84,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading data...");
+    this.state.set(new LoadState(State.Loading, "Loading data..."));
 
     // Hack hack fix. There seems to be some timing issue when creating handsontable the first time.
     // Without the delay, only first column is rendered (and even that with incorrect width).
@@ -103,7 +106,7 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
     // check for empty file
     if (this.dataset().size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
@@ -204,11 +207,11 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
               this.hot = new Handsontable(container, this.getSettings(headers, body, container));
             }
           });
-          this.state = new LoadState(State.Ready);
+          this.state.set(new LoadState(State.Ready));
         },
         error: (error: Response) => {
-          this.state = new LoadState(State.Fail, "Loading data failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading data failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }

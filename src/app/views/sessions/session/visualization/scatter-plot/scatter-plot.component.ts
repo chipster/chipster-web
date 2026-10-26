@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnChanges, OnDestroy, inject } from "@angular/core";
 import * as d3 from "d3";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { PlotDirective } from "../../../../../shared/visualization/plot.directive";
@@ -12,7 +12,6 @@ import { FormsModule } from "@angular/forms";
   selector: "ch-scatter-plot",
   templateUrl: "./scatter-plot.component.html",
   styleUrls: ["./scatter-plot.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [StatusComponent, FormsModule],
 })
 export class ScatterPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
@@ -46,12 +45,14 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
         this.selectedXAxisHeader = this.chipHeaders[0];
         this.selectedYAxisHeader = this.chipHeaders[1];
         this.redrawPlot();
-        this.state = new LoadState(State.Ready);
+        this.state.set(new LoadState(State.Ready));
       } else {
-        this.state = new LoadState(State.Fail, "Dataset does not have enough columns to generate scatterplot.");
+        this.state.set(new LoadState(State.Fail, "Dataset does not have enough columns to generate scatterplot."));
       }
     } else {
-      this.state = new LoadState(State.Fail, "Only microarray data supported, no columns starting with chip. found.");
+      this.state.set(
+        new LoadState(State.Fail, "Only microarray data supported, no columns starting with chip. found."),
+      );
     }
   }
 

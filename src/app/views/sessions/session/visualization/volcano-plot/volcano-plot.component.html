@@ -1,12 +1,12 @@
-@if (!state.isReady()) {
-  <ch-status [state]="state" (buttonEvent)="showAnyway()"></ch-status>
+@if (!state().isReady()) {
+  <ch-status [state]="state()" (buttonEvent)="showAnyway()"></ch-status>
 }
 
 <div class="row">
   <div class="col-md-8">
     <div id="volcanoplot"></div>
   </div>
-  @if (state.isReady()) {
+  @if (state().isReady()) {
     <div class="col-md-4" id="setting">
       <h6 class="lighter mb-0">Parameters</h6>
       <label for="selectXaxis" class="text-sm">Fold Change</label>
@@ -31,7 +31,7 @@
         }
       </select>
 
-      @if (showZeroWarning) {
+      @if (showZeroWarning()) {
         <div class="alert alert-primary mt-3" role="alert">
           -log(p) values displayed at the upper y axis limit correspond to features with padj values rounded to zero by
           edgeR / DESeq2
@@ -40,25 +40,25 @@
 
       <div id="selectedGeneList">
         <h6 class="lighter mt-4">Selection</h6>
-        @if (selectedDataRows && selectedDataRows.length > 0) {
+        @if (selectedDataRows() && selectedDataRows().length > 0) {
           <div class="d-flex align-items-center mb-3">
-            <p class="text-sm mb-0">{{ selectedDataRows.length }}/{{ plotData.length }} features</p>
+            <p class="text-sm mb-0">{{ selectedDataRows().length }}/{{ plotData.length }} features</p>
             <button class="btn btn-primary btn-sm ms-auto" (click)="createDatasetFromSelected()">Create file</button>
           </div>
           <hr class="mt-1 mb-2" />
           <table class="table table-sm text-sm">
             <thead>
               <tr>
-                @if (showSymbolColumn) {
+                @if (showSymbolColumn()) {
                   <th scope="col">Symbol</th>
                 }
                 <th scope="col">Identifier</th>
               </tr>
             </thead>
             <tbody>
-              @for (selection of viewSelectionList; track $index) {
+              @for (selection of viewSelectionList(); track $index) {
                 <tr>
-                  @if (showSymbolColumn) {
+                  @if (showSymbolColumn()) {
                     <td>{{ selection.symbol }}</td>
                   }
                   <td>{{ selection.identifier }}</td>

@@ -1,5 +1,5 @@
-@if (!state.isReady()) {
-  <ch-status [state]="state"></ch-status>
+@if (!state().isReady()) {
+  <ch-status [state]="state()"></ch-status>
 }
 
 <div class="row">
@@ -7,28 +7,28 @@
     <div id="expressionprofile"></div>
   </div>
 
-  @if (state.isReady()) {
+  @if (state().isReady()) {
     <div class="col-md-3" id="selectedGeneList">
       <h6 class="lighter">Selection</h6>
-      @if (selectedGeneExpressions && selectedGeneExpressions.length > 0) {
+      @if (selectedGeneExpressions() && selectedGeneExpressions().length > 0) {
         <div class="d-flex align-items-center mb-3">
-          <p class="text-sm mb-0">{{ selectedGeneExpressions.length }}/{{ totalCount }} features</p>
+          <p class="text-sm mb-0">{{ selectedGeneExpressions().length }}/{{ totalCount }} features</p>
           <button class="btn btn-primary btn-sm ms-auto" (click)="createNewDataset()">Create file</button>
         </div>
         <hr class="mt-1 mb-2" />
         <table class="table table-sm text-sm">
           <thead>
             <tr>
-              @if (showSymbolColumn) {
+              @if (showSymbolColumn()) {
                 <th scope="col">Symbol</th>
               }
               <th scope="col">Identifier</th>
             </tr>
           </thead>
           <tbody>
-            @for (selection of viewSelectionList; track $index) {
+            @for (selection of viewSelectionList(); track $index) {
               <tr>
-                @if (showSymbolColumn) {
+                @if (showSymbolColumn()) {
                   <td>{{ selection.symbol }}</td>
                 }
                 <td>{{ selection.identifier }}</td>

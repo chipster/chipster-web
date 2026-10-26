@@ -1,18 +1,7 @@
-import {
-  Component,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  SimpleChanges,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-  output,
-} from "@angular/core";
+import { Component, OnChanges, SimpleChanges, computed, inject, input, output } from "@angular/core";
 import { Dataset, Job, Module, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
-import { Subject } from "rxjs";
-import { mergeMap, takeUntil } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { DatasetContextMenuService } from "../../dataset.cotext.menu.service";
@@ -22,7 +11,6 @@ import { LabelMenuItem, LabelsContextMenuService } from "../../labels/labels-con
 import { SelectionHandlerService } from "../../selection-handler.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
-import { SessionEventService } from "../../session-event.service";
 import { DatasetModalService } from "../datasetmodal.service";
 import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 import { LabelMenuItemContentComponent } from "../../labels/label-menu-item-content.component";
@@ -32,16 +20,14 @@ import { VisualizationsComponent } from "../../visualization/visualizations.comp
   selector: "ch-selected-files",
   templateUrl: "./selected-files.component.html",
   styleUrls: ["./selected-files.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NGB_DROPDOWN_IMPORTS, LabelMenuItemContentComponent, VisualizationsComponent],
 })
-export class FileComponent implements OnInit, OnChanges, OnDestroy {
+export class FileComponent implements OnChanges {
   selectionService = inject(SelectionService);
   private sessionDataService = inject(SessionDataService);
   private datasetModalService = inject(DatasetModalService);
   private dialogModalService = inject(DialogModalService);
   private restErrorService = inject(RestErrorService);
-  private sessionEventService = inject(SessionEventService);
   private getSessionDataService = inject(GetSessionDataService);
   private selectionHandlerService = inject(SelectionHandlerService);
   private datasetContextMenuService = inject(DatasetContextMenuService);
@@ -54,9 +40,11 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly doScrollFix = output<void>();
 
-  datasetName: string;
+  // the latest copy in datasetsMap, so that a rename shows
+  readonly datasetName = computed(
+    () => this.sessionData().datasetsMap().get(this.dataset().datasetId)?.name ?? this.dataset().name,
+  );
 
-  private unsubscribe: Subject<any> = new Subject();
   sourceJob: Job;
   modulesMap: Map<string, Module>;
   labelsSubmenuOpen = false;
@@ -72,24 +60,7 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(_changes: SimpleChanges): void {
-    this.datasetName = this.dataset().name;
-
     this.sourceJob = this.datasetContextMenuService.getSourceJob([this.dataset()], this.sessionData().jobsMap());
-  }
-
-  ngOnInit(): void {
-    // subscribe to selected dataset content changes, needed for getting new file name after Rename
-    this.sessionEventService
-      .getSelectedDatasetsContentsUpdatedStream()
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe({
-        next: (datasetId) => {
-          const dataset = this.dataset();
-          if (datasetId === dataset?.datasetId) {
-            this.datasetName = this.sessionData().datasetsMap().get(dataset.datasetId)?.name;
-          }
-        },
-      });
   }
 
   renameDataset() {
@@ -154,10 +125,5 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   selectChildren() {
     const children = this.getSessionDataService.getChildren(this.selectionService.selectedDatasets);
     this.selectionHandlerService.setDatasetSelection(children);
-  }
-
-  ngOnDestroy() {
-    this.unsubscribe.next(null);
-    this.unsubscribe.complete();
   }
 }

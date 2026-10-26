@@ -6,7 +6,6 @@ import {
   OnDestroy,
   OutputEmitterRef,
   SimpleChanges,
-  ChangeDetectionStrategy,
   inject,
   input,
   output,
@@ -217,7 +216,6 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
       }
     `,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class PdfViewerComponent implements OnChanges, OnDestroy {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);

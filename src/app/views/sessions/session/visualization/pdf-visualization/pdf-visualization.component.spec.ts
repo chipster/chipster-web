@@ -56,12 +56,12 @@ describe("PdfVisualizationComponent", () => {
   }
 
   function buttonTexts(): string[] {
-    return component.state.buttons.map((button) => button.text);
+    return component.state().buttons.map((button) => button.text);
   }
 
   // like the status component does, when the button with this text is clicked
   function click(buttonText: string) {
-    const button = component.state.buttons.find((candidate) => candidate.text === buttonText);
+    const button = component.state().buttons.find((candidate) => candidate.text === buttonText);
     expect(button, "button " + buttonText).toBeDefined();
     component.onStatusButton(button.action);
   }
@@ -70,21 +70,21 @@ describe("PdfVisualizationComponent", () => {
     it("shows an empty file without loading it", () => {
       select(0);
 
-      expect(component.state.state).toBe(State.EmptyFile);
+      expect(component.state().state).toBe(State.EmptyFile);
       expect(urlRequests.length).toBe(0);
     });
 
     it("loads a file at the limit directly", () => {
       select(limit);
 
-      expect(component.state.isLoading()).toBe(true);
+      expect(component.state().isLoading()).toBe(true);
       expect(urlRequests.length).toBe(1);
     });
 
     it("asks before loading a file over the limit", () => {
       select(limit + 1);
 
-      expect(component.state.isTooLarge()).toBe(true);
+      expect(component.state().isTooLarge()).toBe(true);
       expect(buttonTexts()).toEqual(["Show here", "Open in new tab"]);
       expect(urlRequests.length).toBe(0);
     });
@@ -92,28 +92,28 @@ describe("PdfVisualizationComponent", () => {
     it("shows the limit and the size of a large file in the prompt", () => {
       select(11 * 1024 * 1024);
 
-      expect(component.state.message).toContain("This PDF (11.0 MB) is larger than 10 MB.");
+      expect(component.state().message).toContain("This PDF (11.0 MB) is larger than 10 MB.");
     });
 
     it("never shows the size of a large file below the limit", () => {
       select(limit + 1);
 
-      expect(component.state.message).toContain("This PDF (10.1 MB) is larger than 10 MB.");
+      expect(component.state().message).toContain("This PDF (10.1 MB) is larger than 10 MB.");
     });
 
     it("shows the pdf when its url arrives", () => {
       select(1000);
       urlRequests[0].next("http://localhost/file.pdf");
 
-      expect(component.urlReady).toBe(true);
-      expect(component.src).toBe("http://localhost/file.pdf");
+      expect(component.urlReady()).toBe(true);
+      expect(component.src()).toBe("http://localhost/file.pdf");
     });
 
     it("is ready when the pdf is loaded", () => {
       select(1000);
       component.pdfLoadComplete({ numPages: 6 });
 
-      expect(component.state.isReady()).toBe(true);
+      expect(component.state().isReady()).toBe(true);
       expect(component.totalPages).toBe(6);
     });
   });
@@ -170,13 +170,13 @@ describe("PdfVisualizationComponent", () => {
     it("loads the file with Show here", () => {
       click("Show here");
 
-      expect(component.state.isLoading()).toBe(true);
+      expect(component.state().isLoading()).toBe(true);
       expect(urlRequests.length).toBe(1);
     });
 
     it("loads the file only once when Show here is clicked twice", () => {
       // the button is gone after the first click, but a second click may be on its way already
-      const showHere = component.state.buttons[0];
+      const showHere = component.state().buttons[0];
       component.onStatusButton(showHere.action);
       component.onStatusButton(showHere.action);
 
@@ -187,7 +187,7 @@ describe("PdfVisualizationComponent", () => {
       click("Open in new tab");
 
       expect(openedInNewTab).toEqual([component.dataset()]);
-      expect(component.state.isTooLarge()).toBe(true);
+      expect(component.state().isTooLarge()).toBe(true);
       expect(urlRequests.length).toBe(0);
     });
   });
@@ -197,8 +197,8 @@ describe("PdfVisualizationComponent", () => {
       select(1000);
       urlRequests[0].error(new Error("test failure"));
 
-      expect(component.state.isFail()).toBe(true);
-      expect(component.state.message).toBe("Loading pdf file failed");
+      expect(component.state().isFail()).toBe(true);
+      expect(component.state().message).toBe("Loading pdf file failed");
       expect(shownErrors).toEqual(["Loading pdf file failed"]);
     });
 
@@ -211,10 +211,10 @@ describe("PdfVisualizationComponent", () => {
 
       click("Open in new tab");
       expect(openedInNewTab).toEqual([component.dataset()]);
-      expect(component.state.isFail()).toBe(true);
+      expect(component.state().isFail()).toBe(true);
 
       click("Try again");
-      expect(component.state.isLoading()).toBe(true);
+      expect(component.state().isLoading()).toBe(true);
       expect(urlRequests.length).toBe(2);
     });
 
@@ -230,7 +230,7 @@ describe("PdfVisualizationComponent", () => {
       expect(component.loadedBytes).toBe(0);
       expect(component.totalBytes).toBe(0);
       expect(component.height).toBe(500);
-      expect(component.urlReady).toBe(false);
+      expect(component.urlReady()).toBe(false);
     });
 
     it("ends in the fail state when the pdf viewer fails", () => {
@@ -238,9 +238,9 @@ describe("PdfVisualizationComponent", () => {
       urlRequests[0].next("http://localhost/file.pdf");
       component.pdfLoadFailed(new Error("test failure"));
 
-      expect(component.state.isFail()).toBe(true);
-      expect(component.state.message).toBe("Loading pdf file failed");
-      expect(component.urlReady).toBe(false);
+      expect(component.state().isFail()).toBe(true);
+      expect(component.state().message).toBe("Loading pdf file failed");
+      expect(component.urlReady()).toBe(false);
       expect(shownErrors).toEqual(["Loading pdf file failed"]);
     });
   });
