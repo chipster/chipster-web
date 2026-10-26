@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, output } from "@angular/core";
+import { Component, OnInit, inject, output } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Dataset } from "chipster-js-common";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
@@ -9,7 +9,6 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-dataset-details",
   templateUrl: "./dataset-details.component.html",
   styleUrls: ["./dataset-details.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class DatasetDetailsComponent implements OnInit {
   readonly delete = output<void>();

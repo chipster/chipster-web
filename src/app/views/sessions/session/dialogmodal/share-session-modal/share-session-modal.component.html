@@ -24,7 +24,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (rule of rules; track rule.ruleId) {
+      @for (rule of rules(); track rule.ruleId) {
         <tr>
           <th scope="row">{{ rule.username }}</th>
           <td>{{ rule.readWrite ? "read-write" : "read-only" }}</td>
@@ -47,17 +47,17 @@
           </td>
         </tr>
       }
-      @if (newRule) {
+      @if (newRule()) {
         <tr>
           <th scope="row">
             <input
               #usernameInput
               type="text"
-              [(ngModel)]="newRule.username"
+              [(ngModel)]="newRule().username"
               (keyup.enter)="!isNewRuleUsernameBlank() && saveRule()" />
           </th>
           <td>
-            <select [(ngModel)]="newRule.readWrite">
+            <select [(ngModel)]="newRule().readWrite">
               <option value="true">read-write</option>
               <option value="false">read-only</option>
             </select>
@@ -69,13 +69,13 @@
     </tbody>
   </table>
 
-  @if (!newRule) {
+  @if (!newRule()) {
     <button class="btn btn-sm btn-primary" (click)="addNewRule()">Add rule</button>
   }
 
-  @if (newRule) {
+  @if (newRule()) {
     <div>
-      <button class="btn btn-sm btn-secondary me-1" (click)="newRule = null">Cancel</button>
+      <button class="btn btn-sm btn-secondary me-1" (click)="newRule.set(null)">Cancel</button>
       <button class="btn btn-sm btn-success" [disabled]="isNewRuleUsernameBlank()" (click)="saveRule()">Add</button>
     </div>
   }

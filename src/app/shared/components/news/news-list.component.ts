@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, input } from "@angular/core";
+import { Component, OnInit, inject, input, signal } from "@angular/core";
 import log from "loglevel";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState } from "../../../model/loadstate";
@@ -10,7 +10,6 @@ import { NewsItemComponent } from "./news-item.component";
 @Component({
   selector: "ch-news-list",
   templateUrl: "./news-list.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NewsItemComponent],
 })
 export class NewsListComponent implements OnInit {
@@ -20,25 +19,25 @@ export class NewsListComponent implements OnInit {
 
   // @Input() news: NewsItem[];
   readonly editable = input(false);
-  public news: NewsItem[];
-  public state: LoadState;
-  public errorMessage: string = "";
+  readonly news = signal<NewsItem[]>(undefined);
+  readonly state = signal<LoadState>(undefined);
+  readonly errorMessage = signal<string>("");
 
   ngOnInit(): void {
     this.getNews();
   }
 
   public getNews(): void {
-    this.state = LoadState.Loading;
+    this.state.set(LoadState.Loading);
     this.newsService.getAllNews().subscribe({
       next: (newNews: NewsItem[]) => {
-        this.news = newNews;
-        this.state = LoadState.Ready;
+        this.news.set(newNews);
+        this.state.set(LoadState.Ready);
       },
       error: (error) => {
         log.warn("get news failed", error);
-        this.errorMessage = "Getting news failed.";
-        this.state = LoadState.Fail;
+        this.errorMessage.set("Getting news failed.");
+        this.state.set(LoadState.Fail);
       },
     });
   }

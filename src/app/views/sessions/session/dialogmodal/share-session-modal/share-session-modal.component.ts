@@ -1,14 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  OnInit,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-  viewChild,
-  ElementRef,
-} from "@angular/core";
+import { AfterViewInit, Component, OnDestroy, OnInit, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, SessionEvent } from "chipster-js-common";
 import log from "loglevel";
@@ -24,7 +14,6 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   templateUrl: "./share-session-modal.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, LocalDatePipe],
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
@@ -42,18 +31,30 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
   readonly usernameInput = viewChild<ElementRef<HTMLInputElement>>("usernameInput");
 
-  public rules: Rule[];
-  public newRule: Rule;
+  readonly rules = signal<Rule[]>(undefined);
+  readonly newRule = signal<Rule>(undefined);
 
   private unsubscribe: Subject<any> = new Subject();
 
   ngOnInit() {
-    this.rules = this.session().rules;
+    this.rules.set(this.session().rules);
     this.ruleStream$()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
-        next: () => {
-          this.rules = this.session().rules;
+        next: (sessionEvent: SessionEvent) => {
+          /*
+          Apply the event to our own list. The session of the open session view is replaced by the
+          events, not changed, so the session given to this modal doesn't get the new rules.
+          */
+          const removed = sessionEvent.oldValue as Rule;
+          const added = sessionEvent.newValue as Rule;
+          this.rules.update((rules) => {
+            let updated = removed ? rules.filter((r) => r.ruleId !== removed.ruleId) : rules;
+            if (added && !updated.some((r) => r.ruleId === added.ruleId)) {
+              updated = [...updated, added];
+            }
+            return updated;
+          });
         },
         error: (err) => this.errorService.showError("getting rule events failed", err),
       });
@@ -88,25 +89,25 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.isNewRuleUsernameBlank()) {
       return;
     }
-    this.newRule.username = this.newRule.username.trim();
-    this.sessionResource.createRule(this.session().sessionId, this.newRule).subscribe({
+    this.newRule().username = this.newRule().username.trim();
+    this.sessionResource.createRule(this.session().sessionId, this.newRule()).subscribe({
       next: (resp) => {
         log.info("rule created", resp);
-        this.newRule = null;
+        this.newRule.set(null);
       },
       error: (err) => this.restErrorService.showError("failed to add a new rule", err),
     });
   }
 
   addNewRule() {
-    this.newRule = new Rule();
-    this.newRule.readWrite = true;
+    this.newRule.set(new Rule());
+    this.newRule().readWrite = true;
     // setTimeout() makes this async so that the element is added to the dom before we try to get it
     setTimeout(() => this.usernameInput().nativeElement.focus(), 0);
   }
 
   deleteRule(ruleId: string) {
-    const rule = this.rules.find((r) => r.ruleId === ruleId);
+    const rule = this.rules().find((r) => r.ruleId === ruleId);
     const username = rule ? rule.username : "";
 
     this.dialogModalService
@@ -129,7 +130,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   isNewRuleUsernameBlank() {
-    return !this.newRule?.username?.trim();
+    return !this.newRule()?.username?.trim();
   }
 
   isDeleteEnabled(rule: Rule) {

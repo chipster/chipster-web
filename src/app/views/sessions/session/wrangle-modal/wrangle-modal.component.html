@@ -4,7 +4,7 @@
 </div>
 
 <div class="modal-body">
-  @if (state.isReady()) {
+  @if (state().isReady()) {
     <div>
       <h3 id="preview-header" class="h3-xs">
         Source file preview
@@ -96,7 +96,7 @@
       <!-- {{selectedOthers |json}} -->
     </div>
   } @else {
-    <ch-status [state]="state"></ch-status>
+    <ch-status [state]="state()"></ch-status>
   }
 </div>
 

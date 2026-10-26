@@ -4,25 +4,25 @@
 </div>
 
 <div class="modal-body">
-  @for (file of getFiles(); track file) {
+  @for (file of rows(); track file.file) {
     <div>
       <br />
       <p>{{ file.name }}</p>
 
-      @if (!!fileStatus.get(file)) {
+      @if (!!file.status) {
         <p>
-          @if (!finishedFiles.has(file)) {
+          @if (!file.finished) {
             <span>
               <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
             </span>
           }
           <span>
-            {{ fileStatus.get(file) }}
+            {{ file.status }}
           </span>
         </p>
       }
 
-      @if (!file.isComplete()) {
+      @if (!file.complete) {
         <div>
           @if (file.size) {
             <p>
@@ -35,12 +35,12 @@
 
           <p>
             @if (!file.error) {
-              <ngb-progressbar [value]="file.progress() * 100" [max]="100"></ngb-progressbar>
+              <ngb-progressbar [value]="file.progress * 100" [max]="100"></ngb-progressbar>
             }
           </p>
 
-          @if (flow.timeRemaining()) {
-            <p>{{ flow.timeRemaining() | secondspipe }} remaining</p>
+          @if (timeRemaining()) {
+            <p>{{ timeRemaining() | secondspipe }} remaining</p>
           }
 
           @if (file.error) {
@@ -51,8 +51,8 @@
           }
 
           <p>
-            @if (!file.isComplete()) {
-              <button type="button" class="btn btn-secondary btn-sm" (click)="cancel(file)">
+            @if (!file.complete) {
+              <button type="button" class="btn btn-secondary btn-sm" (click)="cancel(file.file)">
                 <i class="fas fa-times" aria-hidden="true"></i>
                 Cancel
               </button>

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Label } from "chipster-js-common";
 import { forkJoin, of } from "rxjs";
@@ -22,7 +22,6 @@ interface LabelRow {
 @Component({
   selector: "ch-labels-modal",
   templateUrl: "./labels-modal.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [LabelPillComponent, NgClass],
 })
 export class LabelsModalComponent implements OnInit {
@@ -39,9 +38,9 @@ export class LabelsModalComponent implements OnInit {
 
   readonly maxLabelsPerSession = 50;
 
-  rows: LabelRow[] = [];
+  readonly rows = signal<LabelRow[]>([]);
 
-  saving = false;
+  readonly saving = signal(false);
 
   ngOnInit(): void {
     this.refreshRows();
@@ -52,10 +51,12 @@ export class LabelsModalComponent implements OnInit {
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
 
-    this.rows = labels.map((label) => ({
-      label,
-      selection: this.computeSelection(label),
-    }));
+    this.rows.set(
+      labels.map((label) => ({
+        label,
+        selection: this.computeSelection(label),
+      })),
+    );
   }
 
   private computeSelection(label: Label): SelectionState {
@@ -78,7 +79,7 @@ export class LabelsModalComponent implements OnInit {
 
   /** There is something to apply only if files are selected and there are labels to check */
   canApply(): boolean {
-    return this.hasSelection() && this.rows.length > 0;
+    return this.hasSelection() && this.rows().length > 0;
   }
 
   toggleRow(row: LabelRow): void {
@@ -107,14 +108,14 @@ export class LabelsModalComponent implements OnInit {
         // server cascade removes the id from datasets and emits dataset UPDATE events,
         // but also scrub local copies so UI updates immediately
         this.removeLabelsLocally(new Set([row.label.labelId]));
-        this.rows = this.rows.filter((r) => r !== row);
+        this.rows.set(this.rows().filter((r) => r !== row));
       },
       error: (err) => this.errorService.showError("Deleting label failed", err),
     });
   }
 
   deleteAllLabels(): void {
-    const count = this.rows.length;
+    const count = this.rows().length;
     this.dialogModalService
       .openBooleanModal(
         "Delete all labels",
@@ -160,9 +161,9 @@ export class LabelsModalComponent implements OnInit {
 
   private confirmDeleteAllLabels(): void {
     const sessionId = this.sessionData().session().sessionId;
-    const labelIds = this.rows.map((r) => r.label.labelId);
+    const labelIds = this.rows().map((r) => r.label.labelId);
 
-    this.saving = true;
+    this.saving.set(true);
     forkJoin(
       labelIds.map((labelId) =>
         this.sessionResource.deleteLabel(sessionId, labelId).pipe(
@@ -181,11 +182,11 @@ export class LabelsModalComponent implements OnInit {
         const deleted = new Set(results.filter((id): id is string => id != null));
         this.removeLabelsLocally(deleted);
         // keep any rows that weren't deleted (failed, or created meanwhile)
-        this.rows = this.rows.filter((r) => !deleted.has(r.label.labelId));
-        this.saving = false;
+        this.rows.set(this.rows().filter((r) => !deleted.has(r.label.labelId)));
+        this.saving.set(false);
       },
       error: () => {
-        this.saving = false;
+        this.saving.set(false);
       },
     });
   }
@@ -207,9 +208,11 @@ export class LabelsModalComponent implements OnInit {
     modal.label.set(row.label);
     modalRef.result.then(
       (updated: Label) => {
-        this.rows = this.rows
-          .map((r) => (r.label.labelId === updated.labelId ? { ...r, label: updated } : r))
-          .sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? ""));
+        this.rows.set(
+          this.rows()
+            .map((r) => (r.label.labelId === updated.labelId ? { ...r, label: updated } : r))
+            .sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? "")),
+        );
       },
       () => {},
     );
@@ -220,7 +223,7 @@ export class LabelsModalComponent implements OnInit {
       label: created,
       selection: this.hasSelection() ? "checked" : "unchecked",
     };
-    this.rows = [...this.rows, newRow].sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? ""));
+    this.rows.set([...this.rows(), newRow].sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? "")));
   }
 
   confirm(): void {
@@ -254,7 +257,7 @@ export class LabelsModalComponent implements OnInit {
 
     const lastUsedId = tracking.lastAppliedId ?? tracking.lastRemovedId;
 
-    this.saving = true;
+    this.saving.set(true);
     forkJoin(
       datasetUpdates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
@@ -271,11 +274,11 @@ export class LabelsModalComponent implements OnInit {
           if (lastUsedId) {
             this.labelsContextMenuService.recordLastUsedLabel(lastUsedId);
           }
-          this.saving = false;
+          this.saving.set(false);
           this.activeModal.close();
         },
         error: () => {
-          this.saving = false;
+          this.saving.set(false);
         },
       });
   }
@@ -289,7 +292,7 @@ export class LabelsModalComponent implements OnInit {
     tracking: { lastAppliedId: string | null; lastRemovedId: string | null },
   ): Set<string> {
     const after = new Set(before);
-    for (const row of this.rows) {
+    for (const row of this.rows()) {
       const id = row.label.labelId;
       if (row.selection === "checked") {
         if (!before.has(id)) {

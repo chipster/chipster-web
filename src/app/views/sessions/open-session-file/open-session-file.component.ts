@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  ChangeDetectionStrategy,
-  inject,
-  output,
-  viewChild,
-  ElementRef,
-} from "@angular/core";
+import { AfterViewInit, Component, OnInit, inject, output, viewChild, ElementRef } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { of, throwError } from "rxjs";
@@ -23,7 +14,6 @@ import { ImportSessionModalComponent } from "./import-session-modal.component";
   selector: "ch-open-session-file",
   templateUrl: "./open-session-file.component.html",
   styleUrls: ["./open-session-file.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   private errorService = inject(ErrorService);
@@ -88,6 +78,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     file.cancel();
 
     this.fileStatus.set(file, "Extracting session");
+    this.modal?.statusChanged();
     return this.sessionWorkerResource
       .extractSession(sessionId, datasetId)
       .pipe(
@@ -100,11 +91,13 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
           this.warnings.set(file, response.warnings);
 
           this.fileStatus.set(file, "Deleting temporary copy");
+          this.modal?.statusChanged();
           return this.sessionResource.deleteDataset(sessionId, datasetId);
         }),
         mergeMap(() => {
           this.fileStatus.set(file, undefined);
           this.finishedFiles.add(file);
+          this.modal?.statusChanged();
 
           // let the caller know if this was the last one
           if (this.fileStatus.size === this.finishedFiles.size) {
@@ -154,6 +147,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   error(file: any, err) {
     this.fileStatus.set(file, err);
     this.finishedFiles.add(file);
+    this.modal?.statusChanged();
     this.errorService.showError("Failed to open the session file", err);
   }
 

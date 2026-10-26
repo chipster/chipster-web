@@ -1,17 +1,8 @@
-import {
-  AfterViewInit,
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-  viewChild,
-  ElementRef,
-} from "@angular/core";
+import { AfterViewInit, Component, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   templateUrl: "./booleanmodal.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class BooleanModalComponent implements AfterViewInit {
   private activeModal = inject(NgbActiveModal);

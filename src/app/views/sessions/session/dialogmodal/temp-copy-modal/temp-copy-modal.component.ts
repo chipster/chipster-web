@@ -1,18 +1,9 @@
-import {
-  AfterViewInit,
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-  viewChild,
-  ElementRef,
-} from "@angular/core";
+import { AfterViewInit, Component, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { FormsModule } from "@angular/forms";
 
 @Component({
   templateUrl: "./temp-copy-modal.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule],
 })
 export class TempCopyModalComponent implements AfterViewInit {

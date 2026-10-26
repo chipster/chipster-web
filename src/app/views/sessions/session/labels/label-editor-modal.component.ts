@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Label } from "chipster-js-common";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -12,7 +12,6 @@ import { LabelPillComponent } from "./label-pill.component";
   selector: "ch-label-editor-modal",
   templateUrl: "./label-editor-modal.component.html",
   styleUrls: ["./label-editor-modal.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, LabelPillComponent],
 })
 export class LabelEditorModalComponent implements OnInit {
@@ -28,7 +27,7 @@ export class LabelEditorModalComponent implements OnInit {
   readonly maxNameLength = 30;
   name = "";
   color: string = DEFAULT_LABEL_COLOR;
-  saving = false;
+  readonly saving = signal(false);
 
   ngOnInit(): void {
     if (this.label() != null) {
@@ -69,7 +68,7 @@ export class LabelEditorModalComponent implements OnInit {
   }
 
   canSave(): boolean {
-    return (this.name ?? "").trim().length > 0 && !this.saving;
+    return (this.name ?? "").trim().length > 0 && !this.saving();
   }
 
   save(): void {
@@ -78,7 +77,7 @@ export class LabelEditorModalComponent implements OnInit {
       return;
     }
     const sessionId = this.sessionData().session().sessionId;
-    this.saving = true;
+    this.saving.set(true);
 
     if (this.isEdit) {
       const updated: Label = { ...this.label(), name, color: this.color };
@@ -88,7 +87,7 @@ export class LabelEditorModalComponent implements OnInit {
           this.activeModal.close(updated);
         },
         error: (err) => {
-          this.saving = false;
+          this.saving.set(false);
           this.errorService.showError("Updating label failed", err);
         },
       });
@@ -105,7 +104,7 @@ export class LabelEditorModalComponent implements OnInit {
           this.activeModal.close(created);
         },
         error: (err) => {
-          this.saving = false;
+          this.saving.set(false);
           this.errorService.showError("Creating label failed", err);
         },
       });
