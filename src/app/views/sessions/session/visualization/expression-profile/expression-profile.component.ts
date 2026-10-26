@@ -132,9 +132,6 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       const width = entries[0]?.contentRect.width;
       if (width && width !== this.lastChartWidth && this.tsv) {
         this.lastChartWidth = width;
-        // ResizeObserver fires outside Angular's zone, and so do the d3 handlers
-        // registered here. They don't need the zone, because the state they
-        // change is in signals.
         this.drawLineChart(this.tsv);
       }
     });
