@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, input, output, signal } from "@angular/core";
 import { Store } from "@ngrx/store";
+import { NavOutletItemsDirective } from "../../../../shared/directives/nav-outlet-items.directive";
 import { Dataset, Tool } from "chipster-js-common";
 import { find, includes, every, some } from "lodash-es";
 import { Subject } from "rxjs";
@@ -58,6 +59,7 @@ import { VennDiagramComponent } from "./venn-diagram/venn-diagram.component";
     DetailsVisualizationComponent,
     VennDiagramComponent,
     NgbNavOutlet,
+    NavOutletItemsDirective,
   ],
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
