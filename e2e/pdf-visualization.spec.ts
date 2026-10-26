@@ -800,6 +800,8 @@ test("the links in a pdf file work when all pages are shown", async ({ page, api
   }
   // the link on a single page goes to the wide page too
   await visualization.getByTitle("Show single page").click();
+  // the view is updated in the next frame, until then all pages are there
+  await expect(viewer(page).locator(".linkAnnotation a")).toHaveCount(1);
   await viewer(page).locator(".linkAnnotation a").click();
   await expect(visualization.getByText("Page 3 / 3")).toBeVisible();
   await expectHeightFitsPages(page, 1);
