@@ -1,4 +1,4 @@
-import { Component, HostListener, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, HostListener, inject } from "@angular/core";
 import { HotkeyService } from "./shared/services/hotkey.service";
 import { NavigationComponent } from "./views/navigation/navigation.component";
 import { HotkeyCheatsheetComponent } from "./shared/components/hotkey-cheatsheet/hotkey-cheatsheet.component";
@@ -10,7 +10,6 @@ import { RouterOutlet } from "@angular/router";
   selector: "ch-app-root",
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.css"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NavigationComponent, HotkeyCheatsheetComponent, ErrorComponent, ToastsComponent, RouterOutlet],
 })
 export class AppComponent {

@@ -20,11 +20,11 @@
   </div>
   <div class="row">
     <div class="col">
-      @if (contactPath) {
+      @if (contactPath()) {
         <div>
           <ch-manual
-            assetsPath="{{ contactPath }}"
-            page="{{ contactFile }}"
+            assetsPath="{{ contactPath() }}"
+            page="{{ contactFile() }}"
             [showControls]="false"
             [addContainer]="false"
             [manualStyles]="false"></ch-manual>

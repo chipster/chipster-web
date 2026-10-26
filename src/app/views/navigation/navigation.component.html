@@ -1,4 +1,4 @@
-@if (appNameReady) {
+@if (appNameReady()) {
   <nav class="navbar navbar-expand-sm navbar-light" id="navbar">
     <div class="container-fluid">
       <button
@@ -19,7 +19,7 @@
               [routerLink]="routerLinkHome"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: true }">
-              {{ appName }}
+              {{ appName() }}
             </a>
           </li>
           <li class="nav-item">
@@ -46,9 +46,9 @@
             <a class="nav-link cursor-pointer" [routerLink]="" (click)="openNews()">
               News
               <!-- <i *ngIf="unreadNews" class="fas fa-bell" aria-hidden="true"></i> -->
-              @if (isLoggedIn() && unreadNewsCount > 0) {
+              @if (isLoggedIn() && unreadNewsCount() > 0) {
                 <span class="badge bg-primary rounded-pill">
-                  {{ unreadNewsCount }}
+                  {{ unreadNewsCount() }}
                 </span>
               }
             </a>

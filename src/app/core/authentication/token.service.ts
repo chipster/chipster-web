@@ -1,5 +1,5 @@
 import { HttpHeaders } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { jwtDecode } from "jwt-decode";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
 import ParsedToken from "./parsed-token";
@@ -14,6 +14,13 @@ export class TokenService {
 
   // emit when token changes, true if valid token, false if no or invalid token
   private tokenChanged: Subject<boolean> = new Subject();
+
+  /*
+   * Changes when this service sets or clears the token. The getters read it, so that the views that
+   * show the login state are notified, like the navigation right after the login. The token itself
+   * is read from localStorage every time as before.
+   */
+  private readonly tokenVersion = signal(0);
 
   private username: string;
   private name: string;
@@ -32,6 +39,7 @@ export class TokenService {
 
   clear(): void {
     localStorage.clear();
+    this.tokenVersion.update((v) => v + 1);
   }
 
   getHttpBasicHeader(username: string, password: string) {
@@ -82,6 +90,7 @@ export class TokenService {
   }
 
   getToken(): string {
+    this.tokenVersion();
     return localStorage.getItem(this.KEY_TOKEN);
   }
 
@@ -94,10 +103,12 @@ export class TokenService {
   }
 
   hasRole(role: string) {
+    this.tokenVersion();
     return this.roles.includes(role);
   }
 
   getUsername(): string {
+    this.tokenVersion();
     return this.username$.value;
   }
 
@@ -142,6 +153,7 @@ export class TokenService {
       this.validUntil = null;
       this.roles = [];
     }
+    this.tokenVersion.update((v) => v + 1);
     this.username$.next(this.username);
     this.tokenChanged.next(this.isTokenValid());
   }
