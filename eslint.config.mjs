@@ -44,11 +44,9 @@ export default tseslint.config(
     rules: {
       "@angular-eslint/directive-selector": ["error", { type: "attribute", prefix: "ch", style: "camelCase" }],
       "@angular-eslint/component-selector": ["error", { type: "element", prefix: "ch", style: "kebab-case" }],
-      // every component sets ChangeDetectionStrategy.Eager explicitly, which
-      // angular 22's migration added to keep the previous default (the
-      // default is OnPush from 22 on), and the rule reports exactly those.
-      // moving to OnPush is a separate change after the upgrade too.
-      "@angular-eslint/prefer-on-push-component-change-detection": "off",
+      // OnPush is the default from angular 22 on, and the rule accepts it without
+      // changeDetection written out. It reports a component that opts out with Eager
+      "@angular-eslint/prefer-on-push-component-change-detection": "error",
       // inputs, outputs and queries are signals, keep the decorators out of new code
       "@angular-eslint/prefer-signals": "error",
       "@angular-eslint/prefer-output-emitter-ref": "error",
