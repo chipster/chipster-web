@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { Role } from "chipster-js-common";
 import { clone } from "lodash-es";
 import { mergeMap } from "rxjs/operators";
@@ -13,7 +13,6 @@ import { LocalDatePipe } from "../../../shared/pipes/local-date.pipe";
   templateUrl: "./clients.component.html",
   styleUrls: ["./clients.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [LocalDatePipe],
 })
 export class ClientsComponent implements OnInit {
@@ -22,7 +21,7 @@ export class ClientsComponent implements OnInit {
   private auhtHttpClient = inject(AuthHttpClientService);
   private tokenService = inject(TokenService);
 
-  users: any[];
+  readonly users = signal<any[]>(undefined);
 
   ngOnInit() {
     this.configService
@@ -30,7 +29,7 @@ export class ClientsComponent implements OnInit {
       .pipe(mergeMap((service) => this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics")))
       .subscribe({
         next: (topics: any[]) => {
-          this.users = [];
+          const users = [];
 
           // filter out server topics and get values as an array
           const sessionIds = Object.keys(topics).filter((topicName) => topicName !== "jobs" && topicName !== "files");
@@ -50,9 +49,10 @@ export class ClientsComponent implements OnInit {
                 ip = ip.slice(0, ip.indexOf(":"));
               }
               userCopy.address = ip;
-              this.users.push(userCopy);
+              users.push(userCopy);
             });
           });
+          this.users.set(users);
         },
         error: (err) => this.restErrorService.showError("get clients failed", err),
       });

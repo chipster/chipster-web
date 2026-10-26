@@ -1,6 +1,6 @@
 // registers the ag-grid modules and theme, before any grid is created
 import "../../../shared/ag-grid-setup";
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject, viewChild } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation, inject, viewChild } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
 import { Role } from "chipster-js-common";
@@ -38,7 +38,6 @@ import { StatusComponent } from "../../../shared/components/status.component";
   templateUrl: "./storage.component.html",
   styleUrls: ["./storage.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgbNav,
     NgbNavItem,
@@ -69,6 +68,7 @@ import { StatusComponent } from "../../../shared/components/status.component";
  *
  */
 export class StorageComponent implements OnInit {
+  private changeDetectorRef = inject(ChangeDetectorRef);
   private configService = inject(ConfigService);
   private restErrorService = inject(RestErrorService);
   private authHttpClient = inject(AuthHttpClientService);
@@ -318,9 +318,11 @@ export class StorageComponent implements OnInit {
             onGridReady: (event: GridReadyEvent) => {
               this.combinedGridReady = true;
               this.combinedGridApi = event.api;
+              this.changeDetectorRef.markForCheck();
             },
             onGridPreDestroyed: () => {
               this.combinedGridReady = false;
+              this.changeDetectorRef.markForCheck();
             },
             onFilterChanged: this.onFilterChanged.bind(this),
           },
@@ -334,10 +336,13 @@ export class StorageComponent implements OnInit {
             onGridReady: (event: GridReadyEvent) => {
               this.authOnlyGridReady = true;
               this.authOnlyGridApi = event.api;
+              this.changeDetectorRef.markForCheck();
             },
             onGridPreDestroyed: () => {
               this.authOnlyGridReady = false;
+              this.changeDetectorRef.markForCheck();
             },
+            onFilterChanged: this.onFilterChanged.bind(this),
           },
         };
 
@@ -349,14 +354,18 @@ export class StorageComponent implements OnInit {
             onGridReady: (event: GridReadyEvent) => {
               this.sessionDbOnlyGridReady = true;
               this.sessionDbOnlyGridApi = event.api;
+              this.changeDetectorRef.markForCheck();
             },
             onGridPreDestroyed: () => {
               this.sessionDbOnlyGridReady = false;
+              this.changeDetectorRef.markForCheck();
             },
+            onFilterChanged: this.onFilterChanged.bind(this),
           },
         };
 
         this.allSessionsState = LoadState.Ready;
+        this.changeDetectorRef.markForCheck();
       },
       error: (err) => this.restErrorService.showError("get users and quotas failed", err),
     });
@@ -431,8 +440,12 @@ export class StorageComponent implements OnInit {
     this.deleteSessions(user);
   }
 
+  /*
+   * The template shows the filtered counts and rows of the grids, which change in the events of
+   * ag-grid, not of the template
+   */
   onFilterChanged(): void {
-    // Handle filter change here
+    this.changeDetectorRef.markForCheck();
   }
 
   private deleteSessions(...users: any[]) {
@@ -483,6 +496,7 @@ export class StorageComponent implements OnInit {
         next: (result: any[]) => {
           this.sessions = result[0]?.sessions;
           this.userSessionsState = new LoadState(State.Ready);
+          this.changeDetectorRef.markForCheck();
         },
         error: (err) => this.restErrorService.showError("get quotas failed", err),
       });

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, of } from "rxjs";
@@ -14,7 +14,6 @@ import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
   templateUrl: "./services.component.html",
   styleUrls: ["./services.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgbPopover],
 })
 export class ServicesComponent implements OnInit {
@@ -23,21 +22,21 @@ export class ServicesComponent implements OnInit {
   private authHttpClient = inject(AuthHttpClientService);
   private tokenService = inject(TokenService);
 
-  services: Service[];
-  aliveMap: Map<Service, string>;
-  private statusMap: Map<string, Record<string, any>>;
+  readonly services = signal<Service[]>(undefined);
+  readonly aliveMap = signal<Map<Service, string>>(undefined);
+  private readonly statusMap = signal<Map<string, Record<string, any>>>(undefined);
 
   ngOnInit(): void {
-    this.services = [];
-    this.aliveMap = new Map();
-    this.statusMap = new Map();
+    this.services.set([]);
+    this.aliveMap.set(new Map());
+    this.statusMap.set(new Map());
 
     this.configService
       .getInternalServices(this.tokenService.getToken())
       .pipe(
         tap((services: Service[]) => {
           // store all services, sort by role
-          this.services = services.sort((a, b) => a.role.localeCompare(b.role));
+          this.services.set(services.sort((a, b) => a.role.localeCompare(b.role)));
         }),
         // filter out services without admin uri
         map((services: Service[]) => services.filter((service) => service.adminUri != null)),
@@ -46,11 +45,11 @@ export class ServicesComponent implements OnInit {
           const aliveRequests = services.map((service: Service) =>
             this.authHttpClient.get(service.adminUri + "/admin/alive").pipe(
               tap(() => {
-                this.aliveMap.set(service, "OK");
+                this.aliveMap.update((m) => new Map(m).set(service, "OK"));
               }),
               catchError((err) => {
                 log.warn("alive check failed", service.role, err);
-                this.aliveMap.set(service, err.status);
+                this.aliveMap.update((m) => new Map(m).set(service, err.status));
                 return of(false); // returning EMPTY would cancel others in forkJoin
               }),
             ),
@@ -59,11 +58,11 @@ export class ServicesComponent implements OnInit {
           const statusRequests = services.map((service: Service) =>
             this.authHttpClient.getAuth(service.adminUri + "/admin/status").pipe(
               tap((status) => {
-                this.statusMap.set(service.role, status);
+                this.statusMap.update((m) => new Map(m).set(service.role, status));
               }),
               catchError((err) => {
                 log.warn("status check failed", service.role, err);
-                this.statusMap.set(service.role, err.status);
+                this.statusMap.update((m) => new Map(m).set(service.role, err.status));
                 return of(false); // returning EMPTY would cancel others in forkJoin
               }),
             ),
@@ -115,6 +114,6 @@ export class ServicesComponent implements OnInit {
   }
 
   private getStatusObject(service): Record<string, any> {
-    return this.statusMap.get(service.role);
+    return this.statusMap().get(service.role);
   }
 }

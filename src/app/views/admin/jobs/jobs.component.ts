@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { Job, JobState } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, Observable, of } from "rxjs";
@@ -15,7 +15,6 @@ import { JobService } from "../../sessions/session/job.service";
   templateUrl: "./jobs.component.html",
   styleUrls: ["./jobs.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class JobsComponent implements OnInit {
   private configService = inject(ConfigService);
@@ -23,14 +22,14 @@ export class JobsComponent implements OnInit {
   private authHttpClient = inject(AuthHttpClientService);
   private sessionResource = inject(SessionResource);
 
-  jobs: Job[];
+  readonly jobs = signal<Job[]>(undefined);
 
   ngOnInit() {
     this.update();
   }
 
   update() {
-    this.jobs = [];
+    this.jobs.set([]);
 
     let sessionDbUrl;
 
@@ -79,7 +78,7 @@ export class JobsComponent implements OnInit {
       )
       .subscribe({
         next: (jobs) => {
-          this.jobs = jobs;
+          this.jobs.set(jobs);
         },
         error: (err) => this.restErrorService.showError("get jobs failed", err),
       });

@@ -11,10 +11,10 @@
       </tr>
     </thead>
     <tbody>
-      @for (service of services; track service) {
+      @for (service of services(); track service) {
         <tr>
           <th scope="row">{{ service.role }}</th>
-          <td>{{ this.aliveMap.get(service) }}</td>
+          <td>{{ aliveMap().get(service) }}</td>
           <td>{{ getVersionString(service) }}</td>
           <td>
             @if (getStatusString(service).length > 10) {
