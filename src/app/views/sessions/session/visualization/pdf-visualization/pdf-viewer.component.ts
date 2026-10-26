@@ -1,7 +1,6 @@
 import {
   Component,
   ElementRef,
-  NgZone,
   OnChanges,
   OnDestroy,
   OutputEmitterRef,
@@ -219,7 +218,6 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
 })
 export class PdfViewerComponent implements OnChanges, OnDestroy {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private ngZone = inject(NgZone);
 
   readonly src = input<string>(undefined);
   // the page shown when not all pages are shown, starting from 1
@@ -270,16 +268,13 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     if (!this.pdfViewer || this.pdfViewer.pagesCount === 0) {
       return;
     }
-    // pdf.js starts rendering, which mustn't run the change detection
-    this.ngZone.runOutsideAngular(() => {
-      if (changes.showAll) {
-        this.updateScrollMode();
-      }
-      const page = this.page();
-      if (changes.page && page !== this.pdfViewer.currentPageNumber) {
-        this.pdfViewer.currentPageNumber = page;
-      }
-    });
+    if (changes.showAll) {
+      this.updateScrollMode();
+    }
+    const page = this.page();
+    if (changes.page && page !== this.pdfViewer.currentPageNumber) {
+      this.pdfViewer.currentPageNumber = page;
+    }
     this.updateScale();
   }
 
@@ -293,35 +288,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
   private async load(src: string) {
     this.clear();
-    const loadingTask = await this.ngZone.runOutsideAngular(async () => {
-      try {
-        this.pdfjs ??= await loadPdfjs();
-        if (this.destroyed || src !== this.src()) {
-          return null;
-        }
-        this.pdfViewer ??= this.createViewer();
-        this.worker = getWorker(this.pdfjs.lib);
-        const task = this.pdfjs.lib.getDocument({
-          url: src,
-          worker: this.worker,
-          cMapUrl: assetUrl("cmaps/"),
-          iccUrl: assetUrl("iccs/"),
-          standardFontDataUrl: assetUrl("standard_fonts/"),
-          wasmUrl: assetUrl("wasm/"),
-        });
-        // right away, so that clear() can cancel it
-        this.loadingTask = task;
-        this.loading = true;
-        task.onProgress = (progress: OnProgressParameters) => this.emitProgress(task, progress);
-        return task;
-      } catch (error) {
-        // not for a file that is gone already
-        if (!this.destroyed && src === this.src()) {
-          this.emit(this.loadFailed, error);
-        }
-        return null;
-      }
-    });
+    const loadingTask = await this.startLoading(src);
     if (!loadingTask || loadingTask !== this.loadingTask) {
       return;
     }
@@ -340,11 +307,39 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       return;
     }
     this.loading = false;
-    this.ngZone.runOutsideAngular(() => {
-      this.linkService.setDocument(pdf);
-      this.pdfViewer.setDocument(pdf);
-    });
+    this.linkService.setDocument(pdf);
+    this.pdfViewer.setDocument(pdf);
     this.emit(this.loaded, pdf);
+  }
+
+  private async startLoading(src: string): Promise<PDFDocumentLoadingTask> {
+    try {
+      this.pdfjs ??= await loadPdfjs();
+      if (this.destroyed || src !== this.src()) {
+        return null;
+      }
+      this.pdfViewer ??= this.createViewer();
+      this.worker = getWorker(this.pdfjs.lib);
+      const task = this.pdfjs.lib.getDocument({
+        url: src,
+        worker: this.worker,
+        cMapUrl: assetUrl("cmaps/"),
+        iccUrl: assetUrl("iccs/"),
+        standardFontDataUrl: assetUrl("standard_fonts/"),
+        wasmUrl: assetUrl("wasm/"),
+      });
+      // right away, so that clear() can cancel it
+      this.loadingTask = task;
+      this.loading = true;
+      task.onProgress = (progress: OnProgressParameters) => this.emitProgress(task, progress);
+      return task;
+    } catch (error) {
+      // not for a file that is gone already
+      if (!this.destroyed && src === this.src()) {
+        this.emit(this.loadFailed, error);
+      }
+      return null;
+    }
   }
 
   private createViewer(): PDFViewer {
@@ -408,33 +403,31 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       { signal },
     );
     // the width changes also without a window resize, for example when a panel next to the viewer is opened
-    this.ngZone.runOutsideAngular(() => {
+    /*
+     * The height of the pages mustn't change the width, or this could go back
+     * and forth: the session view keeps the space of its scrollbar for that.
+     */
+    this.resizeObserver = new ResizeObserver(() => {
+      const width = this.measureWidth();
+      if (width !== this.hostWidth) {
+        this.hostWidth = width;
+        this.updateScale();
+      }
       /*
-       * The height of the pages mustn't change the width, or this could go back
-       * and forth: the session view keeps the space of its scrollbar for that.
+       * The height follows the pages, so it doesn't change the scale. But
+       * pdf.js renders only the pages that fit in the container, and decides
+       * that when the pages change, before the height is given to this
+       * element, so it has to look again when all pages are shown.
        */
-      this.resizeObserver = new ResizeObserver(() => {
-        const width = this.measureWidth();
-        if (width !== this.hostWidth) {
-          this.hostWidth = width;
-          this.updateScale();
+      const height = this.host.nativeElement.clientHeight;
+      if (height !== this.hostHeight) {
+        this.hostHeight = height;
+        if (this.pdfViewer.pagesCount > 0) {
+          this.pdfViewer.update();
         }
-        /*
-         * The height follows the pages, so it doesn't change the scale. But
-         * pdf.js renders only the pages that fit in the container, and decides
-         * that when the pages change, before the height is given to this
-         * element, so it has to look again when all pages are shown.
-         */
-        const height = this.host.nativeElement.clientHeight;
-        if (height !== this.hostHeight) {
-          this.hostHeight = height;
-          if (this.pdfViewer.pagesCount > 0) {
-            this.pdfViewer.update();
-          }
-        }
-      });
-      this.resizeObserver.observe(this.host.nativeElement);
+      }
     });
+    this.resizeObserver.observe(this.host.nativeElement);
 
     return pdfViewer;
   }
@@ -500,9 +493,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       // the width at the scale 1
       pageWidth = Math.max(pageWidth, viewport.clone({ scale: this.pdfjs.lib.PixelsPerInch.PDF_TO_CSS_UNITS }).width);
     }
-    this.ngZone.runOutsideAngular(() => {
-      this.pdfViewer.currentScale = this.zoom() * Math.min(1, viewerWidth / pageWidth);
-    });
+    this.pdfViewer.currentScale = this.zoom() * Math.min(1, viewerWidth / pageWidth);
     this.updateLayout();
   }
 
@@ -565,10 +556,8 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       const stop = () => worker.destroy();
       closed.then(stop, stop);
     }
-    this.ngZone.runOutsideAngular(() => {
-      this.pdfViewer?.setDocument(null);
-      this.linkService?.setDocument(null);
-    });
+    this.pdfViewer?.setDocument(null);
+    this.linkService?.setDocument(null);
   }
 
   // the file is still being loaded, or a page is being rendered, which the worker prepares
@@ -606,10 +595,9 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   }
 
   /*
-   * pdf.js runs outside of Angular, so that its rendering doesn't run the
-   * change detection. Its events are passed on only after pdf.js has finished
-   * what it was doing, because the change detection that follows gives new
-   * inputs to pdf.js. For example, a link in the pdf changes the page before
+   * The events of pdf.js are passed on only after pdf.js has finished what it
+   * was doing, because the change detection that follows gives new inputs to
+   * pdf.js. For example, a link in the pdf changes the page before
    * pdf.js shows it, and a new scale at that point would go back to the
    * previous page. An event can come also while Angular gives the inputs,
    * and the parent can't change its view in the middle of that.
@@ -617,7 +605,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   private emit<T>(emitter: OutputEmitterRef<T>, value: T) {
     queueMicrotask(() => {
       if (!this.destroyed) {
-        this.ngZone.run(() => emitter.emit(value));
+        emitter.emit(value);
       }
     });
   }

@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
   Component,
-  NgZone,
   OnChanges,
   OnDestroy,
   inject,
@@ -40,7 +39,6 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
   private sessionDataService = inject(SessionDataService);
   private visualizationModalService = inject(VisualizationModalService);
   private typeTagService = inject(TypeTagService);
-  private zone = inject(NgZone);
   private restErrorService = inject(RestErrorService);
   private spreadsheetService = inject(SpreadsheetService);
   private nativeElementService = inject(NativeElementService);
@@ -78,7 +76,6 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
    */
   readonly state = signal<LoadState>(undefined);
 
-  // MUST be handled outside Angular zone to prevent a change detection loop
   hot: ht.Methods;
 
   ngOnChanges() {
@@ -201,12 +198,10 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
           // could be replaced with ViewChild of type ElementRef and ref.nativeElement
           const container = document.getElementById(this.tableContainerId);
 
-          this.zone.runOutsideAngular(() => {
-            // if the visualization isn't removed already
-            if (container != null) {
-              this.hot = new Handsontable(container, this.getSettings(headers, body, container));
-            }
-          });
+          // if the visualization isn't removed already
+          if (container != null) {
+            this.hot = new Handsontable(container, this.getSettings(headers, body, container));
+          }
           this.state.set(new LoadState(State.Ready));
         },
         error: (error: Response) => {
@@ -232,11 +227,9 @@ export class SpreadsheetVisualizationComponent implements OnChanges, OnDestroy, 
 
   destroyHot() {
     if (this.hot) {
-      this.zone.runOutsideAngular(() => {
-        this.hot.destroy();
-        // don't call destroy() twice even if the component is recycled and the loading of the second file fails
-        this.hot = null;
-      });
+      this.hot.destroy();
+      // don't call destroy() twice even if the component is recycled and the loading of the second file fails
+      this.hot = null;
     }
   }
 

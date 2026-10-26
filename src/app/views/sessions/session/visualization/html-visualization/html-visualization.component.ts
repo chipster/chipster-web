@@ -1,7 +1,6 @@
 import {
   Component,
   ElementRef,
-  NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -76,7 +75,6 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
   private fileResource = inject(FileResource);
   private sessionDataService = inject(SessionDataService);
   private restErrorService = inject(RestErrorService);
-  private ngZone = inject(NgZone);
 
   private static readonly SIZE_MESSAGE_TYPE = "chipster-html-visualization-size";
   private static readonly SCROLL_MESSAGE_TYPE = "chipster-html-visualization-scroll";
@@ -312,11 +310,7 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
   readonly state = signal<LoadState>(undefined);
 
   ngOnInit() {
-    // listen outside Angular, because the size messages can arrive on every animation frame and
-    // the handler only sets the size of the iframe, no change detection is needed
-    this.ngZone.runOutsideAngular(() => {
-      this.messageSubscription = fromEvent<MessageEvent>(window, "message").subscribe((event) => this.onMessage(event));
-    });
+    this.messageSubscription = fromEvent<MessageEvent>(window, "message").subscribe((event) => this.onMessage(event));
   }
 
   ngOnChanges() {

@@ -2,7 +2,6 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
-  NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -50,7 +49,6 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   private sessionDataService = inject(SessionDataService);
   private stringModalService = inject(DialogModalService);
   private sessionEventService = inject(SessionEventService);
-  private zone = inject(NgZone);
   private changeDetectorRef = inject(ChangeDetectorRef);
   private restErrorService = inject(RestErrorService);
   private spreadsheetService = inject(SpreadsheetService);
@@ -66,7 +64,6 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   // not the map itself, because the event subscription below needs the latest one, see SessionData
   readonly sessionData = input.required<SessionData>();
 
-  // MUST be handled outside Angular zone to prevent a change detection loop
   hot: any;
   rows: Array<Array<string>> = [];
   /*
@@ -201,10 +198,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     this.unsubscribe.complete();
 
     if (this.hot) {
-      this.zone.runOutsideAngular(() => {
-        this.hot.destroy();
-        this.hot = null;
-      });
+      this.hot.destroy();
+      this.hot = null;
     }
   }
 
@@ -297,21 +292,19 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     button.addEventListener(
       "click",
       () => {
-        this.zone.run(() => {
-          const columnName = this.headerAt(col);
-          this.stringModalService
-            .openBooleanModal(
-              "Delete column",
-              `Are you sure you want to delete column '${columnName}'?`,
-              "Delete",
-              "Cancel",
-              "btn-danger",
-            )
-            .then(
-              () => this.removeColumn(col),
-              () => {},
-            );
-        });
+        const columnName = this.headerAt(col);
+        this.stringModalService
+          .openBooleanModal(
+            "Delete column",
+            `Are you sure you want to delete column '${columnName}'?`,
+            "Delete",
+            "Cancel",
+            "btn-danger",
+          )
+          .then(
+            () => this.removeColumn(col),
+            () => {},
+          );
       },
       false,
     );
@@ -324,10 +317,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   removeColumn(index: number) {
-    this.zone.runOutsideAngular(() => {
-      // removes the header from escapedHeaders too
-      this.hot.alter("remove_col", index);
-    });
+    // removes the header from escapedHeaders too
+    this.hot.alter("remove_col", index);
 
     this.updateDataset();
     this.updateWarnings();
@@ -506,21 +497,17 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     // for now, show the phenodata table only for own phenodata
     const settings = this.getSettings();
     if (this.phenodataState === PhenodataState.OWN_PHENODATA) {
-      this.zone.runOutsideAngular(() => {
-        this.hot = new Handsontable(container, settings);
-        // the column changes rely on this, see escapedHeaders
-        if (this.hot.getSettings().colHeaders !== this.escapedHeaders) {
-          log.error("Handsontable copied the headers, adding and removing columns won't be saved correctly");
-        }
-      });
+      this.hot = new Handsontable(container, settings);
+      // the column changes rely on this, see escapedHeaders
+      if (this.hot.getSettings().colHeaders !== this.escapedHeaders) {
+        log.error("Handsontable copied the headers, adding and removing columns won't be saved correctly");
+      }
 
       this.updateSize();
 
-      this.zone.runOutsideAngular(() => {
-        if (this.hot) {
-          this.hot.loadData(this.rows);
-        }
-      });
+      if (this.hot) {
+        this.hot.loadData(this.rows);
+      }
     }
 
     this.ready = true;
@@ -568,18 +555,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       .openStringModal("Add new column", "Column name", "", "Add")
       .pipe(
         tap((name) => {
-          this.zone.runOutsideAngular(() => {
-            const headers = this.headers;
-            const lastNonEditableIdx = headers.reduce(
-              (acc, h, i) => (this.nonEditableColumns.includes(h) ? i : acc),
-              -1,
-            );
-            const insertIndex = name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : headers.length;
-            // inserts an undefined header into escapedHeaders, replaced with the name below
-            this.hot.alter("insert_col", insertIndex);
-            this.escapedHeaders[insertIndex] = escapeHtml(name);
-            this.hot.render();
-          });
+          const headers = this.headers;
+          const lastNonEditableIdx = headers.reduce((acc, h, i) => (this.nonEditableColumns.includes(h) ? i : acc), -1);
+          const insertIndex = name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : headers.length;
+          // inserts an undefined header into escapedHeaders, replaced with the name below
+          this.hot.alter("insert_col", insertIndex);
+          this.escapedHeaders[insertIndex] = escapeHtml(name);
+          this.hot.render();
 
           this.updateDataset();
           this.updateWarnings();
