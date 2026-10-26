@@ -1,6 +1,6 @@
 // Super class for scatterplot and volcanoplot
 
-import { Directive, NgZone, OnChanges, OnDestroy, inject, input, signal } from "@angular/core";
+import { Directive, OnChanges, OnDestroy, inject, input, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
@@ -42,7 +42,6 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   protected sessionDataService = inject(SessionDataService);
   protected visualizationTSVService = inject(VisualizationTSVService);
   protected restErrorService = inject(RestErrorService);
-  private zone = inject(NgZone);
 
   protected unsubscribe: Subject<any> = new Subject();
   readonly state = signal<LoadState>(undefined);
@@ -433,10 +432,10 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       const width = entries[0]?.contentRect.width;
       if (width && width !== this.lastPlotWidth && this.tsv && this.selectedXAxisHeader) {
         this.lastPlotWidth = width;
-        // ResizeObserver fires outside Angular's zone; redraw inside it so the
-        // d3 drag handlers are re-registered in the zone (otherwise selecting
-        // would not trigger change detection) and bound state stays in sync.
-        this.zone.run(() => this.redrawPlot());
+        // ResizeObserver fires outside Angular's zone, and so do the d3 handlers
+        // registered here. They don't need the zone, because the state they
+        // change is in signals.
+        this.redrawPlot();
       }
     });
     this.resizeObserver.observe(element);
