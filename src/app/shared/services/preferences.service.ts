@@ -74,7 +74,12 @@ export class PreferencesService {
         preferences[rootKey] ??= {};
         preferences[rootKey][leafKey] = value;
         user.preferences = preferences;
-        this.authenticationService.updateUser(user).subscribe({ next: () => log.info("update " + label + " done") });
+        this.authenticationService.updateUser(user).subscribe({
+          next: () => log.info("update " + label + " done"),
+          // the auth service fails an update made at the same time as another one, e.g. from another
+          // tab, and a lost preference isn't worth an error for the user
+          error: (err) => log.warn("update " + label + " failed", err),
+        });
       },
     });
   }
