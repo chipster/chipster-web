@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { User } from "chipster-js-common";
 import log from "loglevel";
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { map, mergeMap, retry } from "rxjs/operators";
 import { AuthenticationService } from "../../core/authentication/authentication-service";
 
 @Injectable()
@@ -68,19 +68,24 @@ export class PreferencesService {
   }
 
   private setPreferenceValue(rootKey: string, leafKey: string, value: unknown, label: string): void {
-    this.authenticationService.getUser().subscribe({
-      next: (user: User) => {
-        const preferences = user.preferences == null || user.preferences.length < 1 ? {} : user.preferences;
-        preferences[rootKey] ??= {};
-        preferences[rootKey][leafKey] = value;
-        user.preferences = preferences;
-        this.authenticationService.updateUser(user).subscribe({
-          next: () => log.info("update " + label + " done"),
-          // the auth service fails an update made at the same time as another one, e.g. from another
-          // tab, and a lost preference isn't worth an error for the user
-          error: (err) => log.warn("update " + label + " failed", err),
-        });
-      },
-    });
+    this.authenticationService
+      .getUser()
+      .pipe(
+        mergeMap((user: User) => {
+          const preferences = user.preferences == null || user.preferences.length < 1 ? {} : user.preferences;
+          preferences[rootKey] ??= {};
+          preferences[rootKey][leafKey] = value;
+          user.preferences = preferences;
+          return this.authenticationService.updateUser(user);
+        }),
+        // the auth service fails an update made at the same time as another one, e.g. from another
+        // tab, so read the user again and try once more
+        retry(1),
+      )
+      .subscribe({
+        next: () => log.info("update " + label + " done"),
+        // a lost preference isn't worth an error for the user
+        error: (err) => log.warn("update " + label + " failed", err),
+      });
   }
 }
