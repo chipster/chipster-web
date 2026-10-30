@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, waitForDevCheck } from "./fixtures";
 import { createDataset, createLabel, datasetNode, openSession, updateDataset, visualizationTab } from "./session-api";
 
 /*
@@ -39,4 +39,5 @@ test("the file details follow the labels and notes changed elsewhere", async ({ 
   await updateDataset(api, sessionId, datasetId, { labelIds: [labelId], notes: "remote note" });
   await expect(details.locator("ch-label-pill")).toContainText("remote-label");
   await expect(details.locator("textarea")).toHaveValue("remote note");
+  await waitForDevCheck(page);
 });

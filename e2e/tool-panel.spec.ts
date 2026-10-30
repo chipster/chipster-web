@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, waitForDevCheck } from "./fixtures";
 import { createDataset, createJob, datasetNode, openSession, visualizationTab } from "./session-api";
 
 /*
@@ -63,4 +63,5 @@ test("the tool panel follows the selections, the validation and the jobs", async
   await page.locator("ch-single-dataset").getByTitle("Actions").click();
   await page.locator(".dropdown-menu.show").getByText("Select tool").click();
   await expect(tools.locator('[id="tool-button-fastx-trimmer.R"]')).toHaveClass(/active/);
+  await waitForDevCheck(page);
 });
