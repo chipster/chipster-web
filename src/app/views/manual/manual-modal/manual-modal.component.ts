@@ -2,14 +2,7 @@ import { Component, ChangeDetectionStrategy, inject, signal } from "@angular/cor
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Tool } from "chipster-js-common";
 import { ToolService } from "../../sessions/session/tools/tool.service";
-import {
-  NgbNav,
-  NgbNavItem,
-  NgbNavLink,
-  NgbNavLinkBase,
-  NgbNavContent,
-  NgbNavOutlet,
-} from "@ng-bootstrap/ng-bootstrap/nav";
+import { NGB_NAV_IMPORTS } from "../../../shared/directives/nav-outlet-items.directive";
 import { ManualComponent } from "../manual.component";
 import { ToolSourceComponent } from "../../../shared/components/tool-source/tool-source.component";
 import { AsyncPipe } from "@angular/common";
@@ -19,17 +12,7 @@ import { AsyncPipe } from "@angular/common";
   templateUrl: "./manual-modal.component.html",
   styleUrls: ["./manual-modal.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
-    NgbNav,
-    NgbNavItem,
-    NgbNavLink,
-    NgbNavLinkBase,
-    NgbNavContent,
-    ManualComponent,
-    ToolSourceComponent,
-    NgbNavOutlet,
-    AsyncPipe,
-  ],
+  imports: [NGB_NAV_IMPORTS, ManualComponent, ToolSourceComponent, AsyncPipe],
 })
 export class ManualModalComponent {
   activeModal = inject(NgbActiveModal);

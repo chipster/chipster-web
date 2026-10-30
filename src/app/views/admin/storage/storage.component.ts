@@ -19,15 +19,7 @@ import UtilsService from "../../../shared/utilities/utils";
 import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
 import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
 import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-modal/confirm-delete-modal.component";
-import {
-  NgbNav,
-  NgbNavItem,
-  NgbNavItemRole,
-  NgbNavLinkButton,
-  NgbNavLinkBase,
-  NgbNavContent,
-  NgbNavOutlet,
-} from "@ng-bootstrap/ng-bootstrap/nav";
+import { NGB_NAV_IMPORTS } from "../../../shared/directives/nav-outlet-items.directive";
 import { NGB_DROPDOWN_IMPORTS } from "../../../shared/directives/dropdown-close.directive";
 import { FormsModule } from "@angular/forms";
 import { AgGridAngular } from "ag-grid-angular";
@@ -39,20 +31,7 @@ import { StatusComponent } from "../../../shared/components/status.component";
   styleUrls: ["./storage.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
-    NgbNav,
-    NgbNavItem,
-    NgbNavItemRole,
-    NgbNavLinkButton,
-    NgbNavLinkBase,
-    NgbNavContent,
-    NGB_DROPDOWN_IMPORTS,
-    FormsModule,
-    AgGridAngular,
-    StatusComponent,
-    NgbNavOutlet,
-    BytesPipe,
-  ],
+  imports: [NGB_NAV_IMPORTS, NGB_DROPDOWN_IMPORTS, FormsModule, AgGridAngular, StatusComponent, BytesPipe],
 })
 
 /**

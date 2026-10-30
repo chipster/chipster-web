@@ -1,6 +1,15 @@
 import { AfterViewInit, ChangeDetectorRef, DestroyRef, Directive, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgbNavOutlet } from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavItemRole,
+  NgbNavLink,
+  NgbNavLinkBase,
+  NgbNavLinkButton,
+  NgbNavOutlet,
+} from "@ng-bootstrap/ng-bootstrap/nav";
 
 /**
  * Checks ng-bootstrap's NgbNavOutlet again when the items of its nav change.
@@ -14,7 +23,7 @@ import { NgbNavOutlet } from "@ng-bootstrap/ng-bootstrap";
  * The changes of the items are emitted when the view that declares the nav is checked, before its
  * child components, so the outlet is checked in the same pass.
  *
- * Import it in the components that have a nav whose items change.
+ * Comes with NGB_NAV_IMPORTS below, so that every nav has it.
  */
 @Directive({
   // matches ng-bootstrap's selector on purpose, so that importing it is enough
@@ -33,3 +42,21 @@ export class NavOutletItemsDirective implements AfterViewInit {
       .subscribe(() => this.changeDetectorRef.markForCheck());
   }
 }
+
+/**
+ * What a component with a nav imports, instead of the ng-bootstrap nav
+ * directives one by one, like NGB_DROPDOWN_IMPORTS. A component that imported
+ * NgbNavOutlet without NavOutletItemsDirective would compile and work, until
+ * one of its tabs gets an @if.
+ */
+export const NGB_NAV_IMPORTS = [
+  NgbNav,
+  NgbNavItem,
+  NgbNavItemRole,
+  NgbNavLink,
+  NgbNavLinkButton,
+  NgbNavLinkBase,
+  NgbNavContent,
+  NgbNavOutlet,
+  NavOutletItemsDirective,
+];

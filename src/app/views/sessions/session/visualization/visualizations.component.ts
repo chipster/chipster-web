@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, input, output } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { NavOutletItemsDirective } from "../../../../shared/directives/nav-outlet-items.directive";
+import { NGB_NAV_IMPORTS } from "../../../../shared/directives/nav-outlet-items.directive";
 import { Dataset, Tool } from "chipster-js-common";
 import { find, includes, every, some } from "lodash-es";
 import { Subject } from "rxjs";
@@ -13,15 +13,6 @@ import { DatasetService } from "../dataset.service";
 import { SelectionService } from "../selection.service";
 import VisualizationConstants, { Visualization } from "./visualization-constants";
 import { VisualizationEventService } from "./visualization-event.service";
-import {
-  NgbNav,
-  NgbNavItem,
-  NgbNavItemRole,
-  NgbNavLink,
-  NgbNavLinkBase,
-  NgbNavContent,
-  NgbNavOutlet,
-} from "@ng-bootstrap/ng-bootstrap/nav";
 import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/spreadsheet-visualization.component";
 import { TextVisualizationComponent } from "./text-visualization/text-visualization.component";
 import { ExpressionProfileComponent } from "./expression-profile/expression-profile.component";
@@ -41,12 +32,7 @@ import { VennDiagramComponent } from "./venn-diagram/venn-diagram.component";
   styleUrls: ["./visualizations.component.less"],
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    NgbNav,
-    NgbNavItem,
-    NgbNavItemRole,
-    NgbNavLink,
-    NgbNavLinkBase,
-    NgbNavContent,
+    NGB_NAV_IMPORTS,
     SpreadsheetVisualizationComponent,
     TextVisualizationComponent,
     ExpressionProfileComponent,
@@ -59,8 +45,6 @@ import { VennDiagramComponent } from "./venn-diagram/venn-diagram.component";
     NewTabVisualizationComponent,
     DetailsVisualizationComponent,
     VennDiagramComponent,
-    NgbNavOutlet,
-    NavOutletItemsDirective,
   ],
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
