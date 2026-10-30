@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, waitForDevCheck } from "./fixtures";
 import { createDataset, createLabel, datasetNode, openSession, updateDataset } from "./session-api";
 
 /*
@@ -43,4 +43,5 @@ test("the session panel follows the graph selection and the label events", async
   const rows = panel.locator(".dataset-list-button");
   await expect(rows.filter({ hasText: "a.txt" })).toHaveClass(/active/);
   await expect(rows.filter({ hasText: "b.txt" })).not.toHaveClass(/active/);
+  await waitForDevCheck(page);
 });

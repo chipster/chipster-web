@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, waitForDevCheck } from "./fixtures";
 import { createJob, openSession, TEST_JOB, updateJob } from "./session-api";
 
 /*
@@ -52,4 +52,5 @@ test("the jobs modal follows the job events", async ({ page, api, sessionId }) =
   await page.keyboard.press("ArrowDown");
   await expect(row).toHaveClass(/table-active/);
   await expect(modal.locator("ch-job")).toContainText("Test tool");
+  await waitForDevCheck(page);
 });

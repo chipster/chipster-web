@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, waitForDevCheck } from "./fixtures";
 import { getSession, openSession } from "./session-api";
 
 /*
@@ -20,6 +20,7 @@ test("the session details follow a rename and notes made elsewhere", async ({ pa
   expect(update.ok(), `update session ${update.status()}`).toBe(true);
   await expect(details.locator(".h6")).toHaveText("renamed elsewhere");
   await expect(details.getByText("second line")).toBeVisible();
+  await waitForDevCheck(page);
 });
 
 test("a session is renamed and its notes edited in the session details", async ({ page, api, sessionId }) => {
@@ -42,6 +43,7 @@ test("a session is renamed and its notes edited in the session details", async (
   await expect(modal).toBeHidden();
   await expect(details.getByText("second line")).toBeVisible();
   await expect.poll(async () => (await getSession(api, sessionId)).notes).toBe("first line\nsecond line");
+  await waitForDevCheck(page);
 });
 
 test("a session that doesn't exist shows its state", async ({ page, pageErrors }) => {
