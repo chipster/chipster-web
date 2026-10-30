@@ -36,13 +36,29 @@ test("the session panel follows the graph selection and the label events", async
   await expect(legend.locator(".label-legend-name")).toHaveText(["remote-label"]);
   await expect(legend.locator(".label-legend-item")).toBeEnabled();
 
-  // the panel's labels menu hides the legend of the graph, and shows it again
+  /*
+   * The panel's labels menu hides the legend of the graph, and shows it again. Each choice is saved
+   * by reading the user and writing it back, so the test waits for each save: otherwise the two
+   * could land in the wrong order, or the last one be cut off when the test ends, and leave the
+   * panel hidden.
+   */
+  const saved = (show: boolean) =>
+    page.waitForResponse(
+      (response) =>
+        response.request().method() === "PUT" &&
+        response.request().postDataJSON()?.preferences?.labels?.showLabelPanel === show &&
+        response.ok(),
+    );
   await panel.getByTitle("Labels menu").click();
+  const hidden = saved(false);
   await page.locator(".dropdown-menu.show").getByText("Hide labels panel").click();
   await expect(legend).toBeHidden();
+  await hidden;
   await panel.getByTitle("Labels menu").click();
+  const shown = saved(true);
   await page.locator(".dropdown-menu.show").getByText("Show labels panel").click();
   await expect(legend).toBeVisible();
+  await shown;
 
   // the List tab shows the selection made in the graph
   await panel.getByRole("tab", { name: "List" }).click();
