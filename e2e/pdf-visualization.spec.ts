@@ -557,9 +557,11 @@ test("the viewer requests nothing from other sites", async ({ page, baseURL, api
   const datasetId = await createDataset(api, sessionId, { name: "small.pdf", x: 100, y: 100 }, SMALL_PDF);
   // the worker, the fonts and the other files of pdf.js are served by the app
   const otherSites: string[] = [];
+  // the app and its services, which are origins of their own in the direct mode
+  const ownOrigins = api.origins(baseURL);
   page.on("request", (request) => {
     const url = new URL(request.url());
-    if (url.protocol.startsWith("http") && url.origin !== new URL(baseURL).origin) {
+    if (url.protocol.startsWith("http") && !ownOrigins.includes(url.origin)) {
       otherSites.push(request.url());
     }
   });
