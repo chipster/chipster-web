@@ -23,7 +23,9 @@ import {
  * The changes of the items are emitted when the view that declares the nav is checked, before its
  * child components, so the outlet is checked in the same pass.
  *
- * Comes with NGB_NAV_IMPORTS below, so that every nav has it.
+ * Comes with NGB_NAV_IMPORTS below, so that every nav has it. Not reported to ng-bootstrap yet;
+ * its issue #4921 (NG0100 in the typeahead) may have the same cause. Remove this directive once
+ * NgbNavOutlet itself re-checks on nav.items.changes.
  */
 @Directive({
   // matches ng-bootstrap's selector on purpose, so that importing it is enough

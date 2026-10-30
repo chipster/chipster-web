@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, waitForDevCheck } from "./fixtures";
 import { createDataset, datasetNode, deleteDataset, openSession } from "./session-api";
 
 /*
@@ -30,4 +30,5 @@ test("datasets added and deleted elsewhere appear and disappear without a reload
   await expect(page.locator("ch-session-panel").getByText("first.txt")).toBeHidden();
 
   expect(await page.evaluate(() => (window as unknown as { notReloaded?: boolean }).notReloaded)).toBe(true);
+  await waitForDevCheck(page);
 });
