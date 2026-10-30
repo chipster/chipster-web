@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { createDataset, createLabel, datasetNode, openSession, updateDataset } from "./session-api";
+import { createDataset, createLabel, datasetNode, openSession, setUserPreference, updateDataset } from "./session-api";
 
 /*
  * The session panel follows the selection made in the workflow graph, which d3 handles, and the
@@ -8,6 +8,12 @@ import { createDataset, createLabel, datasetNode, openSession, updateDataset } f
  */
 
 test("the session panel follows the graph selection and the label events", async ({ page, api, sessionId }) => {
+  /*
+   * The legend is shown only when the labels panel is, and that is a preference saved on the
+   * user. This test hides the panel and shows it again, but saving that can fail when another
+   * test updates the user at the same time, and then the panel would stay hidden in later runs.
+   */
+  await setUserPreference(api, "labels", "showLabelPanel", true);
   const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
   await createDataset(api, sessionId, { name: "b.txt", x: 300, y: 100 }, "b\n");
   await openSession(page, sessionId, datasetId);
