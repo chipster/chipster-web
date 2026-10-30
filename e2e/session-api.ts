@@ -20,6 +20,13 @@ import { USER_STATE } from "./login";
 export interface Api {
   // the public address of a service, e.g. "/session-db" in the proxy mode or "http://localhost:8004"
   address(role: string): string;
+  /*
+   * The origins of the app and the services, for telling a request of the app
+   * apart from a request to another site in both modes: in the proxy mode the
+   * services are relative addresses of the app's own origin, in the direct
+   * mode each has an origin of its own.
+   */
+  origins(baseURL: string): string[];
   get(role: string, path: string): Promise<APIResponse>;
   post(role: string, path: string, data: unknown): Promise<APIResponse>;
   put(role: string, path: string, data: unknown): Promise<APIResponse>;
@@ -64,8 +71,12 @@ export async function getApi(request: APIRequestContext, stateFile = USER_STATE)
   };
   const send = (method: string, role: string, path: string, data?: unknown) =>
     request.fetch(address(role) + path, { method, headers, data });
+  const origins = (baseURL: string) => [
+    ...new Set([new URL(baseURL).origin, ...services.values()].map((uri) => new URL(uri, baseURL).origin)),
+  ];
   return {
     address,
+    origins,
     get: (role, path) => send("GET", role, path),
     post: (role, path, data) => send("POST", role, path, data),
     put: (role, path, data) => send("PUT", role, path, data),
