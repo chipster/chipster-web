@@ -23,10 +23,6 @@ test("the file details show one selected file and list several", async ({ page, 
 });
 
 test("the file details follow the labels and notes changed elsewhere", async ({ page, api, sessionId }) => {
-  // The details show the datasets of the selection, which the dataset events don't update, so
-  // the label and the notes don't show until the selection changes
-  test.fail();
-
   const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
   await openSession(page, sessionId, datasetId);
   await datasetNode(page, datasetId).click();
