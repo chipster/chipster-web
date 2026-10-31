@@ -53,8 +53,8 @@ export const appConfig: ApplicationConfig = {
     /*
     Check also the OnPush views, and once a second, that no binding has changed without
     notifying Angular. A view that would stay stale throws ExpressionChangedAfterItHasBeenChecked
-    instead, which the ErrorHandler above shows as an error toast and logs in the console, once
-    a second until the page is reloaded. Angular compiles this out of production builds.
+    instead, which the ErrorHandler above logs in the console, once a second until the page is
+    reloaded. Angular compiles this out of production builds.
     */
     provideCheckNoChangesConfig({ exhaustive: true, interval: 1000 }),
   ],
