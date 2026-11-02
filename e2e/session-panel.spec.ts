@@ -34,6 +34,20 @@ test("the session panel follows the graph selection and the label events", async
   await expect(legend).toBeHidden();
   const labelId = await createLabel(api, sessionId, "remote-label");
   await updateDataset(api, sessionId, datasetId, { labelIds: [labelId] });
+  /*
+   * The app writes the whole user back when a session is opened, so another test can still
+   * put the hidden panel back between setUserPreference and this page's read of it. The
+   * labels menu shows what the page read: if the panel is hidden, show it as a user would.
+   */
+  const labelsMenuButton = panel.getByTitle("Labels menu");
+  await labelsMenuButton.click();
+  const panelToggle = page.locator(".dropdown-menu.show").getByText(/labels panel/);
+  await expect(panelToggle).toBeVisible();
+  if ((await panelToggle.innerText()) === "Show labels panel") {
+    await panelToggle.click();
+  } else {
+    await labelsMenuButton.click();
+  }
   await expect(legend.locator(".label-legend-name")).toHaveText(["remote-label"]);
   await expect(legend.locator(".label-legend-item")).toBeEnabled();
 
