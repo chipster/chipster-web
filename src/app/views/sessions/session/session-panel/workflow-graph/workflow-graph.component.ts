@@ -577,14 +577,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     if (this.enabled()) {
       this.workflowGraphService.doAndSaveLayout(Array.from(datasetsMap.values()), datasetsMap, jobsMap);
     } else {
-      // preview shouldn't update the data on server
-      const layoutedDatasets = this.workflowGraphService.doLayout(
-        Array.from(datasetsMap.values()),
-        datasetsMap,
-        jobsMap,
-      );
-      // update our copy of datasets
-      layoutedDatasets.forEach((d) => this.sessionData().datasetsMap().set(d.datasetId, d));
+      // preview shouldn't update the data on server. The positions go to the map's own objects
+      this.workflowGraphService.doLayout(Array.from(datasetsMap.values()), datasetsMap, jobsMap);
     }
 
     const datasetNodes = this.getDatasetNodes(

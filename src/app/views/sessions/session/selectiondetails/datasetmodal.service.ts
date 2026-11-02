@@ -304,8 +304,6 @@ export class DatasetModalService {
     selection.datasetsMap.set(selectedDatasetsMap);
     selection.jobsMap.set(sourceJobs);
     selection.labelsMap.set(filteredLabelsMap);
-    selection.datasetTypeTags.set(null);
-    selection.cachedFileHeaders = null;
     return selection;
   }
 
