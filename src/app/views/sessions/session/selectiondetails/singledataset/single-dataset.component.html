@@ -79,12 +79,12 @@
             <td>
               <textarea
                 #notesArea
-                [(ngModel)]="latestDataset().notes"
+                [ngModel]="latestDataset().notes"
                 class="dataset-notes"
                 rows="6"
                 placeholder="{{ notesPlaceholderInactive }} "
                 (focus)="editNotes(notesInput)"
-                (focusout)="saveNotes(latestDataset(), notesInput)"
+                (focusout)="saveNotes(notesInput)"
                 #notesInput></textarea>
             </td>
           </tr>

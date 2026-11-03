@@ -61,15 +61,17 @@ export class SingleDatasetComponent {
   notesPlaceholderInactive = "click to edit";
   notesPlaceholderActive = "";
 
-  editNotes(notesInput) {
+  editNotes(notesInput: HTMLTextAreaElement) {
     notesInput.placeholder = this.notesPlaceholderActive;
   }
 
-  saveNotes(dataset: Dataset, notesInput) {
+  saveNotes(notesInput: HTMLTextAreaElement) {
     this.notesArea().nativeElement.scrollTop = 0;
 
+    // a copy: the dataset is the one in datasetsMap, and the notes of a failed save would stay there
+    // for the next update to send. The dataset's update event replaces it in the map.
     this.sessionDataService
-      .updateDataset(dataset)
+      .updateDataset({ ...this.latestDataset(), notes: notesInput.value })
       .subscribe({ error: (err) => this.restErrorService.showError("saving notes failed", err) });
     notesInput.placeholder = this.notesPlaceholderInactive;
   }
