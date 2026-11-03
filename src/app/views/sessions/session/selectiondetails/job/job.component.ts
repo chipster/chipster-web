@@ -9,7 +9,6 @@ import { JobService } from "../../job.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
-import { ToolService } from "../../tools/tool.service";
 import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
 import { LinkButtonComponent } from "../../link-button/link-button.component";
 import { AsyncPipe } from "@angular/common";
@@ -26,7 +25,6 @@ export class JobComponent {
   private selectionHandlerService = inject(SelectionHandlerService);
   private selectionService = inject(SelectionService);
   private sessionDataService = inject(SessionDataService);
-  private toolService = inject(ToolService);
   private jobService = inject(JobService);
 
   readonly sessionData = input<SessionData>(undefined);
