@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { APIRequestContext, APIResponse, expect, Page } from "@playwright/test";
 import type { Session } from "chipster-js-common";
+import { jwtDecode } from "jwt-decode";
 import { parse } from "yaml";
 
 import { USER_STATE } from "./login";
@@ -18,6 +19,8 @@ import { USER_STATE } from "./login";
  * as the user that auth.setup.ts logged in.
  */
 export interface Api {
+  // the user id of the logged-in user, e.g. "jaas/chipster", the sub of the token like in the app
+  userId: string;
   // the public address of a service, e.g. "/session-db" in the proxy mode or "http://localhost:8004"
   address(role: string): string;
   /*
@@ -45,6 +48,7 @@ export async function getApi(request: APIRequestContext, stateFile = USER_STATE)
     .find((entry) => entry.name === "ch-auth-token")?.value;
   expect(token, `no ch-auth-token in ${stateFile}`).toBeDefined();
   const headers = { Authorization: "Basic " + Buffer.from("token:" + token).toString("base64") };
+  const userId = jwtDecode(token).sub;
 
   /*
    * The only address the app itself knows, from its configuration. It's
@@ -75,6 +79,7 @@ export async function getApi(request: APIRequestContext, stateFile = USER_STATE)
     ...new Set([new URL(baseURL).origin, ...services.values()].map((uri) => new URL(uri, baseURL).origin)),
   ];
   return {
+    userId,
     address,
     origins,
     get: (role, path) => send("GET", role, path),
@@ -143,6 +148,29 @@ export async function updateDataset(api: Api, sessionId: string, datasetId: stri
     ...changes,
   });
   expect(response.ok(), `update dataset ${response.status()}`).toBe(true);
+}
+
+/*
+ * Sets one preference of the user, e.g. setUserPreference(api, "labels", "showLabelPanel", true),
+ * like PreferencesService of the app. The preferences are saved on the user, which all the tests
+ * share, so a test that depends on one sets it itself rather than trusting what an earlier test
+ * left there. The auth service fails an update made at the same time as another test's with a
+ * 500 (see KNOWN_FAILED_REQUESTS in fixtures.ts), so it's tried again. Like the app, it writes back
+ * the whole user, and the auth service takes the preferences and the latest session from it, so
+ * an update that another test makes in between is lost. That's fine for the tests.
+ */
+export async function setUserPreference(api: Api, rootKey: string, leafKey: string, value: unknown): Promise<void> {
+  const path = `/users?userId=${encodeURIComponent(api.userId)}`;
+  await expect(async () => {
+    const current = await api.get("auth", path);
+    expect(current.ok(), `get user ${current.status()}`).toBe(true);
+    const user = await current.json();
+    // like the app, which takes an empty array for no preferences
+    const preferences = user.preferences == null || user.preferences.length < 1 ? {} : user.preferences;
+    preferences[rootKey] = { ...preferences[rootKey], [leafKey]: value };
+    const response = await api.put("auth", path, { ...user, preferences });
+    expect(response.ok(), `update user ${response.status()}`).toBe(true);
+  }).toPass({ timeout: 10_000 });
 }
 
 export async function createLabel(api: Api, sessionId: string, name: string, color = "#ff0000"): Promise<string> {

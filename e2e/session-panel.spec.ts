@@ -1,5 +1,5 @@
 import { expect, test, waitForDevCheck } from "./fixtures";
-import { createDataset, createLabel, datasetNode, openSession, updateDataset } from "./session-api";
+import { createDataset, createLabel, datasetNode, openSession, setUserPreference, updateDataset } from "./session-api";
 
 /*
  * The session panel follows the selection made in the workflow graph, which d3 handles, and the
@@ -8,6 +8,13 @@ import { createDataset, createLabel, datasetNode, openSession, updateDataset } f
  */
 
 test("the session panel follows the graph selection and the label events", async ({ page, api, sessionId }) => {
+  /*
+   * The legend is shown only when the labels panel is, and that is a preference saved on the
+   * user. This test hides the panel and shows it again, but the two saves can land in the wrong
+   * order, or fail when another test updates the user at the same time, and then the panel would
+   * stay hidden in later runs.
+   */
+  await setUserPreference(api, "labels", "showLabelPanel", true);
   const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
   await createDataset(api, sessionId, { name: "b.txt", x: 300, y: 100 }, "b\n");
   await openSession(page, sessionId, datasetId);
@@ -27,14 +34,28 @@ test("the session panel follows the graph selection and the label events", async
   await expect(legend).toBeHidden();
   const labelId = await createLabel(api, sessionId, "remote-label");
   await updateDataset(api, sessionId, datasetId, { labelIds: [labelId] });
+  /*
+   * The app writes the whole user back when a session is opened, so another test can still
+   * put the hidden panel back between setUserPreference and this page's read of it. The
+   * labels menu shows what the page read: if the panel is hidden, show it as a user would.
+   */
+  const labelsMenuButton = panel.getByTitle("Labels menu");
+  await labelsMenuButton.click();
+  const panelToggle = page.locator(".dropdown-menu.show").getByText(/labels panel/);
+  await expect(panelToggle).toBeVisible();
+  if ((await panelToggle.innerText()) === "Show labels panel") {
+    await panelToggle.click();
+  } else {
+    await labelsMenuButton.click();
+  }
   await expect(legend.locator(".label-legend-name")).toHaveText(["remote-label"]);
   await expect(legend.locator(".label-legend-item")).toBeEnabled();
 
   // the panel's labels menu hides the legend of the graph, and shows it again
-  await panel.getByTitle("Labels menu").click();
+  await labelsMenuButton.click();
   await page.locator(".dropdown-menu.show").getByText("Hide labels panel").click();
   await expect(legend).toBeHidden();
-  await panel.getByTitle("Labels menu").click();
+  await labelsMenuButton.click();
   await page.locator(".dropdown-menu.show").getByText("Show labels panel").click();
   await expect(legend).toBeVisible();
 
