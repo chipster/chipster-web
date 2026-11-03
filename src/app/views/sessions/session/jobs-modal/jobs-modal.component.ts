@@ -1,25 +1,11 @@
-import {
-  AfterViewInit,
-  Component,
-  HostListener,
-  OnDestroy,
-  OnInit,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-  viewChild,
-} from "@angular/core";
+import { AfterViewInit, Component, HostListener, computed, inject, signal, viewChild } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, Tool } from "chipster-js-common";
 import log from "loglevel";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SelectionHandlerService } from "../selection-handler.service";
 import { SelectionService } from "../selection.service";
 import { SessionDataService } from "../session-data.service";
-import { SessionEventService } from "../session-event.service";
 import { JobListComponent } from "../tools/job-list/job-list.component";
 import { JobComponent } from "../selectiondetails/job/job.component";
 
@@ -27,23 +13,13 @@ import { JobComponent } from "../selectiondetails/job/job.component";
   selector: "ch-jobs-modal",
   templateUrl: "./jobs-modal.component.html",
   styleUrls: ["./jobs-modal.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [JobListComponent, JobComponent],
 })
-export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
+export class JobsModalComponent implements AfterViewInit {
   activeModal = inject(NgbActiveModal);
   private selectionHandlerService = inject(SelectionHandlerService);
   private selectionService = inject(SelectionService);
-  private sessionEventService = inject(SessionEventService);
-  private errorService = inject(ErrorService);
   private sessionDataService = inject(SessionDataService);
-
-  private unsubscribe: Subject<any> = new Subject();
-
-  ngOnInit(): void {
-    this.updateJobs();
-    this.subscribeToJobEvents();
-  }
 
   ngAfterViewInit() {
     // scroll to the job when it's selected from "Show job" in File context menu
@@ -58,18 +34,20 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         log.warn("scrolling to job failed, element id not found: ", rowId);
       }
-    } else if (this.jobListComponent()?.jobsSorted.length > 0) {
+    } else if (this.jobListComponent()?.jobsSorted().length > 0) {
       // auto-select first job to enable immediate arrow key navigation; setTimeout defers past view check cycle (NG0100)
-      setTimeout(() => this.onJobSelection(this.jobListComponent().jobsSorted[0]));
+      setTimeout(() => this.onJobSelection(this.jobListComponent().jobsSorted()[0]));
     }
   }
 
   readonly jobListComponent = viewChild.required(JobListComponent);
 
-  jobs: Job[];
   // set through the modal ref by the code that opens the modal
   readonly tools = signal<Tool[]>(undefined);
   readonly sessionData = signal<SessionData>(undefined);
+
+  // job events update jobsMap
+  readonly jobs = computed<Job[]>(() => this.sessionDataService.getJobList(this.sessionData()));
 
   /**
    * Job selection goes through selectionHandlerService, bit overkill atm.
@@ -90,26 +68,5 @@ export class JobsModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onJobSelection(job: Job) {
     this.selectionHandlerService.setJobSelection([job]);
-  }
-
-  updateJobs() {
-    this.jobs = this.sessionDataService.getJobList(this.sessionData());
-  }
-
-  private subscribeToJobEvents() {
-    this.sessionEventService
-      .getJobStream()
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe({
-        next: () => {
-          this.updateJobs();
-        },
-        error: (err) => this.errorService.showError("failed to update jobs", err),
-      });
-  }
-
-  ngOnDestroy() {
-    this.unsubscribe.next(null);
-    this.unsubscribe.complete();
   }
 }
