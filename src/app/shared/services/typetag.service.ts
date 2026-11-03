@@ -53,9 +53,9 @@ export class TypeTagService {
     // debug logging
     if (sessionData == null) {
       log.warn("sessionData is null in isCompatible for " + dataset.name);
-    } else if (sessionData.datasetTypeTags == null || sessionData.datasetTypeTags.size === 0) {
+    } else if (sessionData.datasetTypeTags() == null || sessionData.datasetTypeTags().size === 0) {
       log.warn(
-        "empty sessionData.datasetTypetags in isCompatible for " + dataset.name + " " + sessionData.datasetTypeTags,
+        "empty sessionData.datasetTypetags in isCompatible for " + dataset.name + " " + sessionData.datasetTypeTags(),
       );
     }
 
@@ -64,10 +64,10 @@ export class TypeTagService {
       return true;
     }
 
-    const typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
+    const typeTags = sessionData.datasetTypeTags().get(dataset.datasetId);
 
     if (!typeTags) {
-      log.warn("typetags", sessionData.datasetTypeTags, typeTags);
+      log.warn("typetags", sessionData.datasetTypeTags(), typeTags);
       throw new Error("dataset " + dataset.name + " does not have type tags");
     }
     return typeTags.has(type);
@@ -84,7 +84,7 @@ export class TypeTagService {
   }
 
   getTags(sessionData: SessionData, dataset: Dataset): Map<string, string> {
-    const typeTags = sessionData.datasetTypeTags.get(dataset.datasetId);
+    const typeTags = sessionData.datasetTypeTags().get(dataset.datasetId);
     if (!typeTags) {
       throw new Error("dataset " + dataset.name + " does not have type tags");
     }

@@ -36,7 +36,7 @@ export class LabelEditorModalComponent implements OnInit {
       this.color = this.label().color ?? DEFAULT_LABEL_COLOR;
     } else {
       // new label: pick the first palette color not yet used in the session
-      const usedColors = new Set(Array.from(this.sessionData().labelsMap.values()).map((l) => l.color));
+      const usedColors = new Set(Array.from(this.sessionData().labelsMap().values()).map((l) => l.color));
       const firstUnused = LABEL_PALETTE.find((c) => !usedColors.has(c.hex));
       this.color = firstUnused?.hex ?? DEFAULT_LABEL_COLOR;
     }
@@ -84,7 +84,7 @@ export class LabelEditorModalComponent implements OnInit {
       const updated: Label = { ...this.label(), name, color: this.color };
       this.sessionResource.updateLabel(sessionId, updated).subscribe({
         next: () => {
-          this.sessionData().labelsMap.set(updated.labelId, updated);
+          this.sessionData().labelsMap.update((m) => new Map(m).set(updated.labelId, updated));
           this.activeModal.close(updated);
         },
         error: (err) => {
@@ -101,7 +101,7 @@ export class LabelEditorModalComponent implements OnInit {
           // the authoritative copy (incl. server-set created), same as datasets
           // and jobs
           const created: Label = { ...newLabel, labelId };
-          this.sessionData().labelsMap.set(labelId, created);
+          this.sessionData().labelsMap.update((m) => new Map(m).set(labelId, created));
           this.activeModal.close(created);
         },
         error: (err) => {

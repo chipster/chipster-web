@@ -51,14 +51,14 @@
 
             <!-- zoom buttons-->
             <button
-              [disabled]="sessionData().datasetsMap.size === 0"
+              [disabled]="sessionData().datasetsMap().size === 0"
               class="btn btn-sm btn-outline-secondary me-2 float-end tool-bar-button"
               title="Zoom in"
               (click)="workflowGraph.zoomIn()">
               <span class="fa fa-lg fa-search-plus"></span>
             </button>
             <button
-              [disabled]="sessionData().datasetsMap.size === 0"
+              [disabled]="sessionData().datasetsMap().size === 0"
               class="btn btn-sm btn-outline-secondary me-1 float-end tool-bar-button"
               title="Zoom out"
               (click)="workflowGraph.zoomOut()">
@@ -139,8 +139,6 @@
             <ch-workflow-graph
               id="workflow-graph"
               #workflowGraph
-              [datasetsMap]="sessionData().datasetsMap"
-              [jobsMap]="sessionData().jobsMap"
               [modulesMap]="modulesMap()"
               [datasetSearch]="datasetSearch"
               [defaultScale]="1"
