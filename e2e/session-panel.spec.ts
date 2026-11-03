@@ -52,10 +52,10 @@ test("the session panel follows the graph selection and the label events", async
   await expect(legend.locator(".label-legend-item")).toBeEnabled();
 
   // the panel's labels menu hides the legend of the graph, and shows it again
-  await panel.getByTitle("Labels menu").click();
+  await labelsMenuButton.click();
   await page.locator(".dropdown-menu.show").getByText("Hide labels panel").click();
   await expect(legend).toBeHidden();
-  await panel.getByTitle("Labels menu").click();
+  await labelsMenuButton.click();
   await page.locator(".dropdown-menu.show").getByText("Show labels panel").click();
   await expect(legend).toBeVisible();
 
