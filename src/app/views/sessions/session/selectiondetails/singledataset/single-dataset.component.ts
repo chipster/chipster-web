@@ -36,7 +36,7 @@ export class SingleDatasetComponent {
   private toolService = inject(ToolService);
   private datasetContextMenuService = inject(DatasetContextMenuService);
 
-  readonly dataset = input<Dataset>(undefined);
+  readonly dataset = input.required<Dataset>();
   readonly jobs = input<Map<string, Job>>(undefined);
   readonly sessionData = input<SessionData>(undefined);
   readonly tools = input<Tool[]>(undefined);
@@ -49,7 +49,7 @@ export class SingleDatasetComponent {
    * dataset events: labels and notes changed elsewhere, or the server's copy after a local change.
    */
   readonly latestDataset = computed(
-    () => this.sessionData()?.datasetsMap().get(this.dataset()?.datasetId) ?? this.dataset(),
+    () => this.sessionData()?.datasetsMap().get(this.dataset().datasetId) ?? this.dataset(),
   );
   readonly sourceJob = computed<Job>(() =>
     this.sessionDataService.getJobById(this.latestDataset().sourceJob, this.jobs()),
@@ -93,6 +93,6 @@ export class SingleDatasetComponent {
   }
 
   getDatasetLabels() {
-    return getSortedLabels(this.latestDataset()?.labelIds, this.sessionData().labelsMap());
+    return getSortedLabels(this.latestDataset().labelIds, this.sessionData().labelsMap());
   }
 }
