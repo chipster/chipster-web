@@ -688,10 +688,9 @@ export class SessionResource {
   }
 
   cancelJob(sessionId: string, job: Job) {
-    job.state = JobState.Cancelled;
-    job.stateDetail = "";
-
-    return this.updateJob(sessionId, job);
+    // a copy: the job is the one in jobsMap, and a change in place wouldn't notify the OnPush views
+    // that show it. The job's update event replaces it in the map.
+    return this.updateJob(sessionId, { ...job, state: JobState.Cancelled, stateDetail: "" });
   }
 
   /**
