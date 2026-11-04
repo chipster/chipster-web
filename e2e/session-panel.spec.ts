@@ -66,3 +66,32 @@ test("the session panel follows the graph selection and the label events", async
   await expect(rows.filter({ hasText: "b.txt" })).not.toHaveClass(/active/);
   await waitForDevCheck(page);
 });
+
+/*
+ * The toolbar's split button shows the label used last. The labels modal records it only after
+ * its requests, so the panel learns about it from the service's signal, not from the map update
+ * that comes before.
+ */
+test("the split button follows the label applied in the labels modal", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
+  await openSession(page, sessionId, datasetId);
+  const panel = page.locator("ch-session-panel");
+  const splitButton = panel.locator('button.tool-bar-button[title^="Apply or remove"]');
+  await datasetNode(page, datasetId).click();
+  await expect(splitButton).toBeEnabled();
+  const titleBefore = await splitButton.getAttribute("title");
+
+  // apply the last of the default labels, which isn't the one the button shows
+  await panel.getByTitle("Labels menu").click();
+  await page.locator(".dropdown-menu.show").getByText("Edit labels…").click();
+  const modal = page.locator("ch-labels-modal");
+  const lastRow = modal.locator("tbody tr").last();
+  const labelName = (await lastRow.locator("ch-label-pill").innerText()).trim();
+  const titleAfter = `Apply or remove '${labelName}'`;
+  expect(titleAfter).not.toBe(titleBefore);
+  await lastRow.locator("input[type=checkbox]").check();
+  await modal.getByRole("button", { name: "Apply" }).click();
+  await expect(modal).toBeHidden();
+  await expect(splitButton).toHaveAttribute("title", titleAfter);
+  await waitForDevCheck(page);
+});
