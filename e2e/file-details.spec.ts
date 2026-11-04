@@ -54,12 +54,15 @@ test("the file details follow a label applied from the toolbar menu and from the
   // the toolbar menu applies the label, and a second toggle removes it although the selection
   // still has the dataset as it was before the first
   const labelsMenu = page.locator("ch-session-panel").getByTitle("Labels menu");
+  const menuItem = page.locator(".dropdown-menu.show button", { hasText: "my-label" });
   await labelsMenu.click();
-  await page.locator(".dropdown-menu.show").getByText("my-label").click();
+  await expect(menuItem).not.toContainText("✓");
+  await menuItem.click();
   await expect(details.locator("ch-label-pill")).toContainText("my-label");
   await waitForDevCheck(page);
   await labelsMenu.click();
-  await page.locator(".dropdown-menu.show").getByText("my-label").click();
+  await expect(menuItem).toContainText("✓");
+  await menuItem.click();
   await expect(details).toContainText("Add labels");
   await waitForDevCheck(page);
 

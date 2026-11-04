@@ -49,8 +49,7 @@ export class DatasetModalService {
     this.labelsModalRef = this.ngbModal.open(LabelsModalComponent, {});
     const modal = this.labelsModalRef.componentInstance as LabelsModalComponent;
     modal.sessionData.set(sessionData);
-    // the latest copies from datasetsMap: the selection's datasets aren't updated by the dataset events
-    modal.selectedDatasets.set((selectedDatasets ?? []).map((d) => sessionData.datasetsMap().get(d.datasetId) ?? d));
+    modal.selectedDatasets.set(sessionData.latestDatasets(selectedDatasets ?? []));
     this.labelsModalRef.result.then(
       () => {
         this.labelsModalRef = null;

@@ -74,8 +74,9 @@ export class LabelsContextMenuService {
     sessionData.datasetsMap().forEach((dataset) => {
       (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
     });
+    const latest = sessionData.latestDatasets(datasets);
     return labels.map((label) => {
-      const state = this.computeState(datasets, label);
+      const state = this.computeState(latest, label);
       const colorBg = resolveLabelColor(label.color);
       return {
         label,
@@ -120,8 +121,7 @@ export class LabelsContextMenuService {
 
     this.lastUsedLabelId = label.labelId;
 
-    // the latest copies from datasetsMap: the selection's datasets aren't updated by the dataset events
-    const latest = datasets.map((d) => sessionData.datasetsMap().get(d.datasetId) ?? d);
+    const latest = sessionData.latestDatasets(datasets);
     const state = this.computeState(latest, label);
     const shouldRemove = state === "checked";
 
@@ -137,7 +137,6 @@ export class LabelsContextMenuService {
         after.add(label.labelId);
       }
       if (!this.setsEqual(before, after)) {
-        // a copy: a change in place wouldn't notify the OnPush views that show the dataset
         updates.push({ ...dataset, labelIds: Array.from(after) });
       }
     }
@@ -146,18 +145,13 @@ export class LabelsContextMenuService {
       return of(undefined);
     }
 
-    // the copies in datasetsMap right away, so that the views update at once; the datasets'
-    // update events replace them with the server's copies
-    sessionData.datasetsMap.update((m) => {
-      const updated = new Map(m);
-      updates.forEach((d) => updated.set(d.datasetId, d));
-      return updated;
-    });
+    const restore = sessionData.setDatasets(updates);
 
     return forkJoin(
       updates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
           catchError((err) => {
+            restore();
             this.errorService.showError("Updating dataset labels failed", err);
             return of(null);
           }),

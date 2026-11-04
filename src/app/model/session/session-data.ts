@@ -18,4 +18,43 @@ export class SessionData {
   readonly labelsMap = signal(new Map<string, Label>());
   readonly datasetTypeTags = signal(new Map<string, Map<string, string>>());
   cachedFileHeaders = new Map<string, Array<SelectionOption>>();
+
+  /**
+   * The latest copies of the datasets from datasetsMap: the datasets of the selection aren't
+   * updated by the dataset events. A dataset that isn't in the map is returned as it is.
+   */
+  latestDatasets(datasets: Dataset[]): Dataset[] {
+    const map = this.datasetsMap();
+    return datasets.map((d) => map.get(d.datasetId) ?? d);
+  }
+
+  /**
+   * Put copies of datasets in datasetsMap before their update is sent, so that the views update at
+   * once and are notified. A change in place wouldn't notify the OnPush views. The datasets' update
+   * events replace the copies with the server's. Returns a function that restores the previous
+   * datasets when the update fails, for the datasets whose copy is still in the map.
+   */
+  setDatasets(datasets: Dataset[]): () => void {
+    const previous = new Map(datasets.map((d) => [d.datasetId, this.datasetsMap().get(d.datasetId)]));
+    this.datasetsMap.update((m) => {
+      const updated = new Map(m);
+      datasets.forEach((d) => updated.set(d.datasetId, d));
+      return updated;
+    });
+    return () =>
+      this.datasetsMap.update((m) => {
+        const restored = new Map(m);
+        datasets
+          .filter((d) => restored.get(d.datasetId) === d)
+          .forEach((d) => {
+            const before = previous.get(d.datasetId);
+            if (before) {
+              restored.set(d.datasetId, before);
+            } else {
+              restored.delete(d.datasetId);
+            }
+          });
+        return restored;
+      });
+  }
 }

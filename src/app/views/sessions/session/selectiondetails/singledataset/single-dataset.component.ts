@@ -38,7 +38,7 @@ export class SingleDatasetComponent {
 
   readonly dataset = input.required<Dataset>();
   readonly jobs = input<Map<string, Job>>(undefined);
-  readonly sessionData = input<SessionData>(undefined);
+  readonly sessionData = input.required<SessionData>();
   readonly tools = input<Tool[]>(undefined);
   readonly parametersLimit = input<number>(undefined);
 
@@ -48,9 +48,7 @@ export class SingleDatasetComponent {
    * The latest copy from datasetsMap, because the dataset of the selection isn't updated by the
    * dataset events: labels and notes changed elsewhere, or the server's copy after a local change.
    */
-  readonly latestDataset = computed(
-    () => this.sessionData()?.datasetsMap().get(this.dataset().datasetId) ?? this.dataset(),
-  );
+  readonly latestDataset = computed(() => this.sessionData().latestDatasets([this.dataset()])[0]);
   readonly sourceJob = computed<Job>(() =>
     this.sessionDataService.getJobById(this.latestDataset().sourceJob, this.jobs()),
   );
@@ -68,11 +66,16 @@ export class SingleDatasetComponent {
   saveNotes(notesInput: HTMLTextAreaElement) {
     this.notesArea().nativeElement.scrollTop = 0;
 
-    // a copy: the dataset is the one in datasetsMap, and the notes of a failed save would stay there
-    // for the next update to send. The dataset's update event replaces it in the map.
-    this.sessionDataService
-      .updateDataset({ ...this.latestDataset(), notes: notesInput.value })
-      .subscribe({ error: (err) => this.restErrorService.showError("saving notes failed", err) });
+    // the copy in datasetsMap at once, so that an update of the dataset sent before the save's event
+    // arrives, e.g. a label applied with the next click, carries the new notes
+    const dataset = { ...this.latestDataset(), notes: notesInput.value };
+    const restore = this.sessionData().setDatasets([dataset]);
+    this.sessionDataService.updateDataset(dataset).subscribe({
+      error: (err) => {
+        restore();
+        this.restErrorService.showError("saving notes failed", err);
+      },
+    });
     notesInput.placeholder = this.notesPlaceholderInactive;
   }
 

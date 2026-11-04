@@ -134,17 +134,12 @@ export class LabelsModalComponent implements OnInit {
    * Remove the labels from labelsMap and from the datasets that use them.
    *
    * The datasets in datasetsMap are replaced with copies, so that the views that show them are
-   * notified. The selected datasets are the same objects as in the map until now, so change them
-   * in place too, because the selection keeps them.
+   * notified. The selected datasets are the map's objects, so they aren't changed; the views and
+   * confirm() read the latest copies from the map.
    */
   private removeLabelsLocally(labelIds: Set<string>): void {
     const sessionData = this.sessionData();
     sessionData.labelsMap.update((m) => new Map(Array.from(m).filter(([id]) => !labelIds.has(id))));
-    this.selectedDatasets().forEach((d) => {
-      if (d.labelIds) {
-        d.labelIds = d.labelIds.filter((id) => !labelIds.has(id));
-      }
-    });
     sessionData.datasetsMap.update(
       (m) =>
         new Map(
@@ -237,12 +232,12 @@ export class LabelsModalComponent implements OnInit {
     // applied over removed since that's usually the user's main intent.
     const tracking = { lastAppliedId: null as string | null, lastRemovedId: null as string | null };
 
-    for (const dataset of this.selectedDatasets()) {
+    // the latest copies, in case a label was deleted here or a dataset event came while the modal was open
+    for (const dataset of this.sessionData().latestDatasets(this.selectedDatasets())) {
       const before = new Set(dataset.labelIds ?? []);
       const after = this.applyRowsTo(before, tracking);
 
       if (!this.setsEqual(before, after)) {
-        // a copy: a change in place wouldn't notify the OnPush views that show the dataset
         datasetUpdates.push({ ...dataset, labelIds: Array.from(after) });
       }
     }
@@ -252,14 +247,7 @@ export class LabelsModalComponent implements OnInit {
       return;
     }
 
-    // the copies in datasetsMap right away, so that the views update at once; the datasets'
-    // update events replace them with the server's copies
-    this.sessionData().datasetsMap.update((m) => {
-      const updated = new Map(m);
-      datasetUpdates.forEach((d) => updated.set(d.datasetId, d));
-      return updated;
-    });
-
+    const restore = this.sessionData().setDatasets(datasetUpdates);
     const lastUsedId = tracking.lastAppliedId ?? tracking.lastRemovedId;
 
     this.saving = true;
@@ -267,6 +255,7 @@ export class LabelsModalComponent implements OnInit {
       datasetUpdates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
           catchError((err) => {
+            restore();
             this.errorService.showError("Updating dataset labels failed", err);
             return of(null);
           }),

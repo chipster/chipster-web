@@ -21,10 +21,7 @@ export class FilesDetailsComponent {
    * The latest copies from datasetsMap, because the datasets of the selection aren't updated by the
    * dataset events. Without sessionData, as in the Venn diagram, the datasets as they are.
    */
-  readonly latestDatasets = computed(() => {
-    const datasetsMap = this.sessionData()?.datasetsMap();
-    return this.datasets().map((d) => datasetsMap?.get(d.datasetId) ?? d);
-  });
+  readonly latestDatasets = computed(() => this.sessionData()?.latestDatasets(this.datasets()) ?? this.datasets());
 
   labelsFor(dataset: Dataset): Label[] {
     const sessionData = this.sessionData();
