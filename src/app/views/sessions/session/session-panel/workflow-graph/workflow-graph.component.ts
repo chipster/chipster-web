@@ -181,9 +181,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
   });
 
-  // for the template, selectedDatasets is updated in a subscription
-  private readonly selectedDatasetsSignal = this.store.selectSignal<Dataset[]>((state) => state.selectedDatasets);
-  readonly hasSelectedDatasets = computed(() => this.selectedDatasetsSignal()?.length > 0);
+  // for the template: the service's selection is a store signal, the selectedDatasets field isn't
+  readonly hasSelectedDatasets = computed(() => this.selectionService.selectedDatasets.length > 0);
 
   selectionRect: any;
 
