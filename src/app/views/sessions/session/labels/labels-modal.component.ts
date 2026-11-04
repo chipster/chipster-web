@@ -17,6 +17,9 @@ type SelectionState = "checked" | "unchecked" | "indeterminate";
 interface LabelRow {
   label: Label;
   selection: SelectionState;
+  // the state when the modal was opened: only the rows the user changed are applied, so that a
+  // label applied elsewhere while the modal was open isn't removed
+  initial: SelectionState;
 }
 
 @Component({
@@ -52,10 +55,10 @@ export class LabelsModalComponent implements OnInit {
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
 
-    this.rows = labels.map((label) => ({
-      label,
-      selection: this.computeSelection(label),
-    }));
+    this.rows = labels.map((label) => {
+      const selection = this.computeSelection(label);
+      return { label, selection, initial: selection };
+    });
   }
 
   private computeSelection(label: Label): SelectionState {
@@ -134,17 +137,12 @@ export class LabelsModalComponent implements OnInit {
    * Remove the labels from labelsMap and from the datasets that use them.
    *
    * The datasets in datasetsMap are replaced with copies, so that the views that show them are
-   * notified. The selected datasets are the same objects as in the map until now, so change them
-   * in place too, because the selection keeps them.
+   * notified. The selected datasets are the map's objects, so they aren't changed; the views and
+   * confirm() read the latest copies from the map.
    */
   private removeLabelsLocally(labelIds: Set<string>): void {
     const sessionData = this.sessionData();
     sessionData.labelsMap.update((m) => new Map(Array.from(m).filter(([id]) => !labelIds.has(id))));
-    this.selectedDatasets().forEach((d) => {
-      if (d.labelIds) {
-        d.labelIds = d.labelIds.filter((id) => !labelIds.has(id));
-      }
-    });
     sessionData.datasetsMap.update(
       (m) =>
         new Map(
@@ -219,6 +217,7 @@ export class LabelsModalComponent implements OnInit {
     const newRow: LabelRow = {
       label: created,
       selection: this.hasSelection() ? "checked" : "unchecked",
+      initial: "unchecked",
     };
     this.rows = [...this.rows, newRow].sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? ""));
   }
@@ -237,13 +236,13 @@ export class LabelsModalComponent implements OnInit {
     // applied over removed since that's usually the user's main intent.
     const tracking = { lastAppliedId: null as string | null, lastRemovedId: null as string | null };
 
-    for (const dataset of this.selectedDatasets()) {
+    // the latest copies, in case a label was deleted here or a dataset event came while the modal was open
+    for (const dataset of this.sessionData().latestDatasets(this.selectedDatasets())) {
       const before = new Set(dataset.labelIds ?? []);
       const after = this.applyRowsTo(before, tracking);
 
       if (!this.setsEqual(before, after)) {
-        dataset.labelIds = Array.from(after);
-        datasetUpdates.push(dataset);
+        datasetUpdates.push({ ...dataset, labelIds: Array.from(after) });
       }
     }
 
@@ -252,6 +251,7 @@ export class LabelsModalComponent implements OnInit {
       return;
     }
 
+    const restore = this.sessionData().setDatasets(datasetUpdates);
     const lastUsedId = tracking.lastAppliedId ?? tracking.lastRemovedId;
 
     this.saving = true;
@@ -259,6 +259,7 @@ export class LabelsModalComponent implements OnInit {
       datasetUpdates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
           catchError((err) => {
+            restore([d]);
             this.errorService.showError("Updating dataset labels failed", err);
             return of(null);
           }),
@@ -291,6 +292,9 @@ export class LabelsModalComponent implements OnInit {
     const after = new Set(before);
     for (const row of this.rows) {
       const id = row.label.labelId;
+      if (row.selection === row.initial) {
+        continue;
+      }
       if (row.selection === "checked") {
         if (!before.has(id)) {
           tracking.lastAppliedId = id;

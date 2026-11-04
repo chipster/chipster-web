@@ -18,4 +18,45 @@ export class SessionData {
   readonly labelsMap = signal(new Map<string, Label>());
   readonly datasetTypeTags = signal(new Map<string, Map<string, string>>());
   cachedFileHeaders = new Map<string, Array<SelectionOption>>();
+
+  /**
+   * The latest copies of the datasets from datasetsMap: the datasets of the selection aren't
+   * updated by the dataset events. A dataset that isn't in the map is returned as it is.
+   */
+  latestDatasets(datasets: Dataset[]): Dataset[] {
+    const map = this.datasetsMap();
+    return datasets.map((d) => map.get(d.datasetId) ?? d);
+  }
+
+  /**
+   * Put copies of datasets in datasetsMap before their update is sent, so that the views update at
+   * once and are notified. A change in place wouldn't notify the OnPush views. The datasets' update
+   * events replace the copies with the server's. A dataset that isn't in the map any more, deleted
+   * while it was selected, isn't brought back; its update fails on its own.
+   *
+   * Returns a function that restores the previous datasets when the update fails: of the datasets
+   * given to it, or all of them, those whose copy is still in the map.
+   */
+  setDatasets(datasets: Dataset[]): (failed?: Dataset[]) => void {
+    const map = this.datasetsMap();
+    const copies = datasets.filter((d) => map.has(d.datasetId));
+    const previous = new Map(copies.map((d) => [d.datasetId, map.get(d.datasetId)]));
+    if (copies.length > 0) {
+      this.datasetsMap.update((m) => {
+        const updated = new Map(m);
+        copies.forEach((d) => updated.set(d.datasetId, d));
+        return updated;
+      });
+    }
+    return (failed = copies) => {
+      const stale = failed.filter((d) => previous.has(d.datasetId) && this.datasetsMap().get(d.datasetId) === d);
+      if (stale.length > 0) {
+        this.datasetsMap.update((m) => {
+          const restored = new Map(m);
+          stale.forEach((d) => restored.set(d.datasetId, previous.get(d.datasetId)));
+          return restored;
+        });
+      }
+    };
+  }
 }

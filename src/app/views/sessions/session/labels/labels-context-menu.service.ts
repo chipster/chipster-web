@@ -74,8 +74,9 @@ export class LabelsContextMenuService {
     sessionData.datasetsMap().forEach((dataset) => {
       (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
     });
+    const latest = sessionData.latestDatasets(datasets);
     return labels.map((label) => {
-      const state = this.computeState(datasets, label);
+      const state = this.computeState(latest, label);
       const colorBg = resolveLabelColor(label.color);
       return {
         label,
@@ -120,13 +121,14 @@ export class LabelsContextMenuService {
 
     this.lastUsedLabelId = label.labelId;
 
-    const state = this.computeState(datasets, label);
+    const latest = sessionData.latestDatasets(datasets);
+    const state = this.computeState(latest, label);
     const shouldRemove = state === "checked";
 
     const sessionId = sessionData.session.sessionId;
     const updates: Dataset[] = [];
 
-    for (const dataset of datasets) {
+    for (const dataset of latest) {
       const before = new Set(dataset.labelIds ?? []);
       const after = new Set(before);
       if (shouldRemove) {
@@ -135,8 +137,7 @@ export class LabelsContextMenuService {
         after.add(label.labelId);
       }
       if (!this.setsEqual(before, after)) {
-        dataset.labelIds = Array.from(after);
-        updates.push(dataset);
+        updates.push({ ...dataset, labelIds: Array.from(after) });
       }
     }
 
@@ -144,10 +145,13 @@ export class LabelsContextMenuService {
       return of(undefined);
     }
 
+    const restore = sessionData.setDatasets(updates);
+
     return forkJoin(
       updates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
           catchError((err) => {
+            restore([d]);
             this.errorService.showError("Updating dataset labels failed", err);
             return of(null);
           }),

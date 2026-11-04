@@ -93,7 +93,8 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   renameDataset() {
-    const dataset = clone(this.dataset());
+    // the latest copy: the selection's dataset doesn't have the notes and labels saved since
+    const dataset = clone(this.sessionData().latestDatasets([this.dataset()])[0]);
     this.dialogModalService
       .openStringModal("Rename file", "File name", dataset.name, "Rename")
       .pipe(
@@ -116,7 +117,9 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   showHistory() {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset(), this.sessionData(), this.tools());
+    // the latest copy: the history shows the name, which the selection's dataset doesn't follow
+    const dataset = this.sessionData().latestDatasets([this.dataset()])[0];
+    this.datasetModalService.openDatasetHistoryModal(dataset, this.sessionData(), this.tools());
   }
 
   wrangleDataset() {

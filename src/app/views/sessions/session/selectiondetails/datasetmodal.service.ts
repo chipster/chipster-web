@@ -49,7 +49,7 @@ export class DatasetModalService {
     this.labelsModalRef = this.ngbModal.open(LabelsModalComponent, {});
     const modal = this.labelsModalRef.componentInstance as LabelsModalComponent;
     modal.sessionData.set(sessionData);
-    modal.selectedDatasets.set(selectedDatasets ?? []);
+    modal.selectedDatasets.set(sessionData.latestDatasets(selectedDatasets ?? []));
     this.labelsModalRef.result.then(
       () => {
         this.labelsModalRef = null;
@@ -123,7 +123,8 @@ export class DatasetModalService {
       size: "xl",
     });
     const modal = modalRef.componentInstance as SamplesModalComponent;
-    modal.datasets.set(datasets);
+    // the latest copies: the selection's datasets don't have the notes and labels saved since
+    modal.datasets.set(sessionData.latestDatasets(datasets));
     modal.sessionData.set(sessionData);
 
     // modal returns the observale which runs the action
