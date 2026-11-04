@@ -111,3 +111,49 @@ test("notes and a label saved from the details survive a rename from the toolbar
   await expect(textarea).toHaveValue("my note");
   await expect(details.locator("ch-label-pill")).toContainText("my-label");
 });
+
+test("the sample metadata of a failed Define samples doesn't leak into the next save", async ({
+  page,
+  api,
+  baseURL,
+  sessionId,
+  pageErrors,
+}) => {
+  // the toolbar gives the samples modal the latest copies of the datasets, which are the map's objects:
+  // the modal has to write the sample metadata into copies of its own, or a failed save leaves it in the
+  // map, from where the next whole-object update (the notes) sends it to the server
+  const datasetId = await createDataset(api, sessionId, { name: "a.fastq", x: 100, y: 100 }, "@r\nA\n+\nF\n");
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+  await visualizationTab(page, "Details").click();
+  const details = page.locator("ch-single-dataset");
+  const textarea = details.locator("textarea");
+  const datasetOnServer = async () =>
+    (await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`)).json();
+
+  // the address is relative in the proxy mode and absolute in the direct mode
+  const arrayPath = `/sessions/${sessionId}/datasets/array`;
+  const arrayUrl = new URL(api.address("session-db") + arrayPath, baseURL).href;
+  pageErrors.allowFailedRequest(500, "session-db", arrayPath);
+  pageErrors.allowErrorMessage("Saving groups failed");
+  await page.route(
+    (url) => url.href.startsWith(arrayUrl),
+    (route) => route.fulfill({ status: 500, body: "e2e failure" }),
+  );
+
+  await page.locator("ch-selected-files").getByTitle("Actions").locator("visible=true").first().click();
+  await page.locator(".dropdown-menu.show").getByText("Define samples").click();
+  const modal = page.locator(".modal-content");
+  await modal.locator('input[value="single"]').check();
+  await modal.getByRole("button", { name: "One file per sample" }).click();
+  await modal.getByRole("button", { name: "Save" }).click();
+  await expect(page.locator("ch-toasts .toast").filter({ hasText: "Saving groups failed" })).toBeVisible();
+  await expect(modal).toHaveCount(0);
+
+  await textarea.click();
+  await textarea.fill("my note");
+  await textarea.blur();
+  await expect.poll(async () => (await datasetOnServer()).notes).toBe("my note");
+  await waitForDevCheck(page);
+  expect((await datasetOnServer()).metadataFiles ?? []).toHaveLength(0);
+});

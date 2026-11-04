@@ -117,7 +117,9 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   showHistory() {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset(), this.sessionData(), this.tools());
+    // the latest copy: the history shows the name, which the selection's dataset doesn't follow
+    const dataset = this.sessionData().latestDatasets([this.dataset()])[0];
+    this.datasetModalService.openDatasetHistoryModal(dataset, this.sessionData(), this.tools());
   }
 
   wrangleDataset() {
