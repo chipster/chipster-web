@@ -151,7 +151,7 @@ export class LabelsContextMenuService {
       updates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
           catchError((err) => {
-            restore();
+            restore([d]);
             this.errorService.showError("Updating dataset labels failed", err);
             return of(null);
           }),

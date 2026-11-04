@@ -75,3 +75,39 @@ test("the file details follow a label applied from the toolbar menu and from the
   await expect(details.locator("ch-label-pill")).toContainText("my-label");
   await waitForDevCheck(page);
 });
+
+test("notes and a label saved from the details survive a rename from the toolbar", async ({ page, api, sessionId }) => {
+  // the toolbar's Rename sends the whole dataset, so it has to send the latest copy, not the one of the
+  // selection, which the dataset events don't update
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
+  await createLabel(api, sessionId, "my-label");
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+  await visualizationTab(page, "Details").click();
+  const details = page.locator("ch-single-dataset");
+  const textarea = details.locator("textarea");
+  const datasetOnServer = async () =>
+    (await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`)).json();
+
+  await textarea.click();
+  await textarea.fill("my note");
+  await textarea.blur();
+  await expect.poll(async () => (await datasetOnServer()).notes).toBe("my note");
+  await page.locator("ch-session-panel").getByTitle("Labels menu").click();
+  await page.locator(".dropdown-menu.show button", { hasText: "my-label" }).click();
+  await expect(details.locator("ch-label-pill")).toContainText("my-label");
+
+  await page.locator("ch-selected-files").getByTitle("Actions").locator("visible=true").first().click();
+  await page.locator(".dropdown-menu.show").getByText("Rename").click();
+  const modal = page.locator(".modal-content");
+  await modal.locator("input").fill("b.txt");
+  await modal.getByRole("button", { name: "Rename" }).click();
+  await expect(modal).toBeHidden();
+  await expect.poll(async () => (await datasetOnServer()).name).toBe("b.txt");
+  await waitForDevCheck(page);
+  const saved = await datasetOnServer();
+  expect(saved.notes).toBe("my note");
+  expect(saved.labelIds).toHaveLength(1);
+  await expect(textarea).toHaveValue("my note");
+  await expect(details.locator("ch-label-pill")).toContainText("my-label");
+});

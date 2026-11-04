@@ -17,6 +17,9 @@ type SelectionState = "checked" | "unchecked" | "indeterminate";
 interface LabelRow {
   label: Label;
   selection: SelectionState;
+  // the state when the modal was opened: only the rows the user changed are applied, so that a
+  // label applied elsewhere while the modal was open isn't removed
+  initial: SelectionState;
 }
 
 @Component({
@@ -52,10 +55,10 @@ export class LabelsModalComponent implements OnInit {
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
 
-    this.rows = labels.map((label) => ({
-      label,
-      selection: this.computeSelection(label),
-    }));
+    this.rows = labels.map((label) => {
+      const selection = this.computeSelection(label);
+      return { label, selection, initial: selection };
+    });
   }
 
   private computeSelection(label: Label): SelectionState {
@@ -214,6 +217,7 @@ export class LabelsModalComponent implements OnInit {
     const newRow: LabelRow = {
       label: created,
       selection: this.hasSelection() ? "checked" : "unchecked",
+      initial: "unchecked",
     };
     this.rows = [...this.rows, newRow].sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? ""));
   }
@@ -255,7 +259,7 @@ export class LabelsModalComponent implements OnInit {
       datasetUpdates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
           catchError((err) => {
-            restore();
+            restore([d]);
             this.errorService.showError("Updating dataset labels failed", err);
             return of(null);
           }),
@@ -288,6 +292,9 @@ export class LabelsModalComponent implements OnInit {
     const after = new Set(before);
     for (const row of this.rows) {
       const id = row.label.labelId;
+      if (row.selection === row.initial) {
+        continue;
+      }
       if (row.selection === "checked") {
         if (!before.has(id)) {
           tracking.lastAppliedId = id;

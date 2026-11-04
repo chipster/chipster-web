@@ -93,7 +93,8 @@ export class FileComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   renameDataset() {
-    const dataset = clone(this.dataset());
+    // the latest copy: the selection's dataset doesn't have the notes and labels saved since
+    const dataset = clone(this.sessionData().latestDatasets([this.dataset()])[0]);
     this.dialogModalService
       .openStringModal("Rename file", "File name", dataset.name, "Rename")
       .pipe(

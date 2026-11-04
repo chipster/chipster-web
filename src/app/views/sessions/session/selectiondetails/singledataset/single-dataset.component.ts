@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, inject, input, viewChild } from "@angular/core";
+import { Component, ElementRef, computed, inject, input, linkedSignal, viewChild } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -11,7 +11,6 @@ import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-
 import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
 import { LinkButtonComponent } from "../../link-button/link-button.component";
 import { LabelPillComponent } from "../../labels/label-pill.component";
-import { FormsModule } from "@angular/forms";
 import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
 import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
@@ -24,7 +23,6 @@ import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
     DatasetParameterListComponent,
     LinkButtonComponent,
     LabelPillComponent,
-    FormsModule,
     BytesPipe,
     LocalDatePipe,
   ],
@@ -55,6 +53,8 @@ export class SingleDatasetComponent {
   readonly toolCategory = computed(() => this.sourceJob()?.toolCategory ?? "");
   readonly toolName = computed(() => this.sourceJob()?.toolName ?? "");
   readonly tool = computed<Tool>(() => this.toolService.getLiveToolForSourceJob(this.sourceJob(), this.tools()));
+  // the text of the notes textarea: the latest notes, or the typed text when its save failed
+  readonly notesText = linkedSignal(() => this.latestDataset().notes ?? "");
 
   notesPlaceholderInactive = "click to edit";
   notesPlaceholderActive = "";
@@ -65,6 +65,11 @@ export class SingleDatasetComponent {
 
   saveNotes(notesInput: HTMLTextAreaElement) {
     this.notesArea().nativeElement.scrollTop = 0;
+    notesInput.placeholder = this.notesPlaceholderInactive;
+
+    if (notesInput.value === (this.latestDataset().notes ?? "")) {
+      return;
+    }
 
     // the copy in datasetsMap at once, so that an update of the dataset sent before the save's event
     // arrives, e.g. a label applied with the next click, carries the new notes
@@ -73,10 +78,11 @@ export class SingleDatasetComponent {
     this.sessionDataService.updateDataset(dataset).subscribe({
       error: (err) => {
         restore();
+        // keep the typed text for a retry or a copy
+        this.notesText.set(dataset.notes);
         this.restErrorService.showError("saving notes failed", err);
       },
     });
-    notesInput.placeholder = this.notesPlaceholderInactive;
   }
 
   showHistory(): void {
