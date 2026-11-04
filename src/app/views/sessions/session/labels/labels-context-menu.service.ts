@@ -120,13 +120,15 @@ export class LabelsContextMenuService {
 
     this.lastUsedLabelId = label.labelId;
 
-    const state = this.computeState(datasets, label);
+    // the latest copies from datasetsMap: the selection's datasets aren't updated by the dataset events
+    const latest = datasets.map((d) => sessionData.datasetsMap().get(d.datasetId) ?? d);
+    const state = this.computeState(latest, label);
     const shouldRemove = state === "checked";
 
     const sessionId = sessionData.session.sessionId;
     const updates: Dataset[] = [];
 
-    for (const dataset of datasets) {
+    for (const dataset of latest) {
       const before = new Set(dataset.labelIds ?? []);
       const after = new Set(before);
       if (shouldRemove) {
@@ -135,14 +137,22 @@ export class LabelsContextMenuService {
         after.add(label.labelId);
       }
       if (!this.setsEqual(before, after)) {
-        dataset.labelIds = Array.from(after);
-        updates.push(dataset);
+        // a copy: a change in place wouldn't notify the OnPush views that show the dataset
+        updates.push({ ...dataset, labelIds: Array.from(after) });
       }
     }
 
     if (updates.length === 0) {
       return of(undefined);
     }
+
+    // the copies in datasetsMap right away, so that the views update at once; the datasets'
+    // update events replace them with the server's copies
+    sessionData.datasetsMap.update((m) => {
+      const updated = new Map(m);
+      updates.forEach((d) => updated.set(d.datasetId, d));
+      return updated;
+    });
 
     return forkJoin(
       updates.map((d) =>

@@ -37,3 +37,38 @@ test("the file details follow the labels and notes changed elsewhere", async ({ 
   await expect(details.locator("textarea")).toHaveValue("remote note");
   await waitForDevCheck(page);
 });
+
+test("the file details follow a label applied from the toolbar menu and from the labels modal", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
+  await createLabel(api, sessionId, "my-label");
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+  await visualizationTab(page, "Details").click();
+  const details = page.locator("ch-single-dataset");
+  await expect(details).toContainText("Add labels");
+
+  // the toolbar menu applies the label, and a second toggle removes it although the selection
+  // still has the dataset as it was before the first
+  const labelsMenu = page.locator("ch-session-panel").getByTitle("Labels menu");
+  await labelsMenu.click();
+  await page.locator(".dropdown-menu.show").getByText("my-label").click();
+  await expect(details.locator("ch-label-pill")).toContainText("my-label");
+  await waitForDevCheck(page);
+  await labelsMenu.click();
+  await page.locator(".dropdown-menu.show").getByText("my-label").click();
+  await expect(details).toContainText("Add labels");
+  await waitForDevCheck(page);
+
+  // the labels modal from the details applies it again
+  await details.getByText("Add labels").click();
+  const modal = page.locator("ch-labels-modal");
+  await modal.locator("input[type=checkbox]").first().check();
+  await modal.getByRole("button", { name: "Apply" }).click();
+  await expect(modal).toBeHidden();
+  await expect(details.locator("ch-label-pill")).toContainText("my-label");
+  await waitForDevCheck(page);
+});

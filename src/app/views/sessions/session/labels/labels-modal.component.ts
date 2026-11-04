@@ -242,8 +242,8 @@ export class LabelsModalComponent implements OnInit {
       const after = this.applyRowsTo(before, tracking);
 
       if (!this.setsEqual(before, after)) {
-        dataset.labelIds = Array.from(after);
-        datasetUpdates.push(dataset);
+        // a copy: a change in place wouldn't notify the OnPush views that show the dataset
+        datasetUpdates.push({ ...dataset, labelIds: Array.from(after) });
       }
     }
 
@@ -251,6 +251,14 @@ export class LabelsModalComponent implements OnInit {
       this.activeModal.close();
       return;
     }
+
+    // the copies in datasetsMap right away, so that the views update at once; the datasets'
+    // update events replace them with the server's copies
+    this.sessionData().datasetsMap.update((m) => {
+      const updated = new Map(m);
+      datasetUpdates.forEach((d) => updated.set(d.datasetId, d));
+      return updated;
+    });
 
     const lastUsedId = tracking.lastAppliedId ?? tracking.lastRemovedId;
 
