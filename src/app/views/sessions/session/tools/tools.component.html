@@ -159,30 +159,21 @@
           <div style="position: relative; height: 100%">
             <div style="position: absolute; height: 100%; width: 100%; overflow: auto">
               <div class="row mb-2">
-                @if (validatedTool() == null || selectedTool().tool.name.id !== validatedTool().tool.name.id) {
-                  <div class="col d-flex">
-                    <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
-                    &nbsp; Validating tool inputs...
-                  </div>
-                }
-                @if (validatedTool() != null && selectedTool().tool.name.id === validatedTool().tool.name.id) {
+                @if (validatedToolIsSelected()) {
                   <div class="col d-flex">
                     <!-- parameters -->
                     <button
                       class="btn btn-sm btn-outline-secondary me-1"
                       (click)="openParametersModal()"
-                      title="Edit parameters and inputs"
-                      [disabled]="!selectedTool()">
+                      title="Edit parameters and inputs">
                       <!-- class="fas fa-fw fa-sliders-h" -->
 
-                      @if (paramButtonWarning()) {
+                      @if (!runEnabled()) {
                         <span class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></span>
-                      }
-                      @if (!paramButtonWarning() && !paramButtonChanged()) {
-                        <span class="fas fa-fw fa-edit" aria-hidden="true"></span>
-                      }
-                      @if (!paramButtonWarning() && paramButtonChanged()) {
+                      } @else if (paramButtonChanged()) {
                         <span class="fas fa-fw fa-edit text-primary" aria-hidden="true"></span>
+                      } @else {
+                        <span class="fas fa-fw fa-edit" aria-hidden="true"></span>
                       }
                       Parameters
                     </button>
@@ -258,6 +249,11 @@
                         </div>
                       </div>
                     }
+                  </div>
+                } @else {
+                  <div class="col d-flex">
+                    <i class="fas fa-circle-notch fa-spin" style="font-size: 22px"></i>
+                    &nbsp; Validating tool inputs...
                   </div>
                 }
               </div>

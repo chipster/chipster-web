@@ -132,8 +132,19 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   public toolSearchList: Array<ToolSearchListItem>;
 
-  // the state of the buttons, computed from the validated tool. The template shows them only
-  // when the validated tool is the selected one, so a new selection hides them until it's validated
+  // a selection is validated again also when it's the same tool, and the store keeps the earlier
+  // validation until then
+  private readonly validationPending = signal(false);
+  // the buttons show the validation of the selected tool, not an earlier tool's or an earlier one
+  // of the same tool
+  public readonly validatedToolIsSelected = computed(
+    () =>
+      !this.validationPending() &&
+      this.validatedTool() != null &&
+      this.validatedTool().tool.name.id === this.selectedTool()?.tool.name.id,
+  );
+
+  // the state of the buttons, computed from the validated tool
   public readonly runIsDropdown = computed(() => {
     const tool = this.validatedTool();
     return tool != null && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
@@ -146,7 +157,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
       (tool.singleJobValidation.valid || tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid)
     );
   });
-  public readonly paramButtonWarning = computed(() => !this.runEnabled());
   public readonly paramButtonChanged = computed(() =>
     this.toolSelectionService.parametersHaveBeenChanged(this.validatedTool()),
   );
@@ -285,19 +295,21 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   runJob(runForEach: boolean) {
+    const tool = this.validatedTool();
     if (runForEach) {
-      this.jobService.runForEach(this.validatedTool(), this.sessionData());
-      this.showRunJobToaster(this.validatedTool().selectedDatasets.length);
+      this.jobService.runForEach(tool, this.sessionData());
+      this.showRunJobToaster(tool.selectedDatasets.length);
     } else {
-      this.jobService.runJob(this.validatedTool());
+      this.jobService.runJob(tool);
       this.showRunJobToaster();
     }
   }
 
   runForEachSample() {
-    this.jobService.runForEachSample(this.validatedTool(), this.sessionData());
+    const tool = this.validatedTool();
+    this.jobService.runForEachSample(tool, this.sessionData());
 
-    this.showRunJobToaster(this.validatedTool().sampleGroups.pairedEndSamples.length);
+    this.showRunJobToaster(tool.sampleGroups.pairedEndSamples.length);
   }
 
   private showRunJobToaster(jobCount = 1) {
@@ -440,6 +452,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
           });
         }
       });
+
+    // every selection is validated, see validatedToolIsSelected
+    this.store
+      .select("selectedTool")
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(() => this.validationPending.set(true));
 
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
       .getSelectedDatasetsContentsUpdatedStream()
@@ -640,6 +658,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .select("validatedTool")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((tool: ValidatedTool) => {
+        this.validationPending.set(false);
+
         // componentInstance is undefined for closed modal
         const modal = this.parametersModalRef?.componentInstance as ParametersModalComponent;
         if (modal != null) {
