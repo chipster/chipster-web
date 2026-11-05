@@ -7,7 +7,7 @@ import { NgSelectComponent, NgLabelTemplateDirective, NgOptionTemplateDirective 
 import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
 import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
-import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
+import { filter, map, startWith, switchMap, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
@@ -133,7 +133,8 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public toolSearchList: Array<ToolSearchListItem>;
 
   // the buttons show the validation of the selected tool: a selection clears the validated tool in
-  // the store, and the id check hides the validation of an earlier tool that arrives after it
+  // the store and cancels the parameter population of an earlier one (the switchMap below), so the
+  // id check is a guard
   public readonly validatedToolIsSelected = computed(() => {
     const tool = this.validatedTool();
     return tool != null && tool.tool.name.id === this.selectedTool()?.tool.name.id;
@@ -541,9 +542,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.unsubscribe),
         filter((value) => value !== null),
-        mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) =>
-          // populate params is async, and returns the same tool with params populated
-          // if there are no params, just return the same tool as observable
+        // populate params is async, and returns the same tool with params populated
+        // if there are no params, just return the same tool as observable.
+        // switchMap, so that a population of an earlier selection or file selection doesn't finish
+        // after the latest one and walk the rest of the chain with the earlier bindings
+        switchMap((toolWithInputs: SelectedToolWithValidatedInputs) =>
           toolWithInputs.tool.parameters.length > 0
             ? this.toolSelectionService.populateParameters(toolWithInputs, this.sessionData())
             : of(toolWithInputs),
