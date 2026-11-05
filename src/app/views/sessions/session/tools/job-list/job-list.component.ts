@@ -37,7 +37,7 @@ export class JobListComponent {
     () => new Map(this.jobsSorted().map((job) => [job.jobId, this.createDurationObservable(job)])),
   );
 
-  readonly runningJobCount = computed(() => this.jobsSorted().filter((job) => JobService.isRunning(job)).length);
+  readonly runningJobCount = computed(() => JobService.runningJobCount(this.jobsSorted()));
 
   readonly jobSelected = output<Job>();
 

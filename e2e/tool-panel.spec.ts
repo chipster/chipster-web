@@ -27,6 +27,11 @@ test("the tool panel follows the selections, the validation and the jobs", async
   await expect(runButton).toBeEnabled();
   await expect(tools.locator(".fa-exclamation-circle.text-warning")).toBeHidden();
 
+  // the same tool selected again clears the validated tool in the store and is validated again, so
+  // the buttons come back (at once here, the validation of this tool is synchronous)
+  await tools.locator('[id="tool-button-select_columns.R"]').click();
+  await expect(runButton).toBeEnabled();
+
   // a parameter changed in the parameters modal: the button shows it after the debounce and the validation
   await tools.getByTitle("Edit parameters and inputs").click();
   const modal = page.locator("ch-parameters-modal");
