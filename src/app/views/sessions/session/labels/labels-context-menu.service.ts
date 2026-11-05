@@ -1,4 +1,4 @@
-import { Injectable, inject } from "@angular/core";
+import { Injectable, inject, signal } from "@angular/core";
 import { Dataset, Label } from "chipster-js-common";
 import { Observable, forkJoin, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
@@ -32,14 +32,16 @@ export class LabelsContextMenuService {
 
   // Most recently toggled label (added or removed). Used by surfaces like the
   // workflow toolbar's split-button to default the next action to whatever the
-  // user just did.
-  private lastUsedLabelId: string | null = null;
+  // user just did. A signal, because the OnPush session panel shows it, and the
+  // labels modal records it after its requests, when nothing else notifies the panel.
+  private readonly lastUsedLabelId = signal<string | null>(null);
 
   getLastUsedLabel(sessionData: SessionData): Label | null {
-    if (!this.lastUsedLabelId || !sessionData?.labelsMap()) {
+    const lastUsedId = this.lastUsedLabelId();
+    if (!lastUsedId || !sessionData?.labelsMap()) {
       return null;
     }
-    return sessionData.labelsMap().get(this.lastUsedLabelId) ?? null;
+    return sessionData.labelsMap().get(lastUsedId) ?? null;
   }
 
   // Default label for surfaces that need to pick one (e.g. the workflow
@@ -61,7 +63,7 @@ export class LabelsContextMenuService {
   // (e.g. the Edit-labels modal which commits a batch of changes). Lets the
   // workflow toolbar's split-button track those actions too.
   recordLastUsedLabel(labelId: string): void {
-    this.lastUsedLabelId = labelId;
+    this.lastUsedLabelId.set(labelId);
   }
 
   buildItems(datasets: Dataset[], sessionData: SessionData): LabelMenuItem[] {
@@ -119,7 +121,7 @@ export class LabelsContextMenuService {
       return of(undefined);
     }
 
-    this.lastUsedLabelId = label.labelId;
+    this.lastUsedLabelId.set(label.labelId);
 
     const latest = sessionData.latestDatasets(datasets);
     const state = this.computeState(latest, label);

@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  ChangeDetectionStrategy,
-  inject,
-  input,
-  viewChild,
-  ElementRef,
-} from "@angular/core";
+import { AfterViewInit, Component, OnInit, inject, input, viewChild, ElementRef } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
 import { UploadModalComponent } from "./upload-modal.component";
@@ -18,7 +9,6 @@ import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-
 @Component({
   selector: "ch-add-dataset-modal",
   templateUrl: "./upload.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NGB_DROPDOWN_IMPORTS],
 })
 export class UploadComponent implements AfterViewInit, OnInit {
