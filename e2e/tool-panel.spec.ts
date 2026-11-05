@@ -27,7 +27,8 @@ test("the tool panel follows the selections, the validation and the jobs", async
   await expect(runButton).toBeEnabled();
   await expect(tools.locator(".fa-exclamation-circle.text-warning")).toBeHidden();
 
-  // the same tool selected again is validated again, and the buttons come back after it
+  // the same tool selected again is validated again (the store clears the validated tool), and the
+  // buttons come back after it. The validation is synchronous here, so the spinner can't be seen
   await tools.locator('[id="tool-button-select_columns.R"]').click();
   await expect(runButton).toBeEnabled();
 

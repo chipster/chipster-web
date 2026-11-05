@@ -126,6 +126,9 @@ export function validatedTool(state: ValidatedTool = null, { type, payload }) {
       return { ...payload };
     case CLEAR_VALIDATED_TOOL:
       return null;
+    // a selection is validated again, also when it's the same tool: until then there is no valid one
+    case SET_SELECTED_TOOL:
+      return null;
     default:
       return state;
   }

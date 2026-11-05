@@ -132,16 +132,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   public toolSearchList: Array<ToolSearchListItem>;
 
-  // a selection is validated again also when it's the same tool, and the store keeps the earlier
-  // validation until then
-  private readonly validationPending = signal(false);
-  // the buttons show the validation of the selected tool, not an earlier tool's or an earlier one
-  // of the same tool
+  // the buttons show the validation of the selected tool: a selection clears the validated tool in
+  // the store, and the id check hides the validation of an earlier tool that arrives after it
   public readonly validatedToolIsSelected = computed(
-    () =>
-      !this.validationPending() &&
-      this.validatedTool() != null &&
-      this.validatedTool().tool.name.id === this.selectedTool()?.tool.name.id,
+    () => this.validatedTool() != null && this.validatedTool().tool.name.id === this.selectedTool()?.tool.name.id,
   );
 
   // the state of the buttons, computed from the validated tool
@@ -241,6 +235,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
     this.unsubscribe.complete();
     if (this.manualModalRef != null) {
       this.manualModalRef.close();
+    }
+    // its outputs are subscribed by this component
+    if (this.parametersModalRef != null) {
+      this.parametersModalRef.close();
     }
   }
 
@@ -453,12 +451,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
         }
       });
 
-    // every selection is validated, see validatedToolIsSelected
-    this.store
-      .select("selectedTool")
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe(() => this.validationPending.set(true));
-
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
       .getSelectedDatasetsContentsUpdatedStream()
       .pipe(startWith(null as SessionEvent));
@@ -658,11 +650,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .select("validatedTool")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((tool: ValidatedTool) => {
-        this.validationPending.set(false);
-
-        // componentInstance is undefined for closed modal
+        // componentInstance is undefined for closed modal. The modal keeps the last validated tool
+        // while there is none, its template needs one
         const modal = this.parametersModalRef?.componentInstance as ParametersModalComponent;
-        if (modal != null) {
+        if (modal != null && tool != null) {
           modal.validatedTool.set(tool);
         }
       });
