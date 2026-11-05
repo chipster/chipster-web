@@ -126,20 +126,42 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   private toolsMap: Map<string, Tool>;
 
-  // signals, because the subscriptions below set them, and other views select tools too
-  public readonly selectedTool = signal<SelectedTool>(undefined);
-  public readonly validatedTool = signal<ValidatedTool>(undefined);
+  // signals of the store, because other views select tools too, e.g. "Select tool" in the file details
+  public readonly selectedTool = this.store.selectSignal<SelectedTool>((state) => state.selectedTool);
+  public readonly validatedTool = this.store.selectSignal<ValidatedTool>((state) => state.validatedTool);
 
   public toolSearchList: Array<ToolSearchListItem>;
 
-  public readonly runEnabled = signal(false);
-  public readonly runIsDropdown = signal(false);
-  public readonly defineHintVisible = signal(false);
-  public readonly paramButtonWarning = signal(false);
-  public readonly paramButtonChanged = signal(false);
+  // the state of the buttons, computed from the validated tool. The template shows them only
+  // when the validated tool is the selected one, so a new selection hides them until it's validated
+  public readonly runIsDropdown = computed(() => {
+    const tool = this.validatedTool();
+    return tool != null && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
+  });
+  public readonly runEnabled = computed(() => {
+    const tool = this.validatedTool();
+    return (
+      tool != null &&
+      tool.resourcesValidation.valid &&
+      (tool.singleJobValidation.valid || tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid)
+    );
+  });
+  public readonly paramButtonWarning = computed(() => !this.runEnabled());
+  public readonly paramButtonChanged = computed(() =>
+    this.toolSelectionService.parametersHaveBeenChanged(this.validatedTool()),
+  );
+  public readonly defineHintVisible = computed(() => {
+    const tool = this.validatedTool();
+    return (
+      tool != null &&
+      tool.sampleGroups.singleEndSamples.length < 1 &&
+      tool.sampleGroups.pairedEndSamples.length < 1 &&
+      tool.sampleGroups.pairMissingSamples.length < 1
+    );
+  });
   // job events update jobsMap
-  public readonly runningJobs = computed(
-    () => this.sessionDataService.getJobList(this.sessionData()).filter((job) => JobService.isRunning(job)).length,
+  public readonly runningJobs = computed(() =>
+    JobService.runningJobCount(this.sessionDataService.getJobList(this.sessionData())),
   );
 
   modules: Array<Module> = [];
@@ -152,9 +174,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   public moduleSelectionMode: ModuleSelectionMode = ModuleSelectionMode.Dropdown;
   public toolsetTitleVisible = true;
 
-  compactToolList = true;
-
-  // the settings modal changes it
+  // a setting of SettingsService, like the ones the settings modal changes
   readonly compactToolListSetting = toSignal(this.settingsService.compactToolList$, { requireSync: true });
 
   // cleared in a setTimeout
@@ -421,18 +441,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
         }
       });
 
-    // subscribe to selected tool
-    this.store
-      .select("selectedTool")
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe((t: SelectedTool) => {
-        this.selectedTool.set(t);
-        this.runEnabled.set(false);
-        this.paramButtonWarning.set(false);
-        this.paramButtonChanged.set(false);
-        this.runIsDropdown.set(false);
-      });
-
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
       .getSelectedDatasetsContentsUpdatedStream()
       .pipe(startWith(null as SessionEvent));
@@ -627,36 +635,16 @@ export class ToolsComponent implements OnInit, OnDestroy {
         }
       });
 
-    // subscribe to validated tool
+    // the open parameters modal shows the validated tool too
     this.store
       .select("validatedTool")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((tool: ValidatedTool) => {
-        this.validatedTool.set(tool);
-
         // componentInstance is undefined for closed modal
         const modal = this.parametersModalRef?.componentInstance as ParametersModalComponent;
         if (modal != null) {
           modal.validatedTool.set(tool);
         }
-
-        this.runIsDropdown.set(tool && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid));
-
-        this.runEnabled.set(
-          tool &&
-            tool.resourcesValidation.valid &&
-            (tool.singleJobValidation.valid ||
-              tool.runForEachValidation.valid ||
-              tool.runForEachSampleValidation.valid),
-        );
-        this.paramButtonWarning.set(!this.runEnabled());
-        this.paramButtonChanged.set(this.toolSelectionService.parametersHaveBeenChanged(tool));
-        this.defineHintVisible.set(
-          tool != null &&
-            tool.sampleGroups.singleEndSamples.length < 1 &&
-            tool.sampleGroups.pairedEndSamples.length < 1 &&
-            tool.sampleGroups.pairMissingSamples.length < 1,
-        );
       });
   }
 

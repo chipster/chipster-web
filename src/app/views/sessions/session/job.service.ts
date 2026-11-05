@@ -28,6 +28,11 @@ export class JobService {
     return job.state === "NEW" || job.state === "WAITING" || job.state === "SCHEDULED" || job.state === "RUNNING";
   }
 
+  // the count of the tool panel's badge and the jobs modal
+  static runningJobCount(jobs: Job[]): number {
+    return jobs.filter((job) => JobService.isRunning(job)).length;
+  }
+
   static getDuration(job: Job): Observable<string> {
     if (job.startTime == null) {
       return of(null);
