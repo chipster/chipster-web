@@ -187,9 +187,7 @@
                         <span class="fas fa-play"></span>
                         Run
                       </button>
-                    }
-
-                    @if (runIsDropdown()) {
+                    } @else {
                       <div ngbDropdown autoClose="true" container="body" class="d-flex flex-grow-1">
                         <button
                           class="btn btn-success run-button btn-sm button-wide flex-grow-1"

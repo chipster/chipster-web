@@ -134,9 +134,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   // the buttons show the validation of the selected tool: a selection clears the validated tool in
   // the store, and the id check hides the validation of an earlier tool that arrives after it
-  public readonly validatedToolIsSelected = computed(
-    () => this.validatedTool() != null && this.validatedTool().tool.name.id === this.selectedTool()?.tool.name.id,
-  );
+  public readonly validatedToolIsSelected = computed(() => {
+    const tool = this.validatedTool();
+    return tool != null && tool.tool.name.id === this.selectedTool()?.tool.name.id;
+  });
 
   // the state of the buttons, computed from the validated tool
   public readonly runIsDropdown = computed(() => {
@@ -651,10 +652,15 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((tool: ValidatedTool) => {
         // componentInstance is undefined for closed modal. The modal keeps the last validated tool
-        // while there is none, its template needs one
+        // while there is none, its template needs one, and closes if another tool got selected,
+        // e.g. with the hotkey of the tool search
         const modal = this.parametersModalRef?.componentInstance as ParametersModalComponent;
         if (modal != null && tool != null) {
-          modal.validatedTool.set(tool);
+          if (tool.tool.name.id === modal.validatedTool().tool.name.id) {
+            modal.validatedTool.set(tool);
+          } else {
+            this.parametersModalRef.close();
+          }
         }
       });
   }

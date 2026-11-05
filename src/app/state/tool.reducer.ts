@@ -24,6 +24,8 @@ export function selectedToolById(state: SelectedToolById = null, { type, payload
 }
 
 // tool
+// A selection, also of the same tool again, is validated from the start: it clears every later
+// stage of the chain, so that nothing shows or revalidates the earlier selection's stages
 export const SET_SELECTED_TOOL = "SET_SELECTED_TOOL";
 export const CLEAR_SELECTED_TOOL = "CLEAR_SELECTED_TOOL";
 
@@ -47,6 +49,7 @@ export function selectedToolWithInputs(state: SelectedToolWithInputs = null, { t
     case SET_SELECTED_TOOL_WITH_INPUTS:
       return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_INPUTS:
+    case SET_SELECTED_TOOL:
       return null;
     default:
       return state;
@@ -62,6 +65,7 @@ export function selectedToolWithValidatedInputs(state: SelectedToolWithValidated
     case SET_SELECTED_TOOL_WITH_VALIDATED_INPUTS:
       return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_VALIDATED_INPUTS:
+    case SET_SELECTED_TOOL:
       return null;
     default:
       return state;
@@ -77,6 +81,7 @@ export function selectedToolWithPopulatedParams(state: SelectedToolWithValidated
     case SET_SELECTED_TOOL_WITH_POPULATED_PARAMS:
       return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_POPULATED_PARAMS:
+    case SET_SELECTED_TOOL:
       return null;
     default:
       return state;
@@ -92,6 +97,7 @@ export function selectedToolWithValidatedParams(state: SelectedToolWithValidated
     case SET_SELECTED_TOOL_WITH_VALIDATED_PARAMS:
       return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_VALIDATED_PARAMS:
+    case SET_SELECTED_TOOL:
       return null;
     default:
       return state;
@@ -110,6 +116,7 @@ export function selectedToolWithValidatedResources(
     case SET_SELECTED_TOOL_WITH_VALIDATED_RESOURCES:
       return { ...payload };
     case CLEAR_SELECTED_TOOL_WITH_VALIDATED_RESOURCES:
+    case SET_SELECTED_TOOL:
       return null;
     default:
       return state;
@@ -125,8 +132,6 @@ export function validatedTool(state: ValidatedTool = null, { type, payload }) {
     case SET_VALIDATED_TOOL:
       return { ...payload };
     case CLEAR_VALIDATED_TOOL:
-      return null;
-    // a selection is validated again, also when it's the same tool: until then there is no valid one
     case SET_SELECTED_TOOL:
       return null;
     default:
