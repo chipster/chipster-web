@@ -93,5 +93,14 @@ test("the split button follows the label applied in the labels modal", async ({ 
   await modal.getByRole("button", { name: "Apply" }).click();
   await expect(modal).toBeHidden();
   await expect(splitButton).toHaveAttribute("title", titleAfter);
+
+  // the button shows the label also when the update failed, so check that the file got it
+  const labels = await (await api.get("session-db", `/sessions/${sessionId}/labels`)).json();
+  const labelId = labels.find((label) => label.name === labelName).labelId;
+  await expect
+    .poll(
+      async () => (await (await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`)).json()).labelIds,
+    )
+    .toContain(labelId);
   await waitForDevCheck(page);
 });
