@@ -1,8 +1,8 @@
 import { Injectable, inject } from "@angular/core";
 import { Dataset, Session, SessionState } from "chipster-js-common";
 import * as log from "loglevel";
-import { defer, EMPTY, forkJoin, NEVER, Observable } from "rxjs";
-import { catchError, map, mergeMap, tap } from "rxjs/operators";
+import { concat, defer, EMPTY, forkJoin, NEVER, Observable, of } from "rxjs";
+import { catchError, ignoreElements, map, mergeMap, tap } from "rxjs/operators";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
@@ -24,11 +24,13 @@ export class SessionService {
   }
 
   /*
-   * These open the modal on subscribe, save a copy of the session and return it. The OnPush views
-   * need a new object to see the change. The session view would get it from its session event, but
-   * applies it at once, so that leaving the page right after renaming a temporary session doesn't
-   * delete it as unsaved. The user's events that the sessions list follows have only the rules, so
-   * the list takes it from here too.
+   * These open the modal on subscribe, and emit a copy of the session with the change before they
+   * save it, like the change in place did before the copies. The OnPush views need a new object to
+   * see the change. The session view would get it from its session event, but applies it at once,
+   * so that leaving the page right after renaming a temporary session, even while the request is
+   * on its way, doesn't delete it as unsaved. The user's events that the sessions list follows have
+   * only the rules, so the list takes it from here too. A failed save shows an error, and the
+   * session event or a reload brings back the saved state.
    */
   openRenameModalAndUpdate(session: Session): Observable<Session> {
     return this.updateFromModal(
@@ -65,7 +67,7 @@ export class SessionService {
   // deferred, because the dialog service opens the modal when it's called
   private updateFromModal(openModal: () => Observable<Session>, errorMessage: string): Observable<Session> {
     return defer(openModal).pipe(
-      mergeMap((updated) => this.updateSession(updated).pipe(map(() => updated))),
+      mergeMap((updated) => concat(of(updated), this.updateSession(updated).pipe(ignoreElements()))),
       catchError((err) => {
         this.restErrorService.showError(errorMessage, err);
         return EMPTY;
