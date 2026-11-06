@@ -1,3 +1,5 @@
+import { Route } from "@playwright/test";
+
 import { expect, test } from "./fixtures";
 import { datasetNode, getDatasetContent, getDatasets, openSession } from "./session-api";
 
@@ -96,4 +98,49 @@ test("several files uploaded at once and more from the upload modal become datas
   for (const dataset of datasets) {
     await expect(datasetNode(page, dataset.datasetId)).toBeVisible();
   }
+});
+
+/*
+ * flow.js adds the files to its list only after it has told about each of them, so the modal shows
+ * them when flow.js tells that they were submitted, before their upload starts. The creation of the
+ * datasets, which the upload waits for, is held until the files are shown.
+ */
+test("the upload modal shows the files before their upload starts", async ({ page, api, sessionId }) => {
+  const toUpload = (name: string) => [{ name, mimeType: "text/plain", buffer: Buffer.from(`${name}\n`) }];
+  await openSession(page, sessionId);
+  const held: Route[] = [];
+  const datasetsUrl = (url: URL) => url.pathname.endsWith(`/sessions/${sessionId}/datasets`);
+  await page.route(datasetsUrl, async (route) => {
+    if (route.request().method() === "POST") {
+      held.push(route);
+    } else {
+      await route.fallback();
+    }
+  });
+
+  // the file that opens the modal
+  await page.locator("#addFileDropdownMenuButton").click();
+  let fileChooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Upload file(s)" }).click();
+  await (await fileChooser).setFiles(toUpload("first.txt"));
+
+  const modal = page.getByRole("dialog");
+  await expect(modal.getByRole("cell", { name: "first.txt" })).toBeVisible();
+
+  // and one added in the open modal
+  await modal.getByRole("button", { name: "Add more files" }).click();
+  fileChooser = page.waitForEvent("filechooser");
+  await modal.getByRole("button", { name: "Upload file(s)" }).click();
+  await (await fileChooser).setFiles(toUpload("second.txt"));
+  await expect(modal.getByRole("cell", { name: "second.txt" })).toBeVisible();
+
+  await expect.poll(() => held.length).toBe(2);
+  expect(await getDatasets(api, sessionId)).toEqual([]);
+
+  await Promise.all(held.map((route) => route.continue()));
+  await page.unroute(datasetsUrl);
+  await expect(modal.locator(".fa-check-circle")).toHaveCount(2, { timeout: 30_000 });
+  await expect
+    .poll(async () => (await getDatasets(api, sessionId)).map((d) => d.name).sort())
+    .toEqual(["first.txt", "second.txt"]);
 });

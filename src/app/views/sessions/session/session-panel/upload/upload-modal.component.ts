@@ -62,15 +62,20 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   };
 
   ngOnInit() {
+    // flow.js adds the files to its list only after their fileAdded events, then tells about
+    // them with filesSubmitted. The files that opened the modal were submitted before this.
+    this.flow().on("filesSubmitted", this.update);
     this.flow().on("progress", this.update);
     this.flow().on("fileRemoved", this.update);
     this.flow().on("error", this.update);
-    // a completed file doesn't get a progress event of its own after this
+    // flow.js zeroes the speed of a completed file after its last progress event
     this.flow().on("fileSuccess", this.update);
     this.flow().on("complete", this.complete);
+    this.update();
   }
 
   ngOnDestroy() {
+    this.flow().off("filesSubmitted", this.update);
     this.flow().off("progress", this.update);
     this.flow().off("fileRemoved", this.update);
     this.flow().off("error", this.update);
@@ -81,7 +86,6 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   // called by upload.component
   fileAdded(file: any) {
     this.uploadService.startUpload(this.sessionId(), file, false);
-    this.update();
   }
 
   // the buttons change the files of flow.js, which tells about it only with the next progress
