@@ -29,8 +29,8 @@ export class SessionService {
    * see the change. The session view would get it from its session event, but applies it at once,
    * so that leaving the page right after renaming a temporary session, even while the request is
    * on its way, doesn't delete it as unsaved. The user's events that the sessions list follows have
-   * only the rules, so the list takes it from here too. A failed save shows an error, and the
-   * session event or a reload brings back the saved state.
+   * only the rules, so the list takes it from here too. A failed save shows an error and keeps the
+   * change in the page, like the change in place did: only a reload brings back the saved state.
    */
   openRenameModalAndUpdate(session: Session): Observable<Session> {
     return this.updateFromModal(
