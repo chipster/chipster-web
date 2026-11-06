@@ -1,7 +1,7 @@
-import { ChangeDetectorRef, Injectable, inject } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
-import { Observable, forkJoin, timer } from "rxjs";
+import { Observable, forkJoin } from "rxjs";
 import { map } from "rxjs/operators";
 import { TokenService } from "../../core/authentication/token.service";
 import { ErrorService } from "../../core/errorhandler/error.service";
@@ -81,6 +81,13 @@ export class UploadService {
       next: (value: [string, Dataset]) => {
         const url = value[0];
         const dataset = value[1];
+        if (!file.flowObj.files.includes(file)) {
+          // cancelled in the upload modal while the dataset was being created
+          this.sessionResource.deleteDataset(sessionId, dataset.datasetId).subscribe({
+            error: (err) => this.restErrorService.showError("deleting the cancelled upload failed", err),
+          });
+          return;
+        }
         file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${
           dataset.datasetId
         }?token=${this.tokenService.getToken()}`;
@@ -105,23 +112,6 @@ export class UploadService {
         return d;
       }),
     );
-  }
-
-  /**
-   * We have to poll the upload progress, because flow.js doesn't send events about it.
-   *
-   * Schedule a next view update after a second as long as flow.js has files.
-   */
-  scheduleViewUpdate(changeDetectorRef: ChangeDetectorRef, flow: any) {
-    log.info("scheduling view update");
-    timer(1000).subscribe(() => {
-      // TODO check if view not destroyed
-      changeDetectorRef.detectChanges();
-
-      if (flow.files.length > 0) {
-        this.scheduleViewUpdate(changeDetectorRef, flow);
-      }
-    });
   }
 
   openDialogAndDowloadFromUrl() {

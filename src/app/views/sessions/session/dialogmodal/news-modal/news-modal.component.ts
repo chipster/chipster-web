@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
@@ -7,7 +7,6 @@ import { NewsListComponent } from "../../../../../shared/components/news/news-li
 
 @Component({
   templateUrl: "./news-modal.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NewsListComponent],
 })
 export class NewsModalComponent implements OnInit {

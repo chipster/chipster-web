@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
@@ -19,7 +19,6 @@ export interface ColumnItem {
   selector: "ch-samples-modal",
   templateUrl: "./samples-modal.component.html",
   styleUrls: ["./samples-modal.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class SamplesModalComponent implements OnInit {

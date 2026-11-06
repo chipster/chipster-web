@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnDestroy, OnInit, inject, signal } from "@angular/core";
 import { Module, Rule, Session, WsEvent } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import log from "loglevel";
@@ -28,7 +28,6 @@ import { LocalDatePipe } from "../../shared/pipes/local-date.pipe";
   selector: "ch-session-list",
   templateUrl: "./session-list.component.html",
   styleUrls: ["./session-list.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [OpenSessionFileComponent, NgClass, NGB_DROPDOWN_IMPORTS, WorkflowGraphComponent, BytesPipe, LocalDatePipe],
 })
 export class SessionListComponent implements OnInit, OnDestroy {
@@ -46,29 +45,30 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   public SessionListMode = SessionListMode; // ref for using enum in template
 
-  public mode = SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN;
+  readonly mode = signal(SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN);
   private exampleSessionOwnerUserId: string;
   private trainingSessionOwnerUserId = "training";
-  public selectedSession: Session;
+  readonly selectedSession = signal<Session>(undefined);
   public previousSession: Session;
-  public lightSelectedSession: Session;
-  public sessionsByUserKeys: Array<string>;
-  public sessionsByUser: Map<string, Array<Session>>;
-  public sessionShares: Session[] = [];
-  public deletingSessions = new Set<Session>();
-  public sessionData: SessionData;
-  public modulesMap: Map<string, Module>;
-  public sessionSize: number;
-  public sessionListLoading = false;
-  public workflowPreviewLoading = false;
-  public workflowPreviewFailed = false;
-  public stats: {} = null;
+  readonly lightSelectedSession = signal<Session>(undefined);
+  readonly sessionsByUserKeys = signal<Array<string>>(undefined);
+  readonly sessionsByUser = signal<Map<string, Array<Session>>>(undefined);
+  readonly sessionShares = signal<Session[]>([]);
+  // replaced with a copy when it changes, so that the signal notifies
+  public readonly deletingSessions = signal(new Set<Session>());
+  readonly sessionData = signal<SessionData>(undefined);
+  readonly modulesMap = signal<Map<string, Module>>(undefined);
+  readonly sessionSize = signal<number>(undefined);
+  readonly sessionListLoading = signal(false);
+  readonly workflowPreviewLoading = signal(false);
+  readonly workflowPreviewFailed = signal(false);
+  readonly stats = signal<{}>(null);
 
   private previewThrottle$ = new Subject<Session>();
   private previewThrottleSubscription;
 
-  public selectionDisabled = false; // disable session selection when session context menu is open
-  public noPersonalSessions = true;
+  public readonly selectionDisabled = signal(false); // disable session selection when session context menu is open
+  readonly noPersonalSessions = signal(true);
 
   private userEventData = new UserEventData();
 
@@ -77,9 +77,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // subscribe to mode change
     this.settingsService.sessionListMode$.subscribe((newMode: SessionListMode) => {
-      this.mode = newMode;
+      this.mode.set(newMode);
     });
-    this.sessionListLoading = true;
+    this.sessionListLoading.set(true);
     this.configService
       .get(ConfigService.KEY_EXAMPLE_SESSION_OWNER_USER_ID)
       .pipe(
@@ -91,7 +91,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
           this.userEventData.sessions = sessionMap;
         }),
         tap(() => {
-          this.sessionListLoading = false;
+          this.sessionListLoading.set(false);
         }),
         tap(() => this.subscribeToEvents()),
         tap(() => this.updateSessions()),
@@ -108,35 +108,39 @@ export class SessionListComponent implements OnInit, OnDestroy {
       // hide the loading indicator of the old session immediately
       .pipe(
         tap(() => {
-          this.workflowPreviewFailed = false;
-          this.workflowPreviewLoading = true;
+          this.workflowPreviewFailed.set(false);
+          this.workflowPreviewLoading.set(true);
         }),
         // wait a while to see if the user is really interested about this session
         debounceTime(500),
-        filter(() => this.selectedSession !== null),
+        filter(() => this.selectedSession() !== null),
         mergeMap((session) =>
           forkJoin([this.sessionResource.loadSession(session.sessionId, true), this.toolsService.getModulesMap()]),
         ),
         tap((results) => {
           const sData = results[0];
-          this.modulesMap = results[1];
+          this.modulesMap.set(results[1]);
 
-          this.workflowPreviewLoading = false;
+          this.workflowPreviewLoading.set(false);
           // don't show if the selection has already changed
-          if (this.selectedSession && sData.session() && this.selectedSession.sessionId === sData.session().sessionId) {
-            this.sessionData = sData;
-            this.sessionSize = this.sessionDataService.getSessionSize(this.sessionData);
+          if (
+            this.selectedSession() &&
+            sData.session() &&
+            this.selectedSession().sessionId === sData.session().sessionId
+          ) {
+            this.sessionData.set(sData);
+            this.sessionSize.set(this.sessionDataService.getSessionSize(this.sessionData()));
           }
         }),
         // hide the spinner when unsubscribed (when the user has opened a session)
         finalize(() => {
-          this.workflowPreviewLoading = false;
+          this.workflowPreviewLoading.set(false);
         }),
       )
       .subscribe({
         next: () => {},
         error: (error: any) => {
-          this.workflowPreviewFailed = true;
+          this.workflowPreviewFailed.set(true);
           this.restErrorService.showError("Loading session preview failed", error);
         },
       });
@@ -209,9 +213,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
           // if the session was just removed
           if (!this.userEventData.sessions.has(sessionId)) {
             // try to delete from the deletingSessions
-            this.deletingSessions.forEach((s) => {
+            this.deletingSessions().forEach((s) => {
               if (s.sessionId === sessionId) {
-                this.deletingSessions.delete(s);
+                this.deletingSessions.update((set) => this.without(set, s));
               }
             });
           }
@@ -256,7 +260,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   updateStats() {
     this.sessionResource.getStats().subscribe({
       next: (stats: {}) => {
-        this.stats = stats;
+        this.stats.set(stats);
       },
       error: (error: any) => {
         this.restErrorService.showError("failed to get session statistics", error);
@@ -298,9 +302,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
       });
     });
 
-    this.sessionsByUserKeys = Array.from(sessionsByUser.keys());
+    const keys = Array.from(sessionsByUser.keys());
     // sort sessions by name
-    this.sessionsByUserKeys.forEach((user: string) => {
+    keys.forEach((user: string) => {
       sessionsByUser.set(
         user,
         sessionsByUser.get(user).sort((s1: Session, s2: Session) => s1.name.localeCompare(s2.name)),
@@ -308,54 +312,55 @@ export class SessionListComponent implements OnInit, OnDestroy {
     });
 
     // FIXME quick hack for ordering example and training sessions, needs refactor
-    const exampleIndex = this.sessionsByUserKeys.indexOf(this.exampleSessionOwnerUserId);
-    const trainingIndex = this.sessionsByUserKeys.indexOf(this.trainingSessionOwnerUserId);
+    const exampleIndex = keys.indexOf(this.exampleSessionOwnerUserId);
+    const trainingIndex = keys.indexOf(this.trainingSessionOwnerUserId);
     if (exampleIndex >= 0 && trainingIndex >= 0 && trainingIndex < exampleIndex) {
-      this.sessionsByUserKeys[exampleIndex] = this.trainingSessionOwnerUserId;
-      this.sessionsByUserKeys[trainingIndex] = this.exampleSessionOwnerUserId;
+      keys[exampleIndex] = this.trainingSessionOwnerUserId;
+      keys[trainingIndex] = this.exampleSessionOwnerUserId;
     }
 
-    this.sessionShares = this.sessionDataService.getPendingShares(sessions);
-    this.noPersonalSessions = !(sessionsByUser.get(null).length > 0);
-    this.sessionsByUser = sessionsByUser;
+    this.sessionShares.set(this.sessionDataService.getPendingShares(sessions));
+    this.noPersonalSessions.set(!(sessionsByUser.get(null).length > 0));
+    this.sessionsByUser.set(sessionsByUser);
+    this.sessionsByUserKeys.set(keys);
 
     this.updateStats();
   }
 
   onSessionClick(session: Session) {
-    switch (this.mode) {
+    switch (this.mode()) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
-        if (this.selectionDisabled) {
-          this.selectionDisabled = false;
+        if (this.selectionDisabled()) {
+          this.selectionDisabled.set(false);
 
-          if (!this.deletingSessions.has(session)) {
+          if (!this.deletingSessions().has(session)) {
             this.selectSession(session);
           }
-        } else if (!this.deletingSessions.has(session)) {
+        } else if (!this.deletingSessions().has(session)) {
           this.openSession(session.sessionId);
         }
         break;
       case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
-        if (this.selectionDisabled) {
-          this.selectionDisabled = false;
+        if (this.selectionDisabled()) {
+          this.selectionDisabled.set(false);
 
-          if (!this.deletingSessions.has(session)) {
+          if (!this.deletingSessions().has(session)) {
             this.selectSession(session);
           }
-        } else if (!this.deletingSessions.has(session)) {
+        } else if (!this.deletingSessions().has(session)) {
           this.openSession(session.sessionId);
         }
 
         break;
       case SessionListMode.CLICK_TO_PREVIEW_BUTTON_TO_OPEN:
-        if (this.selectionDisabled) {
-          this.selectionDisabled = false;
+        if (this.selectionDisabled()) {
+          this.selectionDisabled.set(false);
 
-          if (!this.deletingSessions.has(session)) {
+          if (!this.deletingSessions().has(session)) {
             this.selectSession(session);
             this.lightSelectSession(session);
           }
-        } else if (!this.deletingSessions.has(session)) {
+        } else if (!this.deletingSessions().has(session)) {
           if (this.isSessionSelected(session)) {
             this.lightSelectSession(session);
             this.selectSession(null);
@@ -371,7 +376,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   onSessionMouseover(session: Session) {
-    switch (this.mode) {
+    switch (this.mode()) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
         this.selectSession(session);
         break;
@@ -387,7 +392,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   onSessionMouseout() {
-    switch (this.mode) {
+    switch (this.mode()) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
         this.selectSession(null);
         break;
@@ -402,7 +407,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   rowHighlighted(session: Session) {
-    switch (this.mode) {
+    switch (this.mode()) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
         return this.isSessionSelected(session);
       case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
@@ -415,7 +420,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   buttonsVisible(session: Session) {
-    switch (this.mode) {
+    switch (this.mode()) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
         return this.isSessionSelected(session);
       case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
@@ -436,7 +441,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   getSessionRowTitle() {
-    switch (this.mode) {
+    switch (this.mode()) {
       case SessionListMode.CLICK_TO_OPEN_HOVER_TO_PREVIEW:
         return "Click to open";
       case SessionListMode.CLICK_TO_OPEN_BUTTON_TO_PREVIEW:
@@ -470,28 +475,28 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   selectSession(session: Session) {
-    if (this.selectionDisabled || this.deletingSessions.has(session)) {
+    if (this.selectionDisabled() || this.deletingSessions().has(session)) {
       return;
     }
 
-    this.selectedSession = session;
+    this.selectedSession.set(session);
 
-    if (this.selectedSession) {
+    if (this.selectedSession()) {
       if (session !== this.previousSession) {
         // hide the old session immediately
         this.previousSession = session;
-        this.sessionData = null;
-        this.sessionSize = null;
+        this.sessionData.set(null);
+        this.sessionSize.set(null);
         this.previewThrottle$.next(session);
       }
     }
   }
 
   lightSelectSession(session: Session) {
-    if (this.selectionDisabled || this.deletingSessions.has(session)) {
+    if (this.selectionDisabled() || this.deletingSessions().has(session)) {
       return;
     }
-    this.lightSelectedSession = session;
+    this.lightSelectedSession.set(session);
   }
 
   deleteSession(session: Session, sharedByUsername: string = null) {
@@ -514,17 +519,17 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
     confirm.then(
       () => {
-        if (this.selectedSession === session) {
-          this.selectedSession = null;
+        if (this.selectedSession() === session) {
+          this.selectedSession.set(null);
         }
-        this.deletingSessions.add(session);
+        this.deletingSessions.update((set) => new Set(set).add(session));
 
         // this.sessionResource.deleteSession(session.sessionId).subscribe( () => {
         // delete the session only from this user (i.e. the rule)
         this.sessionDataService.deletePersonalRules(session).subscribe({
           error: (error: any) => {
             // FIXME close preview if open
-            this.deletingSessions.delete(session);
+            this.deletingSessions.update((set) => this.without(set, session));
             this.restErrorService.showError(
               isPendingShare ? "Declining the share failed" : "Deleting session failed",
               error,
@@ -556,11 +561,11 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   isSessionSelected(session: Session) {
-    return this.selectedSession === session;
+    return this.selectedSession() === session;
   }
 
   isSessionLightSelected(session: Session) {
-    return this.lightSelectedSession === session;
+    return this.lightSelectedSession() === session;
   }
 
   getSharedByTitlePart(userId: string): string {
@@ -604,11 +609,11 @@ export class SessionListComponent implements OnInit, OnDestroy {
     const session = SessionService.withModalChanges(current, updated);
     this.userEventData.sessions.set(session.sessionId, session);
     this.updateSessions();
-    if (this.selectedSession?.sessionId === session.sessionId) {
-      this.selectedSession = session;
+    if (this.selectedSession()?.sessionId === session.sessionId) {
+      this.selectedSession.set(session);
     }
-    if (this.lightSelectedSession?.sessionId === session.sessionId) {
-      this.lightSelectedSession = session;
+    if (this.lightSelectedSession()?.sessionId === session.sessionId) {
+      this.lightSelectedSession.set(session);
     }
   }
 
@@ -636,9 +641,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
         mergeMap((name) => {
           duplicateName = name;
           // use sessionData from preview if available
-          if (this.sessionData && this.sessionData.session().sessionId === session.sessionId) {
+          if (this.sessionData() && this.sessionData().session().sessionId === session.sessionId) {
             log.info("using session data from preview for duplicate");
-            return of(this.sessionData);
+            return of(this.sessionData());
           }
           log.info("no session data from preview available, getting from server");
           return this.sessionResource.loadSession(session.sessionId);
@@ -660,7 +665,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   sessionMenuOpenChange(open: boolean) {
-    this.selectionDisabled = open;
+    this.selectionDisabled.set(open);
   }
 
   getNotesButtonText(session: Session) {
@@ -669,5 +674,11 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
   closePreview() {
     this.selectSession(null);
+  }
+
+  private without(set: Set<Session>, session: Session): Set<Session> {
+    const copy = new Set(set);
+    copy.delete(session);
+    return copy;
   }
 }

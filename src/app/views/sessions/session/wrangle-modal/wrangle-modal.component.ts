@@ -1,6 +1,6 @@
 // registers the ag-grid modules and theme, before any grid is created
 import "../../../../shared/ag-grid-setup";
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal, viewChild } from "@angular/core";
+import { Component, OnInit, inject, signal, viewChild } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
@@ -35,7 +35,6 @@ export interface ColumnItem {
   selector: "ch-wrangle-modal",
   templateUrl: "./wrangle-modal.component.html",
   styleUrls: ["./wrangle-modal.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [AgGridAngular, MultiDropdownComponent, FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class WrangleModalComponent implements OnInit {
@@ -82,17 +81,22 @@ export class WrangleModalComponent implements OnInit {
   nonUniqueIncludedColumns = new Set<string>();
 
   private unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
+  /*
+   * The column items, the column definitions and the preview rows are set in the same callback
+   * right before the state becomes ready, and shown only when it is, so this signal notifies the
+   * view of them too
+   */
+  readonly state = signal<LoadState>(undefined);
   next: () => {};
 
   ngOnInit(): void {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading data...");
+    this.state.set(new LoadState(State.Loading, "Loading data..."));
 
     // check for empty file
     if (this.dataset().size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
@@ -154,11 +158,11 @@ export class WrangleModalComponent implements OnInit {
             .slice(0, this.previewRowCount)
             .map((row: string[]) => ({ ...row }));
 
-          this.state = new LoadState(State.Ready);
+          this.state.set(new LoadState(State.Ready));
         },
         error: (error: Response) => {
-          this.state = new LoadState(State.Fail, "Loading data failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading data failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }

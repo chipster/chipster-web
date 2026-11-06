@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, ChangeDetectionStrategy, input, output, viewChild } from "@angular/core";
+import { Component, OnChanges, OnInit, input, output, viewChild } from "@angular/core";
 import log from "loglevel";
 import type { ColumnItem } from "./wrangle-modal.component";
 import { NgSelectComponent, NgHeaderTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
@@ -8,7 +8,6 @@ import { FormsModule } from "@angular/forms";
   selector: "ch-multi-dropdown",
   templateUrl: "./multi-dropdown.component.html",
   styleUrls: ["./multi-dropdown.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgSelectComponent, FormsModule, NgHeaderTemplateDirective, NgOptionTemplateDirective],
 })
 /**
