@@ -226,7 +226,7 @@ export class SessionEventService {
    * session event replaces the session: the rules of the latest one are updated, and the signal
    * notifies the views.
    */
-  private handleRuleEventOfSessionData(event: any, sessionData: SessionData): Observable<SessionEvent> {
+  private handleRuleEventOfSessionData(event: WsEvent, sessionData: SessionData): Observable<SessionEvent> {
     return this.applyRuleEvent(
       event,
       sessionData.session().sessionId,
@@ -236,7 +236,7 @@ export class SessionEventService {
   }
 
   private applyRuleEvent(
-    event: any,
+    event: WsEvent,
     sessionId: string,
     getRules: () => Rule[],
     setRules: (rules: Rule[]) => void,
