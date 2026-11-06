@@ -92,9 +92,10 @@ test("the open session is shared and the share removed in the sharing modal", as
 });
 
 /*
- * Renaming a temporary session saves it. The page has to know that right after the request, not
- * only after the session event, or leaving the page in between deletes the session as unsaved.
- * The session event's fetch of the session is held until the page has been left.
+ * Renaming a temporary session saves it. The page has to know that at once, not only after the
+ * request or the session event, or leaving the page in between deletes the session as unsaved. The
+ * rename's request and the session event's fetch of the session are held until the page has been
+ * left.
  */
 test.describe("temporary session", () => {
   test.use({ sessionState: "TEMPORARY_UNMODIFIED" });
@@ -103,7 +104,9 @@ test.describe("temporary session", () => {
     await openSession(page, sessionId);
     const held: Route[] = [];
     const sessionUrl = (url: URL) => url.pathname.endsWith(`/sessions/${sessionId}`);
-    await page.route(sessionUrl, (route) => (route.request().method() === "GET" ? held.push(route) : route.continue()));
+    await page.route(sessionUrl, (route) => {
+      held.push(route);
+    });
 
     const details = page.locator("ch-session-details");
     await details.getByTitle("Actions").click();
@@ -112,16 +115,19 @@ test.describe("temporary session", () => {
     await modal.getByRole("textbox").fill("renamed temporary session");
     await modal.getByRole("button", { name: "Rename" }).click();
     await expect(modal).toBeHidden();
-    await expect.poll(async () => (await getSession(api, sessionId)).state).toBe("READY");
-    await expect.poll(() => held.length).toBeGreaterThan(0);
+    await expect.poll(() => held.some((route) => route.request().method() === "PUT")).toBe(true);
 
+    // the guard would delete the user's rule, which isn't held, and session-db the session with it
     await page.locator("#navbar").getByRole("link", { name: "Sessions" }).click();
     await expect(page).toHaveURL(/\/sessions$/);
-    await expect(page.getByText("renamed temporary session")).toBeVisible();
-    expect(await getSession(api, sessionId)).toMatchObject({ name: "renamed temporary session", state: "READY" });
 
     await Promise.all(held.map((route) => route.continue()));
     await page.unroute(sessionUrl);
+    await expect
+      .poll(async () => (await api.get("session-db", `/sessions/${sessionId}`)).status(), "the session is kept")
+      .toBe(200);
+    await expect.poll(async () => (await getSession(api, sessionId)).state).toBe("READY");
+    expect((await getSession(api, sessionId)).name).toBe("renamed temporary session");
   });
 });
 
