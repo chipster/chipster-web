@@ -54,8 +54,11 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
               sessionEvent.event.type === EventType.Delete
                 ? rules.filter((r) => r.ruleId !== sessionEvent.event.resourceId)
                 : rules;
-            if (added && !updated.some((r) => r.ruleId === added.ruleId)) {
-              updated = [...updated, added];
+            if (added) {
+              // replaced if a session event brought the rule already or it was updated
+              updated = updated.some((r) => r.ruleId === added.ruleId)
+                ? updated.map((r) => (r.ruleId === added.ruleId ? added : r))
+                : [...updated, added];
             }
             return updated;
           });
