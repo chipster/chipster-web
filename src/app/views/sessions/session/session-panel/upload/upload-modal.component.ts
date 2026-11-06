@@ -30,15 +30,22 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
 
   /*
    * A snapshot of the files of flow.js, taken when it tells about a change. Flow.js changes the
-   * progress of its files on every progress event of the requests, but tells about it at most every
-   * 500 ms, so a view of the files themselves would change without a notification.
+   * progress of its files on every progress event of the requests, but tells about it at most once
+   * in progressCallbacksInterval (1 s, see UploadService.getFlow()), so a view of the files
+   * themselves would change without a notification.
    */
   readonly files = signal<UploadRow[]>([]);
   readonly timeRemaining = signal(0);
 
+  // flow.cancel() removes the files one by one, each with a fileRemoved event
+  private cancelling = false;
+
   // function references needed for the flow.off in ngOnDestroy
   // 'this' used inside so need to use => or bind
   update = () => {
+    if (this.cancelling) {
+      return;
+    }
     this.files.set(
       this.flow()
         .files.slice()
@@ -65,6 +72,9 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
     // flow.js adds the files to its list only after their fileAdded events, then tells about
     // them with filesSubmitted. The files that opened the modal were submitted before this.
     this.flow().on("filesSubmitted", this.update);
+    // UploadService.startUpload() resumes the file when its dataset has been created. If another
+    // file is uploading, flow.js doesn't fire this, but then the next progress event comes soon.
+    this.flow().on("uploadStart", this.update);
     this.flow().on("progress", this.update);
     this.flow().on("fileRemoved", this.update);
     this.flow().on("error", this.update);
@@ -76,6 +86,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.flow().off("filesSubmitted", this.update);
+    this.flow().off("uploadStart", this.update);
     this.flow().off("progress", this.update);
     this.flow().off("fileRemoved", this.update);
     this.flow().off("error", this.update);
@@ -100,7 +111,12 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   cancelAll() {
-    this.flow().cancel();
+    this.cancelling = true;
+    try {
+      this.flow().cancel();
+    } finally {
+      this.cancelling = false;
+    }
     this.update();
   }
 

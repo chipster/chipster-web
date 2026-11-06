@@ -50,7 +50,8 @@ export class ImportSessionModalComponent implements OnInit, OnDestroy {
   /*
    * A snapshot of the files of flow.js and their status, taken when flow.js tells about a change
    * or the status changes. Flow.js changes the progress of its files on every progress event of
-   * the requests, but tells about it at most every 500 ms, and this modal and
+   * the requests, but tells about it at most once in progressCallbacksInterval (1 s, see
+   * UploadService.getFlow()), and this modal and
    * OpenSessionFileComponent change the status in their callbacks.
    */
   readonly rows = signal<ImportRow[]>([]);
