@@ -592,9 +592,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   /*
-   * The user's events have only the rules, see SessionService. The modals change only these fields
-   * of a copy made when they opened: take the rest from the current entry, which a rule event may
-   * have replaced in the meantime. The selections are compared by identity.
+   * The user's events have only the rules, see SessionService. A rule event may have replaced the
+   * entry while the modal was open. The selections are compared by identity.
    */
   private sessionUpdated(updated: Session) {
     const current = this.userEventData.sessions.get(updated.sessionId);
@@ -602,7 +601,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
       // gone from the list in the meantime
       return;
     }
-    const session = { ...current, name: updated.name, notes: updated.notes, state: updated.state };
+    const session = SessionService.withModalChanges(current, updated);
     this.userEventData.sessions.set(session.sessionId, session);
     this.updateSessions();
     if (this.selectedSession?.sessionId === session.sessionId) {

@@ -25,9 +25,10 @@ export class SessionService {
 
   /*
    * These open the modal on subscribe, save a copy of the session and return it. The OnPush views
-   * need a new object to see the change. The session view gets it from its session event, but the
-   * user's events that the sessions list follows have only the rules, so the list takes it from
-   * here.
+   * need a new object to see the change. The session view would get it from its session event, but
+   * applies it at once, so that leaving the page right after renaming a temporary session doesn't
+   * delete it as unsaved. The user's events that the sessions list follows have only the rules, so
+   * the list takes it from here too.
    */
   openRenameModalAndUpdate(session: Session): Observable<Session> {
     return this.updateFromModal(
@@ -51,6 +52,14 @@ export class SessionService {
       () => this.dialogModalService.openNotesModal(session).pipe(map((notes: string) => ({ ...session, notes }))),
       "Failed to edit session notes",
     );
+  }
+
+  /*
+   * The current session with the changes of a copy that these returned. The copy is the session as
+   * it was when the modal opened, and events may have replaced the rest of it in the meantime.
+   */
+  static withModalChanges(current: Session, updated: Session): Session {
+    return { ...current, name: updated.name, notes: updated.notes, state: updated.state };
   }
 
   // deferred, because the dialog service opens the modal when it's called
