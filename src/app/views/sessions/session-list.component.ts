@@ -50,7 +50,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   private trainingSessionOwnerUserId = "training";
   readonly selectedSession = signal<Session>(undefined);
   public previousSession: Session;
-  public lightSelectedSession: Session;
+  readonly lightSelectedSession = signal<Session>(undefined);
   readonly sessionsByUserKeys = signal<Array<string>>(undefined);
   readonly sessionsByUser = signal<Map<string, Array<Session>>>(undefined);
   readonly sessionShares = signal<Session[]>([]);
@@ -302,9 +302,9 @@ export class SessionListComponent implements OnInit, OnDestroy {
       });
     });
 
-    this.sessionsByUserKeys.set(Array.from(sessionsByUser.keys()));
+    const keys = Array.from(sessionsByUser.keys());
     // sort sessions by name
-    this.sessionsByUserKeys().forEach((user: string) => {
+    keys.forEach((user: string) => {
       sessionsByUser.set(
         user,
         sessionsByUser.get(user).sort((s1: Session, s2: Session) => s1.name.localeCompare(s2.name)),
@@ -312,16 +312,17 @@ export class SessionListComponent implements OnInit, OnDestroy {
     });
 
     // FIXME quick hack for ordering example and training sessions, needs refactor
-    const exampleIndex = this.sessionsByUserKeys().indexOf(this.exampleSessionOwnerUserId);
-    const trainingIndex = this.sessionsByUserKeys().indexOf(this.trainingSessionOwnerUserId);
+    const exampleIndex = keys.indexOf(this.exampleSessionOwnerUserId);
+    const trainingIndex = keys.indexOf(this.trainingSessionOwnerUserId);
     if (exampleIndex >= 0 && trainingIndex >= 0 && trainingIndex < exampleIndex) {
-      this.sessionsByUserKeys()[exampleIndex] = this.trainingSessionOwnerUserId;
-      this.sessionsByUserKeys()[trainingIndex] = this.exampleSessionOwnerUserId;
+      keys[exampleIndex] = this.trainingSessionOwnerUserId;
+      keys[trainingIndex] = this.exampleSessionOwnerUserId;
     }
 
     this.sessionShares.set(this.sessionDataService.getPendingShares(sessions));
     this.noPersonalSessions.set(!(sessionsByUser.get(null).length > 0));
     this.sessionsByUser.set(sessionsByUser);
+    this.sessionsByUserKeys.set(keys);
 
     this.updateStats();
   }
@@ -495,7 +496,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
     if (this.selectionDisabled() || this.deletingSessions().has(session)) {
       return;
     }
-    this.lightSelectedSession = session;
+    this.lightSelectedSession.set(session);
   }
 
   deleteSession(session: Session, sharedByUsername: string = null) {
@@ -564,7 +565,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   isSessionLightSelected(session: Session) {
-    return this.lightSelectedSession === session;
+    return this.lightSelectedSession() === session;
   }
 
   getSharedByTitlePart(userId: string): string {
@@ -611,8 +612,8 @@ export class SessionListComponent implements OnInit, OnDestroy {
     if (this.selectedSession()?.sessionId === session.sessionId) {
       this.selectedSession.set(session);
     }
-    if (this.lightSelectedSession?.sessionId === session.sessionId) {
-      this.lightSelectedSession = session;
+    if (this.lightSelectedSession()?.sessionId === session.sessionId) {
+      this.lightSelectedSession.set(session);
     }
   }
 
