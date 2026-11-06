@@ -591,12 +591,25 @@ export class SessionListComponent implements OnInit, OnDestroy {
     this.sessionService.openNotesModalAndUpdate(session).subscribe((updated) => this.sessionUpdated(updated));
   }
 
-  // the user's events have only the rules, see SessionService
-  private sessionUpdated(session: Session) {
+  /*
+   * The user's events have only the rules, see SessionService. The modals change only these fields
+   * of a copy made when they opened: take the rest from the current entry, which a rule event may
+   * have replaced in the meantime. The selections are compared by identity.
+   */
+  private sessionUpdated(updated: Session) {
+    const current = this.userEventData.sessions.get(updated.sessionId);
+    if (!current) {
+      // gone from the list in the meantime
+      return;
+    }
+    const session = { ...current, name: updated.name, notes: updated.notes, state: updated.state };
     this.userEventData.sessions.set(session.sessionId, session);
     this.updateSessions();
     if (this.selectedSession?.sessionId === session.sessionId) {
       this.selectedSession = session;
+    }
+    if (this.lightSelectedSession?.sessionId === session.sessionId) {
+      this.lightSelectedSession = session;
     }
   }
 
