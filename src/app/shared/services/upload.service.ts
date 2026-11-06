@@ -81,6 +81,13 @@ export class UploadService {
       next: (value: [string, Dataset]) => {
         const url = value[0];
         const dataset = value[1];
+        if (!file.flowObj.files.includes(file)) {
+          // cancelled in the upload modal while the dataset was being created
+          this.sessionResource.deleteDataset(sessionId, dataset.datasetId).subscribe({
+            error: (err) => this.restErrorService.showError("deleting the cancelled upload failed", err),
+          });
+          return;
+        }
         file.chipsterTarget = `${url}/sessions/${sessionId}/datasets/${
           dataset.datasetId
         }?token=${this.tokenService.getToken()}`;

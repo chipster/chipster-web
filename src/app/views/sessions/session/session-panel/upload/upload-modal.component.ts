@@ -138,6 +138,10 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   cancelUpload(file: any) {
     file.cancel();
     this.update();
+    if (!file.chipsterDatasetId) {
+      // the dataset is still being created, UploadService.startUpload() deletes it
+      return;
+    }
     this.sessionResource.deleteDataset(file.chipsterSessionId, file.chipsterDatasetId).subscribe({
       error: (err) => {
         this.errorService.showError("cancel failed", err);

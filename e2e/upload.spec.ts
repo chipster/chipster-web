@@ -103,9 +103,14 @@ test("several files uploaded at once and more from the upload modal become datas
 /*
  * flow.js adds the files to its list only after it has told about each of them, so the modal shows
  * them when flow.js tells that they were submitted, before their upload starts. The creation of the
- * datasets, which the upload waits for, is held until the files are shown.
+ * datasets, which the upload waits for, is held until the files are shown and one of them is
+ * cancelled. The cancelled file's dataset is deleted when it has been created.
  */
-test("the upload modal shows the files before their upload starts", async ({ page, api, sessionId }) => {
+test("the upload modal shows the files before their upload starts and cancels one", async ({
+  page,
+  api,
+  sessionId,
+}) => {
   const toUpload = (name: string) => [{ name, mimeType: "text/plain", buffer: Buffer.from(`${name}\n`) }];
   await openSession(page, sessionId);
   const held: Route[] = [];
@@ -137,10 +142,18 @@ test("the upload modal shows the files before their upload starts", async ({ pag
   await expect.poll(() => held.length).toBe(2);
   expect(await getDatasets(api, sessionId)).toEqual([]);
 
+  await modal.getByRole("row").filter({ hasText: "second.txt" }).locator(".fa-times").click();
+  await expect(modal.getByRole("cell", { name: "second.txt" })).toBeHidden();
+
+  const deleted = page.waitForResponse(
+    (response) =>
+      response.request().method() === "DELETE" && response.url().includes(`/sessions/${sessionId}/datasets/`),
+  );
   await Promise.all(held.map((route) => route.continue()));
   await page.unroute(datasetsUrl);
-  await expect(modal.locator(".fa-check-circle")).toHaveCount(2, { timeout: 30_000 });
-  await expect
-    .poll(async () => (await getDatasets(api, sessionId)).map((d) => d.name).sort())
-    .toEqual(["first.txt", "second.txt"]);
+  // both datasets are created, and the cancelled one deleted
+  expect((await deleted).ok()).toBe(true);
+  await expect(modal.locator(".fa-check-circle")).toHaveCount(1, { timeout: 30_000 });
+  await expect.poll(async () => (await getDatasets(api, sessionId)).map((d) => d.name)).toEqual(["first.txt"]);
+  expect(await getDatasetContent(api, sessionId, (await getDatasets(api, sessionId))[0].datasetId)).toBe("first.txt\n");
 });
