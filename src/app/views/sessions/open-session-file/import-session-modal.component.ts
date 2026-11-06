@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, inject, signal } from "@angular/core";
 import { Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import type { FlowFile } from "flowjs";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
@@ -115,7 +116,7 @@ export class ImportSessionModalComponent implements OnInit, OnDestroy {
 
 interface ImportRow {
   // the file of flow.js, for the cancel button
-  file: any;
+  file: FlowFile;
   name: string;
   status: string;
   finished: boolean;

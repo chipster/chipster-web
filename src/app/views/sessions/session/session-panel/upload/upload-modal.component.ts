@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import type { FlowFile } from "flowjs";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
 import { UploadService } from "../../../../../shared/services/upload.service";
@@ -84,12 +85,12 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   // the buttons change the files of flow.js, which tells about it only with the next progress
-  pause(file: any) {
+  pause(file: FlowFile) {
     file.pause();
     this.update();
   }
 
-  resume(file: any) {
+  resume(file: FlowFile) {
     file.resume();
     this.update();
   }
@@ -127,7 +128,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
 
 interface UploadRow {
   // the file of flow.js, for the buttons
-  file: any;
+  file: FlowFile;
   relativePath: string;
   size: number;
   progress: number;
