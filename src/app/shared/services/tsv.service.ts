@@ -32,7 +32,7 @@ export class TsvService {
   }
 
   getTSV2File(dataset: Dataset, sessionData: SessionData, maxBytes?: number): Observable<TSV2File> {
-    return this.fileResource.getLimitedData(sessionData.session.sessionId, dataset, maxBytes).pipe(
+    return this.fileResource.getLimitedData(sessionData.session().sessionId, dataset, maxBytes).pipe(
       map((tsvData: any) => {
         const tsvArray = d3.tsvParseRows(tsvData);
         return this.getTSV2FileFromArray(dataset, sessionData, tsvArray);

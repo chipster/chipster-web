@@ -105,7 +105,7 @@ export class LabelsModalComponent implements OnInit {
   }
 
   private confirmDeleteLabel(row: LabelRow): void {
-    this.sessionResource.deleteLabel(this.sessionData().session.sessionId, row.label.labelId).subscribe({
+    this.sessionResource.deleteLabel(this.sessionData().session().sessionId, row.label.labelId).subscribe({
       next: () => {
         // server cascade removes the id from datasets and emits dataset UPDATE events,
         // but also scrub local copies so UI updates immediately
@@ -157,7 +157,7 @@ export class LabelsModalComponent implements OnInit {
   }
 
   private confirmDeleteAllLabels(): void {
-    const sessionId = this.sessionData().session.sessionId;
+    const sessionId = this.sessionData().session().sessionId;
     const labelIds = this.rows.map((r) => r.label.labelId);
 
     this.saving = true;
@@ -228,7 +228,7 @@ export class LabelsModalComponent implements OnInit {
       return;
     }
 
-    const sessionId = this.sessionData().session.sessionId;
+    const sessionId = this.sessionData().session().sessionId;
     const datasetUpdates: Dataset[] = [];
 
     // Track which labels were actually applied/removed so the workflow

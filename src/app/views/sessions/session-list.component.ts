@@ -123,7 +123,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
 
           this.workflowPreviewLoading = false;
           // don't show if the selection has already changed
-          if (this.selectedSession && sData.session && this.selectedSession.sessionId === sData.session.sessionId) {
+          if (this.selectedSession && sData.session() && this.selectedSession.sessionId === sData.session().sessionId) {
             this.sessionData = sData;
             this.sessionSize = this.sessionDataService.getSessionSize(this.sessionData);
           }
@@ -584,11 +584,32 @@ export class SessionListComponent implements OnInit, OnDestroy {
   }
 
   rename(session: Session) {
-    this.sessionService.openRenameModalAndUpdate(session);
+    this.sessionService.openRenameModalAndUpdate(session).subscribe((updated) => this.sessionUpdated(updated));
   }
 
   notes(session: Session) {
-    this.sessionService.openNotesModalAndUpdate(session);
+    this.sessionService.openNotesModalAndUpdate(session).subscribe((updated) => this.sessionUpdated(updated));
+  }
+
+  /*
+   * The user's events have only the rules, see SessionService. A rule event may have replaced the
+   * entry while the modal was open. The selections are compared by identity.
+   */
+  private sessionUpdated(updated: Session) {
+    const current = this.userEventData.sessions.get(updated.sessionId);
+    if (!current) {
+      // gone from the list in the meantime
+      return;
+    }
+    const session = SessionService.withModalChanges(current, updated);
+    this.userEventData.sessions.set(session.sessionId, session);
+    this.updateSessions();
+    if (this.selectedSession?.sessionId === session.sessionId) {
+      this.selectedSession = session;
+    }
+    if (this.lightSelectedSession?.sessionId === session.sessionId) {
+      this.lightSelectedSession = session;
+    }
   }
 
   download(session: Session) {
@@ -615,7 +636,7 @@ export class SessionListComponent implements OnInit, OnDestroy {
         mergeMap((name) => {
           duplicateName = name;
           // use sessionData from preview if available
-          if (this.sessionData && this.sessionData.session.sessionId === session.sessionId) {
+          if (this.sessionData && this.sessionData.session().sessionId === session.sessionId) {
             log.info("using session data from preview for duplicate");
             return of(this.sessionData);
           }

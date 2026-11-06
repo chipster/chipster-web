@@ -10,7 +10,7 @@ import {
   ElementRef,
 } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Rule, Session, SessionEvent } from "chipster-js-common";
+import { EventType, Rule, Session, SessionEvent } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -52,8 +52,22 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     this.ruleStream$()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
-        next: () => {
-          this.rules = this.session().rules;
+        next: (sessionEvent: SessionEvent) => {
+          /*
+          Apply the event to our own list. The session of the open session view is replaced by the
+          events, not changed, so the session given to this modal doesn't get the new rules. Removed
+          by the id of the event: the old value is missing when a session event has dropped the rule
+          already.
+          */
+          const added = sessionEvent.newValue as Rule;
+          let updated =
+            sessionEvent.event.type === EventType.Delete
+              ? this.rules.filter((r) => r.ruleId !== sessionEvent.event.resourceId)
+              : this.rules;
+          if (added && !updated.some((r) => r.ruleId === added.ruleId)) {
+            updated = [...updated, added];
+          }
+          this.rules = updated;
         },
         error: (err) => this.errorService.showError("getting rule events failed", err),
       });

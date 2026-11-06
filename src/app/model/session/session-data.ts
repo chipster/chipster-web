@@ -12,7 +12,7 @@ import { SelectionOption } from "../../views/sessions/session/SelectionOption";
  * maps from it, while an input of a map changes only when the parent is checked next time.
  */
 export class SessionData {
-  session: Session;
+  readonly session = signal<Session>(undefined);
   readonly datasetsMap = signal(new Map<string, Dataset>());
   readonly jobsMap = signal(new Map<string, Job>());
   readonly labelsMap = signal(new Map<string, Label>());
