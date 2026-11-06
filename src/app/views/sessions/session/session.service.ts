@@ -1,7 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { Dataset, Session, SessionState } from "chipster-js-common";
 import * as log from "loglevel";
-import { EMPTY, forkJoin, NEVER, Observable } from "rxjs";
+import { defer, EMPTY, forkJoin, NEVER, Observable } from "rxjs";
 import { catchError, map, mergeMap, tap } from "rxjs/operators";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
@@ -31,29 +31,31 @@ export class SessionService {
    */
   openRenameModalAndUpdate(session: Session): Observable<Session> {
     return this.updateFromModal(
-      this.dialogModalService.openSessionNameModal("Rename session", session.name).pipe(
-        map((name: string) => {
-          const renamed = { ...session, name };
-          // 'save' temp session when renaming it
-          if (this.isTemporary(session)) {
-            renamed.state = SessionState.Ready;
-          }
-          return renamed;
-        }),
-      ),
+      () =>
+        this.dialogModalService.openSessionNameModal("Rename session", session.name).pipe(
+          map((name: string) => {
+            const renamed = { ...session, name };
+            // 'save' temp session when renaming it
+            if (this.isTemporary(session)) {
+              renamed.state = SessionState.Ready;
+            }
+            return renamed;
+          }),
+        ),
       "Rename session failed",
     );
   }
 
   openNotesModalAndUpdate(session: Session): Observable<Session> {
     return this.updateFromModal(
-      this.dialogModalService.openNotesModal(session).pipe(map((notes: string) => ({ ...session, notes }))),
+      () => this.dialogModalService.openNotesModal(session).pipe(map((notes: string) => ({ ...session, notes }))),
       "Failed to edit session notes",
     );
   }
 
-  private updateFromModal(updated$: Observable<Session>, errorMessage: string): Observable<Session> {
-    return updated$.pipe(
+  // deferred, because the dialog service opens the modal when it's called
+  private updateFromModal(openModal: () => Observable<Session>, errorMessage: string): Observable<Session> {
+    return defer(openModal).pipe(
       mergeMap((updated) => this.updateSession(updated).pipe(map(() => updated))),
       catchError((err) => {
         this.restErrorService.showError(errorMessage, err);
