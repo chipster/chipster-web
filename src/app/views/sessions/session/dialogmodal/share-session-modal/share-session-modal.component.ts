@@ -52,8 +52,18 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     this.ruleStream$()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
-        next: () => {
-          this.rules = this.session().rules;
+        next: (sessionEvent: SessionEvent) => {
+          /*
+          Apply the event to our own list. The session of the open session view is replaced by the
+          events, not changed, so the session given to this modal doesn't get the new rules.
+          */
+          const removed = sessionEvent.oldValue as Rule;
+          const added = sessionEvent.newValue as Rule;
+          let updated = removed ? this.rules.filter((r) => r.ruleId !== removed.ruleId) : this.rules;
+          if (added && !updated.some((r) => r.ruleId === added.ruleId)) {
+            updated = [...updated, added];
+          }
+          this.rules = updated;
         },
         error: (err) => this.errorService.showError("getting rule events failed", err),
       });
