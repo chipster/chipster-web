@@ -26,7 +26,6 @@ export class ImportSessionModalComponent implements OnInit, OnDestroy {
   public flow: any;
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();
-  files = [];
 
   fileAdded(file: any) {
     const session = new Session(file.name.replace(".zip", ""));
