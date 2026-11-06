@@ -46,6 +46,43 @@ test("a session is renamed and its notes edited in the session details", async (
   await waitForDevCheck(page);
 });
 
+/*
+ * The sharing modal shows the rules of the session and follows the rule events: it doesn't add or
+ * remove a row itself after its own request. The share goes to a user that doesn't have to exist,
+ * and is gone with the session after the test.
+ */
+test("the open session is shared and the share removed in the sharing modal", async ({ page, api, sessionId }) => {
+  const username = "jaas/e2e-share-target";
+  const rulesOf = async () => (await getSession(api, sessionId)).rules.map((rule) => rule.username);
+
+  await openSession(page, sessionId);
+  const details = page.locator("ch-session-details");
+  await details.getByTitle("Actions").click();
+  await details.getByRole("button", { name: "Share…" }).click();
+  const modal = page.getByRole("dialog").filter({ hasText: "Share session" });
+  const shareRow = modal.getByRole("row").filter({ hasText: username });
+  await expect(modal.getByRole("row").filter({ hasText: "owner" })).toBeVisible();
+
+  await modal.getByRole("button", { name: "Add rule" }).click();
+  await modal.getByRole("textbox").fill(username);
+  await modal.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(shareRow).toBeVisible();
+  await expect(shareRow).toContainText("read-write");
+  await expect.poll(rulesOf).toContain(username);
+
+  await shareRow.getByRole("button").click();
+  const confirm = page.getByRole("dialog").filter({ hasText: `Stop sharing with ${username}?` });
+  await confirm.getByRole("button", { name: "Stop sharing" }).click();
+  await expect(confirm).toBeHidden();
+  await expect(shareRow).toBeHidden();
+  await expect.poll(rulesOf).not.toContain(username);
+  await expect(modal.getByRole("row").filter({ hasText: "owner" })).toBeVisible();
+
+  await modal.getByRole("button", { name: "Close" }).click();
+  await expect(modal).toBeHidden();
+  await waitForDevCheck(page);
+});
+
 test("a session that doesn't exist shows its state", async ({ page, pageErrors }) => {
   pageErrors.allowFailedRequest(404, "session-db", "/sessions/");
   await page.goto("/analyze/00000000-0000-0000-0000-000000000000");
