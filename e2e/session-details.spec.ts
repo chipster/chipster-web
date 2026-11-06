@@ -49,7 +49,8 @@ test("a session is renamed and its notes edited in the session details", async (
 /*
  * The sharing modal shows the rules of the session and follows the rule events: it doesn't add or
  * remove a row itself after its own request. The share goes to a user that doesn't have to exist,
- * and is gone with the session after the test.
+ * and is gone with the session after the test. The session is renamed first, because a session
+ * event replaces the session of the open session view, and the rule events must still reach it.
  */
 test("the open session is shared and the share removed in the sharing modal", async ({ page, api, sessionId }) => {
   const username = "jaas/e2e-share-target";
@@ -57,6 +58,11 @@ test("the open session is shared and the share removed in the sharing modal", as
 
   await openSession(page, sessionId);
   const details = page.locator("ch-session-details");
+  const session = await getSession(api, sessionId);
+  const update = await api.put("session-db", `/sessions/${sessionId}`, { ...session, name: "renamed before sharing" });
+  expect(update.ok(), `update session ${update.status()}`).toBe(true);
+  await expect(details.locator(".h6")).toHaveText("renamed before sharing");
+
   await details.getByTitle("Actions").click();
   await details.getByRole("button", { name: "Share…" }).click();
   const modal = page.getByRole("dialog").filter({ hasText: "Share session" });
