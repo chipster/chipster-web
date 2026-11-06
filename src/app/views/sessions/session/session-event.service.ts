@@ -245,7 +245,8 @@ export class SessionEventService {
     if (event.type === EventType.Create) {
       return this.sessionResource.getRule(sessionId, event.resourceId).pipe(
         mergeMap((rule: Rule) => {
-          setRules([...getRules(), rule]);
+          // a session event may have brought the rule already
+          setRules([...getRules().filter((r) => r.ruleId !== rule.ruleId), rule]);
           return this.createEvent(event, null, rule);
         }),
       );
