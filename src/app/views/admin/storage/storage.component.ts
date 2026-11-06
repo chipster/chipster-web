@@ -210,6 +210,13 @@ export class StorageComponent implements OnInit {
     this.sessions = [];
     this.quotasMap = new Map();
 
+    /*
+     * After a delete, this is called from the result of the confirmation modal, not from an event
+     * of the template. The loading state must be shown before the users arrive: it removes the
+     * grids, and ag-grid reads the new gridOptions only when the grids are created again.
+     */
+    this.changeDetectorRef.markForCheck();
+
     const authUsers$ = this.authenticationService.getUsers();
 
     const sessionDbUsers$ = this.sessionDbAdminService.getQuotas();
