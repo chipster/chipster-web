@@ -1,4 +1,4 @@
-@if (state.isReady()) {
+@if (state().isReady()) {
   <div>
     <div class="scroller">
       <!--
@@ -12,5 +12,5 @@
     </div>
   </div>
 } @else {
-  <ch-status [state]="state"></ch-status>
+  <ch-status [state]="state()"></ch-status>
 }

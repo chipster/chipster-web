@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnChanges, OnDestroy, inject, signal } from "@angular/core";
 import * as d3 from "d3";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { PlotDirective } from "../../../../../shared/visualization/plot.directive";
@@ -14,7 +14,6 @@ import { FormsModule } from "@angular/forms";
   selector: "ch-volcano-plot",
   templateUrl: "./volcano-plot.component.html",
   styleUrls: ["./volcano-plot.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [StatusComponent, FormsModule],
 })
 export class VolcanoPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
@@ -26,7 +25,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
   public volcanoPlotPHeaders: Array<string>;
   private xScale: any;
   private yScale: any;
-  showZeroWarning: boolean;
+  readonly showZeroWarning = signal<boolean>(undefined);
 
   ngOnChanges() {
     super.ngOnChanges();
@@ -55,9 +54,9 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
       }
 
       this.redrawPlot();
-      this.state = new LoadState(State.Ready);
+      this.state.set(new LoadState(State.Ready));
     } else {
-      this.state = new LoadState(State.Fail, "No columns starting with pvalue or fold change value found.");
+      this.state.set(new LoadState(State.Fail, "No columns starting with pvalue or fold change value found."));
     }
   }
 
@@ -118,7 +117,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv);
     const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv);
 
-    this.showZeroWarning = this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
+    this.showZeroWarning.set(this.plotData.find((d) => d.plotPoint.y === Infinity) != null);
 
     // Define the SVG
     this.svg

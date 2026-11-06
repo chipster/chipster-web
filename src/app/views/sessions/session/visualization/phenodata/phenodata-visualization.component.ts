@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   NgZone,
   OnChanges,
@@ -7,7 +8,6 @@ import {
   OnInit,
   SimpleChanges,
   ViewEncapsulation,
-  ChangeDetectionStrategy,
   inject,
   input,
   linkedSignal,
@@ -45,13 +45,13 @@ export enum PhenodataState {
   // disable ViewEncapsulation.Emulated, because we want dynamically add a style to the
   // remove column button, but an emulated view encapsulation would mess up style names
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private sessionDataService = inject(SessionDataService);
   private stringModalService = inject(DialogModalService);
   private sessionEventService = inject(SessionEventService);
   private zone = inject(NgZone);
+  private changeDetectorRef = inject(ChangeDetectorRef);
   private restErrorService = inject(RestErrorService);
   private spreadsheetService = inject(SpreadsheetService);
   private nativeElementService = inject(NativeElementService);
@@ -411,12 +411,20 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     setTimeout(() => this.updateView(), 200);
   }
 
+  /*
+   * The template shows state that Handsontable changes in place, like the headers that canReset
+   * depends on, and its callbacks come here or to updateView(). Mark the view for the check that
+   * runs after them.
+   */
   private updateWarnings() {
+    this.changeDetectorRef.markForCheck();
     this.phenodataFilled = this.datasetService.isPhenodataFilled(this.currentDataset());
     this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.currentDataset());
   }
 
   private updateView() {
+    // see updateWarnings()
+    this.changeDetectorRef.markForCheck();
     this.ready = false;
     this.phenodataFilled = false;
     this.groupColumnMissing = false;
