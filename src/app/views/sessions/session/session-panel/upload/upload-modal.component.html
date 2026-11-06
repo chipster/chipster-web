@@ -46,7 +46,7 @@
                   <i class="fas fa-pause" aria-hidden="true"></i>
                 </button>
               }
-              @if (file.paused && !file.complete) {
+              @if (file.paused && file.started && !file.complete) {
                 <button type="button" class="btn btn-outline-dark btn-no-border btn-sm" (click)="resume(file.file)">
                   <i class="fas fa-play" aria-hidden="true"></i>
                 </button>

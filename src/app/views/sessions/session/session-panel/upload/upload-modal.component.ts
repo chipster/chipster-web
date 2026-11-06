@@ -58,6 +58,7 @@ export class UploadModalComponent implements AfterViewInit, OnInit, OnDestroy {
           complete: file.isComplete(),
           error: file.error,
           paused: file.paused,
+          started: !!file.chipsterTarget,
           currentSpeed: file.currentSpeed,
         })),
     );
@@ -159,5 +160,8 @@ interface UploadRow {
   complete: boolean;
   error: boolean;
   paused: boolean;
+  // UploadService.startUpload() has created the dataset and set the target, before that resuming
+  // would upload to an undefined address
+  started: boolean;
   currentSpeed: number;
 }

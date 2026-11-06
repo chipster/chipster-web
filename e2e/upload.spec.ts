@@ -141,6 +141,8 @@ test("the upload modal shows the files before their upload starts and cancels on
 
   await expect.poll(() => held.length).toBe(2);
   expect(await getDatasets(api, sessionId)).toEqual([]);
+  // the files are paused until their datasets exist, but can't be resumed before
+  await expect(modal.locator("tbody .fa-play")).toHaveCount(0);
 
   await modal.getByRole("row").filter({ hasText: "second.txt" }).locator(".fa-times").click();
   await expect(modal.getByRole("cell", { name: "second.txt" })).toBeHidden();
