@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ViewEncapsulation } from "@angular/core";
 import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 
 @Component({
@@ -6,7 +6,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
   templateUrl: "./admin.component.html",
   styleUrls: ["./admin.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
 })
 export class AdminComponent {

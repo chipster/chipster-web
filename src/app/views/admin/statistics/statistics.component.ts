@@ -1,5 +1,5 @@
 import { HttpParams } from "@angular/common/http";
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Role } from "chipster-js-common";
 import { mergeMap } from "rxjs/operators";
@@ -15,7 +15,6 @@ import { StatusComponent } from "../../../shared/components/status.component";
   templateUrl: "./statistics.component.html",
   styleUrls: ["./statistics.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class StatisticsComponent implements OnInit {
@@ -39,10 +38,10 @@ export class StatisticsComponent implements OnInit {
     ignoreUsers: this.ignoreUsersControl,
   });
 
-  userCount: number;
-  jobCount: number;
+  readonly userCount = signal<number>(undefined);
+  readonly jobCount = signal<number>(undefined);
 
-  state = LoadState.Ready;
+  readonly state = signal(LoadState.Ready);
 
   ngOnInit(): void {
     this.configService.get(ConfigService.KEY_STATISTICS_IGNORE_USERS).subscribe({
@@ -62,7 +61,7 @@ export class StatisticsComponent implements OnInit {
   }
 
   updateStats(): void {
-    this.state = LoadState.Loading;
+    this.state.set(LoadState.Loading);
     let params = new HttpParams().append("year", this.yearControl.value).append("module", this.moduleControl.value);
 
     this.ignoreUsersControl.value
@@ -82,12 +81,12 @@ export class StatisticsComponent implements OnInit {
       )
       .subscribe({
         next: (result) => {
-          this.userCount = result["userCount"];
-          this.jobCount = result["jobCount"];
-          this.state = LoadState.Ready;
+          this.userCount.set(result["userCount"]);
+          this.jobCount.set(result["jobCount"]);
+          this.state.set(LoadState.Ready);
         },
         error: (err) => {
-          this.state = LoadState.Fail;
+          this.state.set(LoadState.Fail);
           this.errorHandlerService.showError("get statistics failed", err);
         },
       });

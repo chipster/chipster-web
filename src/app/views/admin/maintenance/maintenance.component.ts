@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, ChangeDetectionStrategy, inject } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation, inject } from "@angular/core";
 import { Service } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, from, Observable } from "rxjs";
@@ -17,15 +17,19 @@ import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
   templateUrl: "./maintenance.component.html",
   styleUrls: ["./maintenance.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, NGB_DROPDOWN_IMPORTS, BytesPipe],
 })
 export class MaintenanceComponent implements OnInit {
+  private changeDetectorRef = inject(ChangeDetectorRef);
   private configService = inject(ConfigService);
   private restErrorService = inject(RestErrorService);
   private authHttpClient = inject(AuthHttpClientService);
   private tokenService = inject(TokenService);
 
+  /*
+   * These are filled in by the responses of many requests, so the callbacks mark the view for
+   * check instead of each of them being a signal
+   */
   storageIds = [];
   free = new Map();
   total = new Map();
@@ -54,6 +58,7 @@ export class MaintenanceComponent implements OnInit {
             this.addStorageId(fileStats.storageId);
             this.sessionDbFileStats.set(fileStats.storageId, fileStats);
           });
+          this.changeDetectorRef.markForCheck();
         },
         error: (err) => {
           this.restErrorService.showError("failed to get storages", err);
@@ -76,6 +81,7 @@ export class MaintenanceComponent implements OnInit {
             this.addStorageId(storage.storageId);
             this.fileBrokerStorages.set(storage.storageId, storage);
           });
+          this.changeDetectorRef.markForCheck();
         }),
         mergeMap((storages: FileBrokerStorage[]) => from(storages)),
         mergeMap((storage: FileBrokerStorage) => this.updateStatus(storage.storageId, fileBroker)),
@@ -93,6 +99,7 @@ export class MaintenanceComponent implements OnInit {
 
           this.copySource = leastFreeStorageId;
           this.setCopyTarget(mostFreeStorageId);
+          this.changeDetectorRef.markForCheck();
         },
         error: (err) => {
           this.restErrorService.showError("failed to get storages", err);
@@ -110,6 +117,7 @@ export class MaintenanceComponent implements OnInit {
       map((idResp: object) => (idResp ? idResp["storageId"] : null)),
       tap((idOnStorage: string) => {
         this.idOnStorage.set(storageId, idOnStorage);
+        this.changeDetectorRef.markForCheck();
       }),
       map(() => storageId),
     );
@@ -124,6 +132,7 @@ export class MaintenanceComponent implements OnInit {
       }),
       tap((fileStats: FileStats) => {
         this.fileStorageFileStats.set(storageId, fileStats);
+        this.changeDetectorRef.markForCheck();
       }),
       map(() => storageId),
     );
@@ -148,6 +157,7 @@ export class MaintenanceComponent implements OnInit {
       tap((status: object) => {
         this.free.set(storageId, status["diskFree,fs=storage"]);
         this.total.set(storageId, status["diskTotal,fs=storage"]);
+        this.changeDetectorRef.markForCheck();
       }),
       map(() => storageId),
     );

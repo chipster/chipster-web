@@ -1,7 +1,7 @@
-@if (state.isReady()) {
+@if (state().isReady()) {
   <div>
     <ch-news-list [editable]="true"></ch-news-list>
   </div>
 } @else {
-  <ch-status [state]="state"></ch-status>
+  <ch-status [state]="state()"></ch-status>
 }
