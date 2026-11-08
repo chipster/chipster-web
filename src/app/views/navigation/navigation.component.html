@@ -45,7 +45,6 @@
           <li class="nav-item">
             <a class="nav-link cursor-pointer" [routerLink]="" (click)="openNews()">
               News
-              <!-- <i *ngIf="unreadNews" class="fas fa-bell" aria-hidden="true"></i> -->
               @if (isLoggedIn() && unreadNewsCount() > 0) {
                 <span class="badge bg-primary rounded-pill">
                   {{ unreadNewsCount() }}

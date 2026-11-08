@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, ElementRef, OnInit, inject, viewChild, signal } from "@angular/core";
+import { Component, ElementRef, OnInit, computed, inject, viewChild, signal } from "@angular/core";
 import { UntypedFormGroup, FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -51,7 +51,7 @@ export class LoginComponent implements OnInit {
   private readonly usernameInput = viewChild<ElementRef>("usernameInput");
   readonly oidcConfigs = signal<OidcConfig[]>(undefined);
 
-  readonly multipleLoginMethods = signal(false);
+  readonly multipleLoginMethods = computed(() => this.oidcConfigs()?.length > 0);
 
   readonly jaasDescription = signal<string>(undefined);
 
@@ -105,7 +105,6 @@ export class LoginComponent implements OnInit {
         mergeMap(() => this.oidcService.getOidcConfigs$()),
         tap((configs: OidcConfig[]) => {
           this.oidcConfigs.set(configs);
-          this.multipleLoginMethods.set(this.oidcConfigs() != null && this.oidcConfigs().length > 0);
           this.showLoginForm.set(!this.multipleLoginMethods());
 
           // everything ready, show login
@@ -171,10 +170,6 @@ export class LoginComponent implements OnInit {
         this.error.set("Please enter password");
       }
     }
-  }
-
-  getOidcConfigs() {
-    return this.oidcConfigs();
   }
 
   oidcLogin(oidc: OidcConfig) {

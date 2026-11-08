@@ -16,11 +16,15 @@ export class TokenService {
   private tokenChanged: Subject<boolean> = new Subject();
 
   /*
-   * Changes when this service sets or clears the token. The getters read it, so that the views that
-   * show the login state are notified, like the navigation right after the login. The token itself
-   * is read from localStorage every time as before.
+   * Changes when this service sets or clears the token, and when the token expires. Every getter
+   * reads it, so that the views that show the login state are notified, like the navigation right
+   * after the login and when the login expires while the page is idle. The token itself is read
+   * from localStorage every time as before.
    */
   private readonly tokenVersion = signal(0);
+
+  // bumps tokenVersion when the token expires, see scheduleExpiry()
+  private expiryTimerId: number = null;
 
   private username: string;
   private name: string;
@@ -39,6 +43,7 @@ export class TokenService {
 
   clear(): void {
     localStorage.clear();
+    this.cancelExpiry();
     this.tokenVersion.update((v) => v + 1);
   }
 
@@ -122,6 +127,7 @@ export class TokenService {
   }
 
   getName(): string {
+    this.tokenVersion();
     return this.name;
   }
 
@@ -130,12 +136,17 @@ export class TokenService {
   }
 
   getValidUntil(): Date {
+    this.tokenVersion();
     return this.validUntil;
   }
 
   setAuthToken(token: string): void {
-    if (token != null) {
-      const parsedToken: ParsedToken = jwtDecode(token);
+    // decode before changing anything, so that a malformed token keeps the current one and its timer
+    const parsedToken: ParsedToken = token != null ? jwtDecode(token) : null;
+
+    this.cancelExpiry();
+
+    if (parsedToken != null) {
       const expString = parsedToken.exp;
       const expSeconds = parseInt(expString, 10);
       const exp = new Date(expSeconds * 1000);
@@ -145,6 +156,8 @@ export class TokenService {
       this.name = parsedToken.name;
       this.validUntil = exp;
       this.roles = parsedToken.roles;
+
+      this.scheduleExpiry();
     } else {
       // item has to be removed explicitly, because setItem(..., null) would be converted to a 'null' string
       localStorage.removeItem(this.KEY_TOKEN);
@@ -156,6 +169,33 @@ export class TokenService {
     this.tokenVersion.update((v) => v + 1);
     this.username$.next(this.username);
     this.tokenChanged.next(this.isTokenValid());
+  }
+
+  /*
+   * Bumps tokenVersion when the token expires, so that isTokenValid() is evaluated again: the hourly
+   * refresh normally replaces the token before that, but not when the page has been asleep or the
+   * token has reached its maximum lifetime. setTimeout treats a delay over 2^31 - 1 ms (about 24.8
+   * days) as 0, so the delay is capped and the timer is scheduled again if it fires while the token
+   * is still valid.
+   */
+  private scheduleExpiry(): void {
+    const remaining = this.validUntil.getTime() - Date.now();
+    this.expiryTimerId = window.setTimeout(
+      () => {
+        this.expiryTimerId = null;
+        if (this.isTokenValid()) {
+          this.scheduleExpiry();
+        } else {
+          this.tokenVersion.update((v) => v + 1);
+        }
+      },
+      Math.min(remaining, 2 ** 31 - 1),
+    );
+  }
+
+  private cancelExpiry(): void {
+    window.clearTimeout(this.expiryTimerId);
+    this.expiryTimerId = null;
   }
 
   isLoggedIn() {

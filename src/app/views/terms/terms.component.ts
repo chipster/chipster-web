@@ -34,17 +34,9 @@ export class TermsComponent implements OnInit {
       error: (err) => this.restErrorService.showError("failed to get the configuration", err),
     });
 
-    this.route.queryParams
-      .pipe(
-        filter((params) => {
-          console.log(params);
-          return params["showAccept"];
-        }),
-      )
-      .subscribe((params) => {
-        this.showAccept.set(!!params.showAccept);
-        console.log(this.showAccept());
-      });
+    this.route.queryParams.pipe(filter((params) => params["showAccept"])).subscribe((params) => {
+      this.showAccept.set(!!params.showAccept);
+    });
   }
 
   accept() {

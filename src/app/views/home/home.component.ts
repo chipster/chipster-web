@@ -48,7 +48,7 @@ export class HomeComponent implements OnInit {
         if (path) {
           this.homeHeaderFile.set(this.routeService.basename(path));
           this.homeHeaderPath.set(this.routeService.dirname(path) + "/");
-          log.info("loading custom home page header", this.homePath(), this.homeFile());
+          log.info("loading custom home page header", this.homeHeaderPath(), this.homeHeaderFile());
         }
       },
       error: (err) => this.errorService.showError("failed to get the path of the home page header", err),

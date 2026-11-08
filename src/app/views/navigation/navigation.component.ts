@@ -45,7 +45,6 @@ export class NavigationComponent implements OnInit {
   readonly appNameReady = signal(false);
 
   news: NewsItem[];
-  unreadNews: boolean = false;
   readonly unreadNewsCount = signal<number>(0);
 
   ngOnInit() {
@@ -104,9 +103,6 @@ export class NavigationComponent implements OnInit {
         if (this.news != null && this.news.length > 0) {
           this.preferencesService.getNewsReadTime().subscribe({
             next: (lastReadTime: Date) => {
-              // Calculate both unread flag and count
-              this.unreadNews =
-                lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(this.news[0]);
               this.unreadNewsCount.set(
                 this.news.filter(
                   (item) => lastReadTime == null || lastReadTime < this.newsService.getCreateOrModified(item),
@@ -155,7 +151,6 @@ export class NavigationComponent implements OnInit {
     if (this.isLoggedIn()) {
       this.dialogModalService.openNewsModal(this.news).subscribe({
         complete: () => {
-          this.unreadNews = false;
           this.unreadNewsCount.set(0); // Reset the count when news modal is closed
         },
       });
