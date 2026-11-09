@@ -5,7 +5,13 @@ import { SelectionOption } from "../../views/sessions/session/SelectionOption";
 /**
  * The maps are signals, so that the views that show them are notified when they change.
  * Replace a map with a new one instead of changing it in place, e.g.
- * update((m) => new Map(m).set(id, dataset)), otherwise the signal won't notify.
+ * update((m) => UtilsService.mapWith(m, id, dataset)), otherwise the signal won't notify. The maps
+ * are typed ReadonlyMap, so that a set() or delete() on the map itself doesn't compile.
+ *
+ * Replacing the map says nothing about its values: they are shared objects that a few places
+ * still change in place. The positions that the workflow graph's drag and auto layout set and the
+ * phenodata edits are sent to the server, whose UPDATE event replaces the objects right after; the
+ * layout of the sessions list's preview only sets positions, which are never sent.
  *
  * The object itself keeps its identity, so it can be passed as an input to the components that
  * read the maps in their own callbacks, like the websocket event subscriptions: they get the latest
@@ -13,10 +19,10 @@ import { SelectionOption } from "../../views/sessions/session/SelectionOption";
  */
 export class SessionData {
   readonly session = signal<Session>(undefined);
-  readonly datasetsMap = signal(new Map<string, Dataset>());
-  readonly jobsMap = signal(new Map<string, Job>());
-  readonly labelsMap = signal(new Map<string, Label>());
-  readonly datasetTypeTags = signal(new Map<string, Map<string, string>>());
+  readonly datasetsMap = signal<ReadonlyMap<string, Dataset>>(new Map());
+  readonly jobsMap = signal<ReadonlyMap<string, Job>>(new Map());
+  readonly labelsMap = signal<ReadonlyMap<string, Label>>(new Map());
+  readonly datasetTypeTags = signal<ReadonlyMap<string, Map<string, string>>>(new Map());
   cachedFileHeaders = new Map<string, Array<SelectionOption>>();
 
   /**

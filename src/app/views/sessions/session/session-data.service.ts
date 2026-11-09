@@ -66,7 +66,7 @@ export class SessionDataService {
     return this.sessionResource.createJob(this.getSessionId(), job);
   }
 
-  getJobById(jobId: string, jobs: Map<string, Job>) {
+  getJobById(jobId: string, jobs: ReadonlyMap<string, Job>) {
     return jobs.get(jobId);
   }
 
@@ -373,7 +373,7 @@ export class SessionDataService {
     When those cannot be selected, those cannot cause problems in the visualization, which assumes that
     the type tags do exist.
     */
-  getCompleteDatasets(datasetsMap: Map<string, Dataset>): Map<string, Dataset> {
+  getCompleteDatasets(datasetsMap: ReadonlyMap<string, Dataset>): Map<string, Dataset> {
     // convert to array[[key1, value1], [key2, value2], ...] for filtering and back to map
     return new Map(
       Array.from(datasetsMap).filter((entry) => {

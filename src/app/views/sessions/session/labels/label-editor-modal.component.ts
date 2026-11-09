@@ -7,6 +7,7 @@ import { SessionResource } from "../../../../shared/resources/session.resource";
 import { DEFAULT_LABEL_COLOR, LABEL_PALETTE, LabelColor } from "./label-palette";
 import { FormsModule } from "@angular/forms";
 import { LabelPillComponent } from "./label-pill.component";
+import UtilsService from "../../../../shared/utilities/utils";
 
 @Component({
   selector: "ch-label-editor-modal",
@@ -83,7 +84,7 @@ export class LabelEditorModalComponent implements OnInit {
       const updated: Label = { ...this.label(), name, color: this.color };
       this.sessionResource.updateLabel(sessionId, updated).subscribe({
         next: () => {
-          this.sessionData().labelsMap.update((m) => new Map(m).set(updated.labelId, updated));
+          this.sessionData().labelsMap.update((m) => UtilsService.mapWith(m, updated.labelId, updated));
           this.activeModal.close(updated);
         },
         error: (err) => {
@@ -100,7 +101,7 @@ export class LabelEditorModalComponent implements OnInit {
           // the authoritative copy (incl. server-set created), same as datasets
           // and jobs
           const created: Label = { ...newLabel, labelId };
-          this.sessionData().labelsMap.update((m) => new Map(m).set(labelId, created));
+          this.sessionData().labelsMap.update((m) => UtilsService.mapWith(m, labelId, created));
           this.activeModal.close(created);
         },
         error: (err) => {

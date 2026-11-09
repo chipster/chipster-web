@@ -21,6 +21,7 @@ import { SessionResource } from "../../../shared/resources/session.resource";
 import { WebSocketService } from "../../../shared/services/websocket.service";
 import { SelectionService } from "./selection.service";
 import { FileState } from "chipster-js-common/lib/model/dataset";
+import UtilsService from "../../../shared/utilities/utils";
 
 @Injectable({ providedIn: "root" })
 export class SessionEventService {
@@ -317,7 +318,7 @@ export class SessionEventService {
     }
     if (event.type === EventType.Delete) {
       const localCopy = sessionData.datasetsMap().get(event.resourceId);
-      sessionData.datasetsMap.update((m) => this.withoutKey(m, event.resourceId));
+      sessionData.datasetsMap.update((m) => UtilsService.mapWithout(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);
@@ -339,8 +340,8 @@ export class SessionEventService {
       // so the dataset is never visible in the UI before its type tags are ready
       return this.sessionResource.getTypeTagsForDataset(sessionId, newValue).pipe(
         map((typeTags) => {
-          sessionData.datasetTypeTags.update((m) => new Map(m).set(newValue.datasetId, typeTags));
-          sessionData.datasetsMap.update((m) => new Map(m).set(newValue.datasetId, newValue));
+          sessionData.datasetTypeTags.update((m) => UtilsService.mapWith(m, newValue.datasetId, typeTags));
+          sessionData.datasetsMap.update((m) => UtilsService.mapWith(m, newValue.datasetId, newValue));
           return sessionEvent;
         }),
         catchError((err) => {
@@ -354,7 +355,7 @@ export class SessionEventService {
       );
     }
     // dataset deleted, type tags can be removed
-    sessionData.datasetTypeTags.update((m) => this.withoutKey(m, sessionEvent.event.resourceId));
+    sessionData.datasetTypeTags.update((m) => UtilsService.mapWithout(m, sessionEvent.event.resourceId));
     return observableOf(sessionEvent);
   }
 
@@ -363,14 +364,14 @@ export class SessionEventService {
       return this.sessionResource.getLabel(sessionId, event.resourceId).pipe(
         mergeMap((remote: Label) => {
           const local = sessionData.labelsMap().get(event.resourceId);
-          sessionData.labelsMap.update((m) => new Map(m).set(event.resourceId, remote));
+          sessionData.labelsMap.update((m) => UtilsService.mapWith(m, event.resourceId, remote));
           return this.createEvent(event, local, remote);
         }),
       );
     }
     if (event.type === EventType.Delete) {
       const localCopy = sessionData.labelsMap().get(event.resourceId);
-      sessionData.labelsMap.update((m) => this.withoutKey(m, event.resourceId));
+      sessionData.labelsMap.update((m) => UtilsService.mapWithout(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);
@@ -381,7 +382,7 @@ export class SessionEventService {
     if (event.type === EventType.Create) {
       return this.sessionResource.getJob(sessionId, event.resourceId).pipe(
         mergeMap((remote: Job) => {
-          sessionData.jobsMap.update((m) => new Map(m).set(event.resourceId, remote));
+          sessionData.jobsMap.update((m) => UtilsService.mapWith(m, event.resourceId, remote));
           return this.createEvent(event, null, remote);
         }),
       );
@@ -390,27 +391,18 @@ export class SessionEventService {
       return this.sessionResource.getJob(sessionId, event.resourceId).pipe(
         mergeMap((remote: Job) => {
           const local = sessionData.jobsMap().get(event.resourceId);
-          sessionData.jobsMap.update((m) => new Map(m).set(event.resourceId, remote));
+          sessionData.jobsMap.update((m) => UtilsService.mapWith(m, event.resourceId, remote));
           return this.createEvent(event, local, remote);
         }),
       );
     }
     if (event.type === EventType.Delete) {
       const localCopy = sessionData.jobsMap().get(event.resourceId);
-      sessionData.jobsMap.update((m) => this.withoutKey(m, event.resourceId));
+      sessionData.jobsMap.update((m) => UtilsService.mapWithout(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event.type, event);
     return EMPTY;
-  }
-
-  /**
-   * A copy of the map without the key, for updating the signals of SessionData
-   */
-  private withoutKey<V>(source: Map<string, V>, key: string): Map<string, V> {
-    const copy = new Map(source);
-    copy.delete(key);
-    return copy;
   }
 
   /**
