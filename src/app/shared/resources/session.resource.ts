@@ -141,7 +141,8 @@ export class SessionResource {
         data.jobsMap.set(UtilsService.arrayToMap(jobs, "jobId"));
         data.labelsMap.set(UtilsService.arrayToMap(labels, "labelId"));
 
-        data.datasetTypeTags.set(types);
+        // none in the preview
+        data.datasetTypeTags.set(types ?? new Map());
 
         return data;
       }),
