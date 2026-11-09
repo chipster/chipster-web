@@ -27,12 +27,12 @@
           type="radio"
           value="yes"
           formControlName="attach"
-          [required]="session != null"
+          [required]="session() != null"
           id="attachYesInput" />
         <label class="form-check-label" for="attachYesInput">
           Attach a copy of your last session
           <em>
-            <b>{{ session?.name || "(not available)" }}</b>
+            <b>{{ session()?.name || "(not available)" }}</b>
           </em>
         </label>
       </div>
@@ -42,7 +42,7 @@
           type="radio"
           value="no"
           formControlName="attach"
-          [required]="session != null"
+          [required]="session() != null"
           id="attachNoInput" />
         <label class="form-check-label" for="attachNoInput">Don't attach the session</label>
       </div>
@@ -64,7 +64,7 @@
         aria-describedby="emailHelp"
         class="form-control" />
       <small class="form-text text-muted" id="emailHelp">Support personnel will use this address to contact you.</small>
-      @if (isVerifiedEmail) {
+      @if (isVerifiedEmail()) {
         <small class="form-text text-muted">
           This email address was received from your login details. If it's not correct, please contact the organization
           that provided your login credentials to update it.

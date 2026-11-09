@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { NgbToast } from "@ng-bootstrap/ng-bootstrap";
 import { Toast, ToastService } from "../../services/toast.service";
 import { NgClass } from "@angular/common";
@@ -14,7 +14,6 @@ import { NgClass } from "@angular/common";
   selector: "ch-toasts",
   templateUrl: "./toasts.component.html",
   styleUrls: ["./toasts.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgbToast, NgClass],
 })
 export class ToastsComponent {

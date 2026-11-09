@@ -7,8 +7,8 @@
         </div>
       }
 
-      @if (html) {
-        <ch-static-html [html]="html"></ch-static-html>
+      @if (html()) {
+        <ch-static-html [html]="html()"></ch-static-html>
       }
     </div>
   </div>

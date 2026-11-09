@@ -5,7 +5,6 @@ import {
   OnChanges,
   OnDestroy,
   SimpleChanges,
-  ChangeDetectionStrategy,
   inject,
   input,
 } from "@angular/core";
@@ -27,7 +26,6 @@ import { ManualUtils } from "../manual-utils";
   selector: "ch-static-html",
   templateUrl: "./static-html.component.html",
   styleUrls: ["./static-html.component.less"],
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges {
   private elementRef = inject(ElementRef);

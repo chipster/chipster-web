@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { ErrorService } from "../../core/errorhandler/error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
@@ -9,7 +9,6 @@ import { ManualComponent } from "../manual/manual.component";
 @Component({
   selector: "ch-contact",
   templateUrl: "./contact.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ManualComponent],
 })
 export class ContactComponent implements OnInit {
@@ -19,15 +18,15 @@ export class ContactComponent implements OnInit {
   private tokenService = inject(TokenService);
   private contactSupportService = inject(ContactSupportService);
 
-  contactFile: string;
-  contactPath: string;
+  readonly contactFile = signal<string>(undefined);
+  readonly contactPath = signal<string>(undefined);
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_CONTACT_PATH).subscribe({
       next: (path) => {
         if (path) {
-          this.contactFile = this.routeService.basename(path);
-          this.contactPath = this.routeService.dirname(path) + "/";
+          this.contactFile.set(this.routeService.basename(path));
+          this.contactPath.set(this.routeService.dirname(path) + "/");
         }
       },
       error: (err) => {
