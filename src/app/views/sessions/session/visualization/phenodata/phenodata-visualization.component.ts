@@ -504,10 +504,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       }
 
       this.updateSize();
-
-      if (this.hot) {
-        this.hot.loadData(this.rows);
-      }
+      this.hot.loadData(this.rows);
     }
 
     this.ready = true;

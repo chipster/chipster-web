@@ -310,6 +310,8 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
   readonly state = signal<LoadState>(undefined);
 
   ngOnInit() {
+    // the size messages can arrive on every animation frame, so the handlers only set the iframe's
+    // style and the page's scroll position: nothing that Angular would have to check
     this.messageSubscription = fromEvent<MessageEvent>(window, "message").subscribe((event) => this.onMessage(event));
   }
 
