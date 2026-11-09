@@ -4,6 +4,7 @@ import JobOutput from "chipster-js-common/lib/model/joboutput";
 import { capitalize, clone } from "lodash-es";
 import log from "loglevel";
 import { EMPTY, Observable } from "rxjs";
+import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { JobService } from "../../job.service";
 import { SelectionHandlerService } from "../../selection-handler.service";
@@ -26,6 +27,7 @@ export class JobComponent {
   private selectionService = inject(SelectionService);
   private sessionDataService = inject(SessionDataService);
   private jobService = inject(JobService);
+  private errorService = inject(ErrorService);
 
   readonly sessionData = input<SessionData>(undefined);
   readonly tools = input<Tool[]>(undefined);
@@ -119,7 +121,10 @@ export class JobComponent {
   }
 
   cancelJob() {
-    this.sessionDataService.cancelJob(this.job());
+    const job = this.job();
+    this.sessionDataService
+      .cancelJob(job)
+      .catch((err) => this.errorService.showError(`Cancelling job failed for: ${job.toolName}`, err));
   }
 
   selectDataset(datasetId: string) {

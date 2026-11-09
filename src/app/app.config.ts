@@ -2,8 +2,9 @@ import { provideHttpClient, withInterceptorsFromDi, withXhr } from "@angular/com
 import {
   ApplicationConfig,
   ErrorHandler,
+  provideBrowserGlobalErrorListeners,
   provideCheckNoChangesConfig,
-  provideZoneChangeDetection,
+  provideZonelessChangeDetection,
 } from "@angular/core";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 import { provideStore } from "@ngrx/store";
@@ -25,7 +26,7 @@ import {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection(),
+    provideZonelessChangeDetection(),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: "enabled" })),
     provideStore(
       {
@@ -49,6 +50,12 @@ export const appConfig: ApplicationConfig = {
       },
     ),
     { provide: ErrorHandler, useClass: AppErrorHandler },
+    /*
+    The errors that the app doesn't catch, e.g. in a timer, a promise or a subscription without an
+    error callback, to the ErrorHandler above. zone.js did this for the code that ran in Angular's
+    zone; without it they would go only to the console.
+    */
+    provideBrowserGlobalErrorListeners(),
     provideHttpClient(withXhr(), withInterceptorsFromDi()),
     /*
     Check also the OnPush views, and once a second, that no binding has changed without

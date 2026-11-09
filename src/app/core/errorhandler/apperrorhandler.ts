@@ -19,15 +19,24 @@ export class AppErrorHandler implements ErrorHandler {
         log.error(error);
         return;
       }
+      /*
+      A browser error event without an error object, which the global error listeners of
+      app.config.ts wrap in an Error. The browser gives no details of these: e.g. "ResizeObserver
+      loop completed with undelivered notifications", which is harmless, or "Script error." of a
+      script from another origin, like a browser extension. Nothing the user could act on.
+      */
+      if (error.cause instanceof ErrorEvent) {
+        log.error(error);
+        return;
+      }
       msg = error.toString();
-    } else if (error.originalError) {
+    } else if (error?.originalError) {
       // e.g. NavigationComponent.getHost() when backend isn't running
       msg = error.originalError;
-    } else if (error.rejection && error.rejection.originalError) {
-      msg = error.rejection.originalError;
-    } else {
+    } else if (error != null) {
       msg = JSON.stringify(error);
     }
+    // a promise rejected without a reason leaves msg empty, and the toast says "Something went wrong"
 
     this.errorService.showError(msg, error);
   }
