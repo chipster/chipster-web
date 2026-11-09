@@ -9,8 +9,9 @@ import { SelectionOption } from "../../views/sessions/session/SelectionOption";
  * are typed ReadonlyMap, so that a set() or delete() on the map itself doesn't compile.
  *
  * Replacing the map says nothing about its values: they are shared objects that a few places
- * still change in place (the positions that the workflow graph's drag and auto layout set, and the
- * phenodata edits), and the server's UPDATE event replaces them right after.
+ * still change in place. The positions that the workflow graph's drag and auto layout set and the
+ * phenodata edits are sent to the server, whose UPDATE event replaces the objects right after; the
+ * layout of the sessions list's preview only sets positions, which are never sent.
  *
  * The object itself keeps its identity, so it can be passed as an input to the components that
  * read the maps in their own callbacks, like the websocket event subscriptions: they get the latest

@@ -46,7 +46,7 @@ export class SessionPanelComponent {
   private labelsContextMenuService = inject(LabelsContextMenuService);
   private datasetModalService = inject(DatasetModalService);
 
-  readonly sessionData = input<SessionData>(undefined);
+  readonly sessionData = input.required<SessionData>();
   readonly modulesMap = input<Map<string, Module>>(undefined);
   readonly tools = input<Tool[]>(undefined);
 

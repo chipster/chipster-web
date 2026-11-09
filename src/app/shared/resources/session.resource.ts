@@ -28,10 +28,10 @@ export class SessionResource {
         let types$;
 
         if (preview) {
-          sessionUrl += "?preview";
-          types$ = observableOf(null);
-        } else {
           // types are not needed in the preview
+          sessionUrl += "?preview";
+          types$ = observableOf(new Map<string, Map<string, string>>());
+        } else {
           types$ = this.getTypeTagsForSession(sessionId).pipe(tap((x) => log.debug("types", x)));
         }
 
@@ -141,8 +141,7 @@ export class SessionResource {
         data.jobsMap.set(UtilsService.arrayToMap(jobs, "jobId"));
         data.labelsMap.set(UtilsService.arrayToMap(labels, "labelId"));
 
-        // none in the preview
-        data.datasetTypeTags.set(types ?? new Map());
+        data.datasetTypeTags.set(types);
 
         return data;
       }),
