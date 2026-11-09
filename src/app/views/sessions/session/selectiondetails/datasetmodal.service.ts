@@ -195,7 +195,7 @@ export class DatasetModalService {
           const copy = this.sessionResource.copyToExistingSession(
             targetSessionData.session().sessionId,
             selectedSessionData,
-            targetSessionData.labelsMap() ?? new Map(),
+            targetSessionData.labelsMap(),
           );
 
           // return observable of the new sessionId
@@ -237,7 +237,7 @@ export class DatasetModalService {
           const copy = this.sessionResource.copyToExistingSession(
             sessionData.session().sessionId,
             sourceSessionData,
-            sessionData.labelsMap() ?? new Map(),
+            sessionData.labelsMap(),
           );
 
           // return observable of the new sessionId
@@ -292,13 +292,11 @@ export class DatasetModalService {
     // narrow labelsMap to only labels referenced by the selected datasets
     const referencedLabelIds = new Set(selectedDatasets.flatMap((d: Dataset) => d.labelIds ?? []));
     const filteredLabelsMap = new Map<string, Label>();
-    if (sessionData.labelsMap()) {
-      sessionData.labelsMap().forEach((label, id) => {
-        if (referencedLabelIds.has(id)) {
-          filteredLabelsMap.set(id, label);
-        }
-      });
-    }
+    sessionData.labelsMap().forEach((label, id) => {
+      if (referencedLabelIds.has(id)) {
+        filteredLabelsMap.set(id, label);
+      }
+    });
 
     const selection = new SessionData();
     selection.session.set(sessionData.session());

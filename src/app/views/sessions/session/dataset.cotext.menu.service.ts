@@ -15,7 +15,7 @@ export class DatasetContextMenuService {
   private dialogModalService = inject(DialogModalService);
   private toolSelectionService = inject(ToolSelectionService);
 
-  getSourceJob(datasets: Dataset[], jobsMap: Map<string, Job>): Job {
+  getSourceJob(datasets: Dataset[], jobsMap: ReadonlyMap<string, Job>): Job {
     if (datasets.length === 1) {
       return this.sessionDataService.getJobById(datasets[0].sourceJob, jobsMap);
     }

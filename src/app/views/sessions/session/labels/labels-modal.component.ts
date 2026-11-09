@@ -11,6 +11,7 @@ import { LabelEditorModalComponent } from "./label-editor-modal.component";
 import { LabelsContextMenuService } from "./labels-context-menu.service";
 import { LabelPillComponent } from "./label-pill.component";
 import { NgClass } from "@angular/common";
+import UtilsService from "../../../../shared/utilities/utils";
 
 type SelectionState = "checked" | "unchecked" | "indeterminate";
 
@@ -143,7 +144,7 @@ export class LabelsModalComponent implements OnInit {
    */
   private removeLabelsLocally(labelIds: Set<string>): void {
     const sessionData = this.sessionData();
-    sessionData.labelsMap.update((m) => new Map(Array.from(m).filter(([id]) => !labelIds.has(id))));
+    sessionData.labelsMap.update((m) => UtilsService.mapWithout(m, ...labelIds));
     sessionData.datasetsMap.update(
       (m) =>
         new Map(

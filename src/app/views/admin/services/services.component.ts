@@ -8,6 +8,7 @@ import { RestErrorService } from "../../../core/errorhandler/rest-error.service"
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 import { NgbPopover } from "@ng-bootstrap/ng-bootstrap/popover";
+import UtilsService from "../../../shared/utilities/utils";
 
 @Component({
   selector: "ch-services",
@@ -45,11 +46,11 @@ export class ServicesComponent implements OnInit {
           const aliveRequests = services.map((service: Service) =>
             this.authHttpClient.get(service.adminUri + "/admin/alive").pipe(
               tap(() => {
-                this.aliveMap.update((m) => new Map(m).set(service, "OK"));
+                this.aliveMap.update((m) => UtilsService.mapWith(m, service, "OK"));
               }),
               catchError((err) => {
                 log.warn("alive check failed", service.role, err);
-                this.aliveMap.update((m) => new Map(m).set(service, err.status));
+                this.aliveMap.update((m) => UtilsService.mapWith(m, service, err.status));
                 return of(false); // returning EMPTY would cancel others in forkJoin
               }),
             ),
@@ -58,11 +59,11 @@ export class ServicesComponent implements OnInit {
           const statusRequests = services.map((service: Service) =>
             this.authHttpClient.getAuth(service.adminUri + "/admin/status").pipe(
               tap((status) => {
-                this.statusMap.update((m) => new Map(m).set(service.role, status));
+                this.statusMap.update((m) => UtilsService.mapWith(m, service.role, status));
               }),
               catchError((err) => {
                 log.warn("status check failed", service.role, err);
-                this.statusMap.update((m) => new Map(m).set(service.role, err.status));
+                this.statusMap.update((m) => UtilsService.mapWith(m, service.role, err.status));
                 return of(false); // returning EMPTY would cancel others in forkJoin
               }),
             ),

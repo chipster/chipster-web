@@ -38,7 +38,7 @@ export class LabelsContextMenuService {
 
   getLastUsedLabel(sessionData: SessionData): Label | null {
     const lastUsedId = this.lastUsedLabelId();
-    if (!lastUsedId || !sessionData?.labelsMap()) {
+    if (!lastUsedId || !sessionData) {
       return null;
     }
     return sessionData.labelsMap().get(lastUsedId) ?? null;
@@ -53,7 +53,7 @@ export class LabelsContextMenuService {
     if (lastUsed) {
       return lastUsed;
     }
-    if (!sessionData?.labelsMap() || sessionData.labelsMap().size === 0) {
+    if (!sessionData || sessionData.labelsMap().size === 0) {
       return null;
     }
     return Array.from(sessionData.labelsMap().values()).sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))[0];

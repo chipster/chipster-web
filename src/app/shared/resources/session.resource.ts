@@ -617,14 +617,14 @@ export class SessionResource {
   copyToExistingSession(
     targetSessionId: string,
     sessionData: SessionData,
-    targetLabelsMap: Map<string, Label>,
+    targetLabelsMap: ReadonlyMap<string, Label>,
   ): Observable<Session> {
     // Preserve source labelIds in the destination so that multiple copies of files
     // sharing the same source label collapse onto one destination label. Drift
     // policy: destination wins -- if a label with the same labelId already exists
     // in the target, skip the create and let the copied file attach to whatever
     // the destination's version looks like now.
-    const sourceLabels: Label[] = Array.from(sessionData.labelsMap()?.values() ?? []);
+    const sourceLabels: Label[] = Array.from(sessionData.labelsMap().values());
     const labelsToCreate = sourceLabels
       .filter((label: Label) => !targetLabelsMap.has(label.labelId))
       .map((label: Label) => ({ ...label, sessionId: null }));
@@ -676,7 +676,7 @@ export class SessionResource {
     );
   }
 
-  private nullifyMissingInputs(job: Job, datasetsMap: Map<string, Dataset>): void {
+  private nullifyMissingInputs(job: Job, datasetsMap: ReadonlyMap<string, Dataset>): void {
     if (job.inputs != null) {
       job.inputs = job.inputs.filter((input) => {
         if (!datasetsMap.has(input.datasetId)) {

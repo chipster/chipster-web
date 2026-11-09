@@ -23,8 +23,7 @@ export class SelectionPanelComponent {
   readonly sessionData = input<SessionData>(undefined);
   readonly tools = input<Tool[]>(undefined);
 
-  // FIXME after tool state refactoring
-  // public toolSelection: ToolSelection;
+  // FIXME after tool state refactoring: nothing sets showTool and showFile since the old selection code was removed
   public selectedDatasets: Array<Dataset>;
 
   // a bit awkward to use enums in the template so going with these
@@ -35,35 +34,4 @@ export class SelectionPanelComponent {
 
   // the settings modal changes it
   readonly splitSelectionPanel = toSignal(this.settingsService.splitSelectionPanel$, { requireSync: true });
-
-  // FIXME after tool selection refactoring
-  // this.toolSelectionService.toolSelection$
-  //   .takeUntil(this.unsubscribe)
-  //   .subscribe(toolSelection => {
-  //     this.toolSelection = toolSelection;
-  //     if (toolSelection) {
-  //       this.showTool = true;
-  //       this.showFile = false;
-  //       this.showJob = false;
-  //     }
-  //   }, err => this.errorService.showError("tool selection failed", err));
-
-  // this.selectionService.selectedDatasets$
-  //   .takeUntil(this.unsubscribe)
-  //   .subscribe(
-  //     (selectedDatasets: Array<Dataset>) => {
-  //       this.selectedDatasets = selectedDatasets;
-  //       if (this.selectedDatasets.length > 0) {
-  //         this.showFile = true;
-  //         this.showTool = false;
-  //         this.showJob = false;
-  //       } else {
-  //         this.showFile = false;
-  //         if (this.toolSelection) {
-  //           this.showTool = true;
-  //         }
-  //       }
-  //     },
-  //     err => this.errorService.showError("dataset selection failed", err)
-  //   );
 }

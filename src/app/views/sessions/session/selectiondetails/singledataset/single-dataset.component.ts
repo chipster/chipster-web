@@ -35,7 +35,7 @@ export class SingleDatasetComponent {
   private datasetContextMenuService = inject(DatasetContextMenuService);
 
   readonly dataset = input.required<Dataset>();
-  readonly jobs = input<Map<string, Job>>(undefined);
+  readonly jobs = input<ReadonlyMap<string, Job>>(undefined);
   readonly sessionData = input.required<SessionData>();
   readonly tools = input<Tool[]>(undefined);
   readonly parametersLimit = input<number>(undefined);

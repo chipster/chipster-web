@@ -85,7 +85,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   readonly datasetSearch = input<string>(undefined);
   readonly defaultScale = input<number>(undefined);
   readonly enabled = input<boolean>(undefined);
-  readonly sessionData = input<SessionData>(undefined);
+  readonly sessionData = input.required<SessionData>();
   readonly tools = input<Tool[]>(undefined);
 
   private zoomScale: number;
@@ -157,7 +157,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dragStarted: boolean;
 
   searchEnabled = false;
-  selectionEnabled = false;
 
   /*
    * Signals, because the buttons of the session panel change them, and those clicks aren't events
@@ -169,9 +168,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   // the labels that are in use in the session, for the legend
   readonly labelLegend = computed<Label[]>(() => {
     const sessionData = this.sessionData();
-    if (!sessionData) {
-      return [];
-    }
     const inUseIds = new Set<string>();
     sessionData.datasetsMap().forEach((dataset) => {
       (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
@@ -325,7 +321,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.selectedDatasets$.subscribe({
           next: (datasets: Array<Dataset>) => {
             this.selectedDatasets = datasets;
-            this.selectionEnabled = true;
             this.update();
 
             // Skip rendering if context menu is opening (prevents DOM rebuild interference)
@@ -1240,11 +1235,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // simple full re-render: labels change rarely vs. positions
     this.d3LabelsGroup.selectAll("*").remove();
 
-    const sessionData = this.sessionData();
-    if (!sessionData || !sessionData.labelsMap()) {
-      return;
-    }
-
     // Force dots in read-only mode (the session-list preview), so a saved
     // "pills" preference doesn't leak into the preview.
     if (this.labelDisplayMode() === "dots" || !this.enabled()) {
@@ -1463,8 +1453,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getDatasetNodes(
-    datasetsMap: Map<string, Dataset>,
-    jobsMap: Map<string, Job>,
+    datasetsMap: ReadonlyMap<string, Dataset>,
+    jobsMap: ReadonlyMap<string, Job>,
     modulesMap: Map<string, Module>,
   ): DatasetNode[] {
     const datasetNodes: DatasetNode[] = [];
@@ -1577,8 +1567,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private buildTooltipHtml(node: DatasetNode): string {
-    const sessionData = this.sessionData();
-    const labels = sessionData?.labelsMap() ? getSortedLabels(node.dataset.labelIds, sessionData.labelsMap()) : [];
+    const labels = getSortedLabels(node.dataset.labelIds, this.sessionData().labelsMap());
     const name = escapeHtml(node.name ?? "");
     if (labels.length === 0) {
       return name;
