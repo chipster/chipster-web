@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
+import { Component, OnDestroy, OnInit, inject, input, output, signal } from "@angular/core";
 import { Store } from "@ngrx/store";
+import { NGB_NAV_IMPORTS } from "../../../../shared/directives/nav-outlet-items.directive";
 import { Dataset, Tool } from "chipster-js-common";
 import { find, includes, every, some } from "lodash-es";
 import { Subject } from "rxjs";
@@ -12,41 +13,63 @@ import { DatasetService } from "../dataset.service";
 import { SelectionService } from "../selection.service";
 import VisualizationConstants, { Visualization } from "./visualization-constants";
 import { VisualizationEventService } from "./visualization-event.service";
+import { SpreadsheetVisualizationComponent } from "./spreadsheet-visualization/spreadsheet-visualization.component";
+import { TextVisualizationComponent } from "./text-visualization/text-visualization.component";
+import { ExpressionProfileComponent } from "./expression-profile/expression-profile.component";
+import { ImageVisualizationComponent } from "./image-visualization/image-visualization.component";
+import { PdfVisualizationComponent } from "./pdf-visualization/pdf-visualization.component";
+import { HtmlvisualizationComponent } from "./html-visualization/html-visualization.component";
+import { ScatterPlotComponent } from "./scatter-plot/scatter-plot.component";
+import { VolcanoPlotComponent } from "./volcano-plot/volcano-plot.component";
+import { PhenodataVisualizationComponent } from "./phenodata/phenodata-visualization.component";
+import { NewTabVisualizationComponent } from "./new-tab-visualization/new-tab-visualization.component";
+import { DetailsVisualizationComponent } from "./details-visualization/details-visualization.component";
+import { VennDiagramComponent } from "./venn-diagram/venn-diagram.component";
 
 @Component({
   selector: "ch-visualizations",
   templateUrl: "./visualizations.component.html",
   styleUrls: ["./visualizations.component.less"],
+  imports: [
+    NGB_NAV_IMPORTS,
+    SpreadsheetVisualizationComponent,
+    TextVisualizationComponent,
+    ExpressionProfileComponent,
+    ImageVisualizationComponent,
+    PdfVisualizationComponent,
+    HtmlvisualizationComponent,
+    ScatterPlotComponent,
+    VolcanoPlotComponent,
+    PhenodataVisualizationComponent,
+    NewTabVisualizationComponent,
+    DetailsVisualizationComponent,
+    VennDiagramComponent,
+  ],
 })
 export class VisualizationsComponent implements OnInit, OnDestroy {
+  selectionService = inject(SelectionService);
+  private store = inject<Store<any>>(Store);
+  private typeTagService = inject(TypeTagService);
+  private errorService = inject(ErrorService);
+  private visualizationEventService = inject(VisualizationEventService);
+  private datasetService = inject(DatasetService);
+  private configService = inject(ConfigService);
+
   static readonly TAB_ID_PREFIX: string = "ch-vis-tab-";
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  tools: Tool[];
+  readonly sessionData = input<SessionData>(undefined);
+  readonly tools = input<Tool[]>(undefined);
 
-  @Output()
-  scrollFix = new EventEmitter();
+  readonly scrollFix = output<void>();
 
-  active: string; // id of the active vis tab
+  readonly active = signal<string>(undefined); // id of the active vis tab
   visualizations: Array<Visualization> = VisualizationConstants.VISUALIZATIONS;
 
-  selectedDatasets: Array<Dataset>;
-  private compatibleVisualizations = new Set<string>();
+  readonly selectedDatasets = signal<Array<Dataset>>(undefined);
+  private readonly compatibleVisualizations = signal(new Set<string>());
   private userInitiatedTabChange = false;
 
   private unsubscribe: Subject<any> = new Subject();
   private visualizationBlacklist: Array<string>;
-
-  constructor(
-    public selectionService: SelectionService, // used in template
-    private store: Store<any>,
-    private typeTagService: TypeTagService,
-    private errorService: ErrorService,
-    private visualizationEventService: VisualizationEventService,
-    private datasetService: DatasetService,
-    private configService: ConfigService,
-  ) {}
 
   ngOnInit() {
     this.configService
@@ -60,12 +83,12 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (datasets: Array<Dataset>) => {
-          this.selectedDatasets = datasets;
-          this.compatibleVisualizations = new Set(this.getCompatibleVisualizations());
+          this.selectedDatasets.set(datasets);
+          this.compatibleVisualizations.set(new Set(this.getCompatibleVisualizations()));
           // check if the previous visualization is still compatible
-          const isPreviousCompatible = Array.from(this.compatibleVisualizations)
+          const isPreviousCompatible = Array.from(this.compatibleVisualizations())
             .map(this.getTabId.bind(this))
-            .includes(this.active);
+            .includes(this.active());
 
           // We will get an empty selection in between when the selection is changed.
           // Don't clear the active visualization because we want to try to show the
@@ -74,16 +97,16 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
           // Also, after previous was new tab, reset to first
 
           const previousNotCompatibleAndNotUserInitiated =
-            !isPreviousCompatible && this.selectedDatasets.length > 0 && !this.userInitiatedTabChange;
+            !isPreviousCompatible && this.selectedDatasets().length > 0 && !this.userInitiatedTabChange;
           const previousIsCompatibleAndNotUserInitiated =
-            isPreviousCompatible && this.selectedDatasets.length > 0 && !this.userInitiatedTabChange;
+            isPreviousCompatible && this.selectedDatasets().length > 0 && !this.userInitiatedTabChange;
           const previousNotCompatibleAndUserInitiated =
-            !isPreviousCompatible && this.selectedDatasets.length > 0 && this.userInitiatedTabChange;
+            !isPreviousCompatible && this.selectedDatasets().length > 0 && this.userInitiatedTabChange;
 
           const previousWasPhenodata =
-            this.selectedDatasets.length > 0 && this.active === this.getTabId(VisualizationConstants.PHENODATA_ID);
+            this.selectedDatasets().length > 0 && this.active() === this.getTabId(VisualizationConstants.PHENODATA_ID);
 
-          const previousWasNewTab = this.active === this.getTabId(VisualizationConstants.NEW_TAB_ID);
+          const previousWasNewTab = this.active() === this.getTabId(VisualizationConstants.NEW_TAB_ID);
 
           // if the user changed the tab to details, then details will be shown, otherwise the first available visualization will be shown
           if (
@@ -94,12 +117,12 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
             previousWasNewTab
           ) {
             // if there's only new tab and details, select details to avoid automatic new tab
-            const compatibleVisualizationsArray: string[] = Array.from(this.compatibleVisualizations);
+            const compatibleVisualizationsArray: string[] = Array.from(this.compatibleVisualizations());
             const firstOtherThanNewTab =
               compatibleVisualizationsArray[0] !== VisualizationConstants.NEW_TAB_ID
                 ? compatibleVisualizationsArray[0]
                 : compatibleVisualizationsArray[1];
-            this.active = this.getTabId(firstOtherThanNewTab);
+            this.active.set(this.getTabId(firstOtherThanNewTab));
             this.userInitiatedTabChange = false;
           }
           // need to emit some event to session top so that the tool and visulazation div scrollTop
@@ -114,7 +137,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((phenodataSelected) => {
         if (phenodataSelected) {
-          this.active = this.getTabId(VisualizationConstants.PHENODATA_ID);
+          this.active.set(this.getTabId(VisualizationConstants.PHENODATA_ID));
           this.userInitiatedTabChange = false;
           this.scrollFix.emit();
         }
@@ -127,7 +150,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   }
 
   isTabVisible(id: string) {
-    return this.compatibleVisualizations.has(id);
+    return this.compatibleVisualizations().has(id);
   }
 
   isCompatibleVisualization(id: string): boolean {
@@ -135,14 +158,16 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
     // for now, only details and open in new tab support gzipped files
     if (
-      this.selectedDatasets.some((dataset) => this.sessionData.datasetTypeTags.get(dataset.datasetId).has(Tags.GZIP)) &&
+      this.selectedDatasets().some((dataset) =>
+        this.sessionData().datasetTypeTags().get(dataset.datasetId).has(Tags.GZIP),
+      ) &&
       !(id === VisualizationConstants.DETAILS_ID || id === VisualizationConstants.NEW_TAB_ID)
     ) {
       return false;
     }
 
     const visualization = find(this.visualizations, (visualization2) => visualization2.id === id);
-    const datasetSelectionCount = this.selectedDatasets.length;
+    const datasetSelectionCount = this.selectedDatasets().length;
 
     const typeIsCompatible = visualization.supportAllTypes || this.containsTypeTags(visualization.typeTags);
 
@@ -154,7 +179,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
     const phenodataSpecialCompatible =
       visualization.id === VisualizationConstants.PHENODATA_ID &&
       datasetSelectionCount === 1 &&
-      this.datasetService.hasOwnPhenodata(this.selectedDatasets[0]);
+      this.datasetService.hasOwnPhenodata(this.selectedDatasets()[0]);
 
     if (isBlacklisted) {
       return false;
@@ -164,7 +189,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
 
   containsTypeTags(tags: Array<string>) {
     return every(this.selectionService.selectedDatasets, (dataset: Dataset) =>
-      some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData, dataset, tag)),
+      some(tags, (tag: string) => this.typeTagService.isCompatible(this.sessionData(), dataset, tag)),
     );
   }
 
@@ -173,7 +198,7 @@ export class VisualizationsComponent implements OnInit, OnDestroy {
   }
 
   onNavChange(event) {
-    this.active = event.nextId;
+    this.active.set(event.nextId);
     this.userInitiatedTabChange = true;
   }
 

@@ -1,27 +1,21 @@
-import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   templateUrl: "./booleanmodal.component.html",
 })
 export class BooleanModalComponent implements AfterViewInit {
-  @Input()
-  okButtonText: string;
-  @Input()
-  okButtonClass: string = "btn-info";
-  @Input()
-  cancelButtonText: string;
-  @Input()
-  message: string;
-  @Input()
-  subMessage: string = null;
-  @Input()
-  title: string;
+  private activeModal = inject(NgbActiveModal);
 
-  @ViewChild("submitButton")
-  submitButton;
+  // set through the modal ref by the code that opens the modal
+  readonly okButtonText = signal<string>(undefined);
+  readonly okButtonClass = signal<string>("btn-info");
+  readonly cancelButtonText = signal<string>(undefined);
+  readonly message = signal<string>(undefined);
+  readonly subMessage = signal<string>(null);
+  readonly title = signal<string>(undefined);
 
-  constructor(private activeModal: NgbActiveModal) {}
+  readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
 
   ngAfterViewInit() {
     // set focus to submit button every time the dialog is opened
@@ -31,7 +25,7 @@ export class BooleanModalComponent implements AfterViewInit {
       // should be fixed in ng-bootstrap 3.3.0
       // https://github.com/ng-bootstrap/ng-bootstrap/issues/1776
       // https:github.com/ng-bootstrap/ng-bootstrap/issues/2728
-      this.submitButton.nativeElement.focus();
+      this.submitButton().nativeElement.focus();
     });
   }
 

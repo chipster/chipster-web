@@ -1,6 +1,5 @@
-import { Component, Input, OnChanges } from "@angular/core";
+import { Component, OnChanges, input } from "@angular/core";
 import { SessionData } from "../../../../../model/session/session-data";
-import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
 
 @Component({
@@ -9,15 +8,13 @@ import { ValidatedTool } from "../ToolSelection";
   styleUrls: ["./run-options.component.less"],
 })
 export class RunOptionsComponent implements OnChanges {
-  @Input() sessionData: SessionData;
-  @Input() validatedTool: ValidatedTool;
+  readonly sessionData = input<SessionData>(undefined);
+  readonly validatedTool = input<ValidatedTool>(undefined);
 
   ready = false;
 
-  constructor(private toolService: ToolService) {}
-
   ngOnChanges() {
-    if (this.validatedTool != null) {
+    if (this.validatedTool() != null) {
       this.ready = true;
     } else {
       this.ready = false;
@@ -25,41 +22,43 @@ export class RunOptionsComponent implements OnChanges {
   }
 
   getRunSingleDescription(): string {
-    if (this.validatedTool.singleJobValidation.valid !== true) {
-      return this.validatedTool.singleJobValidation.message;
+    if (this.validatedTool().singleJobValidation.valid !== true) {
+      return this.validatedTool().singleJobValidation.message;
     }
-    if (this.validatedTool.tool.inputs.length === 0 || this.validatedTool.selectedDatasets.length === 0) {
+    if (this.validatedTool().tool.inputs.length === 0 || this.validatedTool().selectedDatasets.length === 0) {
       return "Runs the tool once.";
     }
-    if (this.validatedTool.selectedDatasets.length === 1) {
+    if (this.validatedTool().selectedDatasets.length === 1) {
       return "Runs the tool once. Uses the one selected file as the tool input.";
     }
     return (
       "Runs the tool once. Uses all the " +
-      this.validatedTool.selectedDatasets.length +
+      this.validatedTool().selectedDatasets.length +
       " selected files as the tool inputs."
     );
   }
 
   getRunForEachSampleDescription(): string {
-    if (this.validatedTool.runForEachSampleValidation.valid === true) {
+    if (this.validatedTool().runForEachSampleValidation.valid === true) {
       const runsTheTool = "Runs the tool ";
 
       const middlePart =
-        this.validatedTool.sampleGroups.pairedEndSamples.length > 0
-          ? this.validatedTool.sampleGroups.pairedEndSamples.length +
+        this.validatedTool().sampleGroups.pairedEndSamples.length > 0
+          ? this.validatedTool().sampleGroups.pairedEndSamples.length +
             " times. Each time the two paired files of a one sample are used as the tool inputs. "
-          : this.validatedTool.sampleGroups.singleEndSamples.length +
+          : this.validatedTool().sampleGroups.singleEndSamples.length +
             " times. Each time the single end sample file is used as the tool input. ";
 
       const nonSampleFiles =
-        this.validatedTool.sampleGroups.sampleDataMissing.length > 0
+        this.validatedTool().sampleGroups.sampleDataMissing.length > 0
           ? "Selected files include the following non-sample files that are used as additional tool inputs files for all the tool runs: " +
-            this.validatedTool.sampleGroups.sampleDataMissing.map((dataset) => dataset.name).join(", ") +
+            this.validatedTool()
+              .sampleGroups.sampleDataMissing.map((dataset) => dataset.name)
+              .join(", ") +
             "."
           : "";
       return runsTheTool + middlePart + nonSampleFiles;
     }
-    return this.validatedTool.runForEachSampleValidation.message;
+    return this.validatedTool().runForEachSampleValidation.message;
   }
 }

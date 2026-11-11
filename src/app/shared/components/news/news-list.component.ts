@@ -1,43 +1,43 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, OnInit, inject, input, signal } from "@angular/core";
 import log from "loglevel";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { LoadState } from "../../../model/loadstate";
 import { DialogModalService } from "../../../views/sessions/session/dialogmodal/dialogmodal.service";
 import { NewsService } from "../../services/news.service";
 import { NewsItem } from "./NewsItem";
+import { NewsItemComponent } from "./news-item.component";
 
 @Component({
   selector: "ch-news-list",
   templateUrl: "./news-list.component.html",
+  imports: [NewsItemComponent],
 })
 export class NewsListComponent implements OnInit {
-  // @Input() news: NewsItem[];
-  @Input() editable = false;
-  public news: NewsItem[];
-  public state: LoadState;
-  public errorMessage: string = "";
+  private newsService = inject(NewsService);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
 
-  constructor(
-    private newsService: NewsService,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-  ) {}
+  // @Input() news: NewsItem[];
+  readonly editable = input(false);
+  readonly news = signal<NewsItem[]>(undefined);
+  readonly state = signal<LoadState>(undefined);
+  readonly errorMessage = signal<string>("");
 
   ngOnInit(): void {
     this.getNews();
   }
 
   public getNews(): void {
-    this.state = LoadState.Loading;
+    this.state.set(LoadState.Loading);
     this.newsService.getAllNews().subscribe({
       next: (newNews: NewsItem[]) => {
-        this.news = newNews;
-        this.state = LoadState.Ready;
+        this.news.set(newNews);
+        this.state.set(LoadState.Ready);
       },
       error: (error) => {
         log.warn("get news failed", error);
-        this.errorMessage = "Getting news failed.";
-        this.state = LoadState.Fail;
+        this.errorMessage.set("Getting news failed.");
+        this.state.set(LoadState.Fail);
       },
     });
   }
@@ -56,7 +56,7 @@ export class NewsListComponent implements OnInit {
   }
 
   public onEdit(newsItem: NewsItem) {
-    if (!this.editable) {
+    if (!this.editable()) {
       return;
     }
 
@@ -73,7 +73,7 @@ export class NewsListComponent implements OnInit {
   }
 
   public onDelete(news: NewsItem) {
-    if (!this.editable) {
+    if (!this.editable()) {
       return;
     }
 

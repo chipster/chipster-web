@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import {
   Dataset,
   EventType,
@@ -21,9 +21,15 @@ import { SessionResource } from "../../../shared/resources/session.resource";
 import { WebSocketService } from "../../../shared/services/websocket.service";
 import { SelectionService } from "./selection.service";
 import { FileState } from "chipster-js-common/lib/model/dataset";
+import UtilsService from "../../../shared/utilities/utils";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionEventService {
+  private sessionResource = inject(SessionResource);
+  private websocketService = inject(WebSocketService);
+  private errorService = inject(ErrorService);
+  private selectionService = inject(SelectionService);
+
   sessionId: string;
 
   datasetStream$: Observable<SessionEvent>;
@@ -44,13 +50,6 @@ export class SessionEventService {
 
   /** Show the same handleOrDrop() message again only after this many milliseconds */
   private static readonly ERROR_INTERVAL_MS = 30 * 1000;
-
-  constructor(
-    private sessionResource: SessionResource,
-    private websocketService: WebSocketService,
-    private errorService: ErrorService,
-    private selectionService: SelectionService,
-  ) {}
 
   unsubscribe() {
     this.websocketService.unsubscribe();
@@ -105,7 +104,9 @@ export class SessionEventService {
 
     this.ruleStream$ = stream.pipe(
       filter((wsData) => wsData.resourceType === Resource.Rule),
-      mergeMap((data) => this.handleOrDrop("rule event error", () => this.handleRuleEvent(data, sessionData.session))),
+      mergeMap((data) =>
+        this.handleOrDrop("rule event error", () => this.handleRuleEventOfSessionData(data, sessionData)),
+      ),
       share(),
     );
 
@@ -207,19 +208,53 @@ export class SessionEventService {
     return observableOf(new SessionEvent(event, oldValue, newValue));
   }
 
+  /**
+   * Apply a rule event to a session of the sessions list, changing it in place
+   */
   handleRuleEvent(event: any, session: Session): Observable<SessionEvent> {
-    log.info("handle rule event", event, session);
+    return this.applyRuleEvent(
+      event,
+      session.sessionId,
+      () => session.rules,
+      (rules) => {
+        session.rules = rules;
+      },
+    );
+  }
+
+  /*
+   * Apply a rule event to the open session. Takes sessionData rather than the session, because a
+   * session event replaces the session: the rules of the latest one are updated, and the signal
+   * notifies the views.
+   */
+  private handleRuleEventOfSessionData(event: WsEvent, sessionData: SessionData): Observable<SessionEvent> {
+    return this.applyRuleEvent(
+      event,
+      sessionData.session().sessionId,
+      () => sessionData.session().rules,
+      (rules) => sessionData.session.update((s) => ({ ...s, rules })),
+    );
+  }
+
+  private applyRuleEvent(
+    event: WsEvent,
+    sessionId: string,
+    getRules: () => Rule[],
+    setRules: (rules: Rule[]) => void,
+  ): Observable<SessionEvent> {
+    log.info("handle rule event", event, sessionId);
     if (event.type === EventType.Create) {
-      return this.sessionResource.getRule(session.sessionId, event.resourceId).pipe(
+      return this.sessionResource.getRule(sessionId, event.resourceId).pipe(
         mergeMap((rule: Rule) => {
-          session.rules.push(rule);
+          // a session event may have brought the rule already
+          setRules([...getRules().filter((r) => r.ruleId !== rule.ruleId), rule]);
           return this.createEvent(event, null, rule);
         }),
       );
     }
     if (event.type === EventType.Delete) {
-      const rule = session.rules.find((r) => r.ruleId === event.resourceId);
-      session.rules = session.rules.filter((r) => r.ruleId !== event.resourceId);
+      const rule = getRules().find((r) => r.ruleId === event.resourceId);
+      setRules(getRules().filter((r) => r.ruleId !== event.resourceId));
       return this.createEvent(event, rule, null);
     }
     log.warn("unknown event type", event);
@@ -231,8 +266,8 @@ export class SessionEventService {
       if (event.state !== SessionState.Delete) {
         return this.sessionResource.getSession(sessionId).pipe(
           mergeMap((remote: Session) => {
-            const local = sessionData.session;
-            sessionData.session = remote;
+            const local = sessionData.session();
+            sessionData.session.set(remote);
             log.info("session updated", remote.name, remote.state);
             return this.createEvent(event, local, remote);
           }),
@@ -274,7 +309,7 @@ export class SessionEventService {
 
       return this.sessionResource.getDataset(sessionId, event.resourceId).pipe(
         mergeMap((remote: Dataset) => {
-          const local = sessionData.datasetsMap.get(event.resourceId);
+          const local = sessionData.datasetsMap().get(event.resourceId);
           // datasetsMap.set() is deferred to updateTypeTags() so that the dataset
           // is never visible in the UI before its type tags are ready
           return this.createEvent(event, local, remote);
@@ -282,15 +317,15 @@ export class SessionEventService {
       );
     }
     if (event.type === EventType.Delete) {
-      const localCopy = sessionData.datasetsMap.get(event.resourceId);
-      sessionData.datasetsMap.delete(event.resourceId);
+      const localCopy = sessionData.datasetsMap().get(event.resourceId);
+      sessionData.datasetsMap.update((m) => UtilsService.mapWithout(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);
     return EMPTY;
   }
 
-  updateTypeTags(sessionId, sessionEvent, sessionData) {
+  updateTypeTags(sessionId: string, sessionEvent: SessionEvent, sessionData: SessionData) {
     // update type tags before
     const newValue = <Dataset>sessionEvent.newValue;
 
@@ -305,8 +340,8 @@ export class SessionEventService {
       // so the dataset is never visible in the UI before its type tags are ready
       return this.sessionResource.getTypeTagsForDataset(sessionId, newValue).pipe(
         map((typeTags) => {
-          sessionData.datasetTypeTags.set(newValue.datasetId, typeTags);
-          sessionData.datasetsMap.set(newValue.datasetId, newValue);
+          sessionData.datasetTypeTags.update((m) => UtilsService.mapWith(m, newValue.datasetId, typeTags));
+          sessionData.datasetsMap.update((m) => UtilsService.mapWith(m, newValue.datasetId, newValue));
           return sessionEvent;
         }),
         catchError((err) => {
@@ -320,7 +355,7 @@ export class SessionEventService {
       );
     }
     // dataset deleted, type tags can be removed
-    sessionData.datasetTypeTags.delete(sessionEvent.event.resourceId);
+    sessionData.datasetTypeTags.update((m) => UtilsService.mapWithout(m, sessionEvent.event.resourceId));
     return observableOf(sessionEvent);
   }
 
@@ -328,15 +363,15 @@ export class SessionEventService {
     if (event.type === EventType.Create || event.type === EventType.Update) {
       return this.sessionResource.getLabel(sessionId, event.resourceId).pipe(
         mergeMap((remote: Label) => {
-          const local = sessionData.labelsMap.get(event.resourceId);
-          sessionData.labelsMap.set(event.resourceId, remote);
+          const local = sessionData.labelsMap().get(event.resourceId);
+          sessionData.labelsMap.update((m) => UtilsService.mapWith(m, event.resourceId, remote));
           return this.createEvent(event, local, remote);
         }),
       );
     }
     if (event.type === EventType.Delete) {
-      const localCopy = sessionData.labelsMap.get(event.resourceId);
-      sessionData.labelsMap.delete(event.resourceId);
+      const localCopy = sessionData.labelsMap().get(event.resourceId);
+      sessionData.labelsMap.update((m) => UtilsService.mapWithout(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);
@@ -347,7 +382,7 @@ export class SessionEventService {
     if (event.type === EventType.Create) {
       return this.sessionResource.getJob(sessionId, event.resourceId).pipe(
         mergeMap((remote: Job) => {
-          sessionData.jobsMap.set(event.resourceId, remote);
+          sessionData.jobsMap.update((m) => UtilsService.mapWith(m, event.resourceId, remote));
           return this.createEvent(event, null, remote);
         }),
       );
@@ -355,15 +390,15 @@ export class SessionEventService {
     if (event.type === EventType.Update) {
       return this.sessionResource.getJob(sessionId, event.resourceId).pipe(
         mergeMap((remote: Job) => {
-          const local = sessionData.jobsMap.get(event.resourceId);
-          sessionData.jobsMap.set(event.resourceId, remote);
+          const local = sessionData.jobsMap().get(event.resourceId);
+          sessionData.jobsMap.update((m) => UtilsService.mapWith(m, event.resourceId, remote));
           return this.createEvent(event, local, remote);
         }),
       );
     }
     if (event.type === EventType.Delete) {
-      const localCopy = sessionData.jobsMap.get(event.resourceId);
-      sessionData.jobsMap.delete(event.resourceId);
+      const localCopy = sessionData.jobsMap().get(event.resourceId);
+      sessionData.jobsMap.update((m) => UtilsService.mapWithout(m, event.resourceId));
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event.type, event);

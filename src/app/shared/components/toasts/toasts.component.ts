@@ -1,6 +1,7 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { NgbToast } from "@ng-bootstrap/ng-bootstrap";
 import { Toast, ToastService } from "../../services/toast.service";
+import { NgClass } from "@angular/common";
 
 /**
  * Shows the toasts of ToastService. There is one of these, in the AppComponent.
@@ -13,12 +14,13 @@ import { Toast, ToastService } from "../../services/toast.service";
   selector: "ch-toasts",
   templateUrl: "./toasts.component.html",
   styleUrls: ["./toasts.component.less"],
+  imports: [NgbToast, NgClass],
 })
 export class ToastsComponent {
+  toastService = inject(ToastService);
+
   // the toasts under the pointer
   hovered = new WeakSet<Toast>();
-
-  constructor(public toastService: ToastService) {}
 
   action(toast: Toast, text: string, event: Event): void {
     // don't close the toast, if tapToDismiss is on

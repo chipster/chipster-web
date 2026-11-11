@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, waitForDevCheck } from "./fixtures";
 import { getSession } from "./session-api";
 
 /*
@@ -33,4 +33,5 @@ test("a session is renamed and its notes edited in the sessions list", async ({ 
   await renamed.hover();
   await expect(page.getByText("second line")).toBeVisible();
   await expect.poll(async () => (await getSession(api, sessionId)).notes).toBe("first line\nsecond line");
+  await waitForDevCheck(page);
 });

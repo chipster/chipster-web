@@ -1,8 +1,8 @@
-@if (accessibilityPath && accessibilityFile && accessibilityRouterPath) {
+@if (accessibilityPath() && accessibilityFile() && accessibilityRouterPath) {
   <div>
     <ch-manual
-      [assetsPath]="accessibilityPath"
-      [page]="accessibilityFile"
+      [assetsPath]="accessibilityPath()"
+      [page]="accessibilityFile()"
       [showControls]="false"
       [addContainer]="true"
       [routerPath]="accessibilityRouterPath"

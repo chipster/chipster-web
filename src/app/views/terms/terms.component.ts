@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { User } from "chipster-js-common";
 import { filter, mergeMap } from "rxjs/operators";
@@ -6,45 +6,37 @@ import { AuthenticationService } from "../../core/authentication/authentication-
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { RouteService } from "../../shared/services/route.service";
+import { ManualComponent } from "../manual/manual.component";
 
 @Component({
   selector: "ch-terms",
   templateUrl: "./terms.component.html",
   styleUrls: ["./terms.component.less"],
+  imports: [ManualComponent],
 })
 export class TermsComponent implements OnInit {
+  private authenticationService = inject(AuthenticationService);
+  private restErrorService = inject(RestErrorService);
+  private configService = inject(ConfigService);
+  private routeService = inject(RouteService);
+  private route = inject(ActivatedRoute);
+
   // increase by one to force everyone to accept again
   static latestTermsVersion = 1;
-  termsOfUse: string;
-  showAccept = false;
-
-  constructor(
-    private authenticationService: AuthenticationService,
-    private restErrorService: RestErrorService,
-    private configService: ConfigService,
-    private routeService: RouteService,
-    private route: ActivatedRoute,
-  ) {}
+  readonly termsOfUse = signal<string>(undefined);
+  readonly showAccept = signal(false);
 
   ngOnInit() {
     this.configService.get(ConfigService.KEY_TERMS_OF_USE_PATH).subscribe({
       next: (path) => {
-        this.termsOfUse = path;
+        this.termsOfUse.set(path);
       },
       error: (err) => this.restErrorService.showError("failed to get the configuration", err),
     });
 
-    this.route.queryParams
-      .pipe(
-        filter((params) => {
-          console.log(params);
-          return params["showAccept"];
-        }),
-      )
-      .subscribe((params) => {
-        this.showAccept = !!params.showAccept;
-        console.log(this.showAccept);
-      });
+    this.route.queryParams.pipe(filter((params) => params["showAccept"])).subscribe((params) => {
+      this.showAccept.set(!!params.showAccept);
+    });
   }
 
   accept() {

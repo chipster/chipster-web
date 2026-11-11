@@ -1,34 +1,25 @@
-import { Component, OnChanges, OnDestroy } from "@angular/core";
+import { Component, OnChanges, OnDestroy, inject } from "@angular/core";
 import * as d3 from "d3";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
-import { FileResource } from "../../../../../shared/resources/fileresource";
 import { PlotDirective } from "../../../../../shared/visualization/plot.directive";
 import { PlotService } from "../../../../../shared/visualization/plot.service";
-import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
-import { SessionDataService } from "../../session-data.service";
 import { PlotData } from "../model/plotData";
 import Point from "../model/point";
+import { StatusComponent } from "../../../../../shared/components/status.component";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-scatter-plot",
   templateUrl: "./scatter-plot.component.html",
   styleUrls: ["./scatter-plot.component.less"],
+  imports: [StatusComponent, FormsModule],
 })
 export class ScatterPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
+  private plotService = inject(PlotService);
+
   public chipHeaders: Array<string> = [];
   private xScale: any;
   private yScale: any;
-
-  constructor(
-    fileResource: FileResource,
-    sessionDataService: SessionDataService,
-    private plotService: PlotService,
-    visualizationTSVService: VisualizationTSVService,
-    private restErrorService2: RestErrorService,
-  ) {
-    super(fileResource, sessionDataService, visualizationTSVService);
-  }
 
   ngOnChanges() {
     super.ngOnChanges();
@@ -54,12 +45,14 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
         this.selectedXAxisHeader = this.chipHeaders[0];
         this.selectedYAxisHeader = this.chipHeaders[1];
         this.redrawPlot();
-        this.state = new LoadState(State.Ready);
+        this.state.set(new LoadState(State.Ready));
       } else {
-        this.state = new LoadState(State.Fail, "Dataset does not have enough columns to generate scatterplot.");
+        this.state.set(new LoadState(State.Fail, "Dataset does not have enough columns to generate scatterplot."));
       }
     } else {
-      this.state = new LoadState(State.Fail, "Only microarray data supported, no columns starting with chip. found.");
+      this.state.set(
+        new LoadState(State.Fail, "Only microarray data supported, no columns starting with chip. found."),
+      );
     }
   }
 
@@ -207,7 +200,7 @@ export class ScatterPlotComponent extends PlotDirective implements OnChanges, On
     const tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset("newDataset.tsv", [this.dataset], "Scatter Plot", data)
-      .subscribe({ error: (err) => this.restErrorService2.showError("create dataset failed", err) });
+      .createDerivedDataset("newDataset.tsv", [this.dataset()], "Scatter Plot", data)
+      .subscribe({ error: (err) => this.restErrorService.showError("create dataset failed", err) });
   }
 }

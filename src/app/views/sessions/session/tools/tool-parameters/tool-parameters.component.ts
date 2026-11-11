@@ -1,20 +1,23 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from "@angular/core";
+import { Component, OnChanges, OnDestroy, OnInit, inject, input, output } from "@angular/core";
 import { ToolParameter } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
-import { ToolSelectionService } from "../../tool.selection.service";
 import { ToolService } from "../tool.service";
 import { ValidatedTool } from "../ToolSelection";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-tool-parameters",
   templateUrl: "./tool-parameters.component.html",
   styleUrls: ["./tool-parameters.component.less"],
+  imports: [FormsModule],
 })
 export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() validatedTool: ValidatedTool;
+  toolService = inject(ToolService);
 
-  @Output() parametersChanged: EventEmitter<any> = new EventEmitter();
+  readonly validatedTool = input<ValidatedTool>(undefined);
+
+  readonly parametersChanged = output<void>();
 
   ready = false;
   showWarning: boolean;
@@ -23,12 +26,6 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   private parametersChangedThrottle = new Subject<any>();
 
   private unsubscribe: Subject<any> = new Subject();
-
-  // noinspection JSUnusedLocalSymbols
-  constructor(
-    public toolService: ToolService,
-    private toolSelectionService: ToolSelectionService, // private dropDown: NgbDropdown
-  ) {}
 
   ngOnInit() {
     this.parametersChangedThrottle
@@ -40,10 +37,10 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
-    if (this.validatedTool != null) {
+    if (this.validatedTool() != null) {
       this.ready = true;
-      this.showWarning = !this.validatedTool.singleJobValidation.valid;
-      this.warningText = this.validatedTool.singleJobValidation.message;
+      this.showWarning = !this.validatedTool().singleJobValidation.valid;
+      this.warningText = this.validatedTool().singleJobValidation.message;
     } else {
       this.ready = false;
     }
@@ -82,7 +79,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   resetAll() {
-    this.validatedTool.tool.parameters.forEach((parameter) => this.reset(parameter));
+    this.validatedTool().tool.parameters.forEach((parameter) => this.reset(parameter));
   }
 
   getDisplayName(obj) {
@@ -91,9 +88,9 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
 
   isResetAllVisible() {
     return (
-      this.validatedTool?.tool?.parameters != null &&
-      this.validatedTool.tool.parameters.length > 0 &&
-      this.validatedTool.tool.parameters.some((parameter) => this.isResetVisible(parameter))
+      this.validatedTool()?.tool?.parameters != null &&
+      this.validatedTool().tool.parameters.length > 0 &&
+      this.validatedTool().tool.parameters.some((parameter) => this.isResetVisible(parameter))
     );
   }
 

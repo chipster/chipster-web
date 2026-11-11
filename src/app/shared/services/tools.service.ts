@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
 import { forkJoin, Observable } from "rxjs";
 import { map, shareReplay } from "rxjs/operators";
@@ -6,16 +6,14 @@ import { ToolResource } from "../resources/tool-resource";
 import UtilsService from "../utilities/utils";
 import { ConfigService } from "./config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ToolsService {
+  private toolResource = inject(ToolResource);
+  private configService = inject(ConfigService);
+
   private toolsCache$: Observable<Tool[]>;
   private modulesCache$: Observable<Module[]>;
   private modulesMapCache$: Observable<Map<string, Module>>;
-
-  constructor(
-    private toolResource: ToolResource,
-    private configService: ConfigService,
-  ) {}
 
   getTools(): Observable<Tool[]> {
     if (!this.toolsCache$) {

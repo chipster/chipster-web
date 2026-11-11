@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Label } from "chipster-js-common";
 import { forkJoin, of } from "rxjs";
@@ -9,73 +9,81 @@ import { SessionResource } from "../../../../shared/resources/session.resource";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { LabelEditorModalComponent } from "./label-editor-modal.component";
 import { LabelsContextMenuService } from "./labels-context-menu.service";
+import { LabelPillComponent } from "./label-pill.component";
+import { NgClass } from "@angular/common";
+import UtilsService from "../../../../shared/utilities/utils";
 
 type SelectionState = "checked" | "unchecked" | "indeterminate";
 
 interface LabelRow {
   label: Label;
   selection: SelectionState;
+  // the state when the modal was opened: only the rows the user changed are applied, so that a
+  // label applied elsewhere while the modal was open isn't removed
+  initial: SelectionState;
 }
 
 @Component({
   selector: "ch-labels-modal",
   templateUrl: "./labels-modal.component.html",
+  imports: [LabelPillComponent, NgClass],
 })
 export class LabelsModalComponent implements OnInit {
-  @Input() sessionData: SessionData;
-  @Input() selectedDatasets: Dataset[] = [];
+  activeModal = inject(NgbActiveModal);
+  private ngbModal = inject(NgbModal);
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private labelsContextMenuService = inject(LabelsContextMenuService);
+
+  // set through the modal ref by the code that opens the modal
+  readonly sessionData = signal<SessionData>(undefined);
+  readonly selectedDatasets = signal<Dataset[]>([]);
 
   readonly maxLabelsPerSession = 50;
 
-  rows: LabelRow[] = [];
+  readonly rows = signal<LabelRow[]>([]);
 
-  saving = false;
-
-  constructor(
-    public activeModal: NgbActiveModal,
-    private ngbModal: NgbModal,
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-    private dialogModalService: DialogModalService,
-    private labelsContextMenuService: LabelsContextMenuService,
-  ) {}
+  readonly saving = signal(false);
 
   ngOnInit(): void {
     this.refreshRows();
   }
 
   private refreshRows(): void {
-    const labels = Array.from(this.sessionData.labelsMap.values()).sort((a, b) =>
+    const labels = Array.from(this.sessionData().labelsMap().values()).sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
 
-    this.rows = labels.map((label) => ({
-      label,
-      selection: this.computeSelection(label),
-    }));
+    this.rows.set(
+      labels.map((label) => {
+        const selection = this.computeSelection(label);
+        return { label, selection, initial: selection };
+      }),
+    );
   }
 
   private computeSelection(label: Label): SelectionState {
-    if (this.selectedDatasets.length === 0) {
+    if (this.selectedDatasets().length === 0) {
       return "unchecked";
     }
-    const count = this.selectedDatasets.filter((d) => (d.labelIds ?? []).includes(label.labelId)).length;
+    const count = this.selectedDatasets().filter((d) => (d.labelIds ?? []).includes(label.labelId)).length;
     if (count === 0) {
       return "unchecked";
     }
-    if (count === this.selectedDatasets.length) {
+    if (count === this.selectedDatasets().length) {
       return "checked";
     }
     return "indeterminate";
   }
 
   hasSelection(): boolean {
-    return this.selectedDatasets.length > 0;
+    return this.selectedDatasets().length > 0;
   }
 
   /** There is something to apply only if files are selected and there are labels to check */
   canApply(): boolean {
-    return this.hasSelection() && this.rows.length > 0;
+    return this.hasSelection() && this.rows().length > 0;
   }
 
   toggleRow(row: LabelRow): void {
@@ -99,29 +107,19 @@ export class LabelsModalComponent implements OnInit {
   }
 
   private confirmDeleteLabel(row: LabelRow): void {
-    this.sessionResource.deleteLabel(this.sessionData.session.sessionId, row.label.labelId).subscribe({
+    this.sessionResource.deleteLabel(this.sessionData().session().sessionId, row.label.labelId).subscribe({
       next: () => {
-        this.sessionData.labelsMap.delete(row.label.labelId);
         // server cascade removes the id from datasets and emits dataset UPDATE events,
         // but also scrub local copies so UI updates immediately
-        this.selectedDatasets.forEach((d) => {
-          if (d.labelIds) {
-            d.labelIds = d.labelIds.filter((id) => id !== row.label.labelId);
-          }
-        });
-        this.sessionData.datasetsMap.forEach((d) => {
-          if (d.labelIds) {
-            d.labelIds = d.labelIds.filter((id) => id !== row.label.labelId);
-          }
-        });
-        this.rows = this.rows.filter((r) => r !== row);
+        this.removeLabelsLocally(new Set([row.label.labelId]));
+        this.rows.set(this.rows().filter((r) => r !== row));
       },
       error: (err) => this.errorService.showError("Deleting label failed", err),
     });
   }
 
   deleteAllLabels(): void {
-    const count = this.rows.length;
+    const count = this.rows().length;
     this.dialogModalService
       .openBooleanModal(
         "Delete all labels",
@@ -137,11 +135,34 @@ export class LabelsModalComponent implements OnInit {
       );
   }
 
-  private confirmDeleteAllLabels(): void {
-    const sessionId = this.sessionData.session.sessionId;
-    const labelIds = this.rows.map((r) => r.label.labelId);
+  /**
+   * Remove the labels from labelsMap and from the datasets that use them.
+   *
+   * The datasets in datasetsMap are replaced with copies, so that the views that show them are
+   * notified. The selected datasets are the map's objects, so they aren't changed; the views and
+   * confirm() read the latest copies from the map.
+   */
+  private removeLabelsLocally(labelIds: Set<string>): void {
+    const sessionData = this.sessionData();
+    sessionData.labelsMap.update((m) => UtilsService.mapWithout(m, ...labelIds));
+    sessionData.datasetsMap.update(
+      (m) =>
+        new Map(
+          Array.from(m).map(([datasetId, d]) => [
+            datasetId,
+            d.labelIds?.some((id) => labelIds.has(id))
+              ? { ...d, labelIds: d.labelIds.filter((id) => !labelIds.has(id)) }
+              : d,
+          ]),
+        ),
+    );
+  }
 
-    this.saving = true;
+  private confirmDeleteAllLabels(): void {
+    const sessionId = this.sessionData().session().sessionId;
+    const labelIds = this.rows().map((r) => r.label.labelId);
+
+    this.saving.set(true);
     forkJoin(
       labelIds.map((labelId) =>
         this.sessionResource.deleteLabel(sessionId, labelId).pipe(
@@ -158,30 +179,21 @@ export class LabelsModalComponent implements OnInit {
       next: (results) => {
         // mirror the local-state scrub done in confirmDeleteLabel, for every deleted id
         const deleted = new Set(results.filter((id): id is string => id != null));
-        deleted.forEach((id) => this.sessionData.labelsMap.delete(id));
-        this.selectedDatasets.forEach((d) => {
-          if (d.labelIds) {
-            d.labelIds = d.labelIds.filter((id) => !deleted.has(id));
-          }
-        });
-        this.sessionData.datasetsMap.forEach((d) => {
-          if (d.labelIds) {
-            d.labelIds = d.labelIds.filter((id) => !deleted.has(id));
-          }
-        });
+        this.removeLabelsLocally(deleted);
         // keep any rows that weren't deleted (failed, or created meanwhile)
-        this.rows = this.rows.filter((r) => !deleted.has(r.label.labelId));
-        this.saving = false;
+        this.rows.set(this.rows().filter((r) => !deleted.has(r.label.labelId)));
+        this.saving.set(false);
       },
       error: () => {
-        this.saving = false;
+        this.saving.set(false);
       },
     });
   }
 
   openCreateLabel(): void {
     const modalRef = this.ngbModal.open(LabelEditorModalComponent, { size: "sm" });
-    modalRef.componentInstance.sessionData = this.sessionData;
+    const modal = modalRef.componentInstance as LabelEditorModalComponent;
+    modal.sessionData.set(this.sessionData());
     modalRef.result.then(
       (created: Label) => this.addCreatedLabelRow(created),
       () => {},
@@ -190,13 +202,16 @@ export class LabelsModalComponent implements OnInit {
 
   openEditLabel(row: LabelRow): void {
     const modalRef = this.ngbModal.open(LabelEditorModalComponent, { size: "sm" });
-    modalRef.componentInstance.sessionData = this.sessionData;
-    modalRef.componentInstance.label = row.label;
+    const modal = modalRef.componentInstance as LabelEditorModalComponent;
+    modal.sessionData.set(this.sessionData());
+    modal.label.set(row.label);
     modalRef.result.then(
       (updated: Label) => {
-        this.rows = this.rows
-          .map((r) => (r.label.labelId === updated.labelId ? { ...r, label: updated } : r))
-          .sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? ""));
+        this.rows.set(
+          this.rows()
+            .map((r) => (r.label.labelId === updated.labelId ? { ...r, label: updated } : r))
+            .sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? "")),
+        );
       },
       () => {},
     );
@@ -206,8 +221,9 @@ export class LabelsModalComponent implements OnInit {
     const newRow: LabelRow = {
       label: created,
       selection: this.hasSelection() ? "checked" : "unchecked",
+      initial: "unchecked",
     };
-    this.rows = [...this.rows, newRow].sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? ""));
+    this.rows.set([...this.rows(), newRow].sort((a, b) => (a.label.name ?? "").localeCompare(b.label.name ?? "")));
   }
 
   confirm(): void {
@@ -216,7 +232,7 @@ export class LabelsModalComponent implements OnInit {
       return;
     }
 
-    const sessionId = this.sessionData.session.sessionId;
+    const sessionId = this.sessionData().session().sessionId;
     const datasetUpdates: Dataset[] = [];
 
     // Track which labels were actually applied/removed so the workflow
@@ -224,13 +240,13 @@ export class LabelsModalComponent implements OnInit {
     // applied over removed since that's usually the user's main intent.
     const tracking = { lastAppliedId: null as string | null, lastRemovedId: null as string | null };
 
-    for (const dataset of this.selectedDatasets) {
+    // the latest copies, in case a label was deleted here or a dataset event came while the modal was open
+    for (const dataset of this.sessionData().latestDatasets(this.selectedDatasets())) {
       const before = new Set(dataset.labelIds ?? []);
       const after = this.applyRowsTo(before, tracking);
 
       if (!this.setsEqual(before, after)) {
-        dataset.labelIds = Array.from(after);
-        datasetUpdates.push(dataset);
+        datasetUpdates.push({ ...dataset, labelIds: Array.from(after) });
       }
     }
 
@@ -239,13 +255,15 @@ export class LabelsModalComponent implements OnInit {
       return;
     }
 
+    const restore = this.sessionData().setDatasets(datasetUpdates);
     const lastUsedId = tracking.lastAppliedId ?? tracking.lastRemovedId;
 
-    this.saving = true;
+    this.saving.set(true);
     forkJoin(
       datasetUpdates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
           catchError((err) => {
+            restore([d]);
             this.errorService.showError("Updating dataset labels failed", err);
             return of(null);
           }),
@@ -258,11 +276,11 @@ export class LabelsModalComponent implements OnInit {
           if (lastUsedId) {
             this.labelsContextMenuService.recordLastUsedLabel(lastUsedId);
           }
-          this.saving = false;
+          this.saving.set(false);
           this.activeModal.close();
         },
         error: () => {
-          this.saving = false;
+          this.saving.set(false);
         },
       });
   }
@@ -276,8 +294,11 @@ export class LabelsModalComponent implements OnInit {
     tracking: { lastAppliedId: string | null; lastRemovedId: string | null },
   ): Set<string> {
     const after = new Set(before);
-    for (const row of this.rows) {
+    for (const row of this.rows()) {
       const id = row.label.labelId;
+      if (row.selection === row.initial) {
+        continue;
+      }
       if (row.selection === "checked") {
         if (!before.has(id)) {
           tracking.lastAppliedId = id;

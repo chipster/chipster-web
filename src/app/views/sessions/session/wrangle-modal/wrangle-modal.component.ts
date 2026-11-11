@@ -1,5 +1,7 @@
-import { Component, Input, OnInit, ViewChild } from "@angular/core";
-import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
+// registers the ag-grid modules and theme, before any grid is created
+import "../../../../shared/ag-grid-setup";
+import { Component, OnInit, inject, signal, viewChild } from "@angular/core";
+import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -15,6 +17,9 @@ import { TsvService } from "../../../../shared/services/tsv.service";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DatasetService } from "../dataset.service";
 import { SessionDataService } from "../session-data.service";
+import { AgGridAngular } from "ag-grid-angular";
+import { MultiDropdownComponent } from "./multi-dropdown.component";
+import { StatusComponent } from "../../../../shared/components/status.component";
 
 enum ColumnType {
   Identifier,
@@ -30,24 +35,22 @@ export interface ColumnItem {
   selector: "ch-wrangle-modal",
   templateUrl: "./wrangle-modal.component.html",
   styleUrls: ["./wrangle-modal.component.less"],
+  imports: [AgGridAngular, MultiDropdownComponent, FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class WrangleModalComponent implements OnInit {
-  constructor(
-    public activeModal: NgbActiveModal,
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService,
-    private typeTagService: TypeTagService,
-    private restErrorService: RestErrorService,
-    private tsvService: TsvService,
-    private datasetService: DatasetService,
-  ) {}
+  activeModal = inject(NgbActiveModal);
+  private fileResource = inject(FileResource);
+  private sessionDataService = inject(SessionDataService);
+  private typeTagService = inject(TypeTagService);
+  private restErrorService = inject(RestErrorService);
+  private tsvService = inject(TsvService);
+  private datasetService = inject(DatasetService);
 
-  public static FILE_SIZE_LIMIT = 200; // MB
+  // set through the modal ref by the code that opens the modal
+  readonly dataset = signal<Dataset>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
 
-  @Input() dataset: Dataset;
-  @Input() sessionData: SessionData;
-
-  @ViewChild("agGrid") agGrid;
+  readonly agGrid = viewChild<AgGridAngular>("agGrid");
 
   private readonly SAMPLE_PREFIX = "chip.";
   private readonly INCLUDE = "included";
@@ -78,17 +81,22 @@ export class WrangleModalComponent implements OnInit {
   nonUniqueIncludedColumns = new Set<string>();
 
   private unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
+  /*
+   * The column items, the column definitions and the preview rows are set in the same callback
+   * right before the state becomes ready, and shown only when it is, so this signal notifies the
+   * view of them too
+   */
+  readonly state = signal<LoadState>(undefined);
   next: () => {};
 
   ngOnInit(): void {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading data...");
+    this.state.set(new LoadState(State.Loading, "Loading data..."));
 
     // check for empty file
-    if (this.dataset.size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+    if (this.dataset().size < 1) {
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
@@ -96,15 +104,15 @@ export class WrangleModalComponent implements OnInit {
 
     // get file contents
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, this.dataset.size)
+      .getData(this.sessionDataService.getSessionId(), this.dataset(), this.dataset().size)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {
           // sanity check
 
-          if (result.length !== this.dataset.size) {
+          if (result.length !== this.dataset().size) {
             log.warn(
-              `before wrangle download content size is ${result.length} while dataset size is ${this.dataset.size}`,
+              `before wrangle download content size is ${result.length} while dataset size is ${this.dataset().size}`,
             );
           }
 
@@ -112,12 +120,12 @@ export class WrangleModalComponent implements OnInit {
           let parsedTSV = d3.tsvParseRows(result);
 
           // filter out comment lines, e.g. lines starting with ## in a VCF file
-          const skipLinesPrefix = this.typeTagService.get(this.sessionData, this.dataset, Tags.SKIP_LINES);
+          const skipLinesPrefix = this.typeTagService.get(this.sessionData(), this.dataset(), Tags.SKIP_LINES);
           if (skipLinesPrefix) {
             parsedTSV = parsedTSV.filter((row) => !row[0].startsWith(skipLinesPrefix));
           }
 
-          this.tsv2File = this.tsvService.getTSV2FileFromArray(this.dataset, this.sessionData, parsedTSV);
+          this.tsv2File = this.tsvService.getTSV2FileFromArray(this.dataset(), this.sessionData(), parsedTSV);
 
           const headers = this.tsv2File.getHeadersForSpreadSheet();
 
@@ -150,11 +158,11 @@ export class WrangleModalComponent implements OnInit {
             .slice(0, this.previewRowCount)
             .map((row: string[]) => ({ ...row }));
 
-          this.state = new LoadState(State.Ready);
+          this.state.set(new LoadState(State.Ready));
         },
         error: (error: Response) => {
-          this.state = new LoadState(State.Fail, "Loading data failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading data failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }
@@ -301,9 +309,9 @@ export class WrangleModalComponent implements OnInit {
           log.info("Creating converted dataset");
 
           const newFileName =
-            this.dataset.name.endsWith(".txt") || this.dataset.name.endsWith(".tsv")
-              ? this.dataset.name.slice(0, -4) + "-converted.tsv"
-              : this.dataset.name + "-converted.tsv";
+            this.dataset().name.endsWith(".txt") || this.dataset().name.endsWith(".tsv")
+              ? this.dataset().name.slice(0, -4) + "-converted.tsv"
+              : this.dataset().name + "-converted.tsv";
 
           // phenodata
           const phenodataString = this.getPhenodataString();
@@ -316,7 +324,7 @@ export class WrangleModalComponent implements OnInit {
 
           return this.sessionDataService.createDerivedDataset(
             newFileName,
-            [this.dataset],
+            [this.dataset()],
             "Convert to Chipster format",
             wrangledFileString,
             "Import",
@@ -387,7 +395,7 @@ export class WrangleModalComponent implements OnInit {
         phenodataRows +
         fixedSampleHeader +
         "\t" +
-        this.dataset.name +
+        this.dataset().name +
         "\t" +
         "not applicable" +
         "\t" +
@@ -406,6 +414,6 @@ export class WrangleModalComponent implements OnInit {
   }
 
   private updatePreviewStyles(): void {
-    this.agGrid.api.redrawRows(); // refreshCells() wasn't enough
+    this.agGrid().api.redrawRows(); // refreshCells() wasn't enough
   }
 }

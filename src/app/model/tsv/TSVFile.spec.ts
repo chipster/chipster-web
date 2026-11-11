@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { testtsv } from "./TSVFile.input.spec";
+import { testtsv } from "./TSVFile.testdata";
 import TSVFile from "./TSVFile";
 
 describe("TSVFile", () => {

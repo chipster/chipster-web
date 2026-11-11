@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Job, JobState, Label, Rule, Session } from "chipster-js-common";
 import { SessionState } from "chipster-js-common/lib/model/session";
 import { chunk, clone } from "lodash-es";
@@ -14,14 +14,12 @@ import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
 import { SchedulerResource } from "./scheduler-resource";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionResource {
-  constructor(
-    private configService: ConfigService,
-    private http: HttpClient,
-    private tokenService: TokenService,
-    private schedulerResource: SchedulerResource,
-  ) {}
+  private configService = inject(ConfigService);
+  private http = inject(HttpClient);
+  private tokenService = inject(TokenService);
+  private schedulerResource = inject(SchedulerResource);
 
   loadSession(sessionId: string, preview = false): Observable<SessionData> {
     return this.configService.getSessionDbUrl().pipe(
@@ -30,10 +28,10 @@ export class SessionResource {
         let types$;
 
         if (preview) {
-          sessionUrl += "?preview";
-          types$ = observableOf(null);
-        } else {
           // types are not needed in the preview
+          sessionUrl += "?preview";
+          types$ = observableOf(new Map<string, Map<string, string>>());
+        } else {
           types$ = this.getTypeTagsForSession(sessionId).pipe(tap((x) => log.debug("types", x)));
         }
 
@@ -138,12 +136,12 @@ export class SessionResource {
           console.warn("skipped " + (datasets.length - completeDatasets.length) + " non-complete datasets");
         }
 
-        data.session = session;
-        data.datasetsMap = UtilsService.arrayToMap(completeDatasets, "datasetId");
-        data.jobsMap = UtilsService.arrayToMap(jobs, "jobId");
-        data.labelsMap = UtilsService.arrayToMap(labels, "labelId");
+        data.session.set(session);
+        data.datasetsMap.set(UtilsService.arrayToMap(completeDatasets, "datasetId"));
+        data.jobsMap.set(UtilsService.arrayToMap(jobs, "jobId"));
+        data.labelsMap.set(UtilsService.arrayToMap(labels, "labelId"));
 
-        data.datasetTypeTags = types;
+        data.datasetTypeTags.set(types);
 
         return data;
       }),
@@ -587,12 +585,12 @@ export class SessionResource {
   copySession(sessionData: SessionData, name: string, temporary: boolean): Observable<string> {
     log.info(
       "copying session, original has:",
-      sessionData.datasetsMap.size,
+      sessionData.datasetsMap().size,
       "datasets,",
-      sessionData.jobsMap.size,
+      sessionData.jobsMap().size,
       "jobs",
     );
-    const newSession: Session = clone(sessionData.session);
+    const newSession: Session = clone(sessionData.session());
     newSession.sessionId = null;
     newSession.name = name || "unnamed session";
     newSession.state = SessionState.Import;
@@ -619,14 +617,14 @@ export class SessionResource {
   copyToExistingSession(
     targetSessionId: string,
     sessionData: SessionData,
-    targetLabelsMap: Map<string, Label>,
+    targetLabelsMap: ReadonlyMap<string, Label>,
   ): Observable<Session> {
     // Preserve source labelIds in the destination so that multiple copies of files
     // sharing the same source label collapse onto one destination label. Drift
     // policy: destination wins -- if a label with the same labelId already exists
     // in the target, skip the create and let the copied file attach to whatever
     // the destination's version looks like now.
-    const sourceLabels: Label[] = Array.from(sessionData.labelsMap?.values() ?? []);
+    const sourceLabels: Label[] = Array.from(sessionData.labelsMap().values());
     const labelsToCreate = sourceLabels
       .filter((label: Label) => !targetLabelsMap.has(label.labelId))
       .map((label: Label) => ({ ...label, sessionId: null }));
@@ -634,7 +632,7 @@ export class SessionResource {
     const createLabelsRequest = labelsToCreate.length > 0 ? this.createLabels(targetSessionId, labelsToCreate) : of([]);
 
     // datasets keep their labelIds verbatim -- they now resolve in the destination
-    const oldDatasets = Array.from(sessionData.datasetsMap.values());
+    const oldDatasets = Array.from(sessionData.datasetsMap().values());
     const clones = oldDatasets.map((dataset: Dataset) => {
       const _clone = clone(dataset);
       _clone.sessionId = null;
@@ -656,7 +654,7 @@ export class SessionResource {
         }, new Map());
 
         // create jobs
-        const oldJobs: Job[] = Array.from(sessionData.jobsMap.values());
+        const oldJobs: Job[] = Array.from(sessionData.jobsMap().values());
         const jobCopies = oldJobs
           .filter((oldJob) => !JobService.isRunning(oldJob))
           .map((oldJob: Job) => {
@@ -678,7 +676,7 @@ export class SessionResource {
     );
   }
 
-  private nullifyMissingInputs(job: Job, datasetsMap: Map<string, Dataset>): void {
+  private nullifyMissingInputs(job: Job, datasetsMap: ReadonlyMap<string, Dataset>): void {
     if (job.inputs != null) {
       job.inputs = job.inputs.filter((input) => {
         if (!datasetsMap.has(input.datasetId)) {
@@ -690,10 +688,9 @@ export class SessionResource {
   }
 
   cancelJob(sessionId: string, job: Job) {
-    job.state = JobState.Cancelled;
-    job.stateDetail = "";
-
-    return this.updateJob(sessionId, job);
+    // a copy: the job is the one in jobsMap, and a change in place wouldn't notify the OnPush views
+    // that show it. The job's update event replaces it in the map.
+    return this.updateJob(sessionId, { ...job, state: JobState.Cancelled, stateDetail: "" });
   }
 
   /**

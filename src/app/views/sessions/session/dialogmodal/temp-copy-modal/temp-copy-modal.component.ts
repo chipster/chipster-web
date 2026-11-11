@@ -1,29 +1,24 @@
-import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   templateUrl: "./temp-copy-modal.component.html",
+  imports: [FormsModule],
 })
 export class TempCopyModalComponent implements AfterViewInit {
-  @Input()
-  button1Text: string;
-  @Input()
-  button2Text: string;
-  @Input()
-  description: string;
-  @Input()
-  value: string;
-  @Input()
-  title: string;
-  @Input()
-  message: string;
-  @Input()
-  placeHolder: string;
+  private activeModal = inject(NgbActiveModal);
 
-  @ViewChild("valueInput")
-  valueInput;
+  // set through the modal ref by the code that opens the modal
+  readonly button1Text = signal<string>(undefined);
+  readonly button2Text = signal<string>(undefined);
+  readonly description = signal<string>(undefined);
+  readonly value = signal<string>(undefined);
+  readonly title = signal<string>(undefined);
+  readonly message = signal<string>(undefined);
+  readonly placeHolder = signal<string>(undefined);
 
-  constructor(private activeModal: NgbActiveModal) {}
+  readonly valueInput = viewChild<ElementRef<HTMLInputElement>>("valueInput");
 
   ngAfterViewInit() {
     setTimeout(() => {
@@ -31,14 +26,14 @@ export class TempCopyModalComponent implements AfterViewInit {
       // should be fixed in ng-bootstrap 3.3.0
       // https://github.com/ng-bootstrap/ng-bootstrap/issues/1776
       // https:github.com/ng-bootstrap/ng-bootstrap/issues/2728
-      this.valueInput.nativeElement.focus();
-      this.valueInput.nativeElement.select();
+      this.valueInput().nativeElement.focus();
+      this.valueInput().nativeElement.select();
     });
   }
 
   save(button: string) {
     this.activeModal.close({
-      value: this.value,
+      value: this.value(),
       button,
     });
   }

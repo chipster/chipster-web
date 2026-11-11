@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { Job, JobState } from "chipster-js-common";
 import log from "loglevel";
 import { forkJoin, Observable, of } from "rxjs";
@@ -17,21 +17,19 @@ import { JobService } from "../../sessions/session/job.service";
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class JobsComponent implements OnInit {
-  jobs: Job[];
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private authHttpClient = inject(AuthHttpClientService);
+  private sessionResource = inject(SessionResource);
 
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private authHttpClient: AuthHttpClientService,
-    private sessionResource: SessionResource,
-  ) {}
+  readonly jobs = signal<Job[]>(undefined);
 
   ngOnInit() {
     this.update();
   }
 
   update() {
-    this.jobs = [];
+    this.jobs.set([]);
 
     let sessionDbUrl;
 
@@ -80,7 +78,7 @@ export class JobsComponent implements OnInit {
       )
       .subscribe({
         next: (jobs) => {
-          this.jobs = jobs;
+          this.jobs.set(jobs);
         },
         error: (err) => this.restErrorService.showError("get jobs failed", err),
       });

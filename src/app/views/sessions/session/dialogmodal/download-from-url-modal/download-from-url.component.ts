@@ -1,14 +1,16 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   templateUrl: "./download-from-url.component.html",
+  imports: [FormsModule],
 })
 export class DownloadFromUrlModalComponent {
+  private activeModal = inject(NgbActiveModal);
+
   value = "";
   placeHolder = "https://example.com/example.tsv";
-
-  constructor(private activeModal: NgbActiveModal) {}
 
   save($event): void {
     this.activeModal.close(this.value);

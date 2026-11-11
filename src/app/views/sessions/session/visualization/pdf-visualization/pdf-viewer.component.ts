@@ -1,14 +1,14 @@
 import {
   Component,
   ElementRef,
-  EventEmitter,
-  Input,
-  NgZone,
   OnChanges,
   OnDestroy,
-  Output,
+  OutputEmitterRef,
   SimpleChanges,
-  ViewChild,
+  inject,
+  input,
+  output,
+  viewChild,
 } from "@angular/core";
 import type {
   OnProgressParameters,
@@ -217,27 +217,27 @@ function linkViewer(pdfViewer: PDFViewer, onTarget: (target: ScrollTarget) => vo
   ],
 })
 export class PdfViewerComponent implements OnChanges, OnDestroy {
-  @Input() src: string;
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  readonly src = input<string>(undefined);
   // the page shown when not all pages are shown, starting from 1
-  @Input() page = 1;
+  readonly page = input(1);
   // relative to the size of the page, or to the width of the viewer when the page doesn't fit
-  @Input() zoom = 1;
-  @Input() showAll = false;
+  readonly zoom = input(1);
+  readonly showAll = input(false);
 
-  @Output() loaded = new EventEmitter<PDFDocumentProxy>();
-  @Output() loadFailed = new EventEmitter<unknown>();
-  @Output() loadProgress = new EventEmitter<OnProgressParameters>();
+  readonly loaded = output<PDFDocumentProxy>();
+  readonly loadFailed = output<unknown>();
+  readonly loadProgress = output<OnProgressParameters>();
   // the height of the shown pages with their margins, as pdf.js lays them out, whenever it changes
-  @Output() heightChange = new EventEmitter<number>();
+  readonly heightChange = output<number>();
   // pdf.js changes the page itself too, for example when a link in the pdf is clicked
-  @Output() pageChange = new EventEmitter<number>();
+  readonly pageChange = output<number>();
 
-  @ViewChild("container", { static: true })
-  container: ElementRef<HTMLDivElement>;
+  readonly container = viewChild<ElementRef<HTMLDivElement>>("container");
 
   // pdf.js puts the shown pages in it
-  @ViewChild("viewer", { static: true })
-  viewerElement: ElementRef<HTMLDivElement>;
+  readonly viewerElement = viewChild<ElementRef<HTMLDivElement>>("viewer");
 
   pdfViewer: PDFViewer;
 
@@ -259,29 +259,22 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   private progressTimeout: ReturnType<typeof setTimeout>;
   private destroyed = false;
 
-  constructor(
-    private host: ElementRef<HTMLElement>,
-    private ngZone: NgZone,
-  ) {}
-
   ngOnChanges(changes: SimpleChanges) {
     if (changes.src) {
-      this.load(this.src);
+      this.load(this.src());
       return;
     }
     // pdf.js has the document before its pages, and the pages get these when they are ready
     if (!this.pdfViewer || this.pdfViewer.pagesCount === 0) {
       return;
     }
-    // pdf.js starts rendering, which mustn't run the change detection
-    this.ngZone.runOutsideAngular(() => {
-      if (changes.showAll) {
-        this.updateScrollMode();
-      }
-      if (changes.page && this.page !== this.pdfViewer.currentPageNumber) {
-        this.pdfViewer.currentPageNumber = this.page;
-      }
-    });
+    if (changes.showAll) {
+      this.updateScrollMode();
+    }
+    const page = this.page();
+    if (changes.page && page !== this.pdfViewer.currentPageNumber) {
+      this.pdfViewer.currentPageNumber = page;
+    }
     this.updateScale();
   }
 
@@ -295,35 +288,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
   private async load(src: string) {
     this.clear();
-    const loadingTask = await this.ngZone.runOutsideAngular(async () => {
-      try {
-        this.pdfjs ??= await loadPdfjs();
-        if (this.destroyed || src !== this.src) {
-          return null;
-        }
-        this.pdfViewer ??= this.createViewer();
-        this.worker = getWorker(this.pdfjs.lib);
-        const task = this.pdfjs.lib.getDocument({
-          url: src,
-          worker: this.worker,
-          cMapUrl: assetUrl("cmaps/"),
-          iccUrl: assetUrl("iccs/"),
-          standardFontDataUrl: assetUrl("standard_fonts/"),
-          wasmUrl: assetUrl("wasm/"),
-        });
-        // right away, so that clear() can cancel it
-        this.loadingTask = task;
-        this.loading = true;
-        task.onProgress = (progress: OnProgressParameters) => this.emitProgress(task, progress);
-        return task;
-      } catch (error) {
-        // not for a file that is gone already
-        if (!this.destroyed && src === this.src) {
-          this.emit(this.loadFailed, error);
-        }
-        return null;
-      }
-    });
+    const loadingTask = await this.startLoading(src);
     if (!loadingTask || loadingTask !== this.loadingTask) {
       return;
     }
@@ -342,11 +307,39 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       return;
     }
     this.loading = false;
-    this.ngZone.runOutsideAngular(() => {
-      this.linkService.setDocument(pdf);
-      this.pdfViewer.setDocument(pdf);
-    });
+    this.linkService.setDocument(pdf);
+    this.pdfViewer.setDocument(pdf);
     this.emit(this.loaded, pdf);
+  }
+
+  private async startLoading(src: string): Promise<PDFDocumentLoadingTask> {
+    try {
+      this.pdfjs ??= await loadPdfjs();
+      if (this.destroyed || src !== this.src()) {
+        return null;
+      }
+      this.pdfViewer ??= this.createViewer();
+      this.worker = getWorker(this.pdfjs.lib);
+      const task = this.pdfjs.lib.getDocument({
+        url: src,
+        worker: this.worker,
+        cMapUrl: assetUrl("cmaps/"),
+        iccUrl: assetUrl("iccs/"),
+        standardFontDataUrl: assetUrl("standard_fonts/"),
+        wasmUrl: assetUrl("wasm/"),
+      });
+      // right away, so that clear() can cancel it
+      this.loadingTask = task;
+      this.loading = true;
+      task.onProgress = (progress: OnProgressParameters) => this.emitProgress(task, progress);
+      return task;
+    } catch (error) {
+      // not for a file that is gone already
+      if (!this.destroyed && src === this.src()) {
+        this.emit(this.loadFailed, error);
+      }
+      return null;
+    }
   }
 
   private createViewer(): PDFViewer {
@@ -361,7 +354,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     });
     // the abortSignal is missing from the type declarations of pdf.js
     const options: ConstructorParameters<PdfjsViewer["PDFViewer"]>[0] & { abortSignal: AbortSignal } = {
-      container: this.container.nativeElement,
+      container: this.container().nativeElement,
       eventBus,
       linkService: this.linkService,
       // a 10px margin under each page instead of the borders
@@ -379,7 +372,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       "pagesinit",
       () => {
         this.updateScrollMode();
-        this.pdfViewer.currentPageNumber = this.page;
+        this.pdfViewer.currentPageNumber = this.page();
         this.updateScale();
       },
       { signal },
@@ -403,40 +396,38 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     eventBus.on(
       "pagechanging",
       ({ pageNumber }) => {
-        if (pageNumber !== this.page) {
+        if (pageNumber !== this.page()) {
           this.emit(this.pageChange, pageNumber);
         }
       },
       { signal },
     );
     // the width changes also without a window resize, for example when a panel next to the viewer is opened
-    this.ngZone.runOutsideAngular(() => {
+    /*
+     * The height of the pages mustn't change the width, or this could go back
+     * and forth: the session view keeps the space of its scrollbar for that.
+     */
+    this.resizeObserver = new ResizeObserver(() => {
+      const width = this.measureWidth();
+      if (width !== this.hostWidth) {
+        this.hostWidth = width;
+        this.updateScale();
+      }
       /*
-       * The height of the pages mustn't change the width, or this could go back
-       * and forth: the session view keeps the space of its scrollbar for that.
+       * The height follows the pages, so it doesn't change the scale. But
+       * pdf.js renders only the pages that fit in the container, and decides
+       * that when the pages change, before the height is given to this
+       * element, so it has to look again when all pages are shown.
        */
-      this.resizeObserver = new ResizeObserver(() => {
-        const width = this.measureWidth();
-        if (width !== this.hostWidth) {
-          this.hostWidth = width;
-          this.updateScale();
+      const height = this.host.nativeElement.clientHeight;
+      if (height !== this.hostHeight) {
+        this.hostHeight = height;
+        if (this.pdfViewer.pagesCount > 0) {
+          this.pdfViewer.update();
         }
-        /*
-         * The height follows the pages, so it doesn't change the scale. But
-         * pdf.js renders only the pages that fit in the container, and decides
-         * that when the pages change, before the height is given to this
-         * element, so it has to look again when all pages are shown.
-         */
-        const height = this.host.nativeElement.clientHeight;
-        if (height !== this.hostHeight) {
-          this.hostHeight = height;
-          if (this.pdfViewer.pagesCount > 0) {
-            this.pdfViewer.update();
-          }
-        }
-      });
-      this.resizeObserver.observe(this.host.nativeElement);
+      }
     });
+    this.resizeObserver.observe(this.host.nativeElement);
 
     return pdfViewer;
   }
@@ -449,7 +440,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
    * changes.
    */
   private scrollToTarget({ pageNumber, destArray }: ScrollTarget) {
-    const pageView = this.showAll ? this.pdfViewer.getPageView(pageNumber - 1) : null;
+    const pageView = this.showAll() ? this.pdfViewer.getPageView(pageNumber - 1) : null;
     if (!pageView) {
       return;
     }
@@ -476,7 +467,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
 
   private updateScrollMode() {
     const { ScrollMode } = this.pdfjs.viewer;
-    this.pdfViewer.scrollMode = this.showAll ? ScrollMode.VERTICAL : ScrollMode.PAGE;
+    this.pdfViewer.scrollMode = this.showAll() ? ScrollMode.VERTICAL : ScrollMode.PAGE;
   }
 
   /*
@@ -493,7 +484,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     if (!this.pdfViewer?.pdfDocument || this.pdfViewer.pagesCount === 0 || viewerWidth === 0) {
       return;
     }
-    const pageIndexes = this.showAll
+    const pageIndexes = this.showAll()
       ? Array.from({ length: this.pdfViewer.pagesCount }, (_, index) => index)
       : [this.pdfViewer.currentPageNumber - 1];
     let pageWidth = 0;
@@ -502,9 +493,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       // the width at the scale 1
       pageWidth = Math.max(pageWidth, viewport.clone({ scale: this.pdfjs.lib.PixelsPerInch.PDF_TO_CSS_UNITS }).width);
     }
-    this.ngZone.runOutsideAngular(() => {
-      this.pdfViewer.currentScale = this.zoom * Math.min(1, viewerWidth / pageWidth);
-    });
+    this.pdfViewer.currentScale = this.zoom() * Math.min(1, viewerWidth / pageWidth);
     this.updateLayout();
   }
 
@@ -518,7 +507,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
    * the pages. It's 0 for the scrollbars that are drawn over the content.
    */
   private updateLayout() {
-    const container = this.container.nativeElement;
+    const container = this.container().nativeElement;
     // only a horizontal scrollbar, because the vertical one is hidden
     const padding = container.offsetHeight - container.clientHeight + "px";
     const host = this.host.nativeElement;
@@ -527,7 +516,7 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
     }
 
     // the shown pages: on a single page, pdf.js keeps only that page here
-    const pages = Array.from(this.viewerElement.nativeElement.querySelectorAll<HTMLElement>(":scope > .page"));
+    const pages = Array.from(this.viewerElement().nativeElement.querySelectorAll<HTMLElement>(":scope > .page"));
     // the same margin under each page, from the stylesheet of pdf.js
     const margin = pages.length > 0 ? parseFloat(getComputedStyle(pages[0]).marginBottom) : 0;
     let height = 0;
@@ -567,10 +556,8 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
       const stop = () => worker.destroy();
       closed.then(stop, stop);
     }
-    this.ngZone.runOutsideAngular(() => {
-      this.pdfViewer?.setDocument(null);
-      this.linkService?.setDocument(null);
-    });
+    this.pdfViewer?.setDocument(null);
+    this.linkService?.setDocument(null);
   }
 
   // the file is still being loaded, or a page is being rendered, which the worker prepares
@@ -608,18 +595,17 @@ export class PdfViewerComponent implements OnChanges, OnDestroy {
   }
 
   /*
-   * pdf.js runs outside of Angular, so that its rendering doesn't run the
-   * change detection. Its events are passed on only after pdf.js has finished
-   * what it was doing, because the change detection that follows gives new
-   * inputs to pdf.js. For example, a link in the pdf changes the page before
+   * The events of pdf.js are passed on only after pdf.js has finished what it
+   * was doing, because the change detection that follows gives new inputs to
+   * pdf.js. For example, a link in the pdf changes the page before
    * pdf.js shows it, and a new scale at that point would go back to the
    * previous page. An event can come also while Angular gives the inputs,
    * and the parent can't change its view in the middle of that.
    */
-  private emit<T>(emitter: EventEmitter<T>, value: T) {
+  private emit<T>(emitter: OutputEmitterRef<T>, value: T) {
     queueMicrotask(() => {
       if (!this.destroyed) {
-        this.ngZone.run(() => emitter.emit(value));
+        emitter.emit(value);
       }
     });
   }

@@ -1,6 +1,12 @@
-import { DOCUMENT } from "@angular/common";
-import { AfterViewInit, Component, Inject, Input, OnInit, ViewChild } from "@angular/core";
-import { AbstractControl, UntypedFormBuilder, UntypedFormControl, Validators } from "@angular/forms";
+import { AfterViewInit, Component, OnInit, DOCUMENT, inject, signal, viewChild, ElementRef } from "@angular/core";
+import {
+  AbstractControl,
+  UntypedFormBuilder,
+  UntypedFormControl,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Rule, Session, User } from "chipster-js-common";
 import log from "loglevel";
@@ -18,37 +24,35 @@ import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmod
 @Component({
   templateUrl: "./contact-support-modal.component.html",
   styleUrls: ["./contact-support-modal.component.less"],
+  imports: [FormsModule, ReactiveFormsModule],
 })
 export class ContactSupportModalComponent implements AfterViewInit, OnInit {
+  private activeModal = inject(NgbActiveModal);
+  private sessionWorkerResource = inject(SessionWorkerResource);
+  private restErrorService = inject(RestErrorService);
+  private userService = inject(UserService);
+  private sessionResource = inject(SessionResource);
+  private authenticationService = inject(AuthenticationService);
+  private configService = inject(ConfigService);
+  private dialogModalService = inject(DialogModalService);
+  private fb = inject(UntypedFormBuilder);
+  private document = inject<Document>(DOCUMENT);
+
   public supportForm = this.fb.group({
     message: ["", [Validators.required]],
     email: ["", [Validators.required, Validators.email]],
     attach: ["", [Validators.required]], // force user to select
   });
 
-  @Input()
-  log: string;
+  // set through the modal ref by the code that opens the modal
+  readonly log = signal<string>(undefined);
 
-  @ViewChild("messageTextarea")
-  messageTextarea;
+  readonly messageTextarea = viewChild<ElementRef<HTMLTextAreaElement>>("messageTextarea");
 
-  public session: Session;
+  readonly session = signal<Session>(undefined);
   public user: User;
-  public isVerifiedEmail = false;
+  readonly isVerifiedEmail = signal(false);
   public appId;
-
-  constructor(
-    private activeModal: NgbActiveModal,
-    private sessionWorkerResource: SessionWorkerResource,
-    private restErrorService: RestErrorService,
-    private userService: UserService,
-    private sessionResource: SessionResource,
-    private authenticationService: AuthenticationService,
-    private configService: ConfigService,
-    private dialogModalService: DialogModalService,
-    private fb: UntypedFormBuilder,
-    @Inject(DOCUMENT) private document,
-  ) {}
 
   ngOnInit() {
     this.userService
@@ -61,8 +65,8 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
           return of(null);
         }),
         tap((session) => {
-          this.session = session;
-          if (this.session == null) {
+          this.session.set(session);
+          if (this.session() == null) {
             this.supportForm.patchValue({
               attach: "no",
             });
@@ -76,7 +80,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
             this.supportForm.patchValue({
               email: user.mail,
             });
-            this.isVerifiedEmail = true;
+            this.isVerifiedEmail.set(true);
           }
         }),
         mergeMap(() => this.configService.get(ConfigService.KEY_APP_ID).pipe(take(1))),
@@ -94,7 +98,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
   ngAfterViewInit() {
     // setTimeout() to avoid scrolling in the current Bootstrap version
     setTimeout(() => {
-      this.messageTextarea.nativeElement.focus();
+      this.messageTextarea().nativeElement.focus();
     }, 0);
   }
 
@@ -102,8 +106,8 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     if (this.supportForm.valid) {
       let copySessionId$: Observable<string>;
 
-      if (this.session != null && this.supportForm.value.attach === "yes") {
-        copySessionId$ = this.copyToSupportSessions(this.session.sessionId);
+      if (this.session() != null && this.supportForm.value.attach === "yes") {
+        copySessionId$ = this.copyToSupportSessions(this.session().sessionId);
       } else {
         copySessionId$ = of(null);
       }
@@ -116,7 +120,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
             sessionUrl,
             this.supportForm.value.email,
             this.appId,
-            this.log,
+            this.log(),
           );
         }),
       );
@@ -150,7 +154,7 @@ export class ContactSupportModalComponent implements AfterViewInit, OnInit {
     return this.sessionResource.loadSession(sessionId, true).pipe(
       mergeMap((data: SessionData) => {
         sessionData = data;
-        const name = utcDate + "_" + userId + "_" + sessionData.session.name;
+        const name = utcDate + "_" + userId + "_" + sessionData.session().name;
         return this.sessionResource.copySession(sessionData, name, false);
       }),
       tap((id: string) => {

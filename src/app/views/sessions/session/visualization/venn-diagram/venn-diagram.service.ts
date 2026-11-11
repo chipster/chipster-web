@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { tail, every, includes, sortBy, differenceBy, head, forEach } from "lodash-es";
 import TSVFile from "../../../../../model/tsv/TSVFile";
 import TSVHeaders from "../../../../../model/tsv/TSVHeaders";
@@ -11,12 +11,10 @@ import VennCircle from "./venn-circle";
 import VennDiagramSelection from "./venn-diagram-selection";
 import VennDiagramText from "./venn-diagram-text";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class VennDiagramService {
-  constructor(
-    private twoCircleVenndiagramService: TwoCircleVennDiagramService,
-    private threeCircleVenndiagramService: ThreeCircleVennDiagramService,
-  ) {}
+  private twoCircleVenndiagramService = inject(TwoCircleVennDiagramService);
+  private threeCircleVenndiagramService = inject(ThreeCircleVennDiagramService);
 
   getCircleCenterPoints(fileCount: number, visualizationAreaCenter: Point, radius: number): Array<Point> {
     return fileCount === 2

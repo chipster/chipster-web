@@ -1,19 +1,24 @@
-import { Component, Input, OnChanges } from "@angular/core";
+import { Component, OnChanges, inject, input } from "@angular/core";
 import { JobParameter, Tool } from "chipster-js-common";
 import { clone } from "lodash-es";
 import log from "loglevel";
 import { ToolService } from "../../tools/tool.service";
+import { NgClass, NgStyle } from "@angular/common";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
 
 @Component({
   selector: "ch-dataset-parameter-list",
   templateUrl: "./dataset-parameter-list.component.html",
   styleUrls: ["./dataset-parameter-list.component.less"],
+  imports: [NgClass, NgStyle, LinkButtonComponent],
 })
 export class DatasetParameterListComponent implements OnChanges {
-  @Input() tool: Tool;
-  @Input() parameters: Array<JobParameter>;
-  @Input() parametersLimit: number;
-  @Input() historyMode = false;
+  private toolService = inject(ToolService);
+
+  readonly tool = input<Tool>(undefined);
+  readonly parameters = input<Array<JobParameter>>(undefined);
+  readonly parametersLimit = input<number>(undefined);
+  readonly historyMode = input(false);
 
   noLimit = false;
   showAll = false;
@@ -26,8 +31,6 @@ export class DatasetParameterListComponent implements OnChanges {
   // noinspection JSMismatchedCollectionQueryUpdate
   parameterListForView: Array<JobParameter> = [];
   isDefaultValueMap: Map<JobParameter, boolean> = new Map();
-
-  constructor(private toolService: ToolService) {}
 
   ngOnChanges(changes: any) {
     let parameters = null;
@@ -52,8 +55,9 @@ export class DatasetParameterListComponent implements OnChanges {
   }
 
   updateLimits() {
-    this.limit = this.parametersLimit == null ? this.defaultLimit : this.parametersLimit;
-    this.noLimit = this.parametersLimit < 0;
+    const parametersLimit = this.parametersLimit();
+    this.limit = parametersLimit == null ? this.defaultLimit : parametersLimit;
+    this.noLimit = this.parametersLimit() < 0;
 
     if (this.noLimit || this.showAll) {
       this.limit = this.parameterListForView.length;

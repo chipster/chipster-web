@@ -5,8 +5,13 @@
 // Now importing functions first so that they can be used to manipulate colors if needed, and them
 // importing all the rest, which I guess imports functions again. Seems to work
 
+// Sass deprecates @import, but overriding Bootstrap's variables needs it until Bootstrap
+// supports @use. The deprecation is silenced in angular.json (silenceDeprecations: import)
+// for these two imports. That setting covers every stylesheet, so don't add @import
+// elsewhere, and remove the setting when these two go.
+
 // Include functions first (so you can manipulate colors, SVGs, calc, etc)
-@import "../node_modules/bootstrap/scss/functions";
+@import "bootstrap/scss/functions";
 
 // Override variables
 // shade-color(red, 20%) to darken
@@ -26,4 +31,4 @@ $table-active-color: white;
 $table-active-bg: $primary;
 
 // Import all the bootstrap (functions will be imported again)
-@import "../node_modules/bootstrap/scss/bootstrap";
+@import "bootstrap/scss/bootstrap";

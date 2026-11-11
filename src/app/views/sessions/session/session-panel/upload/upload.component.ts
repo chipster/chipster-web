@@ -1,29 +1,30 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { AfterViewInit, Component, OnInit, inject, input, viewChild, ElementRef } from "@angular/core";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { UploadService } from "../../../../../shared/services/upload.service";
 import { UploadModalComponent } from "./upload-modal.component";
 import { DatasetModalService } from "../../selectiondetails/datasetmodal.service";
 import { SessionData } from "../../../../../model/session/session-data";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 
 @Component({
   selector: "ch-add-dataset-modal",
   templateUrl: "./upload.component.html",
+  imports: [NGB_DROPDOWN_IMPORTS],
 })
 export class UploadComponent implements AfterViewInit, OnInit {
-  @Input() sessionData: SessionData;
+  private modalService = inject(NgbModal);
+  private uploadService = inject(UploadService);
+  private datasetModalService = inject(DatasetModalService);
 
-  @ViewChild("uploadFilesButton") uploadFilesButton;
-  @ViewChild("uploadFolderButton") uploadFolderButton;
+  readonly sessionData = input<SessionData>(undefined);
+
+  readonly uploadFilesButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFilesButton");
+  readonly uploadFolderButton = viewChild<ElementRef<HTMLButtonElement>>("uploadFolderButton");
 
   private flow: any;
   private modalOpen = false;
-  private modalRef: any;
-
-  constructor(
-    private modalService: NgbModal,
-    private uploadService: UploadService,
-    private datasetModalService: DatasetModalService,
-  ) {}
+  private modalRef: NgbModalRef;
+  private modal: UploadModalComponent;
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(this.fileAdded.bind(this), this.fileSuccess.bind(this));
@@ -36,8 +37,9 @@ export class UploadComponent implements AfterViewInit, OnInit {
         size: "lg",
       });
 
-      this.modalRef.componentInstance.sessionId = this.sessionData.session.sessionId;
-      this.modalRef.componentInstance.flow = this.flow;
+      this.modal = this.modalRef.componentInstance as UploadModalComponent;
+      this.modal.sessionId.set(this.sessionData().session().sessionId);
+      this.modal.flow.set(this.flow);
       this.modalOpen = true;
 
       this.modalRef.result.then(
@@ -51,7 +53,7 @@ export class UploadComponent implements AfterViewInit, OnInit {
     }
 
     // notify modal that file file was added
-    this.modalRef.componentInstance.fileAdded(file);
+    this.modal.fileAdded(file);
   }
 
   fileSuccess(_file: any) {
@@ -61,8 +63,8 @@ export class UploadComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    this.flow.assignBrowse(this.uploadFilesButton);
-    this.flow.assignBrowse(this.uploadFolderButton, true);
+    this.flow.assignBrowse(this.uploadFilesButton());
+    this.flow.assignBrowse(this.uploadFolderButton(), true);
   }
 
   downloadFromUrl() {
@@ -70,6 +72,6 @@ export class UploadComponent implements AfterViewInit, OnInit {
   }
 
   mergeSession() {
-    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData);
+    this.datasetModalService.openMergeSessionToCurrentSessionModal(this.sessionData());
   }
 }

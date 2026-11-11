@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { AfterViewInit, Component, OnInit, inject, output, viewChild, ElementRef } from "@angular/core";
+import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import log from "loglevel";
 import { of, throwError } from "rxjs";
 import { mergeMap } from "rxjs/operators";
@@ -16,28 +16,26 @@ import { ImportSessionModalComponent } from "./import-session-modal.component";
   styleUrls: ["./open-session-file.component.less"],
 })
 export class OpenSessionFileComponent implements AfterViewInit, OnInit {
-  @ViewChild("browseFilesButton")
-  browseFilesButton;
+  private errorService = inject(ErrorService);
+  private modalService = inject(NgbModal);
+  private uploadService = inject(UploadService);
+  private sessionWorkerResource = inject(SessionWorkerResource);
+  private sessionResource = inject(SessionResource);
+  private dialogModalService = inject(DialogModalService);
+
+  readonly browseFilesButton = viewChild<ElementRef<HTMLSpanElement>>("browseFilesButton");
 
   private flow;
   private modalOpen = false;
-  private modalRef: any;
-  @Output() done = new EventEmitter();
+  private modalRef: NgbModalRef;
+  private modal: ImportSessionModalComponent;
+  readonly done = output<string[]>();
 
   fileStatus = new Map<any, string>();
   finishedFiles = new Set<any>();
 
   // store warnings here, because fileSuccess() is called for each file and we want to show all of them at once
   warnings = new Map<string, string[]>();
-
-  constructor(
-    private errorService: ErrorService,
-    private modalService: NgbModal,
-    private uploadService: UploadService,
-    private sessionWorkerResource: SessionWorkerResource,
-    private sessionResource: SessionResource,
-    private dialogModalService: DialogModalService,
-  ) {}
 
   ngOnInit() {
     this.flow = this.uploadService.getFlow(this.fileAdded.bind(this), this.fileSuccess.bind(this));
@@ -50,9 +48,10 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
         size: "lg",
       });
 
-      this.modalRef.componentInstance.flow = this.flow;
-      this.modalRef.componentInstance.fileStatus = this.fileStatus;
-      this.modalRef.componentInstance.finishedFiles = this.finishedFiles;
+      this.modal = this.modalRef.componentInstance as ImportSessionModalComponent;
+      this.modal.flow = this.flow;
+      this.modal.fileStatus = this.fileStatus;
+      this.modal.finishedFiles = this.finishedFiles;
       this.modalOpen = true;
 
       this.modalRef.result.then(
@@ -68,7 +67,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     this.warnings = new Map();
 
     // notify the modal that file was added
-    this.modalRef.componentInstance.fileAdded(file);
+    this.modal.fileAdded(file);
   }
 
   fileSuccess(file: any) {
@@ -79,6 +78,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
     file.cancel();
 
     this.fileStatus.set(file, "Extracting session");
+    this.modal?.statusChanged();
     return this.sessionWorkerResource
       .extractSession(sessionId, datasetId)
       .pipe(
@@ -91,11 +91,13 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
           this.warnings.set(file, response.warnings);
 
           this.fileStatus.set(file, "Deleting temporary copy");
+          this.modal?.statusChanged();
           return this.sessionResource.deleteDataset(sessionId, datasetId);
         }),
         mergeMap(() => {
           this.fileStatus.set(file, undefined);
           this.finishedFiles.add(file);
+          this.modal?.statusChanged();
 
           // let the caller know if this was the last one
           if (this.fileStatus.size === this.finishedFiles.size) {
@@ -104,7 +106,7 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
             this.finishedFiles.clear();
             this.done.emit(sessionIds);
             if (this.modalOpen) {
-              this.modalRef.componentInstance.closeModal();
+              this.modal.closeModal();
             }
 
             // if there were warnings
@@ -145,10 +147,11 @@ export class OpenSessionFileComponent implements AfterViewInit, OnInit {
   error(file: any, err) {
     this.fileStatus.set(file, err);
     this.finishedFiles.add(file);
+    this.modal?.statusChanged();
     this.errorService.showError("Failed to open the session file", err);
   }
 
   ngAfterViewInit() {
-    this.flow.assignBrowse(this.browseFilesButton);
+    this.flow.assignBrowse(this.browseFilesButton());
   }
 }

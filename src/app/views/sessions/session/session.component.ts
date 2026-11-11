@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
+import { Component, OnDestroy, OnInit, inject, signal } from "@angular/core";
+import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot, RouterLink } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import {
   Dataset,
@@ -38,6 +38,13 @@ import { SessionDataService } from "./session-data.service";
 import { SessionEventService } from "./session-event.service";
 import { SessionService } from "./session.service";
 import UtilsService from "../../../shared/utilities/utils";
+import { SplitComponent, SplitAreaComponent } from "angular-split";
+import { SessionPanelComponent } from "./session-panel/session-panel.component";
+import { ToolsComponent } from "./tools/tools.component";
+import { SessionDetailsComponent } from "./session-details/session-details.component";
+import { FileComponent } from "./selectiondetails/selected-files/selected-files.component";
+import { SelectionPanelComponent } from "./selection-panel/selection-panel.component";
+import { ToolListAccordionComponent } from "./tools/tool-list/tool-list-accordion.component";
 
 export enum ComponentState {
   LOADING_SESSION = "Loading session...",
@@ -50,47 +57,60 @@ export enum ComponentState {
   selector: "ch-session",
   templateUrl: "./session.component.html",
   styleUrls: ["./session.component.less"],
+  imports: [
+    RouterLink,
+    SplitComponent,
+    SplitAreaComponent,
+    SessionPanelComponent,
+    ToolsComponent,
+    SessionDetailsComponent,
+    FileComponent,
+    SelectionPanelComponent,
+    ToolListAccordionComponent,
+  ],
 })
 export class SessionComponent implements OnInit, OnDestroy {
+  private sessionEventService = inject(SessionEventService);
+  private sessionDataService = inject(SessionDataService);
+  private sessionResource = inject(SessionResource);
+  private sessionService = inject(SessionService);
+  selectionService = inject(SelectionService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private route = inject(ActivatedRoute);
+  private modalService = inject(NgbModal);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private tokenService = inject(TokenService);
+  routeService = inject(RouteService);
+  private settingsService = inject(SettingsService);
+  private userService = inject(UserService);
+  private toolsService = inject(ToolsService);
+  private configService = inject(ConfigService);
+  private toastService = inject(ToastService);
+  private errorService = inject(ErrorService);
+  private getSessionDataService = inject(GetSessionDataService);
+
   sessionData: SessionData;
   tools: Tool[];
   modules: Module[];
   modulesMap: Map<string, Module>;
 
   ComponentState = ComponentState; // for using the enum in template
-  state = ComponentState.LOADING_SESSION;
+  /*
+   * sessionData, tools, modules and modulesMap above are set in the same callback right before the
+   * state becomes ready, and shown only when it is, so this signal notifies the view of them too
+   */
+  readonly state = signal(ComponentState.LOADING_SESSION);
 
-  split3Visible = false;
-  split1Size = 33;
-  split2Size = 67;
-  split3Size = 33;
+  readonly split3Visible = signal(false);
+  readonly split1Size = signal(33);
+  readonly split2Size = signal(67);
+  readonly split3Size = signal(33);
 
   private exampleSessionOwnerUserId: string;
   private PARAM_SOURCE_SESSION = "sourceSession";
 
   private unsubscribe: Subject<null> = new Subject();
-
-  constructor(
-    private sessionEventService: SessionEventService,
-    private sessionDataService: SessionDataService,
-    private sessionResource: SessionResource,
-    private sessionService: SessionService,
-    public selectionService: SelectionService,
-    private selectionHandlerService: SelectionHandlerService,
-    private route: ActivatedRoute,
-    private modalService: NgbModal,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-    private tokenService: TokenService,
-    public routeService: RouteService, // used from template
-    private settingsService: SettingsService,
-    private userService: UserService,
-    private toolsService: ToolsService,
-    private configService: ConfigService,
-    private toastService: ToastService,
-    private errorService: ErrorService,
-    private getSessionDataService: GetSessionDataService,
-  ) {}
 
   ngOnInit(): void {
     this.route.params
@@ -101,7 +121,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     Also this component can be reused, e.g. when a user creates her own copy
     of an example session, she is directed to the new session.
      */
-          this.state = ComponentState.LOADING_SESSION;
+          this.state.set(ComponentState.LOADING_SESSION);
           this.selectionHandlerService.clearSelections();
           this.sessionData = null;
 
@@ -145,13 +165,13 @@ export class SessionComponent implements OnInit, OnDestroy {
           this.saveLatestSession();
 
           // ready to go
-          this.state = ComponentState.READY;
+          this.state.set(ComponentState.READY);
         },
         error: (error: Error) => {
           if (RestErrorService.isNotFound(error)) {
-            this.state = ComponentState.NOT_FOUND;
+            this.state.set(ComponentState.NOT_FOUND);
           } else {
-            this.state = ComponentState.FAIL;
+            this.state.set(ComponentState.FAIL);
             this.restErrorService.showError("Loading session failed", error);
           }
         },
@@ -161,15 +181,15 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.settingsService.showToolsPanel$.pipe(takeUntil(this.unsubscribe)).subscribe({
       next: (showToolsPanel: boolean) => {
         if (showToolsPanel) {
-          this.split3Visible = true;
-          this.split1Size = 30;
-          this.split2Size = 45;
-          this.split3Size = 25;
+          this.split3Visible.set(true);
+          this.split1Size.set(30);
+          this.split2Size.set(45);
+          this.split3Size.set(25);
         } else {
-          this.split3Visible = false;
-          this.split1Size = 33;
-          this.split2Size = 67;
-          this.split3Size = 33;
+          this.split3Visible.set(false);
+          this.split1Size.set(33);
+          this.split2Size.set(67);
+          this.split3Size.set(33);
         }
       },
       error: (err) => this.errorService.showError("tool panel error", err),
@@ -184,10 +204,10 @@ export class SessionComponent implements OnInit, OnDestroy {
    * already.
    */
   cleanUpSession() {
-    if (this.sessionDataService.isReadOnlySession(this.sessionData.session)) {
+    if (this.sessionDataService.isReadOnlySession(this.sessionData.session())) {
       log.info("skip check for temporary-zip-exports because this a read-only session");
     } else {
-      this.sessionData.datasetsMap.forEach((dataset) => {
+      this.sessionData.datasetsMap().forEach((dataset) => {
         dataset.metadataFiles.forEach((mf) => {
           if (mf.name === "temporary-zip-export") {
             const created = UtilsService.parseISOStringToDate(dataset.created);
@@ -202,7 +222,7 @@ export class SessionComponent implements OnInit, OnDestroy {
                 "delete old temporary-zip-export: " + dataset.name + ", state: " + dataset.state + ", age: " + millis,
               );
 
-              this.sessionDataService.deleteDatasets([dataset], this.sessionData.session.sessionId);
+              this.sessionDataService.deleteDatasets([dataset], this.sessionData.session().sessionId);
             } else {
               log.info(
                 "keep recent temporary-zip-export: " +
@@ -249,13 +269,13 @@ export class SessionComponent implements OnInit, OnDestroy {
     If user opens an example session and then deletes it, the client receives a websocket
     event about the deleted rule and deletes that rule from the sessionData.
     */
-    if (this.state === ComponentState.DELETING_SESSION) {
+    if (this.state() === ComponentState.DELETING_SESSION) {
       return of(true);
     }
 
     // temporary session with changes is only case where we might possibly remain
     // on the page and therefore possible want to continue receiving session events
-    if (!(this.sessionData && this.sessionData.session.state === SessionState.TemporaryModified)) {
+    if (!(this.sessionData && this.sessionData.session().state === SessionState.TemporaryModified)) {
       this.sessionEventService.unsubscribe();
     }
 
@@ -265,17 +285,17 @@ export class SessionComponent implements OnInit, OnDestroy {
     }
 
     // no access anymore
-    if (this.sessionDataService.getApplicableRules(this.sessionData.session.rules).length < 1) {
+    if (this.sessionDataService.getApplicableRules(this.sessionData.session().rules).length < 1) {
       return of(true);
     }
 
     // temp session, no changes --> delete
-    if (this.sessionData.session.state === SessionState.TemporaryUnmodified) {
+    if (this.sessionData.session().state === SessionState.TemporaryUnmodified) {
       return this.deleteTempSession();
     }
 
     // temporary session with changes, ask what to do
-    if (this.sessionData.session.state === SessionState.TemporaryModified) {
+    if (this.sessionData.session().state === SessionState.TemporaryModified) {
       const leavePage$ = this.askKeepOrDiscardSession().pipe(
         tap((leave) => {
           if (leave) {
@@ -293,7 +313,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   subscribeToEvents(): void {
     // Services don't have access to ActivatedRoute, so we have to set it
-    this.sessionDataService.setSessionId(this.sessionData.session.sessionId);
+    this.sessionDataService.setSessionId(this.sessionData.session().sessionId);
 
     this.getSessionDataService.setSessionData(this.sessionData);
 
@@ -315,7 +335,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
         if (change.event.type === EventType.Delete && rule.username === this.tokenService.getUsername()) {
           this.sessionEventService.unsubscribe();
-          this.toastService.info(this.sessionData.session.name, "Session deleted");
+          this.toastService.info(this.sessionData.session().name, "Session deleted");
           this.routeService.navigateAbsolute("/sessions");
         }
       });
@@ -373,7 +393,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   getJob(jobId: string): Job {
-    return this.sessionData.jobsMap.get(jobId);
+    return this.sessionData.jobsMap().get(jobId);
   }
 
   exportDatasets(datasets: Dataset[]): void {
@@ -384,8 +404,9 @@ export class SessionComponent implements OnInit, OnDestroy {
     const modalRef = this.modalService.open(JobErrorModalComponent, {
       size: "lg",
     });
-    modalRef.componentInstance.title = title;
-    modalRef.componentInstance.job = job;
+    const modal = modalRef.componentInstance as JobErrorModalComponent;
+    modal.title.set(title);
+    modal.job.set(job);
   }
 
   private getSessionData(sessionId: string): Observable<SessionData> {
@@ -395,7 +416,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           return of(sessionData);
         }
         log.info("read-only sesssion, create copy");
-        return this.sessionResource.copySession(sessionData, sessionData.session.name, true).pipe(
+        return this.sessionResource.copySession(sessionData, sessionData.session().name, true).pipe(
           mergeMap((id) => {
             const queryParams = {};
             queryParams[this.PARAM_SOURCE_SESSION] = sessionId;
@@ -416,10 +437,10 @@ export class SessionComponent implements OnInit, OnDestroy {
   // first-time users see usable labels immediately. The session must be
   // writable; the read-only path above never reaches this step (NEVER).
   private seedDefaultLabelsIfEmpty(sessionData: SessionData): Observable<SessionData> {
-    if (sessionData.labelsMap.size > 0) {
+    if (sessionData.labelsMap().size > 0) {
       return of(sessionData);
     }
-    const sessionId = sessionData.session.sessionId;
+    const sessionId = sessionData.session().sessionId;
     const drafts: Label[] = DEFAULT_LABELS.map((d) => ({
       sessionId,
       labelId: null,
@@ -430,9 +451,11 @@ export class SessionComponent implements OnInit, OnDestroy {
     return this.sessionResource.createLabels(sessionId, drafts).pipe(
       // the bulk endpoint returns the assigned ids in the same order as the posted labels
       tap((created: { labelId: string }[]) => {
+        const labelsMap = new Map(sessionData.labelsMap());
         created.forEach((c, i) => {
-          sessionData.labelsMap.set(c.labelId, { ...drafts[i], labelId: c.labelId });
+          labelsMap.set(c.labelId, { ...drafts[i], labelId: c.labelId });
         });
+        sessionData.labelsMap.set(labelsMap);
       }),
       map(() => sessionData),
       // seeding is best-effort; don't block opening the session if it fails
@@ -444,11 +467,11 @@ export class SessionComponent implements OnInit, OnDestroy {
    * Return true when done.
    */
   private deleteTempSession(): Observable<boolean> {
-    this.state = ComponentState.DELETING_SESSION;
+    this.state.set(ComponentState.DELETING_SESSION);
 
     // the user doesn't need to be notified that the session is deleted
     this.sessionEventService.unsubscribe();
-    return this.sessionDataService.deletePersonalRules(this.sessionData.session).pipe(map(() => true));
+    return this.sessionDataService.deletePersonalRules(this.sessionData.session()).pipe(map(() => true));
   }
 
   /**
@@ -458,9 +481,9 @@ export class SessionComponent implements OnInit, OnDestroy {
    * @param session
    */
   public onDeleteSession(): void {
-    this.state = ComponentState.DELETING_SESSION;
+    this.state.set(ComponentState.DELETING_SESSION);
 
-    this.sessionDataService.deletePersonalRules(this.sessionData.session).subscribe({
+    this.sessionDataService.deletePersonalRules(this.sessionData.session()).subscribe({
       next: () => {
         log.debug("delete session request done");
       },
@@ -478,16 +501,15 @@ export class SessionComponent implements OnInit, OnDestroy {
         "<p>" +
           this.getKeepDialogFirstParagraph() +
           "</p><p>Do you want to save the changes to a new session or just discard them?</p>",
-        this.sessionData.session.name,
+        this.sessionData.session().name,
         keepButton,
         deleteButton,
       )
       .pipe(
         mergeMap((dialogResult) => {
           if (dialogResult.button === keepButton) {
-            this.sessionData.session.name = dialogResult.value;
-            this.sessionData.session.state = SessionState.Ready;
-            return this.sessionService.updateSession(this.sessionData.session).pipe(map(() => true));
+            this.sessionData.session.update((s) => ({ ...s, name: dialogResult.value, state: SessionState.Ready }));
+            return this.sessionService.updateSession(this.sessionData.session()).pipe(map(() => true));
           }
           if (dialogResult.button === deleteButton) {
             return this.deleteTempSession();
@@ -505,7 +527,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   private getKeepDialogFirstParagraph(): string {
-    if (this.sessionData.session.rules.some((rule: Rule) => rule.sharedBy === this.exampleSessionOwnerUserId)) {
+    if (this.sessionData.session().rules.some((rule: Rule) => rule.sharedBy === this.exampleSessionOwnerUserId)) {
       return "You have made changes to a <em>read-only<em> example session.";
     }
     return "You have made changes to a <em>read-only</em> shared session.";
@@ -549,12 +571,12 @@ export class SessionComponent implements OnInit, OnDestroy {
   private saveLatestSession(): void {
     const sourceSession = this.getSourceSessionId();
     if (sourceSession) {
-      this.userService.updateLatestSession(this.sessionData.session.sessionId, sourceSession);
+      this.userService.updateLatestSession(this.sessionData.session().sessionId, sourceSession);
     } else {
-      this.userService.updateLatestSession(this.sessionData.session.sessionId);
+      this.userService.updateLatestSession(this.sessionData.session().sessionId);
     }
 
-    log.info("saving latest session id", this.sessionData.session.sessionId, sourceSession);
+    log.info("saving latest session id", this.sessionData.session().sessionId, sourceSession);
   }
 
   private removeSourceSessionParamIfRegularSession(session: Session): void {

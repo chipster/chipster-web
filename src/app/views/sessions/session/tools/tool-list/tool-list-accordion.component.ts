@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, inject, input, viewChild } from "@angular/core";
 import { Category, Module, Tool } from "chipster-js-common";
 import { cloneDeep } from "lodash-es";
 import { Subject } from "rxjs";
@@ -7,21 +7,26 @@ import { SearchBoxComponent } from "../../../../../shared/components/search-box/
 import { CategoryPipe } from "../../../../../shared/pipes/categorypipe.pipe";
 import { ModulePipe } from "../../../../../shared/pipes/modulepipe.pipe";
 import { ToolPipe } from "../../../../../shared/pipes/toolpipe.pipe";
-import { PipeService } from "../../../../../shared/services/pipeservice.service";
 import { ToolSelectionService } from "../../tool.selection.service";
+import { NgClass } from "@angular/common";
+import { ScrollerComponent } from "../scroller/scroller.component";
+import { ToolListItemComponent } from "./tool-list-item/tool-list-item.component";
 
 @Component({
   selector: "ch-tool-list-accordion",
   templateUrl: "./tool-list-accordion.component.html",
   styleUrls: ["./tool-list-accordion.component.less"],
+  imports: [NgClass, SearchBoxComponent, ScrollerComponent, ToolListItemComponent, CategoryPipe, ModulePipe],
 })
 export class ToolListAccordionComponent implements OnInit {
-  @Input()
-  private sessionData: SessionData;
-  @Input()
-  private toolsArray: Tool[];
-  @Input()
-  private modulesArray: Module[];
+  private modulePipe = inject(ModulePipe);
+  private categoryPipe = inject(CategoryPipe);
+  private toolPipe = inject(ToolPipe);
+  private toolSelectionService = inject(ToolSelectionService);
+
+  readonly sessionData = input<SessionData>(undefined);
+  readonly toolsArray = input<Tool[]>(undefined);
+  readonly modulesArray = input<Module[]>(undefined);
 
   // FIXME after tool state refactoring
   // @Input()
@@ -31,8 +36,7 @@ export class ToolListAccordionComponent implements OnInit {
   // @Output()
   // private selectToolOutput = new EventEmitter<ToolSelection>();
 
-  @ViewChild("searchBox")
-  private searchBox: SearchBoxComponent;
+  private readonly searchBox = viewChild<SearchBoxComponent>("searchBox");
 
   modules: Array<Module> = [];
   tools: Array<Tool> = [];
@@ -44,15 +48,10 @@ export class ToolListAccordionComponent implements OnInit {
 
   selectTool$ = new Subject();
 
-  constructor(
-    private pipeService: PipeService,
-    private toolSelectionService: ToolSelectionService,
-  ) {}
-
   ngOnInit() {
     // TODO why copies?
-    this.tools = cloneDeep(this.toolsArray);
-    this.modules = cloneDeep(this.modulesArray);
+    this.tools = cloneDeep(this.toolsArray());
+    this.modules = cloneDeep(this.modulesArray());
 
     // FIXME after tool state refactoring
     // trigger parameter validation
@@ -80,15 +79,12 @@ export class ToolListAccordionComponent implements OnInit {
   }
 
   selectFirstVisible() {
-    const filteredModules = new ModulePipe(this.pipeService).transform(this.modules, this.searchTool);
+    const filteredModules = this.modulePipe.transform(this.modules, this.searchTool);
     if (filteredModules && !filteredModules.includes(this.selectedModule) && filteredModules[0]) {
       this.selectModule(filteredModules[0]);
     }
 
-    const filteredCategories = new CategoryPipe(this.pipeService).transform(
-      this.selectedModule.categories,
-      this.searchTool,
-    );
+    const filteredCategories = this.categoryPipe.transform(this.selectedModule.categories, this.searchTool);
     if (filteredCategories && filteredCategories.indexOf(this.selectedCategory) < 0 && filteredCategories[0]) {
       this.selectCategory(filteredCategories[0]);
     }
@@ -115,7 +111,7 @@ export class ToolListAccordionComponent implements OnInit {
 
   searchEnter() {
     // select the first result
-    const visibleTools = new ToolPipe(this.pipeService).transform(this.selectedCategory.tools, this.searchTool);
+    const visibleTools = this.toolPipe.transform(this.selectedCategory.tools, this.searchTool);
     if (visibleTools[0]) {
       this.searchTool = null;
       // this.selectTool(visibleTools[0].name.id);
@@ -125,7 +121,7 @@ export class ToolListAccordionComponent implements OnInit {
 
   openChange(isOpen) {
     if (isOpen) {
-      this.searchBox.focus();
+      this.searchBox().focus();
     }
   }
 }

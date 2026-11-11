@@ -6,7 +6,7 @@
     <div>
       <!-- file name -->
       @if (selectionService.selectedDatasets.length === 1) {
-        <span class="h6">{{ datasetName }}</span>
+        <span class="h6">{{ datasetName() }}</span>
       }
 
       <!-- context dropdown -->
@@ -120,6 +120,9 @@
 
   <!-- visualization tabs -->
   @if (selectionService.selectedDatasets.length > 0) {
-    <ch-visualizations (scrollFix)="doScrollFix.emit()" [sessionData]="sessionData" [tools]="tools"></ch-visualizations>
+    <ch-visualizations
+      (scrollFix)="doScrollFix.emit()"
+      [sessionData]="sessionData()"
+      [tools]="tools()"></ch-visualizations>
   }
 </div>

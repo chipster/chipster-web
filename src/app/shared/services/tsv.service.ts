@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Observable } from "rxjs";
@@ -13,12 +13,10 @@ import { TypeTagService } from "./typetag.service";
 
 const MAX_HEADER_LENGTH = 64 * 1024;
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class TsvService {
-  constructor(
-    private fileResource: FileResource,
-    private typeTagService: TypeTagService,
-  ) {}
+  private fileResource = inject(FileResource);
+  private typeTagService = inject(TypeTagService);
 
   getTSV(sessionId: string, dataset: Dataset): Observable<any> {
     return this.fileResource.getData(sessionId, dataset);
@@ -34,7 +32,7 @@ export class TsvService {
   }
 
   getTSV2File(dataset: Dataset, sessionData: SessionData, maxBytes?: number): Observable<TSV2File> {
-    return this.fileResource.getLimitedData(sessionData.session.sessionId, dataset, maxBytes).pipe(
+    return this.fileResource.getLimitedData(sessionData.session().sessionId, dataset, maxBytes).pipe(
       map((tsvData: any) => {
         const tsvArray = d3.tsvParseRows(tsvData);
         return this.getTSV2FileFromArray(dataset, sessionData, tsvArray);

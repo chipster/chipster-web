@@ -1,18 +1,22 @@
-import { Component, Input } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Tool } from "chipster-js-common";
 import { ToolService } from "../../sessions/session/tools/tool.service";
+import { NGB_NAV_IMPORTS } from "../../../shared/directives/nav-outlet-items.directive";
+import { ManualComponent } from "../manual.component";
+import { ToolSourceComponent } from "../../../shared/components/tool-source/tool-source.component";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
   selector: "ch-manual-modal-component",
   templateUrl: "./manual-modal.component.html",
   styleUrls: ["./manual-modal.component.less"],
+  imports: [NGB_NAV_IMPORTS, ManualComponent, ToolSourceComponent, AsyncPipe],
 })
 export class ManualModalComponent {
-  @Input() tool: Tool;
+  activeModal = inject(NgbActiveModal);
+  toolService = inject(ToolService);
 
-  constructor(
-    public activeModal: NgbActiveModal,
-    public toolService: ToolService,
-  ) {}
+  // set through the modal ref by the code that opens the modal
+  readonly tool = signal<Tool>(undefined);
 }

@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { UntypedFormGroup } from "@angular/forms";
+import { Component, ElementRef, OnInit, computed, inject, viewChild, signal } from "@angular/core";
+import { UntypedFormGroup, FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
 import { map, mergeMap, tap } from "rxjs/operators";
@@ -13,49 +13,47 @@ import { ConfigService } from "../../shared/services/config.service";
 import { NewsService } from "../../shared/services/news.service";
 import { RouteService } from "../../shared/services/route.service";
 import { OidcConfig } from "./oidc-config";
+import { AuthButtonComponent } from "./auth-button.component";
 
 @Component({
   selector: "ch-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.less"],
+  imports: [AuthButtonComponent, FormsModule],
 })
 export class LoginComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private authenticationService = inject(AuthenticationService);
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private routeService = inject(RouteService);
+  private tokenService = inject(TokenService);
+  private errorService = inject(ErrorService);
+  private oidcService = inject(OidcService);
+  private newsService = inject(NewsService);
+
   static CONF_KEY_JAAS_DESCRIPTION = "jaas-description";
 
   // hide this login page initially to avoid flash of it when returning from the SSO and
   // redirecting immediately
-  show = false;
-  initFailed = false;
-  error: string;
-  appName: string;
+  readonly show = signal(false);
+  readonly initFailed = signal(false);
+  readonly error = signal<string>(undefined);
+  readonly appName = signal<string>(undefined);
 
-  showLoginForm = false;
+  readonly showLoginForm = signal(false);
 
   private returnUrl: string;
   public ssoLoginUrl: string;
 
-  @ViewChild("myForm")
-  private myForm: UntypedFormGroup;
+  private readonly myForm = viewChild<UntypedFormGroup>("myForm");
 
-  @ViewChild("usernameInput")
-  private usernameInput: ElementRef;
-  oidcConfigs: OidcConfig[];
+  private readonly usernameInput = viewChild<ElementRef>("usernameInput");
+  readonly oidcConfigs = signal<OidcConfig[]>(undefined);
 
-  public multipleLoginMethods = false;
+  readonly multipleLoginMethods = computed(() => this.oidcConfigs()?.length > 0);
 
-  jaasDescription: string;
-
-  constructor(
-    private route: ActivatedRoute,
-    private authenticationService: AuthenticationService,
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private routeService: RouteService,
-    private tokenService: TokenService,
-    private errorService: ErrorService,
-    private oidcService: OidcService,
-    private newsService: NewsService,
-  ) {}
+  readonly jaasDescription = signal<string>(undefined);
 
   ngOnInit() {
     // return url is needed in all cases, so start with it
@@ -80,7 +78,7 @@ export class LoginComponent implements OnInit {
             },
             error: (error) => {
               log.warn("checking token failed", error);
-              this.initFailed = true;
+              this.initFailed.set(true);
               this.restErrorService.showError("Initializing login page failed", error);
             },
           });
@@ -98,27 +96,26 @@ export class LoginComponent implements OnInit {
       .get(ConfigService.KEY_APP_NAME)
       .pipe(
         tap((appName) => {
-          this.appName = appName;
+          this.appName.set(appName);
         }),
         mergeMap(() => this.configService.get(LoginComponent.CONF_KEY_JAAS_DESCRIPTION)),
         tap((desc) => {
-          this.jaasDescription = desc;
+          this.jaasDescription.set(desc);
         }),
         mergeMap(() => this.oidcService.getOidcConfigs$()),
         tap((configs: OidcConfig[]) => {
-          this.oidcConfigs = configs;
-          this.multipleLoginMethods = this.oidcConfigs != null && this.oidcConfigs.length > 0;
-          this.showLoginForm = !this.multipleLoginMethods;
+          this.oidcConfigs.set(configs);
+          this.showLoginForm.set(!this.multipleLoginMethods());
 
           // everything ready, show login
-          this.show = true;
+          this.show.set(true);
         }),
       )
       .subscribe({
         error: (error) => {
           this.restErrorService.showError(error, "Initializing login page failed");
           log.warn("get configuration failed", error);
-          this.initFailed = true;
+          this.initFailed.set(true);
         },
       });
   }
@@ -133,15 +130,15 @@ export class LoginComponent implements OnInit {
   }
 
   openLocalLogin() {
-    this.showLoginForm = true;
+    this.showLoginForm.set(true);
     // allow Angular to create the element first
     setTimeout(() => {
-      this.usernameInput.nativeElement.focus();
+      this.usernameInput().nativeElement.focus();
     }, 0);
   }
 
   login() {
-    this.authenticationService.login(this.myForm.value.username, this.myForm.value.password).subscribe({
+    this.authenticationService.login(this.myForm().value.username, this.myForm().value.password).subscribe({
       next: () => {
         // Route to Session creation page
         log.info("logged in");
@@ -150,9 +147,9 @@ export class LoginComponent implements OnInit {
       },
       error: (errorResponse: HttpErrorResponse) => {
         if (RestErrorService.isForbidden(errorResponse)) {
-          this.error = "Incorrect username or password";
+          this.error.set("Incorrect username or password");
         } else {
-          this.error = "Connecting to authentication service failed";
+          this.error.set("Connecting to authentication service failed");
           log.error(errorResponse);
         }
       },
@@ -162,20 +159,17 @@ export class LoginComponent implements OnInit {
   // Hack for the Enter key press for the button type='button'
   keyDownFunction(event) {
     if (event.keyCode === 13) {
-      if (this.myForm.value.username && this.myForm.value.password) {
+      const myForm = this.myForm();
+      if (myForm.value.username && myForm.value.password) {
         this.login();
-      } else if (!this.myForm.value.username && !this.myForm.value.password) {
-        this.error = "Please enter username and password to log in";
-      } else if (!this.myForm.value.username) {
-        this.error = "Please enter username";
-      } else if (!this.myForm.value.password) {
-        this.error = "Please enter password";
+      } else if (!myForm.value.username && !myForm.value.password) {
+        this.error.set("Please enter username and password to log in");
+      } else if (!myForm.value.username) {
+        this.error.set("Please enter username");
+      } else if (!myForm.value.password) {
+        this.error.set("Please enter password");
       }
     }
-  }
-
-  getOidcConfigs() {
-    return this.oidcConfigs;
   }
 
   oidcLogin(oidc: OidcConfig) {
@@ -196,7 +190,7 @@ export class LoginComponent implements OnInit {
   }
 
   backToAuthSelect() {
-    this.showLoginForm = false;
+    this.showLoginForm.set(false);
   }
 
   testOidcConfigs: OidcConfig[] = [

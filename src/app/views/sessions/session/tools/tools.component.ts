@@ -1,13 +1,13 @@
-import { DOCUMENT } from "@angular/common";
-import { Component, Inject, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, OnDestroy, OnInit, DOCUMENT, computed, inject, input, signal, viewChild } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
-import { Category, Dataset, Job, Module, SessionEvent, Tool } from "chipster-js-common";
-import { NgSelectComponent } from "@ng-select/ng-select";
+import { Category, Dataset, Module, SessionEvent, Tool } from "chipster-js-common";
+import { NgSelectComponent, NgLabelTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
 import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
 import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
-import { filter, map, mergeMap, startWith, takeUntil } from "rxjs/operators";
+import { filter, map, startWith, switchMap, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { SettingsService } from "../../../../shared/services/settings.service";
@@ -49,6 +49,12 @@ import {
 import { ParametersModalComponent } from "./parameters-modal/parameters-modal.component";
 import { ToolService } from "./tool.service";
 import { SchedulerResource } from "../../../../shared/resources/scheduler-resource";
+import { FormsModule } from "@angular/forms";
+import { NgClass } from "@angular/common";
+import { CounterSpinnerComponent } from "./counter-spinner/counter-spinner.component";
+import { ToolListItemComponent } from "./tool-list/tool-list-item/tool-list-item.component";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../shared/directives/dropdown-close.directive";
+import { LinkButtonComponent } from "../link-button/link-button.component";
 
 interface ToolSearchListItem {
   moduleName: string;
@@ -71,58 +77,114 @@ enum ModuleSelectionMode {
   templateUrl: "./tools.component.html",
   styleUrls: ["./tools.component.less"],
   providers: [NgbDropdownConfig],
+  imports: [
+    NgSelectComponent,
+    FormsModule,
+    NgLabelTemplateDirective,
+    NgOptionTemplateDirective,
+    NgClass,
+    CounterSpinnerComponent,
+    ToolListItemComponent,
+    NGB_DROPDOWN_IMPORTS,
+    LinkButtonComponent,
+  ],
 })
 export class ToolsComponent implements OnInit, OnDestroy {
+  private document = inject<Document>(DOCUMENT);
+  settingsService = inject(SettingsService);
+  private toolSelectionService = inject(ToolSelectionService);
+  selectionService = inject(SelectionService);
+  private jobService = inject(JobService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private sessionEventService = inject(SessionEventService);
+  private sessionDataService = inject(SessionDataService);
+  toolService = inject(ToolService);
+  private modalService = inject(NgbModal);
+  private toastService = inject(ToastService);
+  private errorService = inject(ErrorService);
+  private datasetModalService = inject(DatasetModalService);
+  private dialogModalService = inject(DialogModalService);
+  private store = inject<Store<any>>(Store);
+  private ngbModal = inject(NgbModal);
+  private schedulerResource = inject(SchedulerResource);
+  private hotkeyService = inject(HotkeyService);
+
   public readonly categoryElementIdPrefix = "category-button-";
   public readonly toolElementIdPrefix = "tool-button-";
 
-  @Input()
-  public sessionData: SessionData;
+  public readonly sessionData = input<SessionData>(undefined);
 
-  @Input()
-  private toolsArray: Tool[]; // stupid name, but tools used for internal copy
+  readonly toolsArray = input<Tool[]>(undefined); // stupid name, but tools used for internal copy
 
-  @Input()
-  private modulesArray: Module[]; // stupid name, but modules used for internal copy
+  readonly modulesArray = input<Module[]>(undefined); // stupid name, but modules used for internal copy
 
-  @Input()
-  private modulesMap: Map<string, Module>;
+  readonly modulesMap = input<Map<string, Module>>(undefined);
 
-  @ViewChild("searchBox")
-  searchBox;
-
-  @ViewChild("searchTool")
-  searchTool: NgSelectComponent;
+  readonly searchTool = viewChild<NgSelectComponent>("searchTool");
 
   private readonly unregisterHotkeys: Array<() => void> = [];
 
   private toolsMap: Map<string, Tool>;
 
-  public selectedTool: SelectedTool;
-  public validatedTool: ValidatedTool;
+  // signals of the store, because other views select tools too, e.g. "Select tool" in the file details
+  public readonly selectedTool = this.store.selectSignal<SelectedTool>((state) => state.selectedTool);
+  public readonly validatedTool = this.store.selectSignal<ValidatedTool>((state) => state.validatedTool);
 
   public toolSearchList: Array<ToolSearchListItem>;
 
-  public runEnabled: boolean;
-  public runIsDropdown: boolean;
-  public defineHintVisible = false;
-  public paramButtonWarning: boolean;
-  public paramButtonChanged: boolean;
-  public runningJobs = 0;
-  public jobList: Job[];
+  // the buttons show the validation of the selected tool: a selection clears the validated tool in
+  // the store and cancels the parameter population of an earlier one (the switchMap below), so the
+  // id check is a guard
+  public readonly validatedToolIsSelected = computed(() => {
+    const tool = this.validatedTool();
+    return tool != null && tool.tool.name.id === this.selectedTool()?.tool.name.id;
+  });
+
+  // the state of the buttons, computed from the validated tool
+  public readonly runIsDropdown = computed(() => {
+    const tool = this.validatedTool();
+    return tool != null && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
+  });
+  public readonly runEnabled = computed(() => {
+    const tool = this.validatedTool();
+    return (
+      tool != null &&
+      tool.resourcesValidation.valid &&
+      (tool.singleJobValidation.valid || tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid)
+    );
+  });
+  public readonly paramButtonChanged = computed(() =>
+    this.toolSelectionService.parametersHaveBeenChanged(this.validatedTool()),
+  );
+  public readonly defineHintVisible = computed(() => {
+    const tool = this.validatedTool();
+    return (
+      tool != null &&
+      tool.sampleGroups.singleEndSamples.length < 1 &&
+      tool.sampleGroups.pairedEndSamples.length < 1 &&
+      tool.sampleGroups.pairMissingSamples.length < 1
+    );
+  });
+  // job events update jobsMap
+  public readonly runningJobs = computed(() =>
+    JobService.runningJobCount(this.sessionDataService.getJobList(this.sessionData())),
+  );
 
   modules: Array<Module> = [];
 
-  selectedModule: Module = null; // used in modal to keep track of which module has been selected
-  selectedCategory: Category = null; // used in modal to keep track of which category has been selected
+  // signals, because selecting a tool elsewhere, e.g. "Select tool" in the file details, changes them too
+  readonly selectedModule = signal<Module>(null); // used in modal to keep track of which module has been selected
+  readonly selectedCategory = signal<Category>(null); // used in modal to keep track of which category has been selected
 
   public ModuleSelectionMode = ModuleSelectionMode; // for template references
   public moduleSelectionMode: ModuleSelectionMode = ModuleSelectionMode.Dropdown;
   public toolsetTitleVisible = true;
 
-  compactToolList = true;
+  // a setting of SettingsService, like the ones the settings modal changes
+  readonly compactToolListSetting = toSignal(this.settingsService.compactToolList$, { requireSync: true });
 
-  public searchBoxModel: ToolSearchListItem;
+  // cleared in a setTimeout
+  public readonly searchBoxModel = signal<ToolSearchListItem>(null);
   private lastJobStartedToast: Toast;
 
   // use to signal that parameters have been changed and need to be validated
@@ -133,29 +195,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
   manualModalRef: any;
 
   parametersModalRef: NgbModalRef;
-  private jobsModalRef: NgbModalRef | null = null;
+  // the jobs modal of toggleJobs() while it is open or opening
+  private jobsModal: Promise<NgbModalRef> | null = null;
 
-  constructor(
-    @Inject(DOCUMENT) private document: any,
-    public settingsService: SettingsService,
-    private toolSelectionService: ToolSelectionService,
-    public selectionService: SelectionService,
-    private jobService: JobService,
-    private selectionHandlerService: SelectionHandlerService,
-    private sessionEventService: SessionEventService,
-    private sessionDataService: SessionDataService,
-    public toolService: ToolService,
-    private modalService: NgbModal,
-    private toastService: ToastService,
-    private errorService: ErrorService,
-    private datasetModalService: DatasetModalService,
-    private dialogModalService: DialogModalService,
-    private store: Store<any>,
-    dropdownConfig: NgbDropdownConfig,
-    private ngbModal: NgbModal,
-    private schedulerResource: SchedulerResource,
-    private hotkeyService: HotkeyService,
-  ) {
+  constructor() {
+    const dropdownConfig = inject(NgbDropdownConfig);
+
     // prevent dropdowns from closing on click inside the dropdown
     dropdownConfig.autoClose = "outside";
   }
@@ -163,15 +208,11 @@ export class ToolsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // TODO why the copies?
     // this.tools = cloneDeep(this.toolsArray);
-    this.modules = cloneDeep(this.modulesArray);
+    this.modules = cloneDeep(this.modulesArray());
 
     this.toolSearchList = this.createToolSearchList();
 
     this.subscribeToToolEvents();
-
-    this.updateJobs();
-
-    this.subscribeToJobEvents();
 
     if (this.modules[0] != null) {
       this.selectModuleAndFirstCategoryAndFirstTool(this.modules[0]);
@@ -179,10 +220,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
       this.errorService.showError("Cannot select module: " + this.modules, null);
     }
 
-    this.toolsMap = new Map(this.toolsArray.map((tool: Tool) => [tool.name.id, tool]));
+    this.toolsMap = new Map(this.toolsArray().map((tool: Tool) => [tool.name.id, tool]));
 
     this.unregisterHotkeys.push(
-      this.hotkeyService.register("t", "Find tool", () => this.searchTool?.open()),
+      this.hotkeyService.register("t", "Find tool", () => this.searchTool()?.open()),
       this.hotkeyService.register("j", "Open jobs", () => this.toggleJobs()),
     );
   }
@@ -197,6 +238,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
     if (this.manualModalRef != null) {
       this.manualModalRef.close();
     }
+    // its outputs are subscribed by this component
+    if (this.parametersModalRef != null) {
+      this.parametersModalRef.close();
+    }
   }
 
   dropDownSelectModule(module: Module) {
@@ -204,22 +249,22 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectModule(module: Module) {
-    this.selectedModule = module;
+    this.selectedModule.set(module);
   }
 
   selectModuleAndFirstCategoryAndFirstTool(module: Module) {
-    this.selectedModule = module;
+    this.selectedModule.set(module);
     if (module.categories.length > 0) {
       this.selectCategoryAndFirstTool(module.categories[0]);
     }
   }
 
   selectCategory(category: Category) {
-    this.selectedCategory = category;
+    this.selectedCategory.set(category);
   }
 
   selectCategoryAndFirstTool(category: Category) {
-    this.selectedCategory = category;
+    this.selectedCategory.set(category);
 
     if (category.tools.length > 0) {
       this.selectTool(category.tools[0]);
@@ -227,7 +272,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   selectTool(tool: Tool) {
-    this.toolSelectionService.selectTool(this.selectedModule, this.selectedCategory, tool);
+    this.toolSelectionService.selectTool(this.selectedModule(), this.selectedCategory(), tool);
   }
 
   setBindings(toolWithInputs: SelectedToolWithInputs) {
@@ -249,26 +294,22 @@ export class ToolsComponent implements OnInit, OnDestroy {
     }
   }
 
-  openChange(isOpen) {
-    if (isOpen) {
-      this.searchBox.focus();
-    }
-  }
-
   runJob(runForEach: boolean) {
+    const tool = this.validatedTool();
     if (runForEach) {
-      this.jobService.runForEach(this.validatedTool, this.sessionData);
-      this.showRunJobToaster(this.validatedTool.selectedDatasets.length);
+      this.jobService.runForEach(tool, this.sessionData());
+      this.showRunJobToaster(tool.selectedDatasets.length);
     } else {
-      this.jobService.runJob(this.validatedTool);
+      this.jobService.runJob(tool);
       this.showRunJobToaster();
     }
   }
 
   runForEachSample() {
-    this.jobService.runForEachSample(this.validatedTool, this.sessionData);
+    const tool = this.validatedTool();
+    this.jobService.runForEachSample(tool, this.sessionData());
 
-    this.showRunJobToaster(this.validatedTool.sampleGroups.pairedEndSamples.length);
+    this.showRunJobToaster(tool.sampleGroups.pairedEndSamples.length);
   }
 
   private showRunJobToaster(jobCount = 1) {
@@ -283,21 +324,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateJobs() {
-    this.jobList = this.sessionDataService.getJobList(this.sessionData);
-    this.runningJobs = this.jobList.reduce((runningCount, job) => {
-      if (JobService.isRunning(job)) {
-        return runningCount + 1;
-      }
-      return runningCount;
-    }, 0);
-  }
-
   openManualModal() {
     this.manualModalRef = this.modalService.open(ManualModalComponent, {
       size: "lg",
     });
-    this.manualModalRef.componentInstance.tool = this.selectedTool.tool;
+    const modal = this.manualModalRef.componentInstance as ManualModalComponent;
+    modal.tool.set(this.selectedTool().tool);
   }
 
   private createToolSearchList(): ToolSearchListItem[] {
@@ -343,26 +375,20 @@ export class ToolsComponent implements OnInit, OnDestroy {
     // scroll to latest jobs at top, if some other job was selected before
     this.selectionHandlerService.setJobSelection([]);
 
-    this.dialogModalService.openJobsModal(
-      this.sessionDataService.getJobList(this.sessionData),
-      this.toolsArray,
-      this.sessionData,
-    );
+    this.dialogModalService.openJobsModal(this.toolsArray(), this.sessionData());
   }
 
   public toggleJobs() {
-    if (this.jobsModalRef) {
-      this.jobsModalRef.close();
+    if (this.jobsModal) {
+      this.jobsModal.then((modalRef) => modalRef.close());
     } else {
       this.selectionHandlerService.setJobSelection([]);
-      this.jobsModalRef = this.dialogModalService.openJobsModal(
-        this.sessionDataService.getJobList(this.sessionData),
-        this.toolsArray,
-        this.sessionData,
+      this.jobsModal = this.dialogModalService.openJobsModal(this.toolsArray(), this.sessionData());
+      this.jobsModal.then((modalRef) =>
+        modalRef.hidden.subscribe(() => {
+          this.jobsModal = null;
+        }),
       );
-      this.jobsModalRef.hidden.subscribe(() => {
-        this.jobsModalRef = null;
-      });
     }
   }
 
@@ -376,7 +402,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   public searchBoxBlur() {
-    this.searchBoxModel = null;
+    this.searchBoxModel.set(null);
   }
 
   private subscribeToToolEvents() {
@@ -388,7 +414,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           // get the tool from categroy based on the id
           // other parts of the UI may have their own instances of tools,
           // which don't have the saved parameter values
-          const module = this.modulesMap.get(t.moduleId);
+          const module = this.modulesMap().get(t.moduleId);
 
           if (module == null) {
             this.errorService.showSimpleError(
@@ -421,22 +447,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
           const toolElementId = this.toolElementIdPrefix + t.toolId;
 
           setTimeout(() => {
-            this.searchBoxModel = null;
+            this.searchBoxModel.set(null);
             this.document.getElementById(toolElementId).focus();
           });
         }
-      });
-
-    // subscribe to selected tool
-    this.store
-      .select("selectedTool")
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe((t: SelectedTool) => {
-        this.selectedTool = t;
-        this.runEnabled = false;
-        this.paramButtonWarning = false;
-        this.paramButtonChanged = false;
-        this.runIsDropdown = false;
       });
 
     const selectedDatasetsContentsUpdated$ = this.sessionEventService
@@ -452,13 +466,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
           const uptodateDatasets = selectedDatasets.map((dataset): Dataset =>
-            this.sessionData.datasetsMap.get(dataset.datasetId),
+            this.sessionData().datasetsMap().get(dataset.datasetId),
           );
 
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,
             payload: {
-              inputBindings: this.toolService.bindInputs(this.sessionData, selectedTool.tool, uptodateDatasets),
+              inputBindings: this.toolService.bindInputs(this.sessionData(), selectedTool.tool, uptodateDatasets),
               selectedDatasets,
               ...selectedTool,
             },
@@ -528,11 +542,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.unsubscribe),
         filter((value) => value !== null),
-        mergeMap((toolWithInputs: SelectedToolWithValidatedInputs) =>
-          // populate params is async, and returns the same tool with params populated
-          // if there are no params, just return the same tool as observable
+        // populate params is async, and returns the same tool with params populated
+        // if there are no params, just return the same tool as observable.
+        // switchMap, so that a population of an earlier selection or file selection doesn't finish
+        // after the latest one and walk the rest of the chain with the earlier bindings
+        switchMap((toolWithInputs: SelectedToolWithValidatedInputs) =>
           toolWithInputs.tool.parameters.length > 0
-            ? this.toolSelectionService.populateParameters(toolWithInputs, this.sessionData)
+            ? this.toolSelectionService.populateParameters(toolWithInputs, this.sessionData())
             : of(toolWithInputs),
         ),
       )
@@ -617,7 +633,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
           if (toolWithValidatedResources == null) {
             return null;
           }
-          return this.toolSelectionService.getValidatedTool(toolWithValidatedResources, this.sessionData);
+          return this.toolSelectionService.getValidatedTool(toolWithValidatedResources, this.sessionData());
         }),
       )
       .subscribe((validatedTool: ValidatedTool) => {
@@ -633,48 +649,27 @@ export class ToolsComponent implements OnInit, OnDestroy {
         }
       });
 
-    // subscribe to validated tool
+    // the open parameters modal shows the validated tool too
     this.store
       .select("validatedTool")
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((tool: ValidatedTool) => {
-        this.validatedTool = tool;
-
-        // componentInstance is undefined for closed modal
-        if (this.parametersModalRef?.componentInstance != null) {
-          this.parametersModalRef.componentInstance.validatedTool = this.validatedTool;
+        // componentInstance is undefined for closed modal. The modal keeps the last validated tool
+        // while there is none, its template needs one, and closes if another tool got selected,
+        // e.g. with the hotkey of the tool search
+        const modal = this.parametersModalRef?.componentInstance as ParametersModalComponent;
+        if (modal != null && tool != null) {
+          if (tool.tool.name.id === modal.validatedTool().tool.name.id) {
+            modal.validatedTool.set(tool);
+          } else {
+            this.parametersModalRef.close();
+          }
         }
-
-        this.runIsDropdown = tool && (tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
-
-        this.runEnabled =
-          tool &&
-          tool.resourcesValidation.valid &&
-          (tool.singleJobValidation.valid || tool.runForEachValidation.valid || tool.runForEachSampleValidation.valid);
-        this.paramButtonWarning = !this.runEnabled;
-        this.paramButtonChanged = this.toolSelectionService.parametersHaveBeenChanged(tool);
-        this.defineHintVisible =
-          tool != null &&
-          this.validatedTool.sampleGroups.singleEndSamples.length < 1 &&
-          this.validatedTool.sampleGroups.pairedEndSamples.length < 1 &&
-          this.validatedTool.sampleGroups.pairMissingSamples.length < 1;
-      });
-  }
-
-  private subscribeToJobEvents() {
-    this.sessionEventService
-      .getJobStream()
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe({
-        next: () => {
-          this.updateJobs();
-        },
-        error: (err) => this.errorService.showError("failed to update jobs", err),
       });
   }
 
   onDefineSamples() {
-    this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData);
+    this.datasetModalService.openGroupsModal(this.selectionService.selectedDatasets, this.sessionData());
   }
 
   private clearStoreToolSelections() {
@@ -703,22 +698,17 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   openParametersModal() {
-    const origTool = this.toolsMap.get(this.validatedTool.tool.name.id);
+    const origTool = this.toolsMap.get(this.validatedTool().tool.name.id);
 
     this.parametersModalRef = this.ngbModal.open(ParametersModalComponent, {
       size: "lg",
     });
-    this.parametersModalRef.componentInstance.validatedTool = this.validatedTool;
-    this.parametersModalRef.componentInstance.sessionData = this.sessionData;
-    this.parametersModalRef.componentInstance.origTool = origTool;
-    this.parametersModalRef.componentInstance.parametersChanged.subscribe({
-      next: () => this.onParametersChanged(),
-    });
-    this.parametersModalRef.componentInstance.updateBindings.subscribe({
-      next: (toolWithInputs: SelectedToolWithInputs) => this.setBindings(toolWithInputs),
-    });
-    this.parametersModalRef.componentInstance.resourcesChanged.subscribe({
-      next: () => this.onResourcesChanged(),
-    });
+    const modal = this.parametersModalRef.componentInstance as ParametersModalComponent;
+    modal.validatedTool.set(this.validatedTool());
+    modal.sessionData.set(this.sessionData());
+    modal.origTool.set(origTool);
+    modal.parametersChanged.subscribe(() => this.onParametersChanged());
+    modal.updateBindings.subscribe((toolWithInputs) => this.setBindings(toolWithInputs));
+    modal.resourcesChanged.subscribe(() => this.onResourcesChanged());
   }
 }

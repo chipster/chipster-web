@@ -10,21 +10,14 @@
     "experimentalDecorators": true,
     "target": "ES2022",
     "importHelpers": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2020",
-      "dom"
-    ],
-    "useDefineForClassFields": false,
-    // the type declarations of pdfjs-dist need TypeScript 5.7 or later
-    "skipLibCheck": true,
+    "typeRoots": ["node_modules/@types"],
     // TypeScript 6 turns strict on by default, and the code isn't strict yet
     "strict": false,
     // Handsontable is used as a global, not imported. TypeScript 6 doesn't load
-    // anything from node_modules/@types by default
-    "types": ["handsontable"]
+    // anything from node_modules/@types by default. Node is for the e2e tests and
+    // playwright.config.ts, which run in Node. The app and the unit tests leave it
+    // out, see tsconfig.app.json and tsconfig.spec.json
+    "types": ["handsontable", "node"]
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,

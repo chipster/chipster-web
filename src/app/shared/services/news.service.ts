@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Role } from "chipster-js-common";
 import { Observable, Subject } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
@@ -9,16 +9,14 @@ import { NewsContents } from "../components/news/NewsContents";
 import { NewsItem } from "../components/news/NewsItem";
 import { ConfigService } from "./config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class NewsService {
-  private newsSubject: Subject<any> = new Subject();
+  private dialogModalService = inject(DialogModalService);
+  private configService = inject(ConfigService);
+  private httpClient = inject(HttpClient);
+  private tokenService = inject(TokenService);
 
-  constructor(
-    private dialogModalService: DialogModalService,
-    private configService: ConfigService,
-    private httpClient: HttpClient,
-    private tokenService: TokenService,
-  ) {}
+  private newsSubject: Subject<any> = new Subject();
 
   public updateNews() {
     this.newsSubject.next(null);

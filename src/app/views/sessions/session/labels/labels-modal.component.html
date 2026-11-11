@@ -3,16 +3,16 @@
     <span>Labels</span>
     @if (hasSelection()) {
       <small class="text-muted ms-1">&mdash;</small>
-      @if (selectedDatasets.length === 1) {
+      @if (selectedDatasets().length === 1) {
         <small
           class="text-muted ms-1 text-truncate"
           style="max-width: 20rem; min-width: 0"
-          [title]="selectedDatasets[0].name">
-          {{ selectedDatasets[0].name }}
+          [title]="selectedDatasets()[0].name">
+          {{ selectedDatasets()[0].name }}
         </small>
       }
-      @if (selectedDatasets.length > 1) {
-        <small class="text-muted ms-1">{{ selectedDatasets.length }} files selected</small>
+      @if (selectedDatasets().length > 1) {
+        <small class="text-muted ms-1">{{ selectedDatasets().length }} files selected</small>
       }
     }
   </h4>
@@ -20,14 +20,14 @@
 </div>
 
 <div class="modal-body pb-2">
-  @if (rows.length === 0) {
+  @if (rows().length === 0) {
     <div class="text-muted">No labels yet.</div>
   }
 
-  @if (rows.length > 0) {
+  @if (rows().length > 0) {
     <table class="table table-sm align-middle mb-0">
       <tbody>
-        @for (row of rows; track row.label.labelId) {
+        @for (row of rows(); track row.label.labelId) {
           <tr>
             @if (hasSelection()) {
               <td style="width: 2.5rem">
@@ -54,9 +54,9 @@
     </table>
   }
 
-  @if (rows.length > 1) {
+  @if (rows().length > 1) {
     <div class="text-end mt-2">
-      <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="saving" (click)="deleteAllLabels()">
+      <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="saving()" (click)="deleteAllLabels()">
         Delete all
       </button>
     </div>
@@ -67,9 +67,9 @@
   <button
     type="button"
     class="btn btn-primary me-auto"
-    [disabled]="sessionData.labelsMap.size >= maxLabelsPerSession"
+    [disabled]="sessionData().labelsMap().size >= maxLabelsPerSession"
     [title]="
-      sessionData.labelsMap.size >= maxLabelsPerSession
+      sessionData().labelsMap().size >= maxLabelsPerSession
         ? 'Maximum ' + maxLabelsPerSession + ' labels per session reached'
         : ''
     "
@@ -83,7 +83,7 @@
     type="button"
     class="btn"
     [ngClass]="{ 'btn-primary': canApply(), 'btn-secondary': !canApply() }"
-    [disabled]="saving"
+    [disabled]="saving()"
     (click)="confirm()">
     @if (canApply()) {
       <span>Apply</span>

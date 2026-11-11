@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild } from "@angular/core";
+import { ChangeDetectorRef, Component, ElementRef, OnChanges, inject, input, viewChild, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { every, includes } from "lodash-es";
@@ -17,59 +17,60 @@ import VennDiagramSelection from "./venn-diagram-selection";
 import VennDiagramText from "./venn-diagram-text";
 import VennDiagramUtils from "./venn-diagram-utils";
 import { VennDiagramService } from "./venn-diagram.service";
+import { FilesDetailsComponent } from "../../selectiondetails/files-details.component.ts/files-details.component";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-venn-diagram",
   templateUrl: "./venn-diagram.component.html",
   styleUrls: ["./venn-diagram.component.less"],
+  imports: [FilesDetailsComponent, FormsModule],
 })
 export class VennDiagramComponent implements OnChanges {
-  @Input()
-  selectedDatasets: Array<Dataset>;
+  private tsvService = inject(TsvService);
+  private toastService = inject(ToastService);
+  private venndiagramService = inject(VennDiagramService);
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private changeDetectorRef = inject(ChangeDetectorRef);
+
+  readonly selectedDatasets = input<Array<Dataset>>(undefined);
 
   files: Array<TSVFile> = [];
   vennCircles: Array<VennCircle>;
   diagramSelection: VennDiagramSelection = new VennDiagramSelection();
-  columnKey: string;
-  symbolComparingEnabled: boolean;
-  identifierComparingEnabled: boolean;
+  readonly columnKey = signal<string>(undefined);
+  readonly symbolComparingEnabled = signal<boolean>(undefined);
+  readonly identifierComparingEnabled = signal<boolean>(undefined);
 
-  isEnabled = false;
+  readonly isEnabled = signal(false);
   bigFiles = false;
   private widthInterval;
   private visualizationWidth: number;
 
-  @ViewChild("vizu") el: ElementRef;
+  readonly el = viewChild<ElementRef>("vizu");
 
   private readonly autoDrawLimit = 1 * 1024 * 1024;
 
-  constructor(
-    private tsvService: TsvService,
-    private toastService: ToastService,
-    private venndiagramService: VennDiagramService,
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-  ) {}
-
   ngOnChanges() {
-    this.isEnabled = false;
+    this.isEnabled.set(false);
 
     // remove the previous graph, e.g. if a third file was just added
     d3.select("#visualization").select("svg").remove();
 
     // only 2 or 3 inputs ok
     const validInputCount =
-      this.selectedDatasets != null && this.selectedDatasets.length >= 2 && this.selectedDatasets.length <= 3;
+      this.selectedDatasets() != null && this.selectedDatasets().length >= 2 && this.selectedDatasets().length <= 3;
 
     if (!validInputCount) {
-      this.isEnabled = false;
+      this.isEnabled.set(false);
       return;
     }
 
     // if big files, draw button instead of diagram
     this.bigFiles =
-      this.selectedDatasets.reduce((sum: number, dataset: Dataset) => sum + dataset.size, 0) > this.autoDrawLimit;
+      this.selectedDatasets().reduce((sum: number, dataset: Dataset) => sum + dataset.size, 0) > this.autoDrawLimit;
 
     if (!this.bigFiles) {
       this.enable();
@@ -81,7 +82,7 @@ export class VennDiagramComponent implements OnChanges {
       this.widthInterval = setInterval(this.waitForWidthAndEnable.bind(this), 10);
     } else {
       this.init();
-      this.isEnabled = true;
+      this.isEnabled.set(true);
     }
   }
 
@@ -91,12 +92,12 @@ export class VennDiagramComponent implements OnChanges {
       clearInterval(this.widthInterval);
       this.visualizationWidth = visualizationWidth;
       this.init();
-      this.isEnabled = true;
+      this.isEnabled.set(true);
     }
   }
 
   private init() {
-    const datasetIds = this.selectedDatasets.map((dataset: Dataset) => dataset);
+    const datasetIds = this.selectedDatasets().map((dataset: Dataset) => dataset);
     const tsvObservables = datasetIds.map((dataset: Dataset) =>
       this.tsvService.getTSV(this.sessionDataService.getSessionId(), dataset),
     );
@@ -107,12 +108,12 @@ export class VennDiagramComponent implements OnChanges {
           .map((tsv: any) => d3.tsvParseRows(tsv))
           .map(
             (tsv: Array<Array<string>>, index: number) =>
-              new TSVFile(tsv, this.selectedDatasets[index].datasetId, this.selectedDatasets[index].name),
+              new TSVFile(tsv, this.selectedDatasets()[index].datasetId, this.selectedDatasets()[index].name),
           );
 
-        this.symbolComparingEnabled = this.enableComparing("symbol");
-        this.identifierComparingEnabled = this.enableComparing("identifier");
-        this.columnKey = this.identifierComparingEnabled ? "identifier" : "symbol";
+        this.symbolComparingEnabled.set(this.enableComparing("symbol"));
+        this.identifierComparingEnabled.set(this.enableComparing("identifier"));
+        this.columnKey.set(this.identifierComparingEnabled() ? "identifier" : "symbol");
         try {
           this.drawVennDiagram(this.files);
         } catch (err) {
@@ -173,7 +174,7 @@ export class VennDiagramComponent implements OnChanges {
     const segmentItemCountTexts = this.venndiagramService.getVennDiagramSegmentTexts(
       this.vennCircles,
       visualizationArea.center,
-      this.columnKey,
+      this.columnKey(),
     );
 
     const circleTexts = [...filenameTexts, ...segmentItemCountTexts];
@@ -217,7 +218,7 @@ export class VennDiagramComponent implements OnChanges {
         const values = this.venndiagramService.getDataIntersection(
           selectionVennCircles,
           this.vennCircles,
-          this.columnKey,
+          this.columnKey(),
         );
         const datasetIds = selectionVennCircles.map((vennCircle: VennCircle) => vennCircle.datasetId);
         if (!isShift) {
@@ -225,6 +226,8 @@ export class VennDiagramComponent implements OnChanges {
         }
         this.diagramSelection.addSelection(datasetIds, values);
       }
+      // a d3 event, not an event of the template, and the selection is changed in place
+      this.changeDetectorRef.markForCheck();
     });
   }
 
@@ -261,14 +264,14 @@ export class VennDiagramComponent implements OnChanges {
   createNewDataset(): void {
     let data;
     try {
-      data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.columnKey);
+      data = this.venndiagramService.generateNewDatasetTSV(this.files, this.diagramSelection, this.columnKey());
     } catch (error) {
       this.dialogModalService.openNotificationModal("Create file failed", error.message);
       return;
     }
     const tsvData = d3.tsvFormatRows(data);
     this.sessionDataService
-      .createDerivedDataset("venn.tsv", this.selectedDatasets, "Venn-Diagram", tsvData)
+      .createDerivedDataset("venn.tsv", this.selectedDatasets(), "Venn-Diagram", tsvData)
       .subscribe({ error: (err) => this.restErrorService.showError("Create file failed", err) });
   }
 
@@ -298,7 +301,7 @@ export class VennDiagramComponent implements OnChanges {
   }
 
   compareIntersectionBy(str: string): void {
-    this.columnKey = str;
+    this.columnKey.set(str);
     this.resetSelection();
   }
 }

@@ -1,11 +1,10 @@
 // Super class for scatterplot and volcanoplot
 
-import { Directive, Input, NgZone, OnChanges, OnDestroy } from "@angular/core";
+import { Directive, OnChanges, OnDestroy, inject, input, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
-import { AppInjector } from "../../app-injector";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../model/loadstate";
 import TSVFile from "../../model/tsv/TSVFile";
@@ -21,8 +20,7 @@ import { VisualizationTSVService } from "./visualizationTSV.service";
 
 @Directive()
 export abstract class PlotDirective implements OnChanges, OnDestroy {
-  @Input()
-  dataset: Dataset;
+  readonly dataset = input<Dataset>(undefined);
   tsv: TSVFile;
   plotData: Array<PlotData> = [];
   plot;
@@ -33,40 +31,27 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   dragStartPoint: Point;
   dragEndPoint: Point;
   selectedDataPointIds: Array<string>;
-  selectedDataRows: Array<TSVRow> = [];
+  readonly selectedDataRows = signal<Array<TSVRow>>([]);
   // symbols and identifiers of the selected rows, shown in the selection list
-  viewSelectionList: Array<SelectionRow> = [];
+  readonly viewSelectionList = signal<Array<SelectionRow>>([]);
   // files without a symbol column show the identifier column only
-  showSymbolColumn = false;
+  readonly showSymbolColumn = signal(false);
 
   svgPadding = 50;
-  protected fileResource: FileResource;
-  protected sessionDataService: SessionDataService;
-  protected visualizationTSVService: VisualizationTSVService;
-  private restErrorService: RestErrorService;
-  private zone: NgZone;
+  protected fileResource = inject(FileResource);
+  protected sessionDataService = inject(SessionDataService);
+  protected visualizationTSVService = inject(VisualizationTSVService);
+  protected restErrorService = inject(RestErrorService);
 
   protected unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
+  readonly state = signal<LoadState>(undefined);
 
   // Redraws the plot when its container changes width, see observePlotResize()
   private resizeObserver: ResizeObserver;
   private lastPlotWidth: number;
 
-  constructor(
-    fileResource: FileResource,
-    sessionDataService: SessionDataService,
-    visualizationTSVService: VisualizationTSVService,
-  ) {
-    this.fileResource = fileResource;
-    this.sessionDataService = sessionDataService;
-    this.visualizationTSVService = visualizationTSVService;
-    this.restErrorService = AppInjector.get(RestErrorService);
-    this.zone = AppInjector.get(NgZone);
-  }
-
   ngOnChanges() {
-    this.state = new LoadState(State.Loading, "Loading data...");
+    this.state.set(new LoadState(State.Loading, "Loading data..."));
     setTimeout(() => this.show(false), 100);
   }
 
@@ -78,8 +63,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
 
     // clear any previous selection so it isn't re-applied to a new dataset
     this.selectedDataPointIds = undefined;
-    this.selectedDataRows = [];
-    this.viewSelectionList = [];
+    this.selectedDataRows.set([]);
+    this.viewSelectionList.set([]);
 
     // reset the cached width so the resize observer redraws the new dataset
     // even when the container returns to a width it had for a previous one
@@ -90,33 +75,37 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       rowLimit = 50000;
     }
 
-    const datasetName = this.dataset.name;
+    const datasetName = this.dataset().name;
 
     // check for empty file
-    if (this.dataset.size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+    if (this.dataset().size < 1) {
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
     // Get the file, this can be in a shared dataservice
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset)
+      .getData(this.sessionDataService.getSessionId(), this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
-          this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
+          this.tsv = new TSVFile(parsedTSV, this.dataset().datasetId, datasetName);
           if (this.tsv.body.size() > rowLimit) {
             if (showMore) {
-              this.state = new LoadState(
-                State.Fail,
-                "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points",
+              this.state.set(
+                new LoadState(
+                  State.Fail,
+                  "Plot visualization is not allowed for TSV files with more than " + rowLimit + " data points",
+                ),
               );
             } else {
-              this.state = new LoadState(
-                State.TooLarge,
-                "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
-                [{ text: "Show anyway", action: "showAnyway" }],
+              this.state.set(
+                new LoadState(
+                  State.TooLarge,
+                  "Plot visualization may be slow for TSV files with more than " + rowLimit + " data points",
+                  [{ text: "Show anyway", action: "showAnyway" }],
+                ),
               );
             }
           } else {
@@ -124,8 +113,8 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
           }
         },
         error: (error: any) => {
-          this.state = new LoadState(State.Fail, "Loading data failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading data failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }
@@ -333,15 +322,17 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
     // also clear the ids, otherwise redrawPlot() re-applies the highlight of a
     // selection that was cleared without selecting anything new
     this.selectedDataPointIds = [];
-    this.selectedDataRows = [];
-    this.viewSelectionList = [];
+    this.selectedDataRows.set([]);
+    this.viewSelectionList.set([]);
   }
 
   /** @description update the selection list shown next to the plot* */
   setViewSelectionList(): void {
-    this.showSymbolColumn = this.visualizationTSVService.containsSymbolColumn(this.tsv);
+    this.showSymbolColumn.set(this.visualizationTSVService.containsSymbolColumn(this.tsv));
     // from the rows of showSelection(), which has just looked them up
-    this.viewSelectionList = this.visualizationTSVService.getSelectionRowsFromTSVRows(this.tsv, this.selectedDataRows);
+    this.viewSelectionList.set(
+      this.visualizationTSVService.getSelectionRowsFromTSVRows(this.tsv, this.selectedDataRows()),
+    );
   }
 
   /**
@@ -392,7 +383,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
   protected showSelection(ids: Array<string>): void {
     (this.selectedDataPointIds ?? []).forEach((id) => this.removeSelectionStyle(id));
     this.selectedDataPointIds = ids;
-    this.selectedDataRows = this.tsv.body.getTSVRows(ids);
+    this.selectedDataRows.set(this.tsv.body.getTSVRows(ids));
     this.setViewSelectionList();
     ids.forEach((id) => this.setSelectionStyle(id));
   }
@@ -441,10 +432,7 @@ export abstract class PlotDirective implements OnChanges, OnDestroy {
       const width = entries[0]?.contentRect.width;
       if (width && width !== this.lastPlotWidth && this.tsv && this.selectedXAxisHeader) {
         this.lastPlotWidth = width;
-        // ResizeObserver fires outside Angular's zone; redraw inside it so the
-        // d3 drag handlers are re-registered in the zone (otherwise selecting
-        // would not trigger change detection) and bound state stays in sync.
-        this.zone.run(() => this.redrawPlot());
+        this.redrawPlot();
       }
     });
     this.resizeObserver.observe(element);

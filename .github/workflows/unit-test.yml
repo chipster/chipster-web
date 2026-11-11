@@ -18,9 +18,12 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # The "Checks before merge" ruleset of master requires a check with this
+  # name, so renaming the job needs the ruleset changed too.
   vitest:
     runs-on: ubuntu-latest
-    # The tests take seconds, the rest is the install.
+    # The build of the specs and the tests take well under a minute, the rest
+    # is the install.
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -33,11 +36,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      # The dependency scripts are skipped, same as in the format and lint
-      # workflows. Vite's esbuild comes as a prebuilt optional dependency,
-      # which works without its postinstall, and the other scripts aren't
-      # needed for these tests. The end-to-end tests with Playwright need a
-      # running backend, so they are not run here.
+      # The dependency scripts are skipped, same as in the other workflows.
+      # npm test builds the specs with the Angular build, like the build
+      # workflow, which doesn't need them either. The end-to-end tests with
+      # Playwright need a running backend, so they are not run here.
       - run: npm ci --ignore-scripts
 
+      # ng test, the Angular unit-test builder, running Vitest in jsdom.
       - run: npm test

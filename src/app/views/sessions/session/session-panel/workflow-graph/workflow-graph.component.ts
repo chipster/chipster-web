@@ -1,12 +1,15 @@
 import {
   Component,
   ElementRef,
-  Input,
   OnChanges,
   OnDestroy,
   OnInit,
   SimpleChanges,
   ViewEncapsulation,
+  computed,
+  inject,
+  input,
+  signal,
 } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, Job, Label, Module, Tool } from "chipster-js-common";
@@ -53,23 +56,37 @@ import { WorkflowGraphService } from "./workflow-graph.service";
   encapsulation: ViewEncapsulation.None,
 })
 export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
+  private sessionDataService = inject(SessionDataService);
+  private sessionEventService = inject(SessionEventService);
+  private selectionService = inject(SelectionService);
+  private pipeService = inject(PipeService);
+  private workflowGraphService = inject(WorkflowGraphService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private store = inject<Store<any>>(Store);
+  private datasetModalService = inject(DatasetModalService);
+  private dialogModalService = inject(DialogModalService);
+  private nativeElementService = inject(NativeElementService);
+  private restErrorService = inject(RestErrorService);
+  private errorService = inject(ErrorService);
+  private settingService = inject(SettingsService);
+  private datasetService = inject(DatasetService);
+  private visualizationEventService = inject(VisualizationEventService);
+  private getSessionDataService = inject(GetSessionDataService);
+  private toolsService = inject(ToolsService);
+  private datasetContextMenuService = inject(DatasetContextMenuService);
+  private labelsContextMenuService = inject(LabelsContextMenuService);
+  private hotkeyService = inject(HotkeyService);
+  private preferencesService = inject(PreferencesService);
+  private dropdownCloseService = inject(DropdownCloseService);
+  private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
   svg: d3.Selection<SVGSVGElement, {}, HTMLElement, {}>;
-  @Input()
-  datasetsMap: Map<string, Dataset>;
-  @Input()
-  jobsMap: Map<string, Job>;
-  @Input()
-  modulesMap: Map<string, Module>;
-  @Input()
-  datasetSearch: string;
-  @Input()
-  defaultScale: number;
-  @Input()
-  enabled: boolean;
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  tools: Tool[];
+  readonly modulesMap = input<Map<string, Module>>(undefined);
+  readonly datasetSearch = input<string>(undefined);
+  readonly defaultScale = input<number>(undefined);
+  readonly enabled = input<boolean>(undefined);
+  readonly sessionData = input.required<SessionData>();
+  readonly tools = input<Tool[]>(undefined);
 
   private zoomScale: number;
   private zoomMin = 0.2;
@@ -85,33 +102,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   // private readonly primaryColor = "#007bff"; // bootstap primary
   private readonly primaryColor = "#006fe6"; // bootstrap primary darken 5%
   private selectedDatasetSourceJob: Job;
-
-  constructor(
-    private sessionDataService: SessionDataService,
-    private sessionEventService: SessionEventService,
-    private selectionService: SelectionService,
-    private pipeService: PipeService,
-    private workflowGraphService: WorkflowGraphService,
-    private selectionHandlerService: SelectionHandlerService,
-    private store: Store<any>,
-    // private store: Store<Dataset[]>,
-    private datasetModalService: DatasetModalService,
-    private dialogModalService: DialogModalService,
-    private nativeElementService: NativeElementService,
-    private restErrorService: RestErrorService,
-    private errorService: ErrorService,
-    private settingService: SettingsService,
-    private datasetService: DatasetService,
-    private visualizationEventService: VisualizationEventService,
-    private getSessionDataService: GetSessionDataService,
-    private toolsService: ToolsService,
-    private datasetContextMenuService: DatasetContextMenuService,
-    private labelsContextMenuService: LabelsContextMenuService,
-    private hotkeyService: HotkeyService,
-    private preferencesService: PreferencesService,
-    private dropdownCloseService: DropdownCloseService,
-    private elementRef: ElementRef<HTMLElement>,
-  ) {}
 
   // actually selected datasets
   selectedDatasets: Array<Dataset>;
@@ -167,11 +157,28 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   dragStarted: boolean;
 
   searchEnabled = false;
-  selectionEnabled = false;
 
-  labelDisplayMode: "dots" | "pills" = "dots";
-  showLabelPanel = true;
-  labelLegend: Label[] = [];
+  /*
+   * Signals, because the buttons of the session panel change them, and those clicks aren't events
+   * of this view
+   */
+  readonly labelDisplayMode = signal<"dots" | "pills">("dots");
+  readonly showLabelPanel = signal(true);
+
+  // the labels that are in use in the session, for the legend
+  readonly labelLegend = computed<Label[]>(() => {
+    const sessionData = this.sessionData();
+    const inUseIds = new Set<string>();
+    sessionData.datasetsMap().forEach((dataset) => {
+      (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
+    });
+    return Array.from(sessionData.labelsMap().values())
+      .filter((label) => inUseIds.has(label.labelId))
+      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+  });
+
+  // for the template: the service's selection is a store signal, the selectedDatasets field isn't
+  readonly hasSelectedDatasets = computed(() => this.selectionService.selectedDatasets.length > 0);
 
   selectionRect: any;
 
@@ -214,13 +221,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // component defaults stay in effect.
     this.preferencesService.getLabelDisplayMode().subscribe((mode) => {
       if (mode != null) {
-        this.labelDisplayMode = mode;
+        this.labelDisplayMode.set(mode);
         this.renderLabels();
       }
     });
     this.preferencesService.getShowLabelPanel().subscribe((value) => {
       if (value != null) {
-        this.showLabelPanel = value;
+        this.showLabelPanel.set(value);
       }
     });
 
@@ -284,10 +291,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     // otherwise datasets is null when calculating scroll stuff
     this.update();
 
-    this.applyZoom(this.defaultScale);
+    this.applyZoom(this.defaultScale());
     this.onSearchChanged();
 
-    if (this.enabled) {
+    if (this.enabled()) {
       this.subscriptions.push(
         this.sessionEventService.getDatasetStream().subscribe({
           next: () => {
@@ -314,7 +321,6 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.selectedDatasets$.subscribe({
           next: (datasets: Array<Dataset>) => {
             this.selectedDatasets = datasets;
-            this.selectionEnabled = true;
             this.update();
 
             // Skip rendering if context menu is opening (prevents DOM rebuild interference)
@@ -325,7 +331,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
             // update these to know if context menu items should be disabled or not
             this.selectedDatasetSourceJob = this.datasetContextMenuService.getSourceJob(
               this.selectedDatasets,
-              this.jobsMap,
+              this.sessionData().jobsMap(),
             );
           },
           error: (err) => this.errorService.showError("get dataset selections failed", err),
@@ -389,10 +395,10 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private onSearchChanged(): void {
-    if (this.datasetSearch != null && this.datasetSearch.trim().length > 0) {
+    if (this.datasetSearch() != null && this.datasetSearch().trim().length > 0) {
       const filteredDatasets = this.pipeService.findDataset(
-        UtilsService.mapValues(this.datasetsMap),
-        this.datasetSearch,
+        UtilsService.mapValues(this.sessionData().datasetsMap()),
+        this.datasetSearch(),
       );
       this.filter = UtilsService.arrayToMap(filteredDatasets, "datasetId");
       this.searchEnabled = true;
@@ -421,8 +427,9 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   resetZoomAndScroll(): void {
     // reset zoom
-    this.zoomGroup.attr("transform", "translate(0, 0) scale(" + this.defaultScale + ")");
-    this.zoomScale = this.defaultScale;
+    const defaultScale = this.defaultScale();
+    this.zoomGroup.attr("transform", "translate(0, 0) scale(" + defaultScale + ")");
+    this.zoomScale = defaultScale;
 
     // reset scrolling
     const scroll = this.scrollerDiv.node();
@@ -466,7 +473,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
     // this.enables might be dealing with the scrolling, need to fix something here for find file tooltips
 
-    if (this.enabled) {
+    if (this.enabled()) {
       // calculate oldzoom / newZoom factor for adjusting scrolling
       const factor = this.zoomScale / oldZoomScale;
 
@@ -581,23 +588,19 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   update(): void {
     // layout new datasets or anything from the CLI client
-    if (this.enabled) {
-      this.workflowGraphService.doAndSaveLayout(Array.from(this.datasetsMap.values()), this.datasetsMap, this.jobsMap);
+    const jobsMap = this.sessionData().jobsMap();
+    const datasetsMap = this.sessionData().datasetsMap();
+    if (this.enabled()) {
+      this.workflowGraphService.doAndSaveLayout(Array.from(datasetsMap.values()), datasetsMap, jobsMap);
     } else {
-      // preview shouldn't update the data on server
-      const layoutedDatasets = this.workflowGraphService.doLayout(
-        Array.from(this.datasetsMap.values()),
-        this.datasetsMap,
-        this.jobsMap,
-      );
-      // update our copy of datasets
-      layoutedDatasets.forEach((d) => this.datasetsMap.set(d.datasetId, d));
+      // preview shouldn't update the data on server. The positions go to the map's own objects
+      this.workflowGraphService.doLayout(Array.from(datasetsMap.values()), datasetsMap, jobsMap);
     }
 
     const datasetNodes = this.getDatasetNodes(
-      this.sessionDataService.getCompleteDatasets(this.datasetsMap),
-      this.jobsMap,
-      this.modulesMap,
+      this.sessionDataService.getCompleteDatasets(datasetsMap),
+      jobsMap,
+      this.modulesMap(),
     );
 
     const links = this.getLinks(datasetNodes);
@@ -610,7 +613,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   isSelectedDataset(dataset: Dataset): boolean {
-    return this.enabled && this.selectionService.isSelectedDatasetById(dataset.datasetId);
+    return this.enabled() && this.selectionService.isSelectedDatasetById(dataset.datasetId);
   }
 
   renderPhenodataNodes(): void {
@@ -659,7 +662,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .classed("phenodata-node", true);
 
     this.d3PhenodataNodes.on("click", (event, d: DatasetNode) => {
-      if (self.enabled) {
+      if (self.enabled()) {
         self.selectionHandlerService.clearJobSelection();
         if (!UtilsService.isCtrlKey(event)) {
           self.selectionHandlerService.clearDatasetSelection();
@@ -868,7 +871,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         if (!self.selectionService.isSelectedDatasetById(d.dataset.datasetId)) {
           d3.select(this).style("fill", "#e9ecef");
         }
-        if (self.enabled) {
+        if (self.enabled()) {
           d3.select(this).classed("hovering-dataset", true);
           self.showTooltip(this, d, false);
         }
@@ -879,13 +882,13 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           d3.select(this).style("fill", "white");
         }
 
-        if (self.enabled) {
+        if (self.enabled()) {
           d3.select(this).classed("hovering-dataset", false);
           self.hideTooltip();
         }
       })
       .on("click", (event, d) => {
-        if (self.enabled) {
+        if (self.enabled()) {
           self.selectionHandlerService.clearJobSelection();
           if (!UtilsService.isCtrlKey(event)) {
             self.selectionHandlerService.clearDatasetSelection();
@@ -1127,12 +1130,12 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         self.selectionHandlerService.setJobSelection([d.target.sourceJob]);
       })
       .on("mouseover", function () {
-        if (self.enabled) {
+        if (self.enabled()) {
           d3.select(this).classed("hovering-job", true);
         }
       })
       .on("mouseout", function () {
-        if (self.enabled) {
+        if (self.enabled()) {
           d3.select(this).classed("hovering-job", false);
         }
       })
@@ -1187,7 +1190,11 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         this.restErrorService.showError("dataset upate error", err);
 
         // update failed. Restore the original positions
-        originalDatasets.forEach((d) => this.sessionData.datasetsMap.set(d.datasetId, d));
+        this.sessionData().datasetsMap.update((m) => {
+          const restored = new Map(m);
+          originalDatasets.forEach((d) => restored.set(d.datasetId, d));
+          return restored;
+        });
         this.update();
         this.renderGraph();
       },
@@ -1211,32 +1218,26 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   toggleLabelDisplayMode(): void {
-    this.labelDisplayMode = this.labelDisplayMode === "dots" ? "pills" : "dots";
+    this.labelDisplayMode.update((mode) => (mode === "dots" ? "pills" : "dots"));
     this.renderLabels();
-    this.preferencesService.setLabelDisplayMode(this.labelDisplayMode);
+    this.preferencesService.setLabelDisplayMode(this.labelDisplayMode());
   }
 
   toggleLabelPanel(): void {
-    this.showLabelPanel = !this.showLabelPanel;
-    this.preferencesService.setShowLabelPanel(this.showLabelPanel);
+    this.showLabelPanel.update((show) => !show);
+    this.preferencesService.setShowLabelPanel(this.showLabelPanel());
   }
 
   renderLabels(): void {
-    this.refreshLabelLegend();
-
     if (!this.d3LabelsGroup) {
       return;
     }
     // simple full re-render: labels change rarely vs. positions
     this.d3LabelsGroup.selectAll("*").remove();
 
-    if (!this.sessionData || !this.sessionData.labelsMap) {
-      return;
-    }
-
     // Force dots in read-only mode (the session-list preview), so a saved
     // "pills" preference doesn't leak into the preview.
-    if (this.labelDisplayMode === "dots" || !this.enabled) {
+    if (this.labelDisplayMode() === "dots" || !this.enabled()) {
       this.renderLabelDots();
     } else {
       this.renderLabelPills();
@@ -1248,29 +1249,15 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   openLabelsModal(): void {
-    this.datasetModalService.openLabelsModal(this.selectedDatasets ?? [], this.sessionData);
+    this.datasetModalService.openLabelsModal(this.selectedDatasets ?? [], this.sessionData());
   }
 
   toggleLabelOnSelection(label: Label): void {
-    this.labelsContextMenuService.toggleLabel(this.selectedDatasets ?? [], label, this.sessionData).subscribe();
+    this.labelsContextMenuService.toggleLabel(this.selectedDatasets ?? [], label, this.sessionData()).subscribe();
   }
 
   toggleLabelsModal(): void {
-    this.datasetModalService.toggleLabelsModal(this.selectedDatasets ?? [], this.sessionData);
-  }
-
-  private refreshLabelLegend(): void {
-    if (!this.sessionData || !this.sessionData.labelsMap) {
-      this.labelLegend = [];
-      return;
-    }
-    const inUseIds = new Set<string>();
-    this.sessionData.datasetsMap.forEach((dataset) => {
-      (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
-    });
-    this.labelLegend = Array.from(this.sessionData.labelsMap.values())
-      .filter((label) => inUseIds.has(label.labelId))
-      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    this.datasetModalService.toggleLabelsModal(this.selectedDatasets ?? [], this.sessionData());
   }
 
   // Per-node container for a node's label dots/pills. Children are drawn at
@@ -1301,7 +1288,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private renderLabelDots(): void {
-    const labelsMap = this.sessionData.labelsMap;
+    const labelsMap = this.sessionData().labelsMap();
     const maxVisible = 5;
     const dotRadius = 7; // diameter matches the pill height (14)
     const dotStep = 7; // horizontal advance per stacked dot; smaller = more overlap, last dot fully visible
@@ -1363,7 +1350,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private renderLabelPills(): void {
-    const labelsMap = this.sessionData.labelsMap;
+    const labelsMap = this.sessionData().labelsMap();
     const maxVisible = 2;
     const pillHeight = 14;
     const pillStep = 17; // horizontal advance per stacked pill; ~2 chars of the pill underneath remain visible
@@ -1466,8 +1453,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getDatasetNodes(
-    datasetsMap: Map<string, Dataset>,
-    jobsMap: Map<string, Job>,
+    datasetsMap: ReadonlyMap<string, Dataset>,
+    jobsMap: ReadonlyMap<string, Job>,
     modulesMap: Map<string, Module>,
   ): DatasetNode[] {
     const datasetNodes: DatasetNode[] = [];
@@ -1521,8 +1508,8 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       if (targetNode.sourceJob) {
         const sourceJob = targetNode.sourceJob;
         // iterate over the inputs of the source job
-        sourceJob.inputs.forEach((input) => {
-          const sourceNode = datasetNodesMap.get(input.datasetId);
+        sourceJob.inputs.forEach((jobInput) => {
+          const sourceNode = datasetNodesMap.get(jobInput.datasetId);
           if (sourceNode && targetNode) {
             links.push({
               source: sourceNode,
@@ -1580,9 +1567,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private buildTooltipHtml(node: DatasetNode): string {
-    const labels = this.sessionData?.labelsMap
-      ? getSortedLabels(node.dataset.labelIds, this.sessionData.labelsMap)
-      : [];
+    const labels = getSortedLabels(node.dataset.labelIds, this.sessionData().labelsMap());
     const name = escapeHtml(node.name ?? "");
     if (labels.length === 0) {
       return name;
@@ -1890,7 +1875,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.convertMenuItem = {
       title: "Convert to Chipster format&hellip;",
       action(d): void {
-        self.datasetModalService.openWrangleModal(d.dataset, self.sessionData);
+        self.datasetModalService.openWrangleModal(d.dataset, self.sessionData());
       },
       disabled: false, // optional, defaults to false
     };
@@ -1920,14 +1905,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.groupsMenuItem = {
       title: "Define samples&hellip;",
       action(): void {
-        self.datasetModalService.openGroupsModal(self.selectedDatasets, self.sessionData);
+        self.datasetModalService.openGroupsModal(self.selectedDatasets, self.sessionData());
       },
     };
 
     this.showJobMenuItem = {
       title: "Show job",
       action(_d): void {
-        self.datasetContextMenuService.showJob(self.selectedDatasetSourceJob, self.tools, self.sessionData);
+        self.datasetContextMenuService.showJob(self.selectedDatasetSourceJob, self.tools(), self.sessionData());
       },
       disabled(): boolean {
         return self.selectedDatasetSourceJob == null;
@@ -1952,7 +1937,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           datasets = [d.dataset];
         }
 
-        self.datasetModalService.openCopySelectionToNewSessionModal(datasets, self.sessionData);
+        self.datasetModalService.openCopySelectionToNewSessionModal(datasets, self.sessionData());
       },
     };
 
@@ -1966,7 +1951,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
           datasets = [d.dataset];
         }
 
-        self.datasetModalService.openCopySelectionToExistingSessionModal(datasets, self.sessionData);
+        self.datasetModalService.openCopySelectionToExistingSessionModal(datasets, self.sessionData());
       },
     };
 
@@ -1980,7 +1965,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     this.historyMenuItem = {
       title: "History&hellip;",
       action(d): void {
-        self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData, self.tools);
+        self.datasetModalService.openDatasetHistoryModal(d.dataset, self.sessionData(), self.tools());
       },
     };
 
@@ -1997,14 +1982,14 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       children(d: any): any[] {
         const datasets = resolveDatasetsForLabelMenu(d);
         const items: any[] = [];
-        const labelItems = self.labelsContextMenuService.buildItems(datasets, self.sessionData);
+        const labelItems = self.labelsContextMenuService.buildItems(datasets, self.sessionData());
         if (labelItems.length > 0) {
           for (const item of labelItems) {
             items.push({
               title: item.displayHtml,
               action(dd: any): void {
                 self.labelsContextMenuService
-                  .toggleLabel(resolveDatasetsForLabelMenu(dd), item.label, self.sessionData)
+                  .toggleLabel(resolveDatasetsForLabelMenu(dd), item.label, self.sessionData())
                   .subscribe();
               },
             });
@@ -2014,7 +1999,7 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
         items.push({
           title: "Edit labels&hellip;",
           action(dd: any): void {
-            self.datasetModalService.openLabelsModal(resolveDatasetsForLabelMenu(dd), self.sessionData);
+            self.datasetModalService.openLabelsModal(resolveDatasetsForLabelMenu(dd), self.sessionData());
           },
         });
         return items;

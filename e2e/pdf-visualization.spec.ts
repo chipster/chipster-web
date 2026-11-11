@@ -645,7 +645,16 @@ test("the download is cancelled when another file is selected", async ({ page, a
 
   await openSession(page, sessionId, largeId);
   await selectDataset(page, largeId);
-  // slow enough to select another file in the middle of the download, the file is about 11 MB
+  const cancelled = page.waitForEvent("requestfailed", (request) => request.url().includes(largeFile));
+  const workerScript = page.waitForResponse((response) => response.url().includes("pdf.worker"), {
+    timeout: 30_000,
+  });
+  await pdfVisualization(page).getByRole("button", { name: "Show here" }).click();
+  // slow enough to select another file in the middle of the download, the file is about 11 MB.
+  // Only after the worker script, the last thing pdf.js loads before it requests the file:
+  // throttling the libraries too would make the start of the download depend on how big the
+  // dev server serves them
+  await (await workerScript).finished();
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Network.emulateNetworkConditions", {
     offline: false,
@@ -653,8 +662,6 @@ test("the download is cancelled when another file is selected", async ({ page, a
     downloadThroughput: 1024 * 1024,
     uploadThroughput: -1,
   });
-  const cancelled = page.waitForEvent("requestfailed", (request) => request.url().includes(largeFile));
-  await pdfVisualization(page).getByRole("button", { name: "Show here" }).click();
   await expect
     .poll(async () => Number(await pdfVisualization(page).locator("progress").getAttribute("value")))
     .toBeGreaterThan(0);
@@ -795,6 +802,8 @@ test("the links in a pdf file work when all pages are shown", async ({ page, api
   }
   // the link on a single page goes to the wide page too
   await visualization.getByTitle("Show single page").click();
+  // the view is updated in the next frame, until then all pages are there
+  await expect(viewer(page).locator(".linkAnnotation a")).toHaveCount(1);
   await viewer(page).locator(".linkAnnotation a").click();
   await expect(visualization.getByText("Page 3 / 3")).toBeVisible();
   await expectHeightFitsPages(page, 1);

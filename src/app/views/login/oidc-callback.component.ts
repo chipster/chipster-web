@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, inject } from "@angular/core";
 import { OidcService } from "../../core/authentication/oidc.service";
 
 @Component({
@@ -6,7 +6,7 @@ import { OidcService } from "../../core/authentication/oidc.service";
   templateUrl: "./oidc-callback.component.html",
 })
 export class OidcCallbackComponent implements OnInit {
-  constructor(private oidcService: OidcService) {}
+  private oidcService = inject(OidcService);
 
   ngOnInit() {
     this.oidcService.completeAuthentication();

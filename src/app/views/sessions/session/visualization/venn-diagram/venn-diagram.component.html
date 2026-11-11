@@ -1,11 +1,11 @@
-@if (bigFiles && !isEnabled) {
+@if (bigFiles && !isEnabled()) {
   <div>
     <div class="align-middle">
       <button class="btn btn-sm btn-secondary" (click)="enable()">Draw</button>
       <span class="ps-3">Venn diagram is shown automatically only for small files.</span>
     </div>
     <hr />
-    <ch-files-details [datasets]="selectedDatasets" [showDate]="false"></ch-files-details>
+    <ch-files-details [datasets]="selectedDatasets()" [showDate]="false"></ch-files-details>
   </div>
 }
 <div class="row">
@@ -13,13 +13,13 @@
     <div class="w-100" id="visualization"></div>
   </div>
 
-  @if (isEnabled) {
+  @if (isEnabled()) {
     <div class="col-md-4">
       <div class="">Common denominator</div>
 
       <select name="keyColumn" [(ngModel)]="columnKey" (ngModelChange)="resetSelection()">
-        <option value="identifier" [disabled]="!identifierComparingEnabled">identifier</option>
-        <option value="symbol" [disabled]="!symbolComparingEnabled">symbol</option>
+        <option value="identifier" [disabled]="!identifierComparingEnabled()">identifier</option>
+        <option value="symbol" [disabled]="!symbolComparingEnabled()">symbol</option>
       </select>
 
       @if (diagramSelection.values.length > 0) {

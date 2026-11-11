@@ -13,7 +13,7 @@
 
       <ng-template ngbNavContent class="mt-4">
         <ch-manual
-          [page]="toolService.getManualPage(tool.name.id) | async"
+          [page]="toolService.getManualPage(tool().name.id) | async"
           [showControls]="true"
           [addContainer]="false"></ch-manual>
       </ng-template>
@@ -24,7 +24,7 @@
       <a ngbNavLink>Source code</a>
 
       <ng-template ngbNavContent>
-        <ch-tool-source [selectedTool]="tool"></ch-tool-source>
+        <ch-tool-source [selectedTool]="tool()"></ch-tool-source>
       </ng-template>
     </ng-container>
   </nav>

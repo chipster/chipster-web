@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
+import { Component, OnChanges, inject, input, output } from "@angular/core";
 import { Dataset, InputBinding, ToolInput } from "chipster-js-common";
 import { difference } from "lodash-es";
 import { SessionData } from "../../../../../model/session/session-data";
 import UtilsService from "../../../../../shared/utilities/utils";
 import { ToolService } from "../tool.service";
-import { ValidatedTool } from "../ToolSelection";
+import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
+import { FormsModule } from "@angular/forms";
 
 interface BindingModel {
   input: ToolInput;
@@ -16,27 +17,28 @@ interface BindingModel {
   selector: "ch-tool-inputs",
   templateUrl: "./tool-inputs.component.html",
   styleUrls: ["./tool-inputs.component.less"],
+  imports: [FormsModule],
 })
 export class ToolInputsComponent implements OnChanges {
-  @Input() sessionData: SessionData;
-  @Input() validatedTool: ValidatedTool;
-  @Output() updateBindings = new EventEmitter();
+  private toolService = inject(ToolService);
+
+  readonly sessionData = input<SessionData>(undefined);
+  readonly validatedTool = input<ValidatedTool>(undefined);
+  readonly updateBindings = output<SelectedToolWithInputs>();
 
   bindingModels: BindingModel[];
   ready = false;
 
-  constructor(private toolService: ToolService) {}
-
   ngOnChanges() {
-    if (this.validatedTool != null) {
+    if (this.validatedTool() != null) {
       this.ready = true;
       // create copy of the datasets property of each InputBinding as it's used as the model of the select
       // element in the template (and thus get's modified)
-      this.bindingModels = this.validatedTool.inputBindings.map((b) => ({
+      this.bindingModels = this.validatedTool().inputBindings.map((b) => ({
         input: b.toolInput,
         boundDatasets: b.datasets.slice(),
-        compatibleDatasets: this.validatedTool.selectedDatasets.filter((dataset: Dataset) =>
-          this.toolService.isCompatible(this.sessionData, dataset, b.toolInput.type.name),
+        compatibleDatasets: this.validatedTool().selectedDatasets.filter((dataset: Dataset) =>
+          this.toolService.isCompatible(this.sessionData(), dataset, b.toolInput.type.name),
         ),
       }));
     } else {
@@ -65,10 +67,10 @@ export class ToolInputsComponent implements OnChanges {
     }));
 
     this.updateBindings.emit({
-      tool: this.validatedTool.tool,
-      category: this.validatedTool.category,
-      module: this.validatedTool.module,
-      selectedDatasets: this.validatedTool.selectedDatasets,
+      tool: this.validatedTool().tool,
+      category: this.validatedTool().category,
+      module: this.validatedTool().module,
+      selectedDatasets: this.validatedTool().selectedDatasets,
       inputBindings: updatedBindings,
     });
   }
@@ -118,6 +120,6 @@ export class ToolInputsComponent implements OnChanges {
   }
 
   getPhenodataInputs() {
-    return this.validatedTool.tool.inputs.filter((input: ToolInput) => input.meta);
+    return this.validatedTool().tool.inputs.filter((toolInput: ToolInput) => toolInput.meta);
   }
 }

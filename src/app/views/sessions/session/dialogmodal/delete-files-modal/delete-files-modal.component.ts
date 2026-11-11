@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 
@@ -6,10 +6,10 @@ import { Dataset } from "chipster-js-common";
   templateUrl: "./delete-files-modal.component.html",
 })
 export class DeleteFilesModalComponent {
-  @Input()
-  datasets: Dataset[];
+  private activeModal = inject(NgbActiveModal);
 
-  constructor(private activeModal: NgbActiveModal) {}
+  // set through the modal ref by the code that opens the modal
+  readonly datasets = signal<Dataset[]>(undefined);
 
   delete() {
     this.activeModal.close();

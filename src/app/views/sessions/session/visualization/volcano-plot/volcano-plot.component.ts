@@ -1,40 +1,31 @@
-import { Component, OnChanges, OnDestroy } from "@angular/core";
+import { Component, OnChanges, OnDestroy, inject, signal } from "@angular/core";
 import * as d3 from "d3";
-import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
-import { FileResource } from "../../../../../shared/resources/fileresource";
 import { PlotDirective } from "../../../../../shared/visualization/plot.directive";
 import { PlotService } from "../../../../../shared/visualization/plot.service";
-import { VisualizationTSVService } from "../../../../../shared/visualization/visualizationTSV.service";
-import { SessionDataService } from "../../session-data.service";
 import { PlotData } from "../model/plotData";
 import Point from "../model/point";
 import { VolcanoPlotService } from "./volcano-plot.service";
 import VolcanoPlotDataRow from "./volcanoPlotDataRow";
+import { StatusComponent } from "../../../../../shared/components/status.component";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-volcano-plot",
   templateUrl: "./volcano-plot.component.html",
   styleUrls: ["./volcano-plot.component.less"],
+  imports: [StatusComponent, FormsModule],
 })
 export class VolcanoPlotComponent extends PlotDirective implements OnChanges, OnDestroy {
+  private volcanoPlotService = inject(VolcanoPlotService);
+  private plotService = inject(PlotService);
+
   private volcanoPlotDataRows: Array<VolcanoPlotDataRow> = [];
   public volcanoPlotFCHeaders: Array<string>;
   public volcanoPlotPHeaders: Array<string>;
   private xScale: any;
   private yScale: any;
-  showZeroWarning: boolean;
-
-  constructor(
-    private volcanoPlotService: VolcanoPlotService,
-    fileResource: FileResource,
-    sessionDataService: SessionDataService,
-    private plotService: PlotService,
-    visualizationTSVService: VisualizationTSVService,
-    private restErrorService2: RestErrorService,
-  ) {
-    super(fileResource, sessionDataService, visualizationTSVService);
-  }
+  readonly showZeroWarning = signal<boolean>(undefined);
 
   ngOnChanges() {
     super.ngOnChanges();
@@ -63,9 +54,9 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
       }
 
       this.redrawPlot();
-      this.state = new LoadState(State.Ready);
+      this.state.set(new LoadState(State.Ready));
     } else {
-      this.state = new LoadState(State.Fail, "No columns starting with pvalue or fold change value found.");
+      this.state.set(new LoadState(State.Fail, "No columns starting with pvalue or fold change value found."));
     }
   }
 
@@ -126,7 +117,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     const xBoundary = this.volcanoPlotService.getVolcanoPlotDataXBoundary(this.tsv);
     const yBoundary = this.volcanoPlotService.getVolcanoPlotDataYBoundary(this.tsv);
 
-    this.showZeroWarning = this.plotData.find((d) => d.plotPoint.y === Infinity) != null;
+    this.showZeroWarning.set(this.plotData.find((d) => d.plotPoint.y === Infinity) != null);
 
     // Define the SVG
     this.svg
@@ -256,7 +247,7 @@ export class VolcanoPlotComponent extends PlotDirective implements OnChanges, On
     const tsvData = this.tsv.getRawDataByRowIds(this.selectedDataPointIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset("newDataset.tsv", [this.dataset], "Volcano Plot", data)
-      .subscribe({ error: (err) => this.restErrorService2.showError("create dataset failed", err) });
+      .createDerivedDataset("newDataset.tsv", [this.dataset()], "Volcano Plot", data)
+      .subscribe({ error: (err) => this.restErrorService.showError("create dataset failed", err) });
   }
 }

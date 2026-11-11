@@ -1,15 +1,19 @@
-import { Component, Input, OnInit } from "@angular/core";
-import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
+import { Component, OnInit, inject, signal } from "@angular/core";
+import { UntypedFormControl, UntypedFormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { NewsItem } from "../../../../../shared/components/news/NewsItem";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   templateUrl: "./edit-news-modal.component.html",
+  imports: [FormsModule, ReactiveFormsModule, LocalDatePipe],
 })
 export class EditNewsModalComponent implements OnInit {
+  private activeModal = inject(NgbActiveModal);
+
   public modalTitle: string;
-  @Input()
-  newsItem: NewsItem;
+  // set through the modal ref by the code that opens the modal
+  readonly newsItem = signal<NewsItem>(undefined);
 
   titleControl = new UntypedFormControl("");
   shortTitleControl = new UntypedFormControl("");
@@ -24,18 +28,16 @@ export class EditNewsModalComponent implements OnInit {
     body: this.bodyControl,
   });
 
-  constructor(private activeModal: NgbActiveModal) {}
-
   ngOnInit(): void {
-    if (this.newsItem == null) {
+    if (this.newsItem() == null) {
       this.modalTitle = "Add news";
     } else {
-      this.titleControl.setValue(this.newsItem.contents.title);
-      this.bodyControl.setValue(this.newsItem.contents.body);
+      this.titleControl.setValue(this.newsItem().contents.title);
+      this.bodyControl.setValue(this.newsItem().contents.body);
       this.modalTitle = "Edit news";
-      this.id = this.newsItem.newsId;
-      this.created = this.newsItem.created;
-      this.modified = this.newsItem.modified;
+      this.id = this.newsItem().newsId;
+      this.created = this.newsItem().created;
+      this.modified = this.newsItem().modified;
     }
   }
 

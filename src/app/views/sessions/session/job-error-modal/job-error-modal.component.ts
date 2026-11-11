@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Job, JobState } from "chipster-js-common";
 import { ContactSupportService } from "../../../contact/contact-support.service";
@@ -7,21 +7,20 @@ import { ContactSupportService } from "../../../contact/contact-support.service"
   templateUrl: "./job-error-modal.component.html",
 })
 export class JobErrorModalComponent {
+  private activeModal = inject(NgbActiveModal);
+  private contactSupportService = inject(ContactSupportService);
+
   private readonly showText = "Show screen output";
   private readonly hideText = "Hide screen output";
 
-  @Input() title: string;
-  @Input() job: Job;
+  // set through the modal ref by the code that opens the modal
+  readonly title = signal<string>(undefined);
+  readonly job = signal<Job>(undefined);
 
   screenOutputVisible = false;
   screenOutputButtonText = this.screenOutputVisible ? this.hideText : this.showText;
 
   JobState = JobState; // for using the enum in template
-
-  constructor(
-    private activeModal: NgbActiveModal,
-    private contactSupportService: ContactSupportService,
-  ) {}
 
   close() {
     this.activeModal.close();
@@ -33,7 +32,7 @@ export class JobErrorModalComponent {
 
   contactSupport() {
     this.activeModal.close();
-    this.contactSupportService.openContactSupportModal(this.jobToLog(this.job));
+    this.contactSupportService.openContactSupportModal(this.jobToLog(this.job()));
   }
 
   toggleScreenOutput() {

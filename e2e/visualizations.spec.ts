@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, waitForDevCheck } from "./fixtures";
 import { createDataset, datasetNode, openSession, updateDataset, visualizationTab } from "./session-api";
 
 /*
@@ -60,6 +60,7 @@ test("the plots and the Venn diagram follow their selections, and the header a r
   expect(c).not.toBeNull();
   await circle.click({ position: { x: 10, y: c.height / 2 } });
   await expect(venn.getByText(/Selected: \d+/)).toBeVisible();
+  await waitForDevCheck(page);
 });
 
 test("the phenodata warnings follow an edit in Handsontable", async ({ page, api, sessionId }) => {
@@ -91,4 +92,5 @@ test("the phenodata warnings follow an edit in Handsontable", async ({ page, api
   await page.keyboard.type("1");
   await page.keyboard.press("Enter");
   await expect(pheno.getByText("Group column contains empty values")).toBeHidden();
+  await waitForDevCheck(page);
 });

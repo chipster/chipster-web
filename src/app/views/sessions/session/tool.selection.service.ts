@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, InputBinding, Module, Tool, ToolParameter } from "chipster-js-common";
 import { flatten } from "lodash-es";
@@ -26,16 +26,14 @@ import {
 } from "./tools/ToolSelection";
 import { ToolService } from "./tools/tool.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class ToolSelectionService {
-  constructor(
-    private toolService: ToolService,
-    private getSessionDataService: GetSessionDataService,
-    private datasetService: DatasetService,
-    private store: Store<any>,
-    private schedulerResource: SchedulerResource,
-    private toolsService: ToolsService,
-  ) {}
+  private toolService = inject(ToolService);
+  private getSessionDataService = inject(GetSessionDataService);
+  private datasetService = inject(DatasetService);
+  private store = inject<Store<any>>(Store);
+  private schedulerResource = inject(SchedulerResource);
+  private toolsService = inject(ToolsService);
 
   selectToolById(moduleId: string, categoryName: string, toolId: string) {
     const selectedToolById: SelectedToolById = {

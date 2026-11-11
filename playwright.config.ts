@@ -9,7 +9,8 @@ import { USER_STATE } from "./e2e/login";
  * automatically if it isn't already running; the backend has to be started by
  * hand.
  *
- * Unit tests are separate and run with Vitest, see vitest.config.mts.
+ * Unit tests are separate: `npm test` runs them with Angular's unit-test
+ * builder, the `test` target in angular.json.
  */
 
 // set BASE_URL to run the tests against an already running deployment

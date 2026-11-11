@@ -5,10 +5,10 @@
       <tbody>
         <tr>
           <td>
-            @if (validatedTool.singleJobValidation.valid) {
+            @if (validatedTool().singleJobValidation.valid) {
               <span class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
             }
-            @if (!validatedTool.singleJobValidation.valid) {
+            @if (!validatedTool().singleJobValidation.valid) {
               <span>
                 <i class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i>
               </span>
@@ -16,10 +16,10 @@
           </td>
           <td class="text-nowrap">Run Tool</td>
           <td class="w-100">
-            @if (validatedTool.singleJobValidation.valid) {
+            @if (validatedTool().singleJobValidation.valid) {
               <div>{{ getRunSingleDescription() }}</div>
             }
-            @if (!validatedTool.singleJobValidation.valid) {
+            @if (!validatedTool().singleJobValidation.valid) {
               <div class="alert alert-warning p-1 mb-0">
                 {{ getRunSingleDescription() }}
               </div>
@@ -28,10 +28,10 @@
         </tr>
         <tr>
           <td>
-            @if (validatedTool.runForEachValidation.valid) {
+            @if (validatedTool().runForEachValidation.valid) {
               <span class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
             }
-            @if (!validatedTool.runForEachValidation.valid) {
+            @if (!validatedTool().runForEachValidation.valid) {
               <span>
                 <i class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i>
               </span>
@@ -39,26 +39,26 @@
           </td>
           <td class="text-nowrap">Run Tool for Each File</td>
           <td>
-            @if (validatedTool.runForEachValidation.valid) {
+            @if (validatedTool().runForEachValidation.valid) {
               <div>
-                Runs the tool {{ validatedTool.selectedDatasets.length }} times. Each time one of the selected
-                {{ validatedTool.selectedDatasets.length }} files is used as a single input for the tool.
+                Runs the tool {{ validatedTool().selectedDatasets.length }} times. Each time one of the selected
+                {{ validatedTool().selectedDatasets.length }} files is used as a single input for the tool.
               </div>
             }
 
-            @if (!validatedTool.runForEachValidation.valid) {
+            @if (!validatedTool().runForEachValidation.valid) {
               <div class="alert alert-warning p-1 mb-0">
-                {{ validatedTool.runForEachValidation.message }}
+                {{ validatedTool().runForEachValidation.message }}
               </div>
             }
           </td>
         </tr>
         <tr>
           <td class="no-bottom-border">
-            @if (validatedTool.runForEachSampleValidation.valid) {
+            @if (validatedTool().runForEachSampleValidation.valid) {
               <span class="fas fa-fw fa-check-circle text-success" aria-hidden="true"></span>
             }
-            @if (!validatedTool.runForEachSampleValidation.valid) {
+            @if (!validatedTool().runForEachSampleValidation.valid) {
               <span>
                 <i class="fas fa-fw fa-exclamation-circle text-warning" aria-hidden="true"></i>
               </span>
@@ -66,13 +66,13 @@
           </td>
           <td class="text-nowrap" class="no-bottom-border">Run Tool for Each Sample</td>
           <td class="no-bottom-border">
-            @if (validatedTool.runForEachSampleValidation.valid) {
+            @if (validatedTool().runForEachSampleValidation.valid) {
               <div>
                 {{ getRunForEachSampleDescription() }}
               </div>
             }
 
-            @if (!validatedTool.runForEachSampleValidation.valid) {
+            @if (!validatedTool().runForEachSampleValidation.valid) {
               <div class="alert alert-warning p-1 mb-0">
                 {{ getRunForEachSampleDescription() }}
               </div>

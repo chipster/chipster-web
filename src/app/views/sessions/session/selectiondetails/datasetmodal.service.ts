@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, Label, Session, Tool } from "chipster-js-common";
 import * as log from "loglevel";
@@ -9,7 +9,6 @@ import { SessionData } from "../../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
-import { WrangleModalComponent } from "../wrangle-modal/wrangle-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 import { LabelsModalComponent } from "../labels/labels-modal.component";
 import { SessionResource } from "../../../../shared/resources/session.resource";
@@ -18,25 +17,27 @@ import { RouteService } from "../../../../shared/services/route.service";
 import { cloneDeep } from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class DatasetModalService {
-  constructor(
-    private ngbModal: NgbModal,
-    private dialogModalService: DialogModalService,
-    private errorService: ErrorService,
-    private typeTagService: TypeTagService,
-    private sessionResource: SessionResource,
-    private restErrorService: RestErrorService,
-    private routeService: RouteService,
-  ) {}
+  private ngbModal = inject(NgbModal);
+  private dialogModalService = inject(DialogModalService);
+  private errorService = inject(ErrorService);
+  private typeTagService = inject(TypeTagService);
+  private sessionResource = inject(SessionResource);
+  private restErrorService = inject(RestErrorService);
+  private routeService = inject(RouteService);
+
+  // the size limit of the wrangle modal, in MB
+  static readonly WRANGLE_FILE_SIZE_LIMIT = 200;
 
   public openDatasetHistoryModal(dataset: Dataset, sessionData: SessionData, tools: Tool[]): void {
     const modalRef = this.ngbModal.open(DatasetHistoryModalComponent, {
       size: "xl",
     });
-    modalRef.componentInstance.dataset = dataset;
-    modalRef.componentInstance.sessionData = sessionData;
-    modalRef.componentInstance.tools = tools;
+    const modal = modalRef.componentInstance as DatasetHistoryModalComponent;
+    modal.dataset.set(dataset);
+    modal.sessionData.set(sessionData);
+    modal.tools.set(tools);
   }
 
   private labelsModalRef: NgbModalRef | null = null;
@@ -46,8 +47,9 @@ export class DatasetModalService {
       return;
     }
     this.labelsModalRef = this.ngbModal.open(LabelsModalComponent, {});
-    this.labelsModalRef.componentInstance.sessionData = sessionData;
-    this.labelsModalRef.componentInstance.selectedDatasets = selectedDatasets ?? [];
+    const modal = this.labelsModalRef.componentInstance as LabelsModalComponent;
+    modal.sessionData.set(sessionData);
+    modal.selectedDatasets.set(sessionData.latestDatasets(selectedDatasets ?? []));
     this.labelsModalRef.result.then(
       () => {
         this.labelsModalRef = null;
@@ -66,7 +68,7 @@ export class DatasetModalService {
     this.openLabelsModal(selectedDatasets, sessionData);
   }
 
-  public openWrangleModal(dataset: Dataset, sessionData: SessionData): void {
+  public async openWrangleModal(dataset: Dataset, sessionData: SessionData): Promise<void> {
     if (!(
       this.typeTagService.has(sessionData, dataset, Tags.TEXT) ||
       this.typeTagService.has(sessionData, dataset, Tags.TSV)
@@ -78,21 +80,25 @@ export class DatasetModalService {
       return;
     }
 
-    if (dataset.size > WrangleModalComponent.FILE_SIZE_LIMIT * 1024 * 1024) {
+    if (dataset.size > DatasetModalService.WRANGLE_FILE_SIZE_LIMIT * 1024 * 1024) {
       this.dialogModalService.openNotificationModal(
         "Converting file not possible",
         "The file is too big to be converted. The size limit is " +
-          WrangleModalComponent.FILE_SIZE_LIMIT +
+          DatasetModalService.WRANGLE_FILE_SIZE_LIMIT +
           " MB at the moment but it will be removed in the future.",
       );
       return;
     }
 
+    // the modal is loaded with import(), so that ag-grid, which only it and the admin storage view need, stays
+    // out of the main bundle: the session list imports this service through the workflow graph
+    const { WrangleModalComponent } = await import("../wrangle-modal/wrangle-modal.component");
     const modalRef = this.ngbModal.open(WrangleModalComponent, {
       size: "xl",
     });
-    modalRef.componentInstance.dataset = dataset;
-    modalRef.componentInstance.sessionData = sessionData;
+    const modal = modalRef.componentInstance as InstanceType<typeof WrangleModalComponent>;
+    modal.dataset.set(dataset);
+    modal.sessionData.set(sessionData);
 
     // modal returns the observale which runs the wrangle
     // block with the spinner while waiting for that observable to complete
@@ -116,8 +122,10 @@ export class DatasetModalService {
     const modalRef = this.ngbModal.open(SamplesModalComponent, {
       size: "xl",
     });
-    modalRef.componentInstance.datasets = datasets;
-    modalRef.componentInstance.sessionData = sessionData;
+    const modal = modalRef.componentInstance as SamplesModalComponent;
+    // the latest copies: the selection's datasets don't have the notes and labels saved since
+    modal.datasets.set(sessionData.latestDatasets(datasets));
+    modal.sessionData.set(sessionData);
 
     // modal returns the observale which runs the action
     // block with the spinner while waiting for that observable to complete
@@ -135,7 +143,7 @@ export class DatasetModalService {
 
   public openCopySelectionToNewSessionModal(selectedDatasets: Dataset[], sessionData: SessionData) {
     this.dialogModalService
-      .openSessionNameModal("Copy selected files to a new session", sessionData.session.name + "_part", "Copy")
+      .openSessionNameModal("Copy selected files to a new session", sessionData.session().name + "_part", "Copy")
       .pipe(
         mergeMap((name: string) => {
           log.info("copying selected datasets and jobs");
@@ -185,9 +193,9 @@ export class DatasetModalService {
           this.changeIds(selectedSessionData);
 
           const copy = this.sessionResource.copyToExistingSession(
-            targetSessionData.session.sessionId,
+            targetSessionData.session().sessionId,
             selectedSessionData,
-            targetSessionData.labelsMap ?? new Map(),
+            targetSessionData.labelsMap(),
           );
 
           // return observable of the new sessionId
@@ -227,9 +235,9 @@ export class DatasetModalService {
           this.changeIds(sourceSessionData);
 
           const copy = this.sessionResource.copyToExistingSession(
-            sessionData.session.sessionId,
+            sessionData.session().sessionId,
             sourceSessionData,
-            sessionData.labelsMap ?? new Map(),
+            sessionData.labelsMap(),
           );
 
           // return observable of the new sessionId
@@ -244,10 +252,10 @@ export class DatasetModalService {
 
   moveFilesSideBySide(targetSessionData: SessionData, sessionDataToMove: SessionData) {
     // find out the width of the target session workflow
-    const minSourceX = Math.min(...Array.from(sessionDataToMove.datasetsMap.values()).map((d) => d.x));
+    const minSourceX = Math.min(...Array.from(sessionDataToMove.datasetsMap().values()).map((d) => d.x));
 
     // find out the minX of the moving session workflow
-    const maxTargetX = Math.max(...Array.from(targetSessionData.datasetsMap.values()).map((d) => d.x));
+    const maxTargetX = Math.max(...Array.from(targetSessionData.datasetsMap().values()).map((d) => d.x));
 
     // width of the target session
     // minus empty space on the left side of source session
@@ -256,7 +264,7 @@ export class DatasetModalService {
 
     // move other session sideways
     // we can modify sourceSessionData directly, because its our own copy which we just got from the server
-    Array.from(sessionDataToMove.datasetsMap.values()).forEach((dataset) => {
+    Array.from(sessionDataToMove.datasetsMap().values()).forEach((dataset) => {
       // xOffset is -Infinity if the current session is empty
       if (xOffset != null && xOffset > 0 && dataset.x != null) {
         dataset.x = dataset.x + xOffset;
@@ -270,7 +278,7 @@ export class DatasetModalService {
     // clone objects in case we wan't to modify them (change ID and location of selected datasets when merging to existing session)
     const sourceJobs: Map<string, Job> = new Map(
       sourceJobIds.map((jobId: string) => {
-        const jobClone = cloneDeep(sessionData.jobsMap.get(jobId));
+        const jobClone = cloneDeep(sessionData.jobsMap().get(jobId));
         return [jobId, jobClone];
       }),
     );
@@ -284,22 +292,18 @@ export class DatasetModalService {
     // narrow labelsMap to only labels referenced by the selected datasets
     const referencedLabelIds = new Set(selectedDatasets.flatMap((d: Dataset) => d.labelIds ?? []));
     const filteredLabelsMap = new Map<string, Label>();
-    if (sessionData.labelsMap) {
-      sessionData.labelsMap.forEach((label, id) => {
-        if (referencedLabelIds.has(id)) {
-          filteredLabelsMap.set(id, label);
-        }
-      });
-    }
+    sessionData.labelsMap().forEach((label, id) => {
+      if (referencedLabelIds.has(id)) {
+        filteredLabelsMap.set(id, label);
+      }
+    });
 
-    return {
-      session: sessionData.session,
-      datasetsMap: selectedDatasetsMap,
-      jobsMap: sourceJobs,
-      labelsMap: filteredLabelsMap,
-      datasetTypeTags: null,
-      cachedFileHeaders: null,
-    };
+    const selection = new SessionData();
+    selection.session.set(sessionData.session());
+    selection.datasetsMap.set(selectedDatasetsMap);
+    selection.jobsMap.set(sourceJobs);
+    selection.labelsMap.set(filteredLabelsMap);
+    return selection;
   }
 
   /**
@@ -313,8 +317,8 @@ export class DatasetModalService {
     */
 
     // map from old ID (key) to new ID (value)
-    const datasetIdMap = new Map(Array.from(sessionData.datasetsMap.keys()).map((key) => [key, uuidv4()]));
-    const jobIdMap = new Map(Array.from(sessionData.jobsMap.keys()).map((key) => [key, uuidv4()]));
+    const datasetIdMap = new Map(Array.from(sessionData.datasetsMap().keys()).map((key) => [key, uuidv4()]));
+    const jobIdMap = new Map(Array.from(sessionData.jobsMap().keys()).map((key) => [key, uuidv4()]));
 
     // maps for updated objects
     const newDatasetsMap = new Map<string, Dataset>();
@@ -322,7 +326,7 @@ export class DatasetModalService {
 
     // update datasets and their sourceJobIds
     datasetIdMap.forEach((newId, oldId) => {
-      const dataset = sessionData.datasetsMap.get(oldId);
+      const dataset = sessionData.datasetsMap().get(oldId);
       dataset.datasetId = newId;
       if (dataset.sourceJob != null) {
         const newSourceJobId = jobIdMap.get(dataset.sourceJob);
@@ -337,7 +341,7 @@ export class DatasetModalService {
 
     // update jobs and their input datasetIds
     jobIdMap.forEach((newId, oldId) => {
-      const job = sessionData.jobsMap.get(oldId);
+      const job = sessionData.jobsMap().get(oldId);
       job.jobId = newId;
       if (job.inputs != null) {
         job.inputs.forEach((input) => {
@@ -366,7 +370,7 @@ export class DatasetModalService {
       newJobsMap.set(job.jobId, job);
     });
 
-    sessionData.datasetsMap = newDatasetsMap;
-    sessionData.jobsMap = newJobsMap;
+    sessionData.datasetsMap.set(newDatasetsMap);
+    sessionData.jobsMap.set(newJobsMap);
   }
 }

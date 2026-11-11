@@ -1,4 +1,4 @@
-import { Component, Input, NgZone, OnChanges, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { Component, OnChanges, OnDestroy, ViewEncapsulation, inject, input, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
 import { filter, map, find, difference, uniq, floor, intersection, range, flatMap, minBy } from "lodash-es";
@@ -19,84 +19,81 @@ import GeneExpression from "./geneexpression";
 import Interval from "./interval";
 import Line from "./line";
 import Rectangle from "./rectangle";
+import { StatusComponent } from "../../../../../shared/components/status.component";
 
 @Component({
   selector: "ch-expression-profile",
   templateUrl: "./expression-profile.component.html",
   styleUrls: ["./expression-profile.component.less"],
   encapsulation: ViewEncapsulation.None,
+  imports: [StatusComponent],
 })
 export class ExpressionProfileComponent implements OnChanges, OnDestroy {
-  @Input()
-  private dataset: Dataset;
+  private expressionProfileService = inject(ExpressionProfileService);
+  private sessionDataService = inject(SessionDataService);
+  private visualizationTSVService = inject(VisualizationTSVService);
+  private fileResource = inject(FileResource);
+  private restErrorService = inject(RestErrorService);
+
+  readonly dataset = input<Dataset>(undefined);
 
   private tsv: TSVFile;
-  selectedGeneExpressions: Array<GeneExpression>; // selected gene expressions
+  readonly selectedGeneExpressions = signal<Array<GeneExpression>>(undefined); // selected gene expressions
   // symbols and identifiers of the selected rows, shown in the selection list
-  public viewSelectionList: Array<SelectionRow> = [];
+  readonly viewSelectionList = signal<Array<SelectionRow>>([]);
   // files without a symbol column show the identifier column only
-  public showSymbolColumn = false;
+  readonly showSymbolColumn = signal(false);
   // total number of rows, shown next to the number of selected rows
   public totalCount = 0;
 
   private unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
+  readonly state = signal<LoadState>(undefined);
 
   // Redraws the chart when its container changes width, see observeResize()
   private resizeObserver: ResizeObserver;
   private lastChartWidth: number;
 
-  constructor(
-    private expressionProfileService: ExpressionProfileService,
-    private sessionDataService: SessionDataService,
-    private visualizationTSVService: VisualizationTSVService,
-    private fileResource: FileResource,
-    private restErrorService: RestErrorService,
-    private zone: NgZone,
-  ) {}
-
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading data...");
+    this.state.set(new LoadState(State.Loading, "Loading data..."));
     setTimeout(() => this.update(), 100);
   }
 
   update() {
-    const datasetName = this.dataset.name;
+    const datasetName = this.dataset().name;
 
     // check for empty file
-    if (this.dataset.size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+    if (this.dataset().size < 1) {
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset)
+      .getData(this.sessionDataService.getSessionId(), this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {
           const parsedTSV = d3.tsvParseRows(result);
-          this.tsv = new TSVFile(parsedTSV, this.dataset.datasetId, datasetName);
+          this.tsv = new TSVFile(parsedTSV, this.dataset().datasetId, datasetName);
           this.totalCount = this.tsv.body.size();
           if (this.visualizationTSVService.containsChipHeaders(this.tsv)) {
             this.drawLineChart(this.tsv);
             this.observeResize();
-            this.state = new LoadState(State.Ready);
+            this.state.set(new LoadState(State.Ready));
           } else {
-            this.state = new LoadState(
-              State.Fail,
-              "Only microarray data supported, no columns starting with chip found.",
+            this.state.set(
+              new LoadState(State.Fail, "Only microarray data supported, no columns starting with chip found."),
             );
           }
         },
         error: (error: any) => {
-          this.state = new LoadState(State.Fail, "Loading data failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading data failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
 
-    this.selectedGeneExpressions = [];
-    this.viewSelectionList = [];
+    this.selectedGeneExpressions.set([]);
+    this.viewSelectionList.set([]);
 
     // reset the cached width so the resize observer redraws the new dataset
     // even when the container returns to a width it had for a previous one
@@ -135,10 +132,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       const width = entries[0]?.contentRect.width;
       if (width && width !== this.lastChartWidth && this.tsv) {
         this.lastChartWidth = width;
-        // ResizeObserver fires outside Angular's zone; redraw inside it so the
-        // d3 drag handlers are re-registered in the zone (otherwise selecting
-        // would not trigger change detection) and bound state stays in sync.
-        this.zone.run(() => this.drawLineChart(this.tsv));
+        this.drawLineChart(this.tsv);
       }
     });
     this.resizeObserver.observe(element);
@@ -187,7 +181,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
       .call(drag);
 
     // Custom headers for x-axis
-    const firstDataset: any = this.dataset;
+    const firstDataset: any = this.dataset();
     const phenodataDescriptions = filter(firstDataset.metadata, (metadata: any) => metadata.key === "description");
 
     // Change default headers to values defined in phenodata if description value has been defined
@@ -469,7 +463,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     });
 
     // the paths are recreated on every redraw, so re-apply the selection highlight
-    (this.selectedGeneExpressions ?? []).forEach((expression) => this.setSelectionStyle(expression.id));
+    (this.selectedGeneExpressions() ?? []).forEach((expression) => this.setSelectionStyle(expression.id));
   }
 
   createNewDataset() {
@@ -477,12 +471,12 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const tsvData = this.tsv.getRawDataByRowIds(selectedGeneExpressionIds);
     const data = d3.tsvFormatRows(tsvData);
     this.sessionDataService
-      .createDerivedDataset("dataset.tsv", [this.dataset], "Expression profile", data)
+      .createDerivedDataset("dataset.tsv", [this.dataset()], "Expression profile", data)
       .subscribe(null);
   }
 
   getSelectionIds(): Array<string> {
-    return this.selectedGeneExpressions.map((expression: GeneExpression) => expression.id);
+    return this.selectedGeneExpressions().map((expression: GeneExpression) => expression.id);
   }
 
   /**
@@ -503,7 +497,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
 
   resetSelections(): void {
     this.removeSelections(this.getSelectionIds());
-    this.selectedGeneExpressions.length = 0;
+    this.selectedGeneExpressions.set([]);
     this.setViewSelectionList();
   }
 
@@ -517,8 +511,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
      * so drop the removed ones instead of looking them all up again.
      */
     const removedIds = new Set(ids);
-    this.selectedGeneExpressions = this.selectedGeneExpressions.filter(
-      (geneExpression: GeneExpression) => !removedIds.has(geneExpression.id),
+    this.selectedGeneExpressions.set(
+      this.selectedGeneExpressions().filter((geneExpression: GeneExpression) => !removedIds.has(geneExpression.id)),
     );
     this.setViewSelectionList();
   }
@@ -528,7 +522,7 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
     const missingSelectionIds = difference(ids, selectionIds);
     // look up the rows of the whole selection at once, a row at a time takes seconds over a large file
     const missingGeneExpressions = this.visualizationTSVService.getGeneExpressionsByIds(this.tsv, missingSelectionIds);
-    this.selectedGeneExpressions = this.selectedGeneExpressions.concat(missingGeneExpressions);
+    this.selectedGeneExpressions.set(this.selectedGeneExpressions().concat(missingGeneExpressions));
     missingSelectionIds.forEach((id) => {
       this.setSelectionStyle(id);
     });
@@ -560,8 +554,8 @@ export class ExpressionProfileComponent implements OnChanges, OnDestroy {
   }
 
   setViewSelectionList(): void {
-    const rowIds = this.selectedGeneExpressions.map((geneExpression: GeneExpression) => geneExpression.id);
-    this.showSymbolColumn = this.visualizationTSVService.containsSymbolColumn(this.tsv);
-    this.viewSelectionList = this.visualizationTSVService.getSelectionRows(this.tsv, rowIds);
+    const rowIds = this.selectedGeneExpressions().map((geneExpression: GeneExpression) => geneExpression.id);
+    this.showSymbolColumn.set(this.visualizationTSVService.containsSymbolColumn(this.tsv));
+    this.viewSelectionList.set(this.visualizationTSVService.getSelectionRows(this.tsv, rowIds));
   }
 }

@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { TokenService } from "../../../core/authentication/token.service";
 
@@ -8,10 +8,8 @@ import { TokenService } from "../../../core/authentication/token.service";
   styleUrls: ["./account.component.less"],
 })
 export class AccountComponent {
-  constructor(
-    private tokenService: TokenService,
-    private activeModal: NgbActiveModal,
-  ) {}
+  private tokenService = inject(TokenService);
+  private activeModal = inject(NgbActiveModal);
 
   getAccountName(): string {
     return this.tokenService.getAccountName();

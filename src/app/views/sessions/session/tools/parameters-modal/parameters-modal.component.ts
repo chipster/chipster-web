@@ -1,23 +1,52 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, inject, signal, output } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { SessionData } from "../../../../../model/session/session-data";
 import { SelectedToolWithInputs, ValidatedTool } from "../ToolSelection";
 import { Tool } from "chipster-js-common";
+import {
+  NgbAccordionDirective,
+  NgbAccordionItem,
+  NgbAccordionHeader,
+  NgbAccordionToggle,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionBody,
+} from "@ng-bootstrap/ng-bootstrap/accordion";
+import { NgbCollapse } from "@ng-bootstrap/ng-bootstrap/collapse";
+import { ToolParametersComponent } from "../tool-parameters/tool-parameters.component";
+import { ToolInputsComponent } from "../tool-inputs/tool-inputs.component";
+import { RunOptionsComponent } from "../run-options/run-options.component";
+import { ToolResourcesComponent } from "../tool-resources/tool-resources.component";
 
 @Component({
   selector: "ch-parameters-modal",
   templateUrl: "./parameters-modal.component.html",
   styleUrls: ["./parameters-modal.component.less"],
+  imports: [
+    NgbAccordionDirective,
+    NgbAccordionItem,
+    NgbAccordionHeader,
+    NgbAccordionToggle,
+    NgbAccordionButton,
+    NgbCollapse,
+    NgbAccordionCollapse,
+    NgbAccordionBody,
+    ToolParametersComponent,
+    ToolInputsComponent,
+    RunOptionsComponent,
+    ToolResourcesComponent,
+  ],
 })
 export class ParametersModalComponent {
-  constructor(public activeModal: NgbActiveModal) {}
+  activeModal = inject(NgbActiveModal);
 
-  @Input() validatedTool: ValidatedTool;
-  @Input() sessionData: SessionData;
-  @Input() origTool: Tool;
-  @Output() parametersChanged = new EventEmitter();
-  @Output() updateBindings = new EventEmitter();
-  @Output() resourcesChanged = new EventEmitter();
+  // set through the modal ref by the code that opens the modal
+  readonly validatedTool = signal<ValidatedTool>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
+  readonly origTool = signal<Tool>(undefined);
+  readonly parametersChanged = output<void>();
+  readonly updateBindings = output<SelectedToolWithInputs>();
+  readonly resourcesChanged = output<void>();
 
   setBindings(toolWithInputs: SelectedToolWithInputs) {
     this.updateBindings.emit(toolWithInputs);

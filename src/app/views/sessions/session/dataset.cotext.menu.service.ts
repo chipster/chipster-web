@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { SessionData } from "../../../model/session/session-data";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
@@ -7,17 +7,15 @@ import { SessionDataService } from "./session-data.service";
 import { ToolSelectionService } from "./tool.selection.service";
 import { ToolService } from "./tools/tool.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class DatasetContextMenuService {
-  constructor(
-    private sessionDataService: SessionDataService,
-    private toolService: ToolService,
-    private selectionHandlerService: SelectionHandlerService,
-    private dialogModalService: DialogModalService,
-    private toolSelectionService: ToolSelectionService,
-  ) {}
+  private sessionDataService = inject(SessionDataService);
+  private toolService = inject(ToolService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private dialogModalService = inject(DialogModalService);
+  private toolSelectionService = inject(ToolSelectionService);
 
-  getSourceJob(datasets: Dataset[], jobsMap: Map<string, Job>): Job {
+  getSourceJob(datasets: Dataset[], jobsMap: ReadonlyMap<string, Job>): Job {
     if (datasets.length === 1) {
       return this.sessionDataService.getJobById(datasets[0].sourceJob, jobsMap);
     }
@@ -31,7 +29,7 @@ export class DatasetContextMenuService {
   showJob(job: Job, tools: Tool[], sessionData: SessionData) {
     this.selectionHandlerService.setJobSelection([job]);
 
-    this.dialogModalService.openJobsModal(this.sessionDataService.getJobList(sessionData), tools, sessionData);
+    this.dialogModalService.openJobsModal(tools, sessionData);
   }
 
   selectTool(job: Job) {

@@ -7,11 +7,11 @@
   </div>
   <div class="row">
     <div class="col">
-      @if (manualPath) {
+      @if (manualPath()) {
         <div>
           <ch-manual
-            assetsPath="{{ manualPath }}"
-            page="{{ file }}"
+            assetsPath="{{ manualPath() }}"
+            page="{{ file() }}"
             [showControls]="false"
             [addContainer]="false"
             [manualStyles]="false"></ch-manual>

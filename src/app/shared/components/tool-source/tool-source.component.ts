@@ -1,27 +1,24 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, inject, input, signal } from "@angular/core";
 import { Tool } from "chipster-js-common";
 import { ToolResource } from "../../resources/tool-resource";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 
 @Component({
   selector: "ch-tool-source",
-  template: '<pre class="tool-source">{{source}}</pre>',
+  template: '<pre class="tool-source">{{ source() }}</pre>',
   styleUrls: ["./tool-source.component.less"],
 })
 export class ToolSourceComponent implements OnInit {
-  source: string;
-  @Input()
-  selectedTool: Tool;
+  private toolResource = inject(ToolResource);
+  private restErrorService = inject(RestErrorService);
 
-  constructor(
-    private toolResource: ToolResource,
-    private restErrorService: RestErrorService,
-  ) {}
+  readonly source = signal<string>(undefined);
+  readonly selectedTool = input<Tool>(undefined);
 
   ngOnInit() {
-    this.toolResource.getSourceCode(this.selectedTool.name.id).subscribe({
+    this.toolResource.getSourceCode(this.selectedTool().name.id).subscribe({
       next: (sourceCode) => {
-        this.source = sourceCode;
+        this.source.set(sourceCode);
       },
       error: (err) => this.restErrorService.showError("get source code failed", err),
     });

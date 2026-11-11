@@ -1,28 +1,27 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, OnInit, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Session } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
+import { FormsModule } from "@angular/forms";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   templateUrl: "./notes-modal.component.html",
   styleUrls: ["./notes-modal.component.less"],
+  imports: [FormsModule, LocalDatePipe],
 })
 export class NotesModalComponent implements AfterViewInit, OnInit {
-  @Input()
-  session: Session;
+  private activeModal = inject(NgbActiveModal);
+  private sessionDataService = inject(SessionDataService);
 
-  @ViewChild("submitButton")
-  submitButton;
-  @ViewChild("notesArea")
-  notesArea;
+  // set through the modal ref by the code that opens the modal
+  readonly session = signal<Session>(undefined);
+
+  readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
+  readonly notesArea = viewChild<ElementRef<HTMLTextAreaElement>>("notesArea");
 
   public notes: string;
   public readOnly: boolean;
-
-  constructor(
-    private activeModal: NgbActiveModal,
-    private sessionDataService: SessionDataService,
-  ) {}
 
   ngAfterViewInit() {
     // set focus to submit button every time the dialog is opened
@@ -34,16 +33,16 @@ export class NotesModalComponent implements AfterViewInit, OnInit {
       // https:github.com/ng-bootstrap/ng-bootstrap/issues/2728
 
       if (this.readOnly) {
-        this.submitButton.nativeElement.focus();
+        this.submitButton().nativeElement.focus();
       } else {
-        this.notesArea.nativeElement.focus();
+        this.notesArea().nativeElement.focus();
       }
     });
   }
 
   ngOnInit() {
-    this.notes = this.session.notes;
-    this.readOnly = !this.sessionDataService.hasPersonalRule(this.session.rules);
+    this.notes = this.session().notes;
+    this.readOnly = !this.sessionDataService.hasPersonalRule(this.session().rules);
   }
 
   save() {

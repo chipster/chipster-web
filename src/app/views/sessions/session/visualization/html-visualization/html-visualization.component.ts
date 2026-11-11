@@ -1,4 +1,15 @@
-import { Component, ElementRef, Input, NgZone, OnChanges, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  inject,
+  input,
+  effect,
+  viewChild,
+  signal,
+} from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { fromEvent, Subject, Subscription } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -6,6 +17,7 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
 import { LoadState, State } from "../../../../../model/loadstate";
 import { FileResource } from "../../../../../shared/resources/fileresource";
 import { SessionDataService } from "../../session-data.service";
+import { StatusComponent } from "../../../../../shared/components/status.component";
 
 /**
  * Show a html dataset in a sandboxed iframe.
@@ -57,8 +69,13 @@ import { SessionDataService } from "../../session-data.service";
   selector: "ch-htmlvisualization",
   templateUrl: "./html-visualization.component.html",
   styleUrls: ["./html-visualization.component.less"],
+  imports: [StatusComponent],
 })
 export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy {
+  private fileResource = inject(FileResource);
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+
   private static readonly SIZE_MESSAGE_TYPE = "chipster-html-visualization-size";
   private static readonly SCROLL_MESSAGE_TYPE = "chipster-html-visualization-scroll";
   private static readonly MAX_FRAME_SIZE_PX = 100_000;
@@ -260,8 +277,7 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
 </script>
 `;
 
-  @Input()
-  private dataset: Dataset;
+  readonly dataset = input<Dataset>(undefined);
 
   /**
    * The iframe exists while the state is ready. The content is set here instead of a srcdoc
@@ -269,15 +285,21 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
    * whole file next to the copy in the srcdoc attribute for as long as the file is shown.
    * Reports can be tens of megabytes.
    */
-  @ViewChild("htmlframe")
-  set htmlframe(frame: ElementRef<HTMLIFrameElement>) {
-    this.frame = frame?.nativeElement;
-    if (this.frame && this.html != null) {
-      // the html goes only to the sandboxed iframe, see the comment on the class. The sandbox
-      // attribute is static in the template, so it's set before the content.
-      this.frame.srcdoc = this.html;
-      this.html = null;
-    }
+  private readonly htmlframe = viewChild<ElementRef<HTMLIFrameElement>>("htmlframe");
+
+  constructor() {
+    // runs when the iframe is created or removed, in the same tick of the change detection. It
+    // tracks only the query: html is a plain field, and ngOnChanges always drops the iframe
+    // before new content is loaded, so the content is never there before the iframe.
+    effect(() => {
+      this.frame = this.htmlframe()?.nativeElement;
+      if (this.frame && this.html != null) {
+        // the html goes only to the sandboxed iframe, see the comment on the class. The sandbox
+        // attribute is static in the template, so it's set before the content.
+        this.frame.srcdoc = this.html;
+        this.html = null;
+      }
+    });
   }
 
   private frame: HTMLIFrameElement;
@@ -285,47 +307,38 @@ export class HtmlvisualizationComponent implements OnInit, OnChanges, OnDestroy 
   private lastScrollTime = 0;
   private unsubscribe: Subject<any> = new Subject();
   private messageSubscription: Subscription;
-  state: LoadState;
-
-  constructor(
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-    private ngZone: NgZone,
-  ) {}
+  readonly state = signal<LoadState>(undefined);
 
   ngOnInit() {
-    // listen outside Angular, because the size messages can arrive on every animation frame and
-    // the handler only sets the size of the iframe, no change detection is needed
-    this.ngZone.runOutsideAngular(() => {
-      this.messageSubscription = fromEvent<MessageEvent>(window, "message").subscribe((event) => this.onMessage(event));
-    });
+    // the size messages can arrive on every animation frame, so the handlers only set the iframe's
+    // style and the page's scroll position: nothing that Angular would have to check
+    this.messageSubscription = fromEvent<MessageEvent>(window, "message").subscribe((event) => this.onMessage(event));
   }
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading html file...");
+    this.state.set(new LoadState(State.Loading, "Loading html file..."));
     this.html = null;
 
     // check for empty file
-    if (this.dataset.size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+    if (this.dataset().size < 1) {
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset)
+      .getData(this.sessionDataService.getSessionId(), this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (html: string) => {
           // given to the iframe when the ready state has created it
           this.html = HtmlvisualizationComponent.FRAME_SCRIPT + html;
-          this.state = new LoadState(State.Ready);
+          this.state.set(new LoadState(State.Ready));
         },
         error: (error: any) => {
-          this.state = new LoadState(State.Fail, "Loading html file failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading html file failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }

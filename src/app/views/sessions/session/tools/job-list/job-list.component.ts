@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
+import { Component, computed, inject, input, output } from "@angular/core";
 import { Job } from "chipster-js-common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -7,49 +7,46 @@ import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
 import { JobService } from "../../job.service";
 import { SelectionService } from "../../selection.service";
 import { SessionDataService } from "../../session-data.service";
+import { NgClass, AsyncPipe } from "@angular/common";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-job-list",
   templateUrl: "./job-list.component.html",
   styleUrls: ["./job-list.component.less"],
+  imports: [NgClass, LinkButtonComponent, AsyncPipe, LocalDatePipe],
 })
-export class JobListComponent implements OnChanges {
-  @Input() jobs: Job[];
-  jobsSorted: Job[];
+export class JobListComponent {
+  private readonly selectionService = inject(SelectionService);
+  private readonly sessionDataService = inject(SessionDataService);
+  private readonly dialogModalService = inject(DialogModalService);
+  private readonly errorService = inject(ErrorService);
 
-  durationMap = new Map<string, Observable<string>>();
-  runningJobCount = 0;
+  readonly jobs = input<Job[]>(undefined);
 
-  @Output() private readonly jobSelected = new EventEmitter<Job>();
-
-  constructor(
-    private readonly selectionService: SelectionService,
-    private readonly sessionDataService: SessionDataService,
-    private readonly dialogModalService: DialogModalService,
-    private readonly errorService: ErrorService,
-  ) {}
-
-  ngOnChanges() {
-    this.jobsSorted = [...this.jobs].sort((a, b) => {
+  readonly jobsSorted = computed(() =>
+    [...this.jobs()].sort((a, b) => {
       const d1 = new Date(a.created).getTime();
       const d2 = new Date(b.created).getTime();
       return d2 - d1;
-    });
+    }),
+  );
 
-    this.durationMap = new Map();
-    this.jobsSorted.forEach((job) => {
-      this.durationMap.set(job.jobId, this.createDurationObservable(job));
-    });
+  readonly durationMap = computed(
+    () => new Map(this.jobsSorted().map((job) => [job.jobId, this.createDurationObservable(job)])),
+  );
 
-    this.runningJobCount = this.jobsSorted.filter((job) => JobService.isRunning(job)).length;
-  }
+  readonly runningJobCount = computed(() => JobService.runningJobCount(this.jobsSorted()));
+
+  readonly jobSelected = output<Job>();
 
   isRunning(job: Job) {
     return JobService.isRunning(job);
   }
 
   getDurationObservable(job) {
-    return this.durationMap.get(job.jobId);
+    return this.durationMap().get(job.jobId);
   }
 
   selectJob(job: Job) {
@@ -57,12 +54,13 @@ export class JobListComponent implements OnChanges {
   }
 
   public navigateJob(direction: 1 | -1): void {
-    if (!this.jobsSorted?.length) {
+    const jobsSorted = this.jobsSorted();
+    if (!jobsSorted?.length) {
       return;
     }
-    const current = this.jobsSorted.findIndex((j) => this.selectionService.isSelectedJobById(j.jobId));
-    const next = Math.max(0, Math.min(this.jobsSorted.length - 1, (current === -1 ? 0 : current) + direction));
-    const job = this.jobsSorted[next];
+    const current = jobsSorted.findIndex((j) => this.isSelectedJobById(j.jobId));
+    const next = Math.max(0, Math.min(jobsSorted.length - 1, (current === -1 ? 0 : current) + direction));
+    const job = jobsSorted[next];
     this.jobSelected.emit(job);
     document.getElementById(`job-id-${job.jobId}`)?.scrollIntoView({ block: "nearest" });
   }
@@ -86,7 +84,7 @@ export class JobListComponent implements OnChanges {
   }
 
   cancelAllJobs() {
-    const count = this.runningJobCount;
+    const count = this.runningJobCount();
     this.dialogModalService
       .openBooleanModal(
         "Cancel all jobs",
@@ -96,7 +94,7 @@ export class JobListComponent implements OnChanges {
       )
       .then(
         () => {
-          const runningJobs = (this.jobsSorted ?? []).filter((job) => JobService.isRunning(job));
+          const runningJobs = this.jobsSorted().filter((job) => JobService.isRunning(job));
           const promises = runningJobs.map((job) => this.sessionDataService.cancelJob(job));
           Promise.allSettled(promises).then((results) => {
             results.forEach((r, i) => {
@@ -112,6 +110,8 @@ export class JobListComponent implements OnChanges {
       );
   }
 
+  // the arrow keys of the jobs modal and its auto-selection change the selection without an event
+  // in this view, but SelectionService reads it from a signal
   isSelectedJobById(jobId: string): boolean {
     return this.selectionService.isSelectedJobById(jobId);
   }

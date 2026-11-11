@@ -2,7 +2,7 @@
 
 <div class="chipster-highlight">
   <div class="mb-2">
-    <span class="h6">{{ session.name }}</span>
+    <span class="h6">{{ session().name }}</span>
 
     <!-- context dropdown -->
     <div ngbDropdown class="d-inline-block">
@@ -34,7 +34,7 @@
     <table class="table table-sm text-sm">
       <tr>
         <td class="lighter">Created:</td>
-        <td width="100%">{{ session.created | localDate }}</td>
+        <td width="100%">{{ session().created | localDate }}</td>
       </tr>
       <tr>
         <td class="lighter">Size:</td>
@@ -43,7 +43,7 @@
       <tr>
         <td class="lighter">Notes:</td>
         <td width="100%">
-          @for (line of session.notes?.split("\n"); track $index) {
+          @for (line of session().notes?.split("\n"); track $index) {
             <p class="mb-1">
               {{ line }}
             </p>

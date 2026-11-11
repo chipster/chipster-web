@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, input } from "@angular/core";
 import { Label } from "chipster-js-common";
 import { resolveLabelColor, textColorForBackground } from "./label-palette";
 
@@ -8,10 +8,10 @@ import { resolveLabelColor, textColorForBackground } from "./label-palette";
   styleUrls: ["./label-pill.component.less"],
 })
 export class LabelPillComponent {
-  @Input() label: Label;
+  readonly label = input<Label>(undefined);
 
   get background(): string {
-    return resolveLabelColor(this.label?.color);
+    return resolveLabelColor(this.label()?.color);
   }
 
   get text(): string {

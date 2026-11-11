@@ -189,4 +189,15 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   ],
 });
 
+/*
+ * Development builds check once a second that no binding has changed without
+ * notifying Angular (provideCheckNoChangesConfig in app.config.ts), and log
+ * ExpressionChangedAfterItHasBeenChecked where one has. A test that follows a
+ * view through changes waits for a few of these checks at the end, so that
+ * pageErrors sees a stale view as a console error.
+ */
+export async function waitForDevCheck(page: Page) {
+  await page.waitForTimeout(3000);
+}
+
 export { expect };

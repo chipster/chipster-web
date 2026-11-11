@@ -1,5 +1,5 @@
 import { HttpParams } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Role } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of } from "rxjs";
@@ -7,12 +7,10 @@ import { mergeMap, tap } from "rxjs/operators";
 import { AuthHttpClientService } from "./auth-http-client.service";
 import { ConfigService } from "./config.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionDbAdminService {
-  constructor(
-    private configService: ConfigService,
-    private authHttpClient: AuthHttpClientService,
-  ) {}
+  private configService = inject(ConfigService);
+  private authHttpClient = inject(AuthHttpClientService);
 
   deleteSessions(...userId: string[]): Observable<any> {
     log.info("delete sessions for", userId);

@@ -1,94 +1,37 @@
-import { Dataset, Tool, Job } from "chipster-js-common";
-import { Component, Input, OnInit, OnDestroy } from "@angular/core";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { SessionDataService } from "../session-data.service";
+import { Dataset, Tool } from "chipster-js-common";
+import { Component, computed, inject, input } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
 import { SessionData } from "../../../../model/session/session-data";
 import { SelectionService } from "../selection.service";
 import { ToolSelectionService } from "../tool.selection.service";
 import { SettingsService } from "../../../../shared/services/settings.service";
-import { ErrorService } from "../../../../core/errorhandler/error.service";
+import { ToolDetailsComponent } from "../tools/tool-details/tool-details.component";
+import { JobComponent } from "../selectiondetails/job/job.component";
+import { FileComponent } from "../selectiondetails/selected-files/selected-files.component";
 
 @Component({
   selector: "ch-selection-panel",
   templateUrl: "./selection-panel.component.html",
   styleUrls: ["./selection-panel.component.less"],
+  imports: [ToolDetailsComponent, JobComponent, FileComponent],
 })
-export class SelectionPanelComponent implements OnInit, OnDestroy {
-  @Input()
-  sessionData: SessionData;
-  @Input()
-  tools: Tool[];
+export class SelectionPanelComponent {
+  selectionService = inject(SelectionService);
+  private toolSelectionService = inject(ToolSelectionService);
+  settingsService = inject(SettingsService);
 
-  // FIXME after tool state refactoring
-  // public toolSelection: ToolSelection;
+  readonly sessionData = input<SessionData>(undefined);
+  readonly tools = input<Tool[]>(undefined);
+
+  // FIXME after tool state refactoring: nothing sets showTool and showFile since the old selection code was removed
   public selectedDatasets: Array<Dataset>;
-  public selectedJobs: Array<Job>;
 
   // a bit awkward to use enums in the template so going with these
   public showTool = false;
   public showFile = false;
-  public showJob = false;
+  // the selection service reads the selection from a signal
+  public readonly showJob = computed(() => this.selectionService.selectedJobs.length > 0);
 
-  private unsubscribe: Subject<any> = new Subject();
-
-  constructor(
-    public selectionService: SelectionService,
-    public sessionDataService: SessionDataService,
-    private toolSelectionService: ToolSelectionService,
-    public settingsService: SettingsService,
-    private errorService: ErrorService,
-  ) {}
-
-  ngOnInit() {
-    // FIXME after tool selection refactoring
-    // this.toolSelectionService.toolSelection$
-    //   .takeUntil(this.unsubscribe)
-    //   .subscribe(toolSelection => {
-    //     this.toolSelection = toolSelection;
-    //     if (toolSelection) {
-    //       this.showTool = true;
-    //       this.showFile = false;
-    //       this.showJob = false;
-    //     }
-    //   }, err => this.errorService.showError("tool selection failed", err));
-
-    // this.selectionService.selectedDatasets$
-    //   .takeUntil(this.unsubscribe)
-    //   .subscribe(
-    //     (selectedDatasets: Array<Dataset>) => {
-    //       this.selectedDatasets = selectedDatasets;
-    //       if (this.selectedDatasets.length > 0) {
-    //         this.showFile = true;
-    //         this.showTool = false;
-    //         this.showJob = false;
-    //       } else {
-    //         this.showFile = false;
-    //         if (this.toolSelection) {
-    //           this.showTool = true;
-    //         }
-    //       }
-    //     },
-    //     err => this.errorService.showError("dataset selection failed", err)
-    //   );
-
-    this.selectionService.selectedJobs$.pipe(takeUntil(this.unsubscribe)).subscribe({
-      next: (selectedJobs: Array<Job>) => {
-        this.selectedJobs = selectedJobs;
-        if (this.selectedJobs.length > 0) {
-          this.showFile = false;
-          this.showTool = false;
-          this.showJob = true;
-        } else {
-          this.showJob = false;
-        }
-      },
-      error: (err) => this.errorService.showError("job selection failed", err),
-    });
-  }
-
-  ngOnDestroy() {
-    this.unsubscribe.next(null);
-    this.unsubscribe.complete();
-  }
+  // the settings modal changes it
+  readonly splitSelectionPanel = toSignal(this.settingsService.splitSelectionPanel$, { requireSync: true });
 }

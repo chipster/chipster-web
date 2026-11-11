@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, input, output } from "@angular/core";
 
 @Component({
   selector: "ch-auth-button",
@@ -6,11 +6,11 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
   styleUrls: ["./auth-button.component.less"],
 })
 export class AuthButtonComponent {
-  @Input() name: string;
-  @Input() logo: string;
-  @Input() description: string;
+  readonly name = input<string>(undefined);
+  readonly logo = input<string>(undefined);
+  readonly description = input<string>(undefined);
 
-  @Output() selectAuth = new EventEmitter();
+  readonly selectAuth = output<void>();
 
   public onSelect() {
     this.selectAuth.emit();

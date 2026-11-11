@@ -1,11 +1,14 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, ViewChild } from "@angular/core";
+import { Component, OnChanges, OnInit, input, output, viewChild } from "@angular/core";
 import log from "loglevel";
-import { ColumnItem } from "./wrangle-modal.component";
+import type { ColumnItem } from "./wrangle-modal.component";
+import { NgSelectComponent, NgHeaderTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-multi-dropdown",
   templateUrl: "./multi-dropdown.component.html",
   styleUrls: ["./multi-dropdown.component.less"],
+  imports: [NgSelectComponent, FormsModule, NgHeaderTemplateDirective, NgOptionTemplateDirective],
 })
 /**
  * Two things make things a little bit complicated here:
@@ -17,12 +20,12 @@ import { ColumnItem } from "./wrangle-modal.component";
  * Inputs and outputs should always be ColumnItem[] though
  */
 export class MultiDropdownComponent implements OnInit, OnChanges {
-  @Input() items: ColumnItem[];
-  @Input() multiple?: boolean = true;
+  readonly items = input<ColumnItem[]>(undefined);
+  readonly multiple = input<boolean>(true);
 
-  @Output() private selectionChanged = new EventEmitter<ColumnItem[]>();
+  readonly selectionChanged = output<ColumnItem[]>();
 
-  @ViewChild("dropdown") dropdown;
+  readonly dropdown = viewChild<NgSelectComponent>("dropdown");
 
   private readonly selectAllString = "Select all";
   private readonly selectAllFilteredString = "Select all filtered";
@@ -35,19 +38,19 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   selectAllButtonText = this.selectAllString;
 
   ngOnInit(): void {
-    this.placeholder = this.multiple ? "Select columns" : "Select column";
+    this.placeholder = this.multiple() ? "Select columns" : "Select column";
   }
 
   ngOnChanges(): void {
     this.indexToColumnItemMap.clear();
-    this.items.forEach((item) => this.indexToColumnItemMap.set(item.index, item));
+    this.items().forEach((item) => this.indexToColumnItemMap.set(item.index, item));
 
     // make sure currently selected are included in the options, if not, unselect
     // shouldn't happen, but just in case
     // see selectedItem declaration
     const selectedIndexesAsArray = [].concat(this.selectedIndexes).filter((index) => index != null);
     const includedIndexes = selectedIndexesAsArray.filter((index) =>
-      this.items.includes(this.indexToColumnItemMap.get(index)),
+      this.items().includes(this.indexToColumnItemMap.get(index)),
     );
     if (selectedIndexesAsArray.length !== includedIndexes.length) {
       log.warn("selected column not included in options after options change", selectedIndexesAsArray, includedIndexes);
@@ -57,7 +60,7 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   }
 
   onSearch(event): void {
-    if (!this.multiple) {
+    if (!this.multiple()) {
       return;
     }
     this.filteredIndexes = event.items.map((item) => item.index);
@@ -65,12 +68,12 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   }
 
   onKeyDownEnter(event): void {
-    if (!this.multiple) {
+    if (!this.multiple()) {
       return;
     }
     event.stopImmediatePropagation();
     this.addFilteredToSelectedIndexes();
-    this.dropdown.close();
+    this.dropdown().close();
   }
 
   onSelectionChange(): void {
@@ -80,23 +83,23 @@ export class MultiDropdownComponent implements OnInit, OnChanges {
   }
 
   onOpen(): void {
-    if (!this.multiple) {
+    if (!this.multiple()) {
       return;
     }
     this.selectAllButtonText = this.selectAllString;
-    this.filteredIndexes = this.items.map((item) => item.index);
+    this.filteredIndexes = this.items().map((item) => item.index);
   }
 
   onSelectAll(): void {
-    if (!this.multiple) {
+    if (!this.multiple()) {
       return;
     }
     this.addFilteredToSelectedIndexes();
-    this.dropdown.close();
+    this.dropdown().close();
   }
 
   onDone(): void {
-    this.dropdown.close();
+    this.dropdown().close();
   }
 
   private emit(selected: number[]): void {

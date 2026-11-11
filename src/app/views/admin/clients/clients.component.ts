@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { Role } from "chipster-js-common";
 import { clone } from "lodash-es";
 import { mergeMap } from "rxjs/operators";
@@ -6,22 +6,22 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
+import { LocalDatePipe } from "../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-clients",
   templateUrl: "./clients.component.html",
   styleUrls: ["./clients.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [LocalDatePipe],
 })
 export class ClientsComponent implements OnInit {
-  users: any[];
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private auhtHttpClient = inject(AuthHttpClientService);
+  private tokenService = inject(TokenService);
 
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private auhtHttpClient: AuthHttpClientService,
-    private tokenService: TokenService,
-  ) {}
+  readonly users = signal<any[]>(undefined);
 
   ngOnInit() {
     this.configService
@@ -29,7 +29,7 @@ export class ClientsComponent implements OnInit {
       .pipe(mergeMap((service) => this.auhtHttpClient.getAuth(service.adminUri + "/admin/topics")))
       .subscribe({
         next: (topics: any[]) => {
-          this.users = [];
+          const users = [];
 
           // filter out server topics and get values as an array
           const sessionIds = Object.keys(topics).filter((topicName) => topicName !== "jobs" && topicName !== "files");
@@ -49,9 +49,10 @@ export class ClientsComponent implements OnInit {
                 ip = ip.slice(0, ip.indexOf(":"));
               }
               userCopy.address = ip;
-              this.users.push(userCopy);
+              users.push(userCopy);
             });
           });
+          this.users.set(users);
         },
         error: (err) => this.restErrorService.showError("get clients failed", err),
       });

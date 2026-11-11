@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -11,7 +11,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
       </button>
     </div>
     <div class="modal-body">
-      <pre>{{ output }}</pre>
+      <pre>{{ output() }}</pre>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
@@ -19,9 +19,8 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
   `,
 })
 export class JobOutputModalComponent {
-  @Input() output;
+  activeModal = inject(NgbActiveModal);
 
-  constructor(public activeModal: NgbActiveModal) {
-    console.log(this.output);
-  }
+  // set through the modal ref by the code that opens the modal
+  readonly output = signal<string>(undefined);
 }

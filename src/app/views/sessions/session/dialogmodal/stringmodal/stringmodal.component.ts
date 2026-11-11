@@ -1,25 +1,22 @@
-import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   templateUrl: "./stringmodal.component.html",
+  imports: [FormsModule],
 })
 export class StringModalComponent implements AfterViewInit {
-  @Input()
-  buttonText: string;
-  @Input()
-  description: string;
-  @Input()
-  value: string;
-  @Input()
-  title: string;
-  @Input()
-  placeHolder: string;
+  private activeModal = inject(NgbActiveModal);
 
-  @ViewChild("valueInput")
-  valueInput;
+  // set through the modal ref by the code that opens the modal
+  readonly buttonText = signal<string>(undefined);
+  readonly description = signal<string>(undefined);
+  readonly value = signal<string>(undefined);
+  readonly title = signal<string>(undefined);
+  readonly placeHolder = signal<string>(undefined);
 
-  constructor(private activeModal: NgbActiveModal) {}
+  readonly valueInput = viewChild<ElementRef<HTMLInputElement>>("valueInput");
 
   ngAfterViewInit() {
     setTimeout(() => {
@@ -27,13 +24,13 @@ export class StringModalComponent implements AfterViewInit {
       // should be fixed in ng-bootstrap 3.3.0
       // https://github.com/ng-bootstrap/ng-bootstrap/issues/1776
       // https:github.com/ng-bootstrap/ng-bootstrap/issues/2728
-      this.valueInput.nativeElement.focus();
-      this.valueInput.nativeElement.select();
+      this.valueInput().nativeElement.focus();
+      this.valueInput().nativeElement.select();
     });
   }
 
   save($event) {
-    this.activeModal.close(this.value);
+    this.activeModal.close(this.value());
     if ($event) {
       // otherwise the event may open the dialog again, when the original button
       // gets it(New session button in session list in Chrome with an enter key event)

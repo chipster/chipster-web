@@ -1,25 +1,25 @@
 <div class="modal-header">
   <h4 class="modal-title">
     <span>Delete file</span>
-    @if (datasets.length > 1) {
+    @if (datasets().length > 1) {
       <span>s</span>
     }
   </h4>
 </div>
 <div class="modal-body">
   <div class="form-group">
-    @if (datasets.length === 1) {
+    @if (datasets().length === 1) {
       <div>
         Are you sure you want to delete
-        <span class="fw-bold">{{ datasets[0].name }}</span>
+        <span class="fw-bold">{{ datasets()[0].name }}</span>
         <span>?</span>
       </div>
     }
 
-    @if (datasets.length > 1) {
+    @if (datasets().length > 1) {
       <div>
-        <div class="mb-3">Are you sure you want to delete {{ datasets.length }} files?</div>
-        @for (dataset of datasets; track dataset.datasetId) {
+        <div class="mb-3">Are you sure you want to delete {{ datasets().length }} files?</div>
+        @for (dataset of datasets(); track dataset.datasetId) {
           <div>
             <span class="fw-bold">{{ dataset.name }}</span>
           </div>

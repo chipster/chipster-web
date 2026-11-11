@@ -1,8 +1,8 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Session, SessionState } from "chipster-js-common";
 import * as log from "loglevel";
-import { forkJoin, NEVER, Observable } from "rxjs";
-import { map, mergeMap, tap } from "rxjs/operators";
+import { concat, defer, EMPTY, forkJoin, NEVER, Observable, of } from "rxjs";
+import { catchError, ignoreElements, map, mergeMap, tap } from "rxjs/operators";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../shared/resources/session.resource";
@@ -10,49 +10,69 @@ import { SessionWorkerResource } from "../../../shared/resources/sessionworker.r
 import { ConfigService } from "../../../shared/services/config.service";
 import { DialogModalService } from "./dialogmodal/dialogmodal.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionService {
-  constructor(
-    private sessionResource: SessionResource,
-    private dialogModalService: DialogModalService,
-    private restErrorService: RestErrorService,
-    private sessionWorkerResource: SessionWorkerResource,
-    private configService: ConfigService,
-    private errorService: ErrorService,
-  ) {}
+  private sessionResource = inject(SessionResource);
+  private dialogModalService = inject(DialogModalService);
+  private restErrorService = inject(RestErrorService);
+  private sessionWorkerResource = inject(SessionWorkerResource);
+  private configService = inject(ConfigService);
+  private errorService = inject(ErrorService);
 
   updateSession(session: Session) {
     return this.sessionResource.updateSession(session);
   }
 
-  openRenameModalAndUpdate(session: Session) {
-    this.dialogModalService
-      .openSessionNameModal("Rename session", session.name)
-      .pipe(
-        mergeMap((name: string) => {
-          session.name = name;
-
-          // 'save' temp session when renaming it
-          if (session.state === SessionState.TemporaryUnmodified || session.state === SessionState.TemporaryModified) {
-            session.state = SessionState.Ready;
-          }
-
-          return this.updateSession(session);
-        }),
-      )
-      .subscribe({ error: (err) => this.restErrorService.showError("Rename session failed", err) });
+  /*
+   * These open the modal on subscribe, and emit a copy of the session with the change before they
+   * save it, like the change in place did before the copies. The OnPush views need a new object to
+   * see the change. The session view would get it from its session event, but applies it at once,
+   * so that leaving the page right after renaming a temporary session, even while the request is
+   * on its way, doesn't delete it as unsaved. The user's events that the sessions list follows have
+   * only the rules, so the list takes it from here too. A failed save shows an error and keeps the
+   * change in the page, like the change in place did: only a reload brings back the saved state.
+   */
+  openRenameModalAndUpdate(session: Session): Observable<Session> {
+    return this.updateFromModal(
+      () =>
+        this.dialogModalService.openSessionNameModal("Rename session", session.name).pipe(
+          map((name: string) => {
+            const renamed = { ...session, name };
+            // 'save' temp session when renaming it
+            if (this.isTemporary(session)) {
+              renamed.state = SessionState.Ready;
+            }
+            return renamed;
+          }),
+        ),
+      "Rename session failed",
+    );
   }
 
-  openNotesModalAndUpdate(session: Session) {
-    this.dialogModalService
-      .openNotesModal(session)
-      .pipe(
-        mergeMap((notes: string) => {
-          session.notes = notes;
-          return this.updateSession(session);
-        }),
-      )
-      .subscribe({ error: (err) => this.restErrorService.showError("Failed to edit session notes", err) });
+  openNotesModalAndUpdate(session: Session): Observable<Session> {
+    return this.updateFromModal(
+      () => this.dialogModalService.openNotesModal(session).pipe(map((notes: string) => ({ ...session, notes }))),
+      "Failed to edit session notes",
+    );
+  }
+
+  /*
+   * The current session with the changes of a copy that these returned. The copy is the session as
+   * it was when the modal opened, and events may have replaced the rest of it in the meantime.
+   */
+  static withModalChanges(current: Session, updated: Session): Session {
+    return { ...current, name: updated.name, notes: updated.notes, state: updated.state };
+  }
+
+  // deferred, because the dialog service opens the modal when it's called
+  private updateFromModal(openModal: () => Observable<Session>, errorMessage: string): Observable<Session> {
+    return defer(openModal).pipe(
+      mergeMap((updated) => concat(of(updated), this.updateSession(updated).pipe(ignoreElements()))),
+      catchError((err) => {
+        this.restErrorService.showError(errorMessage, err);
+        return EMPTY;
+      }),
+    );
   }
 
   downloadSession(sessionId: string) {

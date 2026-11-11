@@ -1,18 +1,17 @@
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { Component, Input } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 
 @Component({
   templateUrl: "./pre-modal.component.html",
   styleUrls: ["./pre-modal.component.less"],
 })
 export class PreModalComponent {
-  @Input()
-  title: string;
+  private activeModal = inject(NgbActiveModal);
 
-  @Input()
-  text: string;
+  // set through the modal ref by the code that opens the modal
+  readonly title = signal<string>(undefined);
 
-  constructor(private activeModal: NgbActiveModal) {}
+  readonly text = signal<string>(undefined);
 
   cancel() {
     this.activeModal.dismiss();

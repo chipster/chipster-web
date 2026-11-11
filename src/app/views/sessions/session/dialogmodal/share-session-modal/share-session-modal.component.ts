@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
-import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Rule, Session, SessionEvent } from "chipster-js-common";
+import { AfterViewInit, Component, OnDestroy, OnInit, inject, signal, viewChild, ElementRef } from "@angular/core";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { EventType, Rule, Session, SessionEvent } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -8,44 +8,63 @@ import { TokenService } from "../../../../../core/authentication/token.service";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionResource } from "../../../../../shared/resources/session.resource";
-import { BooleanModalComponent } from "../booleanmodal/booleanmodal.component";
+import { DialogModalService } from "../dialogmodal.service";
+import { FormsModule } from "@angular/forms";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   templateUrl: "./share-session-modal.component.html",
+  imports: [FormsModule, LocalDatePipe],
 })
 export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
-  @Input()
-  session: Session;
-  @Input()
-  ruleStream$: Observable<SessionEvent>;
+  private activeModal = inject(NgbActiveModal);
+  private tokenService = inject(TokenService);
+  private restErrorService = inject(RestErrorService);
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+  private dialogModalService = inject(DialogModalService);
 
-  @ViewChild("submitButton")
-  submitButton;
-  @ViewChild("usernameInput")
-  usernameInput;
+  // set through the modal ref by the code that opens the modal
+  readonly session = signal<Session>(undefined);
+  readonly ruleStream$ = signal<Observable<SessionEvent>>(undefined);
 
-  public rules: Rule[];
-  public newRule: Rule;
+  readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
+  readonly usernameInput = viewChild<ElementRef<HTMLInputElement>>("usernameInput");
+
+  readonly rules = signal<Rule[]>(undefined);
+  readonly newRule = signal<Rule>(undefined);
 
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(
-    private activeModal: NgbActiveModal,
-    private tokenService: TokenService,
-    private restErrorService: RestErrorService,
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-    private modalService: NgbModal,
-  ) {}
-
   ngOnInit() {
-    this.rules = this.session.rules;
-    this.ruleStream$.pipe(takeUntil(this.unsubscribe)).subscribe({
-      next: () => {
-        this.rules = this.session.rules;
-      },
-      error: (err) => this.errorService.showError("getting rule events failed", err),
-    });
+    this.rules.set(this.session().rules);
+    this.ruleStream$()
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe({
+        next: (sessionEvent: SessionEvent) => {
+          /*
+          Apply the event to our own list. The session of the open session view is replaced by the
+          events, not changed, so the session given to this modal doesn't get the new rules. Removed
+          by the id of the event: the old value is missing when a session event has dropped the rule
+          already.
+          */
+          const added = sessionEvent.newValue as Rule;
+          this.rules.update((rules) => {
+            let updated =
+              sessionEvent.event.type === EventType.Delete
+                ? rules.filter((r) => r.ruleId !== sessionEvent.event.resourceId)
+                : rules;
+            if (added) {
+              // replaced if a session event brought the rule already or it was updated
+              updated = updated.some((r) => r.ruleId === added.ruleId)
+                ? updated.map((r) => (r.ruleId === added.ruleId ? added : r))
+                : [...updated, added];
+            }
+            return updated;
+          });
+        },
+        error: (err) => this.errorService.showError("getting rule events failed", err),
+      });
   }
 
   ngOnDestroy() {
@@ -61,12 +80,12 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
       // should be fixed in ng-bootstrap 3.3.0
       // https://github.com/ng-bootstrap/ng-bootstrap/issues/1776
       // https:github.com/ng-bootstrap/ng-bootstrap/issues/2728
-      this.submitButton.nativeElement.focus();
+      this.submitButton().nativeElement.focus();
     });
   }
 
   save() {
-    this.activeModal.close(this.session.notes);
+    this.activeModal.close(this.session().notes);
   }
 
   cancel() {
@@ -77,45 +96,40 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.isNewRuleUsernameBlank()) {
       return;
     }
-    this.newRule.username = this.newRule.username.trim();
-    this.sessionResource.createRule(this.session.sessionId, this.newRule).subscribe({
+    this.newRule().username = this.newRule().username.trim();
+    this.sessionResource.createRule(this.session().sessionId, this.newRule()).subscribe({
       next: (resp) => {
         log.info("rule created", resp);
-        this.newRule = null;
+        this.newRule.set(null);
       },
       error: (err) => this.restErrorService.showError("failed to add a new rule", err),
     });
   }
 
   addNewRule() {
-    this.newRule = new Rule();
-    this.newRule.readWrite = true;
+    this.newRule.set(new Rule());
+    this.newRule().readWrite = true;
     // setTimeout() makes this async so that the element is added to the dom before we try to get it
-    setTimeout(() => this.usernameInput.nativeElement.focus(), 0);
+    setTimeout(() => this.usernameInput().nativeElement.focus(), 0);
   }
 
   deleteRule(ruleId: string) {
-    const rule = this.rules.find((r) => r.ruleId === ruleId);
+    const rule = this.rules().find((r) => r.ruleId === ruleId);
     const username = rule ? rule.username : "";
 
-    // open BooleanModalComponent directly instead of via DialogModalService, which would create a
-    // circular dependency (DialogModalService opens this SharingModalComponent)
-    const modalRef = this.modalService.open(BooleanModalComponent);
-    modalRef.componentInstance.title = "Stop sharing";
-    modalRef.componentInstance.message = `Stop sharing with ${username}?`;
-    modalRef.componentInstance.okButtonText = "Stop sharing";
-    modalRef.componentInstance.cancelButtonText = "Cancel";
-    modalRef.result.then(
-      () => {
-        this.sessionResource.deleteRule(this.session.sessionId, ruleId).subscribe({
-          next: () => log.info("rule deleted"),
-          error: (err) => this.restErrorService.showError("failed to delete the rule", err),
-        });
-      },
-      () => {
-        // modal dismissed
-      },
-    );
+    this.dialogModalService
+      .openBooleanModal("Stop sharing", `Stop sharing with ${username}?`, "Stop sharing", "Cancel")
+      .then(
+        () => {
+          this.sessionResource.deleteRule(this.session().sessionId, ruleId).subscribe({
+            next: () => log.info("rule deleted"),
+            error: (err) => this.restErrorService.showError("failed to delete the rule", err),
+          });
+        },
+        () => {
+          // modal dismissed
+        },
+      );
   }
 
   getUsername() {
@@ -123,7 +137,7 @@ export class SharingModalComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   isNewRuleUsernameBlank() {
-    return !this.newRule?.username?.trim();
+    return !this.newRule()?.username?.trim();
   }
 
   isDeleteEnabled(rule: Rule) {

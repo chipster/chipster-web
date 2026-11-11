@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class NativeElementService {
   /**
    * Disable back and forward gestures in Safari

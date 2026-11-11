@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Dataset, Job } from "chipster-js-common";
 import log from "loglevel";
 import { cloneDeep } from "lodash-es";
@@ -11,8 +11,12 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
  * @desc Service functions needed to define the positions of the nodes and links
  *       in the workflowgraph graph
  */
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class WorkflowGraphService {
+  private datasetService = inject(DatasetService);
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+
   readonly nodeHeight = 22;
   // nodeWidth = 36;
   readonly nodeWidth = 48;
@@ -27,13 +31,11 @@ export class WorkflowGraphService {
   xMargin = this.nodeWidth / 4;
   yMargin = this.nodeHeight;
 
-  constructor(
-    private datasetService: DatasetService,
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-  ) {}
-
-  resetDoAndSaveLayout(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobsMap: Map<string, Job>): void {
+  resetDoAndSaveLayout(
+    datasets: Dataset[],
+    datasetsMap: ReadonlyMap<string, Dataset>,
+    jobsMap: ReadonlyMap<string, Job>,
+  ): void {
     // create a copy of the datasets to wait for the websocket updates
     const datasetsMapCopy = new Map();
 
@@ -62,7 +64,11 @@ export class WorkflowGraphService {
     this.doAndSaveLayout(resetedDatasets, datasetsMapCopy, jobsMap);
   }
 
-  doAndSaveLayout(datasets: Dataset[], datasetsMap: Map<string, Dataset>, jobMap: Map<string, Job>): void {
+  doAndSaveLayout(
+    datasets: Dataset[],
+    datasetsMap: ReadonlyMap<string, Dataset>,
+    jobMap: ReadonlyMap<string, Job>,
+  ): void {
     const datasetsToUpdate = this.doLayout(datasets, datasetsMap, jobMap);
 
     // update new dataset positions to server
@@ -87,7 +93,7 @@ export class WorkflowGraphService {
    * @param datasetMap
    * @param jobMap
    */
-  doLayout(datasets: Dataset[], datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
+  doLayout(datasets: Dataset[], datasetMap: ReadonlyMap<string, Dataset>, jobMap: ReadonlyMap<string, Job>): Dataset[] {
     // layout nodes with parents
     // sort by the creation date to make parents precede their children in the array and to make this
     // more deterministic
@@ -104,7 +110,11 @@ export class WorkflowGraphService {
     return datasetsToUpdate;
   }
 
-  doLayoutRecursive(datasetId: string, datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
+  doLayoutRecursive(
+    datasetId: string,
+    datasetMap: ReadonlyMap<string, Dataset>,
+    jobMap: ReadonlyMap<string, Job>,
+  ): Dataset[] {
     const dataset = datasetMap.get(datasetId);
 
     // check if this dataset has a position already
@@ -148,7 +158,11 @@ export class WorkflowGraphService {
     return datasetsToUpdate;
   }
 
-  getSourceDatasets(dataset: Dataset, datasetMap: Map<string, Dataset>, jobMap: Map<string, Job>): Dataset[] {
+  getSourceDatasets(
+    dataset: Dataset,
+    datasetMap: ReadonlyMap<string, Dataset>,
+    jobMap: ReadonlyMap<string, Job>,
+  ): Dataset[] {
     if (dataset.sourceJob == null) {
       log.info("dataset's " + dataset.name + " source job is null");
       return [];

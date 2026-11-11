@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject, signal } from "@angular/core";
 import { Dataset, Label } from "chipster-js-common";
 import { Observable, forkJoin, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
@@ -25,23 +25,23 @@ export interface LabelMenuItem {
   colorBg: string;
 }
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class LabelsContextMenuService {
+  private sessionResource = inject(SessionResource);
+  private errorService = inject(ErrorService);
+
   // Most recently toggled label (added or removed). Used by surfaces like the
   // workflow toolbar's split-button to default the next action to whatever the
-  // user just did.
-  private lastUsedLabelId: string | null = null;
-
-  constructor(
-    private sessionResource: SessionResource,
-    private errorService: ErrorService,
-  ) {}
+  // user just did. A signal, because the OnPush session panel shows it, and the
+  // labels modal records it after its requests, when nothing else notifies the panel.
+  private readonly lastUsedLabelId = signal<string | null>(null);
 
   getLastUsedLabel(sessionData: SessionData): Label | null {
-    if (!this.lastUsedLabelId || !sessionData?.labelsMap) {
+    const lastUsedId = this.lastUsedLabelId();
+    if (!lastUsedId || !sessionData) {
       return null;
     }
-    return sessionData.labelsMap.get(this.lastUsedLabelId) ?? null;
+    return sessionData.labelsMap().get(lastUsedId) ?? null;
   }
 
   // Default label for surfaces that need to pick one (e.g. the workflow
@@ -53,31 +53,32 @@ export class LabelsContextMenuService {
     if (lastUsed) {
       return lastUsed;
     }
-    if (!sessionData?.labelsMap || sessionData.labelsMap.size === 0) {
+    if (!sessionData || sessionData.labelsMap().size === 0) {
       return null;
     }
-    return Array.from(sessionData.labelsMap.values()).sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))[0];
+    return Array.from(sessionData.labelsMap().values()).sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))[0];
   }
 
   // For callers that apply or remove labels without going through toggleLabel()
   // (e.g. the Edit-labels modal which commits a batch of changes). Lets the
   // workflow toolbar's split-button track those actions too.
   recordLastUsedLabel(labelId: string): void {
-    this.lastUsedLabelId = labelId;
+    this.lastUsedLabelId.set(labelId);
   }
 
   buildItems(datasets: Dataset[], sessionData: SessionData): LabelMenuItem[] {
-    const labels = Array.from(sessionData.labelsMap.values()).sort((a, b) =>
+    const labels = Array.from(sessionData.labelsMap().values()).sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? ""),
     );
     // Precompute which labels are applied to at least one dataset in the session;
     // saves O(labels * datasets) re-scans by callers that need it per row.
     const inUseIds = new Set<string>();
-    sessionData.datasetsMap.forEach((dataset) => {
+    sessionData.datasetsMap().forEach((dataset) => {
       (dataset.labelIds ?? []).forEach((id) => inUseIds.add(id));
     });
+    const latest = sessionData.latestDatasets(datasets);
     return labels.map((label) => {
-      const state = this.computeState(datasets, label);
+      const state = this.computeState(latest, label);
       const colorBg = resolveLabelColor(label.color);
       return {
         label,
@@ -120,15 +121,16 @@ export class LabelsContextMenuService {
       return of(undefined);
     }
 
-    this.lastUsedLabelId = label.labelId;
+    this.lastUsedLabelId.set(label.labelId);
 
-    const state = this.computeState(datasets, label);
+    const latest = sessionData.latestDatasets(datasets);
+    const state = this.computeState(latest, label);
     const shouldRemove = state === "checked";
 
-    const sessionId = sessionData.session.sessionId;
+    const sessionId = sessionData.session().sessionId;
     const updates: Dataset[] = [];
 
-    for (const dataset of datasets) {
+    for (const dataset of latest) {
       const before = new Set(dataset.labelIds ?? []);
       const after = new Set(before);
       if (shouldRemove) {
@@ -137,8 +139,7 @@ export class LabelsContextMenuService {
         after.add(label.labelId);
       }
       if (!this.setsEqual(before, after)) {
-        dataset.labelIds = Array.from(after);
-        updates.push(dataset);
+        updates.push({ ...dataset, labelIds: Array.from(after) });
       }
     }
 
@@ -146,10 +147,13 @@ export class LabelsContextMenuService {
       return of(undefined);
     }
 
+    const restore = sessionData.setDatasets(updates);
+
     return forkJoin(
       updates.map((d) =>
         this.sessionResource.updateDataset(sessionId, d).pipe(
           catchError((err) => {
+            restore([d]);
             this.errorService.showError("Updating dataset labels failed", err);
             return of(null);
           }),

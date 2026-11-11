@@ -5,7 +5,7 @@
       id="search-input"
       type="text"
       [(ngModel)]="searchTerm"
-      placeholder="{{ placeholder }}"
+      placeholder="{{ placeholder() }}"
       (keyup)="searchKeyEvent($event)"
       #searchInput />
     @if (searchTerm) {

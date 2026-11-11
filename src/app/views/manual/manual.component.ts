@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
+import { AfterViewInit, Component, OnDestroy, inject, input, signal } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute } from "@angular/router";
 import log from "loglevel";
@@ -8,6 +8,8 @@ import { catchError, map, mergeMap, takeUntil, tap } from "rxjs/operators";
 import { RestErrorService } from "../../core/errorhandler/rest-error.service";
 import { ConfigService } from "../../shared/services/config.service";
 import { ManualUtils } from "./manual-utils";
+import { NgClass } from "@angular/common";
+import { StaticHtmlComponent } from "./static-html/static-html.component";
 
 /**
  * Show HTML files in an Angular app
@@ -23,77 +25,69 @@ import { ManualUtils } from "./manual-utils";
   selector: "ch-manual",
   templateUrl: "./manual.component.html",
   styleUrls: ["./manual.component.less"],
+  imports: [NgClass, StaticHtmlComponent],
 })
 export class ManualComponent implements OnDestroy, AfterViewInit {
+  private http = inject(HttpClient);
+  private activatedRoute = inject(ActivatedRoute);
+  private configService = inject(ConfigService);
+  private sanitizer = inject(DomSanitizer);
+  private restErrorService = inject(RestErrorService);
+
   private unsubscribe: Subject<any> = new Subject();
 
-  @Input()
-  private page: string;
-  @Input()
-  showControls = false;
-  @Input()
-  assetsPath = null;
-  @Input()
-  addContainer = true;
-  @Input()
-  routerPath: string = null;
-  @Input()
-  manualStyles = true;
+  readonly page = input<string>(undefined);
+  readonly showControls = input(false);
+  readonly assetsPath = input<string>(null);
+  readonly addContainer = input(true);
+  readonly routerPath = input<string>(null);
+  readonly manualStyles = input(true);
+
+  // the assetsPath and routerPath inputs with their defaults, resolved in ngAfterViewInit
+  private resolvedAssetsPath: string;
+  private resolvedRouterPath: string;
 
   private readonly ABSOLUTE_PREFIX = "ABSOLUTE";
   private currentPage;
 
   // set to null to avoid change detection error when the undefined is changed to null
-  html: SafeHtml = null;
-
-  constructor(
-    private http: HttpClient,
-    private activatedRoute: ActivatedRoute,
-    private configService: ConfigService,
-    private sanitizer: DomSanitizer,
-    private restErrorService: RestErrorService,
-  ) {}
+  readonly html = signal<SafeHtml>(null);
 
   /**
    * Listen for route changes and show the corresponding page
    */
   ngAfterViewInit() {
-    if (!this.routerPath) {
-      this.routerPath = "/manual/";
-    }
+    this.resolvedRouterPath = this.routerPath() || "/manual/";
+    this.resolvedAssetsPath = this.assetsPath();
 
     this.activatedRoute.url
       .pipe(
         takeUntil(this.unsubscribe),
         // get configs
         mergeMap(() => {
-          if (this.assetsPath) {
-            return observableOf(this.assetsPath);
+          if (this.resolvedAssetsPath) {
+            return observableOf(this.resolvedAssetsPath);
           }
           return this.configService.getManualPath();
         }),
         tap((path) => {
-          this.assetsPath = path;
+          this.resolvedAssetsPath = path;
         }),
         mergeMap(() => {
-          log.debug(
-            "route changed",
-            this.activatedRoute.snapshot.url,
-            this.page,
-            this.activatedRoute.snapshot.fragment,
-          );
+          const page = this.page();
+          log.debug("route changed", this.activatedRoute.snapshot.url, page, this.activatedRoute.snapshot.fragment);
           // only way to update the StaticHtmlComponent is to destroy it first
-          this.html = null;
+          this.html.set(null);
 
-          if (this.page) {
-            this.currentPage = this.page;
+          if (page) {
+            this.currentPage = page;
           } else {
             // get the current route path
             this.currentPage = this.activatedRoute.snapshot.url.join("/");
           }
 
           // get the html file
-          return this.getPage(this.assetsPath + this.currentPage);
+          return this.getPage(this.resolvedAssetsPath + this.currentPage);
         }),
         // parse the html
         map((htmlString) => new DOMParser().parseFromString(htmlString, "text/html")),
@@ -101,7 +95,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
         map((htmlDoc) => this.rewrite(htmlDoc, this.currentPage)),
         // show
         map((html) => {
-          this.html = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(html));
+          this.html.set(this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(html)));
         }),
       )
       .subscribe({
@@ -166,17 +160,17 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
       } else if (href.startsWith("#")) {
         // relative urls navigate with the Angular router
         // router needs the page path when navigating within the page
-        link.href = this.routerPath + path + href;
+        link.href = this.resolvedRouterPath + path + href;
       } else if (href.indexOf(".html") !== -1) {
         // .indexOf() instead of .endswith() because there can be a URL fragment after the file extension
         // relative urls navigate with the Angular router
-        link.href = this.routerPath + href;
+        link.href = this.resolvedRouterPath + href;
       } else {
-        console.log(this.assetsPath, href);
+        console.log(this.resolvedAssetsPath, href);
         // relative links to other files like pdf
         // open in a new tab
         link.target = "_blank";
-        link.href = this.assetsPath + href;
+        link.href = this.resolvedAssetsPath + href;
         // convert to absolute
         link.setAttribute("href", link.href);
       }
@@ -186,7 +180,7 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
     Array.from(imgs).forEach((img) => {
       const src = img.getAttribute("src");
       if (src && !ManualUtils.isAbsoluteUrl(src)) {
-        img.src = this.assetsPath + src;
+        img.src = this.resolvedAssetsPath + src;
       }
     });
 
@@ -194,14 +188,14 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
     Array.from(embeds).forEach((embed) => {
       const src = embed.getAttribute("src");
       if (src && !ManualUtils.isAbsoluteUrl(src)) {
-        embed.src = this.assetsPath + src;
+        embed.src = this.resolvedAssetsPath + src;
       }
     });
 
     for (let i = 1; i <= 6; i++) {
       const headers = htmlDoc.getElementsByTagName("h" + i);
       Array.from(headers).forEach((element) => {
-        if (element.classList && this.manualStyles) {
+        if (element.classList && this.manualStyles()) {
           element.classList.add("ch-html-component");
         }
       });
@@ -221,6 +215,6 @@ export class ManualComponent implements OnDestroy, AfterViewInit {
   }
 
   openNewWindow() {
-    window.open(this.routerPath + this.currentPage, "_blank");
+    window.open(this.resolvedRouterPath + this.currentPage, "_blank");
   }
 }

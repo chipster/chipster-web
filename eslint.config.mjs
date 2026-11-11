@@ -28,6 +28,8 @@ export default tseslint.config(
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: "module",
+        // type information for @angular-eslint/no-uncalled-signals
+        projectService: true,
       },
     },
     settings: {
@@ -42,6 +44,14 @@ export default tseslint.config(
     rules: {
       "@angular-eslint/directive-selector": ["error", { type: "attribute", prefix: "ch", style: "camelCase" }],
       "@angular-eslint/component-selector": ["error", { type: "element", prefix: "ch", style: "kebab-case" }],
+      // OnPush is the default from angular 22 on, and the rule accepts it without
+      // changeDetection written out. It reports a component that opts out with Eager
+      "@angular-eslint/prefer-on-push-component-change-detection": "error",
+      // inputs, outputs and queries are signals, keep the decorators out of new code
+      "@angular-eslint/prefer-signals": "error",
+      "@angular-eslint/prefer-output-emitter-ref": "error",
+      // a signal in a condition without () is a function, always truthy
+      "@angular-eslint/no-uncalled-signals": "error",
 
       // rules kept from the airbnb set that was dropped with eslint 9, see
       // README. these catch mistakes, the style-only airbnb rules are gone.
@@ -66,8 +76,10 @@ export default tseslint.config(
       // a cycle breaks only when one of its modules needs a value from
       // another while it's still being evaluated. angular's dependency
       // injection hides that, so the session services have grown 17 of these.
-      // warn to keep them visible until they are untangled.
-      "import/no-cycle": "warn",
+      // warn to keep them visible until they are untangled. a dynamic import()
+      // is evaluated later, on its own, so a cycle through one is no cycle:
+      // the modal services load the modals with one, see DialogModalService.
+      "import/no-cycle": ["warn", { allowUnsafeDynamicCyclicDependency: true }],
 
       // neither of these was enforced before the airbnb configs were dropped,
       // and the codebase has hundreds of both. warn to keep them visible and
@@ -137,7 +149,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["playwright.config.ts", "vitest.config.mts", "eslint.config.mjs", "e2e/**/*.ts", "**/*.spec.ts"],
+    files: ["playwright.config.ts", "eslint.config.mjs", "e2e/**/*.ts", "**/*.spec.ts"],
     rules: {
       // tooling configs and tests import dev dependencies on purpose
       "import/no-extraneous-dependencies": ["error", { devDependencies: true, optionalDependencies: false }],

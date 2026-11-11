@@ -11,7 +11,7 @@ export default class UtilsService {
     return data.startsWith(start);
   }
 
-  static mapValues(map: Map<any, any>) {
+  static mapValues(map: ReadonlyMap<any, any>) {
     const array: any[] = [];
     map.forEach((value: any) => {
       array.push(value);
@@ -25,6 +25,25 @@ export default class UtilsService {
       map.set(array[i][key], array[i]);
     }
     return map;
+  }
+
+  /**
+   * A copy of the map with the key set to the value, for updating a map signal without changing
+   * the map in place: update((m) => UtilsService.mapWith(m, id, dataset))
+   */
+  static mapWith<K, V>(map: ReadonlyMap<K, V>, key: K, value: V): Map<K, V> {
+    return new Map(map).set(key, value);
+  }
+
+  /**
+   * A copy of the map without the keys, for updating a map signal without changing the map in place
+   */
+  static mapWithout<K, V>(map: ReadonlyMap<K, V>, ...keys: K[]): Map<K, V> {
+    const copy = new Map(map);
+    for (const key of keys) {
+      copy.delete(key);
+    }
+    return copy;
   }
 
   static isCtrlKey(event: any) {

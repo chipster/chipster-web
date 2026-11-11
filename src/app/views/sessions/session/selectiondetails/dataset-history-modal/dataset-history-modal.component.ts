@@ -1,12 +1,14 @@
-import { Component, Input, OnChanges, OnInit } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset, Job, JobInput, JobParameter, Tool } from "chipster-js-common";
 import * as FileSaver from "file-saver";
 import { ErrorService } from "../../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../../model/session/session-data";
 import { QuerySessionDataService } from "../../query-session-data.service";
-import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
+import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 export class DatasetHistoryStep {
   datasetName: string;
@@ -28,11 +30,18 @@ interface HistoryOption {
   selector: "ch-dataset-history-modal",
   templateUrl: "./dataset-history-modal.component.html",
   styleUrls: ["./dataset-history-modal.component.less"],
+  imports: [NGB_DROPDOWN_IMPORTS, DatasetParameterListComponent, LocalDatePipe],
 })
-export class DatasetHistoryModalComponent implements OnInit, OnChanges {
-  @Input() dataset: Dataset;
-  @Input() sessionData: SessionData;
-  @Input() private tools: Tool[];
+export class DatasetHistoryModalComponent implements OnInit {
+  activeModal = inject(NgbActiveModal);
+  querySessionDataService = inject(QuerySessionDataService);
+  toolService = inject(ToolService);
+  errorService = inject(ErrorService);
+
+  // set through the modal ref by the code that opens the modal
+  readonly dataset = signal<Dataset>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
+  readonly tools = signal<Tool[]>(undefined);
 
   public historyOptions: Array<HistoryOption> = [
     { id: "sourceJobName", name: "Tool", enabled: true },
@@ -48,21 +57,9 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
 
   datasetHistorySteps: Array<DatasetHistoryStep> = [];
 
-  constructor(
-    public activeModal: NgbActiveModal,
-    public querySessionDataService: QuerySessionDataService,
-    public toolService: ToolService,
-    public sessionDataService: SessionDataService,
-    public errorService: ErrorService,
-  ) {}
-
   ngOnInit(): void {
     this.historyOptionsMap = new Map();
     this.historyOptions.forEach((option) => this.historyOptionsMap.set(option.id, option));
-    this.datasetHistorySteps = this.getHistoryData();
-  }
-
-  ngOnChanges(): void {
     this.datasetHistorySteps = this.getHistoryData();
   }
 
@@ -81,7 +78,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
     }
 
     const blob = new Blob([this.getHistoryAsString()], { type: "text/plain;charset=utf-8" });
-    FileSaver.saveAs(blob, "history-" + this.dataset.name + "-" + this.dataset.datasetId + ".txt");
+    FileSaver.saveAs(blob, "history-" + this.dataset().name + "-" + this.dataset().datasetId + ".txt");
   }
 
   copyToClipboard() {
@@ -100,7 +97,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
     const line = "----------------------------------------------------------------------------\n";
     const doubleLine = "============================================================================\n";
 
-    const header = "History of " + this.dataset.name + "\n" + doubleLine + "\n";
+    const header = "History of " + this.dataset().name + "\n" + doubleLine + "\n";
 
     const steps: string = this.getHistoryData().reduce((s: string, step: DatasetHistoryStep, i) => {
       // tool
@@ -182,10 +179,10 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
   }
 
   private getHistoryData(): Array<DatasetHistoryStep> {
-    const historySteps: Array<DatasetHistoryStep> = [this.dataset]
-      .concat(this.querySessionDataService.getAncestorDatasetsBottomUpBreadthFirst(this.sessionData, this.dataset))
+    const historySteps: Array<DatasetHistoryStep> = [this.dataset()]
+      .concat(this.querySessionDataService.getAncestorDatasetsBottomUpBreadthFirst(this.sessionData(), this.dataset()))
       .map((dataset) => {
-        const sourceJob = this.sessionData.jobsMap.get(dataset.sourceJob);
+        const sourceJob = this.sessionData().jobsMap().get(dataset.sourceJob);
 
         return {
           datasetName: dataset.name,
@@ -196,7 +193,7 @@ export class DatasetHistoryModalComponent implements OnInit, OnChanges {
           inputFileNamesString:
             sourceJob != null ? sourceJob.inputs.map((jobInput: JobInput) => jobInput.displayName).join(" ") : "",
           sourceCode: sourceJob != null ? sourceJob.sourceCode : null,
-          tool: this.toolService.getLiveToolForSourceJob(sourceJob, this.tools),
+          tool: this.toolService.getLiveToolForSourceJob(sourceJob, this.tools()),
         };
       });
 

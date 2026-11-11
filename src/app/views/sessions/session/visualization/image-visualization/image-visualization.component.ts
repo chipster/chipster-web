@@ -1,51 +1,50 @@
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Component, OnChanges, OnDestroy, inject, input, signal } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { LoadState, State } from "../../../../../model/loadstate";
 import { SessionDataService } from "../../session-data.service";
+import { StatusComponent } from "../../../../../shared/components/status.component";
 
 @Component({
   selector: "ch-image-visualization",
   templateUrl: "./image-visualization.component.html",
+  imports: [StatusComponent],
 })
 export class ImageVisualizationComponent implements OnChanges, OnDestroy {
-  @Input()
-  private dataset: Dataset;
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
 
-  public src: string;
+  readonly dataset = input<Dataset>(undefined);
+
+  readonly src = signal<string>(undefined);
 
   private unsubscribe: Subject<any> = new Subject();
-  state: LoadState;
-
-  constructor(
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-  ) {}
+  readonly state = signal<LoadState>(undefined);
 
   ngOnChanges() {
     // unsubscribe from previous subscriptions
     this.unsubscribe.next(null);
-    this.state = new LoadState(State.Loading, "Loading image file...");
+    this.state.set(new LoadState(State.Loading, "Loading image file..."));
 
     // check for empty file
-    if (this.dataset.size < 1) {
-      this.state = new LoadState(State.EmptyFile);
+    if (this.dataset().size < 1) {
+      this.state.set(new LoadState(State.EmptyFile));
       return;
     }
 
     this.sessionDataService
-      .getDatasetUrl(this.dataset)
+      .getDatasetUrl(this.dataset())
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (url) => {
-          this.src = url;
-          this.state = new LoadState(State.Ready);
+          this.src.set(url);
+          this.state.set(new LoadState(State.Ready));
         },
         error: (error: any) => {
-          this.state = new LoadState(State.Fail, "Loading image file failed");
-          this.restErrorService.showError(this.state.message, error);
+          this.state.set(new LoadState(State.Fail, "Loading image file failed"));
+          this.restErrorService.showError(this.state().message, error);
         },
       });
   }
@@ -56,6 +55,6 @@ export class ImageVisualizationComponent implements OnChanges, OnDestroy {
   }
 
   openNewTab() {
-    this.sessionDataService.openNewTab(this.dataset);
+    this.sessionDataService.openNewTab(this.dataset());
   }
 }

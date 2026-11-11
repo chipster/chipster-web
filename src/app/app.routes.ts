@@ -1,5 +1,4 @@
-import { NgModule } from "@angular/core";
-import { RouterModule, Routes } from "@angular/router";
+import { Routes } from "@angular/router";
 import { AnalyzeGuard } from "./core/routing/analyze-guard.service";
 import { AuthGuard } from "./core/routing/auth-guard.service";
 import { LandGuard } from "./core/routing/land-guard.service";
@@ -19,7 +18,7 @@ import { ModifiedSessionGuard } from "./views/sessions/session/modified-session.
 import { SessionComponent } from "./views/sessions/session/session.component";
 import { TermsComponent } from "./views/terms/terms.component";
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: "home", component: HomeComponent },
   { path: "login", component: LoginComponent },
   {
@@ -57,6 +56,17 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
 
+  /*
+   * Admin is loaded lazily: only admins use it, and it brings ag-grid. AuthGuard runs after
+   * the chunk has loaded, because the router loads children when it matches the route, but
+   * still before the view is shown. Before the "" and "**" routes.
+   */
+  {
+    path: "admin",
+    canActivate: [AuthGuard],
+    loadChildren: () => import("./views/admin/admin.routes").then((m) => m.adminRoutes),
+  },
+
   { path: "notfound", component: NotFoundComponent, pathMatch: "full" },
 
   {
@@ -67,15 +77,3 @@ const routes: Routes = [
   },
   { path: "**", component: NotFoundComponent },
 ];
-
-@NgModule({
-  // imports: [
-  //   RouterModule.forRoot(routes, {
-  //     scrollPositionRestoration: "enabled",
-  //     enableTracing: true
-  //   })
-  // ],
-  imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: "enabled" })],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

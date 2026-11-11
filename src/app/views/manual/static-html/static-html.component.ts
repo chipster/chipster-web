@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+  inject,
+  input,
+} from "@angular/core";
 import { SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute, Router } from "@angular/router";
 import log from "loglevel";
@@ -19,15 +28,12 @@ import { ManualUtils } from "../manual-utils";
   styleUrls: ["./static-html.component.less"],
 })
 export class StaticHtmlComponent implements AfterViewInit, OnDestroy, OnChanges {
-  @Input()
-  html: SafeHtml;
-  private anchors: any;
+  private elementRef = inject(ElementRef);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
 
-  constructor(
-    private elementRef: ElementRef,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-  ) {}
+  readonly html = input<SafeHtml>(undefined);
+  private anchors: any;
 
   ngAfterViewInit() {
     this.registerAnchorEventListeners();

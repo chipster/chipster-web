@@ -18,9 +18,9 @@
   <table class="table table-sm text-sm">
     <tr>
       <td class="lighter">Created:</td>
-      <td>{{ session.created | localDate }}</td>
+      <td>{{ session().created | localDate }}</td>
       <td class="lighter">Last opened:</td>
-      <td>{{ session.accessed | localDate }}</td>
+      <td>{{ session().accessed | localDate }}</td>
     </tr>
   </table>
 </div>

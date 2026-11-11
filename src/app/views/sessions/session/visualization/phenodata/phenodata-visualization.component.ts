@@ -1,14 +1,17 @@
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
-  Input,
-  NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
   SimpleChanges,
-  ViewChild,
   ViewEncapsulation,
+  inject,
+  input,
+  linkedSignal,
+  viewChild,
+  ElementRef,
 } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as d3 from "d3";
@@ -22,6 +25,7 @@ import { SpreadsheetService } from "../../../../../shared/services/spreadsheet.s
 import { escapeHtml, unescapeHtml } from "../../../../../shared/utilities/html";
 import { DatasetService } from "../../dataset.service";
 import { DialogModalService } from "../../dialogmodal/dialogmodal.service";
+import { SessionData } from "../../../../../model/session/session-data";
 import { GetSessionDataService } from "../../get-session-data.service";
 import { SessionDataService } from "../../session-data.service";
 import { SessionEventService } from "../../session-event.service";
@@ -42,10 +46,24 @@ export enum PhenodataState {
   encapsulation: ViewEncapsulation.None,
 })
 export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  @Input() private dataset!: Dataset;
-  @Input() private datasetsMap!: Map<string, Dataset>;
+  private sessionDataService = inject(SessionDataService);
+  private stringModalService = inject(DialogModalService);
+  private sessionEventService = inject(SessionEventService);
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  private restErrorService = inject(RestErrorService);
+  private spreadsheetService = inject(SpreadsheetService);
+  private nativeElementService = inject(NativeElementService);
+  private errorService = inject(ErrorService);
+  private getSessionDataService = inject(GetSessionDataService);
+  private datasetService = inject(DatasetService);
 
-  // MUST be handled outside Angular zone to prevent a change detection loop
+  readonly dataset = input.required<Dataset>();
+  // the dataset input, replaced by its latest copy from datasetsMap in updateView(): websocket events update the map,
+  // not the input
+  private readonly currentDataset = linkedSignal(() => this.dataset());
+  // not the map itself, because the event subscription below needs the latest one, see SessionData
+  readonly sessionData = input.required<SessionData>();
+
   hot: any;
   rows: Array<Array<string>> = [];
   /*
@@ -119,20 +137,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   private unsubscribe: Subject<any> = new Subject();
 
-  constructor(
-    private sessionDataService: SessionDataService,
-    private stringModalService: DialogModalService,
-    private sessionEventService: SessionEventService,
-    private zone: NgZone,
-    private restErrorService: RestErrorService,
-    private spreadsheetService: SpreadsheetService,
-    private nativeElementService: NativeElementService,
-    private errorService: ErrorService,
-    private getSessionDataService: GetSessionDataService,
-    private datasetService: DatasetService,
-  ) {}
-
-  @ViewChild("horizontalScroll") horizontalScrollDiv;
+  readonly horizontalScrollDiv = viewChild<ElementRef<HTMLDivElement>>("horizontalScroll");
 
   ngOnInit() {
     this.updateViewAfterDelay();
@@ -148,14 +153,17 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
           // has been changed
 
           // only react to events of this dataset
-          if (this.dataset == null || this.dataset.datasetId !== (event.newValue as Dataset)?.datasetId) {
+          if (
+            this.currentDataset() == null ||
+            this.currentDataset().datasetId !== (event.newValue as Dataset)?.datasetId
+          ) {
             return;
           }
 
           // get the latest datasets from the sessionData, because websocket events
           // don't update selectedDatasets at the moment
           // in this case, could use the one from the event also?
-          const updatedDataset = this.datasetsMap.get(this.dataset.datasetId);
+          const updatedDataset = this.sessionData().datasetsMap().get(this.currentDataset().datasetId);
           if (updatedDataset == null) {
             return;
           }
@@ -173,13 +181,14 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
   ngAfterViewInit() {
     // not created in modal
-    if (this.horizontalScrollDiv) {
-      this.nativeElementService.disableGestures(this.horizontalScrollDiv.nativeElement);
+    const horizontalScrollDiv = this.horizontalScrollDiv();
+    if (horizontalScrollDiv) {
+      this.nativeElementService.disableGestures(horizontalScrollDiv.nativeElement);
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (Object.keys(changes).includes("dataset") && this.dataset) {
+    if (Object.keys(changes).includes("dataset") && this.currentDataset()) {
       this.updateViewLater();
     }
   }
@@ -189,10 +198,8 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     this.unsubscribe.complete();
 
     if (this.hot) {
-      this.zone.runOutsideAngular(() => {
-        this.hot.destroy();
-        this.hot = null;
-      });
+      this.hot.destroy();
+      this.hot = null;
     }
   }
 
@@ -268,7 +275,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
         if (source === "edit" || source === "Autofill.fill" || source === "CopyPaste.paste") {
           this.latestEdit = new Date().getTime();
           this.updateDataset();
-          this.zone.run(() => this.updateWarnings());
+          this.updateWarnings();
         }
       },
     };
@@ -285,21 +292,19 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     button.addEventListener(
       "click",
       () => {
-        this.zone.run(() => {
-          const columnName = this.headerAt(col);
-          this.stringModalService
-            .openBooleanModal(
-              "Delete column",
-              `Are you sure you want to delete column '${columnName}'?`,
-              "Delete",
-              "Cancel",
-              "btn-danger",
-            )
-            .then(
-              () => this.removeColumn(col),
-              () => {},
-            );
-        });
+        const columnName = this.headerAt(col);
+        this.stringModalService
+          .openBooleanModal(
+            "Delete column",
+            `Are you sure you want to delete column '${columnName}'?`,
+            "Delete",
+            "Cancel",
+            "btn-danger",
+          )
+          .then(
+            () => this.removeColumn(col),
+            () => {},
+          );
       },
       false,
     );
@@ -312,13 +317,11 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   }
 
   removeColumn(index: number) {
-    this.zone.runOutsideAngular(() => {
-      // removes the header from escapedHeaders too
-      this.hot.alter("remove_col", index);
-    });
+    // removes the header from escapedHeaders too
+    this.hot.alter("remove_col", index);
 
     this.updateDataset();
-    this.zone.run(() => this.updateWarnings());
+    this.updateWarnings();
   }
 
   /**
@@ -365,11 +368,11 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
             });
             this.updateDataset();
             this.updateViewAfterDelay();
-            this.zone.run(() => this.updateWarnings());
+            this.updateWarnings();
           } else if (action === 3 && this.originalPhenodataString != null) {
-            this.datasetService.setPhenodata(this.dataset, this.originalPhenodataString);
+            this.datasetService.setPhenodata(this.currentDataset(), this.originalPhenodataString);
             this.phenodataString = this.originalPhenodataString;
-            this.sessionDataService.updateDataset(this.dataset).subscribe({
+            this.sessionDataService.updateDataset(this.currentDataset()).subscribe({
               next: () => log.info("dataset phenodata updated"),
               error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
             });
@@ -386,9 +389,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
 
     this.phenodataString = phenodataString;
 
-    if (phenodataString !== this.datasetService.getOwnPhenodata(this.dataset)) {
-      this.datasetService.setPhenodata(this.dataset, phenodataString);
-      this.sessionDataService.updateDataset(this.dataset).subscribe({
+    if (phenodataString !== this.datasetService.getOwnPhenodata(this.currentDataset())) {
+      this.datasetService.setPhenodata(this.currentDataset(), phenodataString);
+      this.sessionDataService.updateDataset(this.currentDataset()).subscribe({
         next: () => log.info("dataset phenodata updated"),
         error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
       });
@@ -399,12 +402,20 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     setTimeout(() => this.updateView(), 200);
   }
 
+  /*
+   * The template shows state that Handsontable changes in place, like the headers that canReset
+   * depends on, and its callbacks come here or to updateView(). Mark the view for the check that
+   * runs after them.
+   */
   private updateWarnings() {
-    this.phenodataFilled = this.datasetService.isPhenodataFilled(this.dataset);
-    this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.dataset);
+    this.changeDetectorRef.markForCheck();
+    this.phenodataFilled = this.datasetService.isPhenodataFilled(this.currentDataset());
+    this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.currentDataset());
   }
 
   private updateView() {
+    // see updateWarnings()
+    this.changeDetectorRef.markForCheck();
     this.ready = false;
     this.phenodataFilled = false;
     this.groupColumnMissing = false;
@@ -436,35 +447,35 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       container.removeChild(container.firstChild);
     }
 
-    if (this.dataset == null) {
+    if (this.currentDataset() == null) {
       this.phenodataState = PhenodataState.DATASET_NULL;
       this.ready = true;
       return;
     }
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    const updatedDataset = this.datasetsMap.get(this.dataset.datasetId);
+    const updatedDataset = this.sessionData().datasetsMap().get(this.currentDataset().datasetId);
     if (updatedDataset == null) {
       this.phenodataState = PhenodataState.DATASET_NULL;
       this.ready = true;
       return;
     }
-    this.dataset = updatedDataset;
+    this.currentDataset.set(updatedDataset);
 
     // find phenodata for this dataset, could be own or inherited
     let phenodataString;
-    if (this.datasetService.hasOwnPhenodata(this.dataset)) {
-      phenodataString = this.datasetService.getOwnPhenodata(this.dataset);
+    if (this.datasetService.hasOwnPhenodata(this.currentDataset())) {
+      phenodataString = this.datasetService.getOwnPhenodata(this.currentDataset());
       this.phenodataState = PhenodataState.OWN_PHENODATA;
-      if (this.dataset.datasetId !== this.originalDatasetId) {
-        this.originalDatasetId = this.dataset.datasetId;
+      if (this.currentDataset().datasetId !== this.originalDatasetId) {
+        this.originalDatasetId = this.currentDataset().datasetId;
         this.originalPhenodataString = phenodataString;
       }
       this.phenodataString = phenodataString;
-      this.phenodataFilled = this.datasetService.isPhenodataFilled(this.dataset);
-      this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.dataset);
+      this.phenodataFilled = this.datasetService.isPhenodataFilled(this.currentDataset());
+      this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.currentDataset());
     } else {
-      const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(this.dataset);
+      const ancestorsWithPhenodata = this.getSessionDataService.getAncestorDatasetsWithPhenodata(this.currentDataset());
       if (ancestorsWithPhenodata.length > 0) {
         phenodataString = this.datasetService.getOwnPhenodata(ancestorsWithPhenodata[0]);
         this.phenodataState = PhenodataState.INHERITED_PHENODATA;
@@ -486,21 +497,14 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     // for now, show the phenodata table only for own phenodata
     const settings = this.getSettings();
     if (this.phenodataState === PhenodataState.OWN_PHENODATA) {
-      this.zone.runOutsideAngular(() => {
-        this.hot = new Handsontable(container, settings);
-        // the column changes rely on this, see escapedHeaders
-        if (this.hot.getSettings().colHeaders !== this.escapedHeaders) {
-          log.error("Handsontable copied the headers, adding and removing columns won't be saved correctly");
-        }
-      });
+      this.hot = new Handsontable(container, settings);
+      // the column changes rely on this, see escapedHeaders
+      if (this.hot.getSettings().colHeaders !== this.escapedHeaders) {
+        log.error("Handsontable copied the headers, adding and removing columns won't be saved correctly");
+      }
 
       this.updateSize();
-
-      this.zone.runOutsideAngular(() => {
-        if (this.hot) {
-          this.hot.loadData(this.rows);
-        }
-      });
+      this.hot.loadData(this.rows);
     }
 
     this.ready = true;
@@ -548,18 +552,13 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       .openStringModal("Add new column", "Column name", "", "Add")
       .pipe(
         tap((name) => {
-          this.zone.runOutsideAngular(() => {
-            const headers = this.headers;
-            const lastNonEditableIdx = headers.reduce(
-              (acc, h, i) => (this.nonEditableColumns.includes(h) ? i : acc),
-              -1,
-            );
-            const insertIndex = name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : headers.length;
-            // inserts an undefined header into escapedHeaders, replaced with the name below
-            this.hot.alter("insert_col", insertIndex);
-            this.escapedHeaders[insertIndex] = escapeHtml(name);
-            this.hot.render();
-          });
+          const headers = this.headers;
+          const lastNonEditableIdx = headers.reduce((acc, h, i) => (this.nonEditableColumns.includes(h) ? i : acc), -1);
+          const insertIndex = name === this.datasetService.GROUP_COLUMN ? lastNonEditableIdx + 1 : headers.length;
+          // inserts an undefined header into escapedHeaders, replaced with the name below
+          this.hot.alter("insert_col", insertIndex);
+          this.escapedHeaders[insertIndex] = escapeHtml(name);
+          this.hot.render();
 
           this.updateDataset();
           this.updateWarnings();

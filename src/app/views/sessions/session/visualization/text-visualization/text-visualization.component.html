@@ -1,4 +1,4 @@
-@if (state.isReady()) {
+@if (state().isReady()) {
   <div>
     <div class="row">
       <div class="col">
@@ -15,7 +15,7 @@
         @if (isCompleteFile()) {
           <label style="font-size: smaller">File size {{ getSizeFull() | bytes }}.</label>
         }
-        @if (!modalMode) {
+        @if (!modalMode()) {
           <ch-link-button (click)="showAll()" class="float-end no-underline-link-button">
             <i class="fa-solid fa-expand"></i>
             Full Screen
@@ -26,10 +26,10 @@
 
     <div class="row">
       <div class="col">
-        <pre class="text-view">{{ data }}</pre>
+        <pre class="text-view">{{ data() }}</pre>
       </div>
     </div>
   </div>
 } @else {
-  <ch-status [state]="state"></ch-status>
+  <ch-status [state]="state()"></ch-status>
 }

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import {
   Dataset,
   EventType,
@@ -30,23 +30,21 @@ import { SelectionHandlerService } from "./selection-handler.service";
 import { SessionEventService } from "./session-event.service";
 import { SessionService } from "./session.service";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class SessionDataService {
-  private sessionId: string;
+  private sessionResource = inject(SessionResource);
+  private sessionService = inject(SessionService);
+  private fileResource = inject(FileResource);
+  private errorService = inject(ErrorService);
+  private tokenService = inject(TokenService);
+  private sessionEventService = inject(SessionEventService);
+  private selectionHandlerService = inject(SelectionHandlerService);
+  private toastService = inject(ToastService);
+  private restErrorService = inject(RestErrorService);
+  private dialogModalService = inject(DialogModalService);
+  private tabService = inject(TabService);
 
-  constructor(
-    private sessionResource: SessionResource,
-    private sessionService: SessionService,
-    private fileResource: FileResource,
-    private errorService: ErrorService,
-    private tokenService: TokenService,
-    private sessionEventService: SessionEventService,
-    private selectionHandlerService: SelectionHandlerService,
-    private toastService: ToastService,
-    private restErrorService: RestErrorService,
-    private dialogModalService: DialogModalService,
-    private tabService: TabService,
-  ) {}
+  private sessionId: string;
 
   getSessionId(): string {
     return this.sessionId;
@@ -68,7 +66,7 @@ export class SessionDataService {
     return this.sessionResource.createJob(this.getSessionId(), job);
   }
 
-  getJobById(jobId: string, jobs: Map<string, Job>) {
+  getJobById(jobId: string, jobs: ReadonlyMap<string, Job>) {
     return jobs.get(jobId);
   }
 
@@ -184,7 +182,7 @@ export class SessionDataService {
   }
 
   hasReadWriteAccess(sessionData: SessionData) {
-    const rules = this.getApplicableRules(sessionData.session.rules);
+    const rules = this.getApplicableRules(sessionData.session().rules);
     return rules.some((rule) => rule.readWrite);
   }
 
@@ -375,7 +373,7 @@ export class SessionDataService {
     When those cannot be selected, those cannot cause problems in the visualization, which assumes that
     the type tags do exist.
     */
-  getCompleteDatasets(datasetsMap: Map<string, Dataset>): Map<string, Dataset> {
+  getCompleteDatasets(datasetsMap: ReadonlyMap<string, Dataset>): Map<string, Dataset> {
     // convert to array[[key1, value1], [key2, value2], ...] for filtering and back to map
     return new Map(
       Array.from(datasetsMap).filter((entry) => {
@@ -386,11 +384,11 @@ export class SessionDataService {
   }
 
   getDatasetList(sessionData: SessionData): Dataset[] {
-    return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap));
+    return UtilsService.mapValues(this.getCompleteDatasets(sessionData.datasetsMap()));
   }
 
   getJobList(sessionData: SessionData): Job[] {
-    return UtilsService.mapValues(sessionData.jobsMap);
+    return UtilsService.mapValues(sessionData.jobsMap());
   }
 
   getDatasetListSortedByCreated(sessionData: SessionData): Dataset[] {

@@ -1,27 +1,28 @@
-import { AfterViewInit, Component, Input, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, inject, signal, viewChild, ElementRef } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   templateUrl: "./choice-modal.component.html",
 })
 export class ChoiceModalComponent implements AfterViewInit {
-  @Input() title: string;
-  @Input() message: string;
-  @Input() action1ButtonText: string;
-  @Input() action1Disabled = false;
-  @Input() action2ButtonText: string;
-  @Input() action2Disabled = false;
-  @Input() action3ButtonText: string;
-  @Input() action3Disabled = false;
-  @Input() cancelButtonText: string;
-  @Input() question: string;
+  private activeModal = inject(NgbActiveModal);
 
-  @ViewChild("submitButton") submitButton;
+  // set through the modal ref by the code that opens the modal
+  readonly title = signal<string>(undefined);
+  readonly message = signal<string>(undefined);
+  readonly action1ButtonText = signal<string>(undefined);
+  readonly action1Disabled = signal(false);
+  readonly action2ButtonText = signal<string>(undefined);
+  readonly action2Disabled = signal(false);
+  readonly action3ButtonText = signal<string>(undefined);
+  readonly action3Disabled = signal(false);
+  readonly cancelButtonText = signal<string>(undefined);
+  readonly question = signal<string>(undefined);
 
-  constructor(private activeModal: NgbActiveModal) {}
+  readonly submitButton = viewChild<ElementRef<HTMLButtonElement>>("submitButton");
 
   ngAfterViewInit() {
-    setTimeout(() => this.submitButton.nativeElement.focus());
+    setTimeout(() => this.submitButton().nativeElement.focus());
   }
 
   action1() {

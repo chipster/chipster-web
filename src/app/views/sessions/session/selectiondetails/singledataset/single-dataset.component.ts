@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ViewChild } from "@angular/core";
+import { Component, ElementRef, computed, inject, input, linkedSignal, viewChild } from "@angular/core";
 import { Dataset, Job, Tool } from "chipster-js-common";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../../../model/session/session-data";
@@ -7,91 +7,101 @@ import { getSortedLabels } from "../../labels/labels-util";
 import { SessionDataService } from "../../session-data.service";
 import { ToolService } from "../../tools/tool.service";
 import { DatasetModalService } from "../datasetmodal.service";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
+import { DatasetParameterListComponent } from "../dataset-parameter-list/dataset-parameter-list.component";
+import { LinkButtonComponent } from "../../link-button/link-button.component";
+import { LabelPillComponent } from "../../labels/label-pill.component";
+import { BytesPipe } from "../../../../../shared/pipes/bytes.pipe";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe";
 
 @Component({
   selector: "ch-single-dataset",
   templateUrl: "./single-dataset.component.html",
   styleUrls: ["./single-dataset.component.less"],
+  imports: [
+    NGB_DROPDOWN_IMPORTS,
+    DatasetParameterListComponent,
+    LinkButtonComponent,
+    LabelPillComponent,
+    BytesPipe,
+    LocalDatePipe,
+  ],
 })
-export class SingleDatasetComponent implements OnInit, OnChanges {
-  @Input()
-  dataset: Dataset;
-  @Input()
-  private jobs: Map<string, Job>;
-  @Input()
-  private sessionData: SessionData;
-  @Input()
-  private tools: Tool[];
-  @Input()
-  parametersLimit: number;
+export class SingleDatasetComponent {
+  private sessionDataService = inject(SessionDataService);
+  private restErrorService = inject(RestErrorService);
+  private datasetModalService = inject(DatasetModalService);
+  private toolService = inject(ToolService);
+  private datasetContextMenuService = inject(DatasetContextMenuService);
 
-  @ViewChild("notesInput")
-  notesArea;
+  readonly dataset = input.required<Dataset>();
+  readonly jobs = input<ReadonlyMap<string, Job>>(undefined);
+  readonly sessionData = input.required<SessionData>();
+  readonly tools = input<Tool[]>(undefined);
+  readonly parametersLimit = input<number>(undefined);
 
-  sourceJob: Job;
-  tool: Tool;
-  toolCategory: string;
-  toolName: string;
+  readonly notesArea = viewChild<ElementRef<HTMLTextAreaElement>>("notesInput");
+
+  /*
+   * The latest copy from datasetsMap, because the dataset of the selection isn't updated by the
+   * dataset events: labels and notes changed elsewhere, or the server's copy after a local change.
+   */
+  readonly latestDataset = computed(() => this.sessionData().latestDatasets([this.dataset()])[0]);
+  readonly sourceJob = computed<Job>(() =>
+    this.sessionDataService.getJobById(this.latestDataset().sourceJob, this.jobs()),
+  );
+  readonly toolCategory = computed(() => this.sourceJob()?.toolCategory ?? "");
+  readonly toolName = computed(() => this.sourceJob()?.toolName ?? "");
+  readonly tool = computed<Tool>(() => this.toolService.getLiveToolForSourceJob(this.sourceJob(), this.tools()));
+  // the text of the notes textarea: the latest notes, or the typed text when its save failed
+  readonly notesText = linkedSignal(() => this.latestDataset().notes ?? "");
 
   notesPlaceholderInactive = "click to edit";
   notesPlaceholderActive = "";
 
-  constructor(
-    private sessionDataService: SessionDataService,
-    private restErrorService: RestErrorService,
-    private datasetModalService: DatasetModalService,
-    private toolService: ToolService,
-    private datasetContextMenuService: DatasetContextMenuService,
-  ) {}
-
-  ngOnInit() {
-    this.sourceJob = this.getSourceJob(this.dataset);
+  editNotes(notesInput: HTMLTextAreaElement) {
+    notesInput.placeholder = this.notesPlaceholderActive;
   }
 
-  ngOnChanges(changes: any) {
-    this.dataset = changes.dataset.currentValue;
-    this.sourceJob = this.getSourceJob(this.dataset);
+  saveNotes(notesInput: HTMLTextAreaElement) {
+    this.notesArea().nativeElement.scrollTop = 0;
+    notesInput.placeholder = this.notesPlaceholderInactive;
 
-    this.toolCategory = this.sourceJob ? this.sourceJob.toolCategory : "";
-    this.toolName = this.sourceJob ? this.sourceJob.toolName : "";
+    if (notesInput.value === (this.latestDataset().notes ?? "")) {
+      return;
+    }
 
-    this.tool = this.toolService.getLiveToolForSourceJob(this.sourceJob, this.tools);
-  }
-
-  editNotes(input) {
-    input.placeholder = this.notesPlaceholderActive;
-  }
-
-  saveNotes(dataset: Dataset, input) {
-    this.notesArea.nativeElement.scrollTop = 0;
-
-    this.sessionDataService
-      .updateDataset(dataset)
-      .subscribe({ error: (err) => this.restErrorService.showError("saving notes failed", err) });
-    input.placeholder = this.notesPlaceholderInactive;
-  }
-
-  getSourceJob(dataset: Dataset) {
-    return this.sessionDataService.getJobById(dataset.sourceJob, this.jobs);
+    // the copy in datasetsMap at once, so that an update of the dataset sent before the save's event
+    // arrives, e.g. a label applied with the next click, carries the new notes
+    const dataset = { ...this.latestDataset(), notes: notesInput.value };
+    const restore = this.sessionData().setDatasets([dataset]);
+    this.sessionDataService.updateDataset(dataset).subscribe({
+      error: (err) => {
+        restore();
+        // keep the typed text for a retry or a copy
+        this.notesText.set(dataset.notes);
+        this.restErrorService.showError("saving notes failed", err);
+      },
+    });
   }
 
   showHistory(): void {
-    this.datasetModalService.openDatasetHistoryModal(this.dataset, this.sessionData, this.tools);
+    this.datasetModalService.openDatasetHistoryModal(this.latestDataset(), this.sessionData(), this.tools());
   }
 
   selectTool() {
-    this.datasetContextMenuService.selectTool(this.sourceJob);
+    this.datasetContextMenuService.selectTool(this.sourceJob());
   }
 
   showJob() {
-    this.datasetContextMenuService.showJob(this.sourceJob, this.tools, this.sessionData);
+    this.datasetContextMenuService.showJob(this.sourceJob(), this.tools(), this.sessionData());
   }
 
   editLabels(): void {
-    this.datasetModalService.openLabelsModal([this.dataset], this.sessionData);
+    this.datasetModalService.openLabelsModal([this.latestDataset()], this.sessionData());
   }
 
   getDatasetLabels() {
-    return getSortedLabels(this.dataset?.labelIds, this.sessionData.labelsMap);
+    return getSortedLabels(this.latestDataset().labelIds, this.sessionData().labelsMap());
   }
 }

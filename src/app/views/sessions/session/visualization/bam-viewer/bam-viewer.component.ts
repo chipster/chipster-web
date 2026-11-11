@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy } from "@angular/core";
+import { Component, OnChanges, OnDestroy, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import * as pako from "pako";
 import { Subject } from "rxjs";
@@ -15,8 +15,7 @@ import BamRecord from "./bamRecord";
   styleUrls: ["./bam-viewer.component.less"],
 })
 export class BamViewerComponent implements OnChanges, OnDestroy {
-  @Input()
-  private dataset: Dataset;
+  readonly dataset = input<Dataset>(undefined);
   private plain: any;
   private samHeaderLen: number;
   private samHeader;
@@ -39,11 +38,11 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
 
   private disabled = false;
 
-  constructor(
-    private fileResource: FileResource,
-    private sessionDataService: SessionDataService,
-    private errorHandlerService: RestErrorService,
-  ) {
+  private fileResource = inject(FileResource);
+  private sessionDataService = inject(SessionDataService);
+  private errorHandlerService = inject(RestErrorService);
+
+  constructor() {
     this.bamRecordList = new Array<BamRecord>();
   }
 
@@ -61,7 +60,7 @@ export class BamViewerComponent implements OnChanges, OnDestroy {
     this.state = new LoadState(State.Loading, "Loading bam file...");
 
     this.fileResource
-      .getData(this.sessionDataService.getSessionId(), this.dataset, this.maxBytes, true)
+      .getData(this.sessionDataService.getSessionId(), this.dataset(), this.maxBytes, true)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe({
         next: (result: any) => {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { GridOptions, GridReadyEvent } from "ag-grid-community";
 import log from "loglevel";
@@ -8,6 +8,7 @@ import { RestErrorService } from "../../../../core/errorhandler/rest-error.servi
 import { SessionDbAdminService } from "../../../../shared/services/sessiondb-admin.service";
 import { UserService } from "../../../../shared/services/user.service";
 import UtilsService from "../../../../shared/utilities/utils";
+import { AgGridAngular } from "ag-grid-angular";
 
 export enum DeleteAction {
   DeleteUser,
@@ -29,10 +30,17 @@ enum DeleteStatus {
   selector: "ch-confirm-delete-modal",
   templateUrl: "./confirm-delete-modal.component.html",
   styleUrls: ["./confirm-delete-modal.component.less"],
+  imports: [AgGridAngular],
 })
 export class ConfirmDeleteModalComponent implements OnInit {
-  @Input() users: any[];
-  @Input() deleteAction: DeleteAction;
+  private activeModal = inject(NgbActiveModal);
+  private userService = inject(UserService);
+  private restErrorService = inject(RestErrorService);
+  private sessionDbAdminService = inject(SessionDbAdminService);
+
+  // set through the modal ref by the code that opens the modal
+  readonly users = signal<any[]>(undefined);
+  readonly deleteAction = signal<DeleteAction>(undefined);
 
   title: string;
   message: string;
@@ -42,9 +50,9 @@ export class ConfirmDeleteModalComponent implements OnInit {
 
   gridOptions: GridOptions = null;
 
-  deleteEnabled = true;
-  deleteVisible = true;
-  closeEnabled = true;
+  readonly deleteEnabled = signal(true);
+  readonly deleteVisible = signal(true);
+  readonly closeEnabled = signal(true);
 
   // indicate if there has been any delete actions and refresh refresh the parent component after close is needed
   private refreshAfterClose: boolean = false;
@@ -52,32 +60,25 @@ export class ConfirmDeleteModalComponent implements OnInit {
   private cancelDelete$ = new Subject();
   api: any;
 
-  constructor(
-    private activeModal: NgbActiveModal,
-    private userService: UserService,
-    private restErrorService: RestErrorService,
-    private sessionDbAdminService: SessionDbAdminService,
-  ) {}
-
   ngOnInit(): void {
     // set title and message according to the deleteAction
-    switch (this.deleteAction) {
+    switch (this.deleteAction()) {
       case DeleteAction.DeleteUser:
         this.title = "Delete users, keep sessions";
-        this.message = `Are you sure you want to delete the following ${this.users.length} user${UtilsService.sIfMany(
-          this.users,
+        this.message = `Are you sure you want to delete the following ${this.users().length} user${UtilsService.sIfMany(
+          this.users(),
         )}?`;
         break;
       case DeleteAction.DeleteSessions:
         this.title = "Delete sessions, keep users";
         this.message = `Are you sure you want to delete sessions for the following ${
-          this.users.length
-        } user${UtilsService.sIfMany(this.users)}?`;
+          this.users().length
+        } user${UtilsService.sIfMany(this.users())}?`;
         break;
       case DeleteAction.DeleteUserAndSessions:
         this.title = "Delete users and sessions";
-        this.message = `Are you sure you want to delete the following ${this.users.length} user${UtilsService.sIfMany(
-          this.users,
+        this.message = `Are you sure you want to delete the following ${this.users().length} user${UtilsService.sIfMany(
+          this.users(),
         )} and their sessions?`;
         break;
       default:
@@ -85,14 +86,15 @@ export class ConfirmDeleteModalComponent implements OnInit {
     }
 
     // set status columns
-    this.rows = this.users.map((user) => ({
+    this.rows = this.users().map((user) => ({
       ...user,
       deleteUser:
-        this.deleteAction === DeleteAction.DeleteUser || this.deleteAction === DeleteAction.DeleteUserAndSessions
+        this.deleteAction() === DeleteAction.DeleteUser || this.deleteAction() === DeleteAction.DeleteUserAndSessions
           ? DeleteStatus.Confirm
           : DeleteStatus.No,
       deleteSessions:
-        this.deleteAction === DeleteAction.DeleteSessions || this.deleteAction === DeleteAction.DeleteUserAndSessions
+        this.deleteAction() === DeleteAction.DeleteSessions ||
+        this.deleteAction() === DeleteAction.DeleteUserAndSessions
           ? DeleteStatus.Confirm
           : DeleteStatus.No,
     }));
@@ -118,17 +120,17 @@ export class ConfirmDeleteModalComponent implements OnInit {
   }
 
   onDelete() {
-    this.deleteVisible = false;
-    this.deleteEnabled = false;
-    this.closeEnabled = false;
+    this.deleteVisible.set(false);
+    this.deleteEnabled.set(false);
+    this.closeEnabled.set(false);
 
     let deleteActions$: Observable<any>[];
 
     // set status to pending according to the deleteAction
-    this.setAllRowsStatus(this.deleteAction, DeleteStatus.Pending);
+    this.setAllRowsStatus(this.deleteAction(), DeleteStatus.Pending);
 
     // for each row, create a delete action that sets the status to deleting, performs delete action, and sets the status to deleted
-    switch (this.deleteAction) {
+    switch (this.deleteAction()) {
       case DeleteAction.DeleteUser:
         deleteActions$ = this.rows
           .filter((row) => !this.isDeleteUserFinished(row))
@@ -168,9 +170,9 @@ export class ConfirmDeleteModalComponent implements OnInit {
         },
         complete: () => {
           log.info("Delete finished");
-          this.deleteEnabled = !this.allRowsFinished();
-          this.deleteVisible = true;
-          this.closeEnabled = true;
+          this.deleteEnabled.set(!this.allRowsFinished());
+          this.deleteVisible.set(true);
+          this.closeEnabled.set(true);
           this.refreshAfterClose = true;
         },
       });
@@ -183,8 +185,8 @@ export class ConfirmDeleteModalComponent implements OnInit {
   onCancelDelete() {
     this.cancelDelete$.next(null);
 
-    this.setAllRowsStatus(this.deleteAction, DeleteStatus.Cancelled);
-    this.deleteEnabled = !this.allRowsFinished();
+    this.setAllRowsStatus(this.deleteAction(), DeleteStatus.Cancelled);
+    this.deleteEnabled.set(!this.allRowsFinished());
   }
 
   customDateRenderer(params: any): string {

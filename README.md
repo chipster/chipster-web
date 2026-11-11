@@ -15,7 +15,7 @@ Run `ng build` to build the project, or `npm run build` for a production build. 
 
 ## Running unit tests
 
-Run `npm test` to execute the unit tests via [Vitest](https://vitest.dev). Use `npm run test:watch` to re-run them on file changes.
+Run `npm test` to execute the unit tests with the Angular CLI's unit-test builder (`ng test`), which builds the specs like the app and runs them with [Vitest](https://vitest.dev) in jsdom. Use `npm run test:watch` to re-run them on file changes.
 
 ## Running end-to-end tests
 

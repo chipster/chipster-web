@@ -1,35 +1,33 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { NGB_DROPDOWN_IMPORTS } from "../../../../../shared/directives/dropdown-close.directive";
 
 @Component({
   templateUrl: "./dropdown-modal.component.html",
+  imports: [NGB_DROPDOWN_IMPORTS],
 })
 export class DropdownModalComponent implements OnInit {
-  @Input()
-  buttonText: string;
-  @Input()
-  description: string;
-  @Input()
-  options: Map<any, string>;
-  @Input()
-  title: string;
-  @Input()
-  placeHolder: string;
+  private activeModal = inject(NgbActiveModal);
+
+  // set through the modal ref by the code that opens the modal
+  readonly buttonText = signal<string>(undefined);
+  readonly description = signal<string>(undefined);
+  readonly options = signal<Map<any, string>>(undefined);
+  readonly title = signal<string>(undefined);
+  readonly placeHolder = signal<string>(undefined);
 
   optionKeys = [];
   value: any;
 
-  constructor(private activeModal: NgbActiveModal) {}
-
   ngOnInit() {
-    this.optionKeys = Array.from(this.options.keys());
+    this.optionKeys = Array.from(this.options().keys());
   }
 
   getOptionName(key) {
-    const name = this.options.get(key);
+    const name = this.options().get(key);
 
     if (name == null) {
-      return this.placeHolder;
+      return this.placeHolder();
     }
     return name;
   }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, OnInit, inject, input } from "@angular/core";
 import { Dataset } from "chipster-js-common";
 import { SessionDataService } from "../../session-data.service";
 
@@ -8,12 +8,11 @@ import { SessionDataService } from "../../session-data.service";
   styleUrls: ["./new-tab-visualization.component.less"],
 })
 export class NewTabVisualizationComponent implements OnInit {
-  @Input()
-  dataset: Dataset;
+  private sessionDataService = inject(SessionDataService);
 
-  constructor(private sessionDataService: SessionDataService) {}
+  readonly dataset = input<Dataset>(undefined);
 
   ngOnInit(): void {
-    this.sessionDataService.openNewTab(this.dataset);
+    this.sessionDataService.openNewTab(this.dataset());
   }
 }

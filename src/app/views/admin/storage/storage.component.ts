@@ -1,4 +1,6 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
+// registers the ag-grid modules and theme, before any grid is created
+import "../../../shared/ag-grid-setup";
+import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation, inject, viewChild } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
 import { Role } from "chipster-js-common";
@@ -13,17 +15,22 @@ import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 import { AuthHttpClientService } from "../../../shared/services/auth-http-client.service";
 import { ConfigService } from "../../../shared/services/config.service";
 import { SessionDbAdminService } from "../../../shared/services/sessiondb-admin.service";
-import { UserService } from "../../../shared/services/user.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { DialogModalService } from "../../sessions/session/dialogmodal/dialogmodal.service";
 import { AgBtnCellRendererComponent } from "./ag-btn-cell-renderer.component";
 import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-modal/confirm-delete-modal.component";
+import { NGB_NAV_IMPORTS } from "../../../shared/directives/nav-outlet-items.directive";
+import { NGB_DROPDOWN_IMPORTS } from "../../../shared/directives/dropdown-close.directive";
+import { FormsModule } from "@angular/forms";
+import { AgGridAngular } from "ag-grid-angular";
+import { StatusComponent } from "../../../shared/components/status.component";
 
 @Component({
   selector: "ch-storage",
   templateUrl: "./storage.component.html",
   styleUrls: ["./storage.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [NGB_NAV_IMPORTS, NGB_DROPDOWN_IMPORTS, FormsModule, AgGridAngular, StatusComponent, BytesPipe],
 })
 
 /**
@@ -40,6 +47,16 @@ import { ConfirmDeleteModalComponent, DeleteAction } from "./confirm-delete-moda
  *
  */
 export class StorageComponent implements OnInit {
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  private configService = inject(ConfigService);
+  private restErrorService = inject(RestErrorService);
+  private authHttpClient = inject(AuthHttpClientService);
+  private modalService = inject(NgbModal);
+  private bytesPipe = inject(BytesPipe);
+  private tokenService = inject(TokenService);
+  private authenticationService = inject(AuthenticationService);
+  private sessionDbAdminService = inject(SessionDbAdminService);
+
   quotasMap: Map<string, any>;
 
   public combinedGridOptions: GridOptions;
@@ -172,19 +189,7 @@ export class StorageComponent implements OnInit {
   public listFilterVisible = false;
   public listFilterText = "";
 
-  @ViewChild("modalContent") modalContent: any;
-
-  constructor(
-    private configService: ConfigService,
-    private restErrorService: RestErrorService,
-    private authHttpClient: AuthHttpClientService,
-    private modalService: NgbModal,
-    private bytesPipe: BytesPipe,
-    private tokenService: TokenService,
-    private authenticationService: AuthenticationService,
-    private userService: UserService,
-    private sessionDbAdminService: SessionDbAdminService,
-  ) {}
+  readonly modalContent = viewChild<any>("modalContent");
 
   ngOnInit() {
     this.refresh();
@@ -204,6 +209,13 @@ export class StorageComponent implements OnInit {
 
     this.sessions = [];
     this.quotasMap = new Map();
+
+    /*
+     * After a delete, this is called from the result of the confirmation modal, not from an event
+     * of the template. The loading state must be shown before the users arrive: it removes the
+     * grids, and ag-grid reads the new gridOptions only when the grids are created again.
+     */
+    this.changeDetectorRef.markForCheck();
 
     const authUsers$ = this.authenticationService.getUsers();
 
@@ -292,9 +304,11 @@ export class StorageComponent implements OnInit {
             onGridReady: (event: GridReadyEvent) => {
               this.combinedGridReady = true;
               this.combinedGridApi = event.api;
+              this.changeDetectorRef.markForCheck();
             },
             onGridPreDestroyed: () => {
               this.combinedGridReady = false;
+              this.changeDetectorRef.markForCheck();
             },
             onFilterChanged: this.onFilterChanged.bind(this),
           },
@@ -308,10 +322,13 @@ export class StorageComponent implements OnInit {
             onGridReady: (event: GridReadyEvent) => {
               this.authOnlyGridReady = true;
               this.authOnlyGridApi = event.api;
+              this.changeDetectorRef.markForCheck();
             },
             onGridPreDestroyed: () => {
               this.authOnlyGridReady = false;
+              this.changeDetectorRef.markForCheck();
             },
+            onFilterChanged: this.onFilterChanged.bind(this),
           },
         };
 
@@ -323,14 +340,18 @@ export class StorageComponent implements OnInit {
             onGridReady: (event: GridReadyEvent) => {
               this.sessionDbOnlyGridReady = true;
               this.sessionDbOnlyGridApi = event.api;
+              this.changeDetectorRef.markForCheck();
             },
             onGridPreDestroyed: () => {
               this.sessionDbOnlyGridReady = false;
+              this.changeDetectorRef.markForCheck();
             },
+            onFilterChanged: this.onFilterChanged.bind(this),
           },
         };
 
         this.allSessionsState = LoadState.Ready;
+        this.changeDetectorRef.markForCheck();
       },
       error: (err) => this.restErrorService.showError("get users and quotas failed", err),
     });
@@ -405,8 +426,12 @@ export class StorageComponent implements OnInit {
     this.deleteSessions(user);
   }
 
+  /*
+   * The template shows the filtered counts and rows of the grids, which change in the events of
+   * ag-grid, not of the template
+   */
   onFilterChanged(): void {
-    // Handle filter change here
+    this.changeDetectorRef.markForCheck();
   }
 
   private deleteSessions(...users: any[]) {
@@ -440,7 +465,7 @@ export class StorageComponent implements OnInit {
   }
 
   private selectUser(user: string) {
-    this.modalService.open(this.modalContent, { size: "xl" });
+    this.modalService.open(this.modalContent(), { size: "xl" });
 
     this.selectedUser = user;
     this.userSessionsState = new LoadState(State.Loading);
@@ -457,6 +482,7 @@ export class StorageComponent implements OnInit {
         next: (result: any[]) => {
           this.sessions = result[0]?.sessions;
           this.userSessionsState = new LoadState(State.Ready);
+          this.changeDetectorRef.markForCheck();
         },
         error: (err) => this.restErrorService.showError("get quotas failed", err),
       });
@@ -521,8 +547,9 @@ export class StorageComponent implements OnInit {
 
   private openConfirmModal(deleteAction: DeleteAction, users: any[]) {
     const modalRef = this.modalService.open(ConfirmDeleteModalComponent, { size: "lg", backdrop: "static" });
-    modalRef.componentInstance.deleteAction = deleteAction;
-    modalRef.componentInstance.users = users;
+    const modal = modalRef.componentInstance as ConfirmDeleteModalComponent;
+    modal.deleteAction.set(deleteAction);
+    modal.users.set(users);
     return DialogModalService.observableFromPromiseWithDismissHandling(modalRef.result);
   }
 }

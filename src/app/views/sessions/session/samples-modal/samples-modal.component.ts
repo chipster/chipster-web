@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from "@angular/core";
-import { UntypedFormBuilder, Validators } from "@angular/forms";
+import { Component, OnInit, inject, signal } from "@angular/core";
+import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Dataset } from "chipster-js-common";
 import { defer, of, Subject } from "rxjs";
@@ -8,6 +8,7 @@ import { LoadState, State } from "../../../../model/loadstate";
 import { SessionData } from "../../../../model/session/session-data";
 import { DatasetService, PairedEndSample, SampleGroups, SingleEndSample } from "../dataset.service";
 import { SessionDataService } from "../session-data.service";
+import { StatusComponent } from "../../../../shared/components/status.component";
 
 export interface ColumnItem {
   index: number;
@@ -18,17 +19,17 @@ export interface ColumnItem {
   selector: "ch-samples-modal",
   templateUrl: "./samples-modal.component.html",
   styleUrls: ["./samples-modal.component.less"],
+  imports: [FormsModule, ReactiveFormsModule, StatusComponent],
 })
 export class SamplesModalComponent implements OnInit {
-  constructor(
-    public activeModal: NgbActiveModal,
-    private fb: UntypedFormBuilder,
-    private datasetService: DatasetService,
-    private sessionDataService: SessionDataService,
-  ) {}
+  activeModal = inject(NgbActiveModal);
+  private fb = inject(UntypedFormBuilder);
+  private datasetService = inject(DatasetService);
+  private sessionDataService = inject(SessionDataService);
 
-  @Input() datasets: Dataset[];
-  @Input() sessionData: SessionData;
+  // set through the modal ref by the code that opens the modal
+  readonly datasets = signal<Dataset[]>(undefined);
+  readonly sessionData = signal<SessionData>(undefined);
 
   identifiersForm = this.fb.group({
     r1Token: ["R1", Validators.required],
@@ -61,13 +62,13 @@ export class SamplesModalComponent implements OnInit {
     this.state = new LoadState(State.Loading, "Loading data...");
 
     // check for nonunique file names
-    const nonUniqueNames = this.findNonUniqueNames(this.datasets);
+    const nonUniqueNames = this.findNonUniqueNames(this.datasets());
     if (nonUniqueNames.length > 0) {
       this.nonUniqueWarning = true;
       this.nonUniqueWarningText = `Selected files contain nonunique names: ${nonUniqueNames.join(", ")}`;
     }
 
-    const sampleGroups: SampleGroups = this.datasetService.getSampleGroups(this.datasets);
+    const sampleGroups: SampleGroups = this.datasetService.getSampleGroups(this.datasets());
 
     this.unpairedFiles = sampleGroups.sampleDataMissing;
     this.pairedEndSamples = sampleGroups.pairedEndSamples;
@@ -142,7 +143,7 @@ export class SamplesModalComponent implements OnInit {
   }
 
   onResetAll() {
-    this.unpairedFiles = this.datasets;
+    this.unpairedFiles = this.datasets();
     this.singleEndSamples = [];
     this.pairedEndSamples = [];
     this.pairMissingSamples = [];
@@ -171,15 +172,29 @@ export class SamplesModalComponent implements OnInit {
   }
 
   /**
-   * Update sample info from dialog to dataset metadata
+   * Copies of the datasets with the sample info of the dialog in their metadata.
+   *
+   * The datasets of the dialog are the latest copies in the session's datasets map, which must not be
+   * changed in place: a failed save would leave the sample info in the map, from where the next update
+   * of the dataset would send it to the server.
    */
   private updateLocalDatasets(): Dataset[] {
-    const updatedDatasets = [];
+    const updatedDatasets: Dataset[] = [];
+    const withSampleData = (
+      file: Dataset,
+      sampleName: string,
+      sampleId: string,
+      pairId?: string,
+      direction?: string,
+    ) => {
+      const copy = { ...file, metadataFiles: file.metadataFiles?.slice() };
+      this.datasetService.setSampleData(copy, sampleName, sampleId, pairId, direction);
+      updatedDatasets.push(copy);
+    };
 
     // add sample data for single ended files
     this.singleEndSamples.forEach((singleEndSample) => {
-      this.datasetService.setSampleData(singleEndSample.file, singleEndSample.sampleName, singleEndSample.sampleId);
-      updatedDatasets.push(singleEndSample.file);
+      withSampleData(singleEndSample.file, singleEndSample.sampleName, singleEndSample.sampleId);
     });
 
     //  add sample data for paired files and paired end with missing other file
@@ -188,36 +203,13 @@ export class SamplesModalComponent implements OnInit {
       const { sampleId } = pairedEndSample;
       pairedEndSample.pairs.forEach((sampleFilePair) => {
         if (sampleFilePair.r1File != null) {
-          this.datasetService.setSampleData(
-            sampleFilePair.r1File,
-            sampleName,
-            sampleId,
-            sampleFilePair.pairId,
-            DatasetService.R1,
-          );
-          updatedDatasets.push(sampleFilePair.r1File);
+          withSampleData(sampleFilePair.r1File, sampleName, sampleId, sampleFilePair.pairId, DatasetService.R1);
         }
 
         if (sampleFilePair.r2File != null) {
-          this.datasetService.setSampleData(
-            sampleFilePair.r2File,
-            sampleName,
-            sampleId,
-            sampleFilePair.pairId,
-            DatasetService.R2,
-          );
-          updatedDatasets.push(sampleFilePair.r2File);
+          withSampleData(sampleFilePair.r2File, sampleName, sampleId, sampleFilePair.pairId, DatasetService.R2);
         }
       });
-    });
-
-    // remove sample data from unpaired files
-    this.unpairedFiles.forEach((dataset) => {
-      // avoid unnecessary update by checking if sample data exists
-      if (this.datasetService.getMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME) != null) {
-        this.datasetService.clearSampleData(dataset);
-        updatedDatasets.push(dataset);
-      }
     });
 
     return updatedDatasets;

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input } from "@angular/core";
+import { AfterViewInit, Component, inject, signal } from "@angular/core";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 import { Observable } from "rxjs";
 import { RestErrorService } from "../../../../../core/errorhandler/rest-error.service";
@@ -7,21 +7,20 @@ import { RestErrorService } from "../../../../../core/errorhandler/rest-error.se
   templateUrl: "./spinnermodal.component.html",
 })
 export class SpinnerModalComponent implements AfterViewInit {
-  @Input() message: string;
-  @Input() observable: Observable<any>;
+  private activeModal = inject(NgbActiveModal);
+  private restErrorService = inject(RestErrorService);
 
-  constructor(
-    private activeModal: NgbActiveModal,
-    private restErrorService: RestErrorService,
-  ) {}
+  // set through the modal ref by the code that opens the modal
+  readonly message = signal<string>(undefined);
+  readonly observable = signal<Observable<any>>(undefined);
 
   ngAfterViewInit() {
-    this.observable.subscribe({
+    this.observable().subscribe({
       next: (result) => {
         this.activeModal.close(result);
       },
       error: (err) => {
-        this.restErrorService.showError(`${this.message} failed`, err);
+        this.restErrorService.showError(`${this.message()} failed`, err);
         this.activeModal.dismiss();
       },
     });

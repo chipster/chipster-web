@@ -1,37 +1,34 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
+import { Component, OnDestroy, OnInit, inject, input, output, viewChild, ElementRef } from "@angular/core";
 import { HotkeyService } from "../../services/hotkey.service";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "ch-search-box",
   templateUrl: "./search-box.component.html",
   styleUrls: ["./search-box.component.less"],
+  imports: [FormsModule],
 })
 export class SearchBoxComponent implements OnInit, OnDestroy {
-  @Input()
-  placeholder: string;
-  @Input()
-  focusOnInit = false;
-  @Input()
-  focusHotkey: string;
-  @Input()
-  focusHotkeyDescription: string;
+  private readonly hotkeyService = inject(HotkeyService);
 
-  @Output()
-  valueChange = new EventEmitter<string>();
-  @Output()
-  enterKey = new EventEmitter<void>();
+  readonly placeholder = input<string>(undefined);
+  readonly focusOnInit = input(false);
+  readonly focusHotkey = input<string>(undefined);
+  readonly focusHotkeyDescription = input<string>(undefined);
 
-  @ViewChild("searchInput") searchInput;
+  readonly valueChange = output<string>();
+  readonly enterKey = output<void>();
+
+  readonly searchInput = viewChild<ElementRef<HTMLInputElement>>("searchInput");
 
   searchTerm: string;
 
   private unregisterHotkey: (() => void) | null = null;
 
-  constructor(private readonly hotkeyService: HotkeyService) {}
-
   ngOnInit() {
-    if (this.focusHotkey) {
-      this.unregisterHotkey = this.hotkeyService.register(this.focusHotkey, this.focusHotkeyDescription, () =>
+    const focusHotkey = this.focusHotkey();
+    if (focusHotkey) {
+      this.unregisterHotkey = this.hotkeyService.register(focusHotkey, this.focusHotkeyDescription(), () =>
         this.focus(),
       );
     }
@@ -44,7 +41,7 @@ export class SearchBoxComponent implements OnInit, OnDestroy {
   focus() {
     // why this doesn't work without setTimeout()?
     setTimeout(() => {
-      this.searchInput.nativeElement.focus();
+      this.searchInput().nativeElement.focus();
     }, 0);
   }
 

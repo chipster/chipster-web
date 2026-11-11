@@ -1,6 +1,12 @@
 import { HttpParams } from "@angular/common/http";
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
+import { Component, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
+import {
+  UntypedFormArray,
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from "@angular/forms";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { JobHistory, Role } from "chipster-js-common";
 import { mergeMap } from "rxjs/operators";
@@ -10,19 +16,30 @@ import { AuthHttpClientService } from "../../../shared/services/auth-http-client
 import { ConfigService } from "../../../shared/services/config.service";
 import UtilsService from "../../../shared/utilities/utils";
 import { JobOutputModalComponent } from "./joboutputmodal.component";
+import { NgbInputDatepicker } from "@ng-bootstrap/ng-bootstrap/datepicker";
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap/pagination";
+import { BytesPipe } from "../../../shared/pipes/bytes.pipe";
 
 @Component({
   selector: "ch-history",
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.less"],
   encapsulation: ViewEncapsulation.Emulated,
+  imports: [FormsModule, ReactiveFormsModule, NgbInputDatepicker, NgbPagination, BytesPipe],
 })
 export class HistoryComponent implements OnInit {
+  private configService = inject(ConfigService);
+  private errorHandlerService = inject(RestErrorService);
+  private auhtHttpClient = inject(AuthHttpClientService);
+  private formBuilder = inject(UntypedFormBuilder);
+  private modalService = inject(NgbModal);
+  private tokenService = inject(TokenService);
+
   readonly comparisonIs = "is";
   readonly comparisonIsNot = "is not";
   readonly attributeUserName = "createdBy";
 
-  jobs: Array<JobHistory> = [];
+  readonly jobs = signal<Array<JobHistory>>([]);
   jobFilterAttributeSet: Array<string> = [this.attributeUserName, "toolId", "state", "comp", "module"];
   jobFilterComparisonSet: Array<string> = [this.comparisonIs, this.comparisonIsNot];
 
@@ -31,20 +48,11 @@ export class HistoryComponent implements OnInit {
   endDateTimeFilterForm: UntypedFormGroup;
   stringFiltersFormArray: UntypedFormArray;
 
-  jobListLoading = false;
-  page = 1;
-  collectionSize = 70;
-  jobNumber = 0;
-  updateTime = null;
-
-  constructor(
-    private configService: ConfigService,
-    private errorHandlerService: RestErrorService,
-    private auhtHttpClient: AuthHttpClientService,
-    private formBuilder: UntypedFormBuilder,
-    private modalService: NgbModal,
-    private tokenService: TokenService,
-  ) {}
+  readonly jobListLoading = signal(false);
+  readonly page = signal(1);
+  readonly collectionSize = signal(70);
+  readonly jobNumber = signal(0);
+  readonly updateTime = signal(null);
 
   ngOnInit() {
     this.stringFiltersFormArray = this.formBuilder.array([]);
@@ -62,8 +70,8 @@ export class HistoryComponent implements OnInit {
   }
 
   public onSubmit() {
-    this.page = 1;
-    this.jobNumber = 0;
+    this.page.set(1);
+    this.jobNumber.set(0);
     this.updateJobCountAndJobs();
   }
 
@@ -126,7 +134,7 @@ export class HistoryComponent implements OnInit {
   }
 
   updateJobCountAndJobs() {
-    this.jobListLoading = true;
+    this.jobListLoading.set(true);
     const filterParams = this.getFilterParams();
 
     this.configService
@@ -138,8 +146,8 @@ export class HistoryComponent implements OnInit {
       )
       .subscribe({
         next: (recordNumber) => {
-          this.jobNumber = recordNumber;
-          this.collectionSize = Math.ceil(recordNumber / 500) * 10;
+          this.jobNumber.set(recordNumber);
+          this.collectionSize.set(Math.ceil(recordNumber / 500) * 10);
           this.updateJobs(filterParams);
         },
         error: (err) => this.errorHandlerService.showError("get job numbers failed", err),
@@ -148,7 +156,7 @@ export class HistoryComponent implements OnInit {
 
   updateJobs(filterParams) {
     // set the page number for which getting the record
-    const pageParams = filterParams.append("page", this.page.toString());
+    const pageParams = filterParams.append("page", this.page().toString());
 
     this.configService
       .getInternalService(Role.JOB_HISTORY, this.tokenService.getToken())
@@ -159,9 +167,9 @@ export class HistoryComponent implements OnInit {
       )
       .subscribe({
         next: (jobHistoryList: JobHistory[]) => {
-          this.jobListLoading = false;
-          this.jobs = jobHistoryList;
-          this.updateTime = new Date();
+          this.jobListLoading.set(false);
+          this.jobs.set(jobHistoryList);
+          this.updateTime.set(new Date());
         },
         error: (err) => this.errorHandlerService.showError("failed to get jobs", err),
       });
@@ -169,8 +177,8 @@ export class HistoryComponent implements OnInit {
 
   reset() {
     this.resetForm();
-    this.page = 1;
-    this.jobNumber = 0;
+    this.page.set(1);
+    this.jobNumber.set(0);
     this.updateJobCountAndJobs();
   }
 
@@ -187,7 +195,7 @@ export class HistoryComponent implements OnInit {
         It would be easy to update the age constantly like we do for the end user, but
         that would give a false sense of live updates, which we don't have here.
         */
-        endDate = this.updateTime;
+        endDate = this.updateTime();
       }
 
       const millis = UtilsService.millisecondsBetweenDates(startDate, endDate);
@@ -200,11 +208,12 @@ export class HistoryComponent implements OnInit {
     const modalRef = this.modalService.open(JobOutputModalComponent, {
       size: "xl",
     });
-    modalRef.componentInstance.output = jobhistory.screenOutput;
+    const modal = modalRef.componentInstance as JobOutputModalComponent;
+    modal.output.set(jobhistory.screenOutput);
   }
 
   onPageChange(page) {
-    this.page = page;
+    this.page.set(page);
     this.updateJobs(this.getFilterParams());
   }
 

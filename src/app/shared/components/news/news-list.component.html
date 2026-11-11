@@ -1,19 +1,19 @@
-@if (editable) {
+@if (editable()) {
   <div class="mt-3 mb-3">
     <button class="btn btn-sm btn-success" (click)="onAdd()">Add</button>
   </div>
 }
 
-@if (state.isReady() && news != null && news.length > 0) {
+@if (state().isReady() && news() != null && news().length > 0) {
   <div>
     <table class="table table">
       <tbody>
-        @for (n of news; track n.newsId) {
+        @for (n of news(); track n.newsId) {
           <tr>
             <td>
               <ch-news-item
                 [newsItem]="n"
-                [editable]="editable"
+                [editable]="editable()"
                 (edit)="onEdit($event)"
                 (delete)="onDelete($event)"></ch-news-item>
             </td>
@@ -24,13 +24,13 @@
   </div>
 }
 
-@if (state.isReady() && (news == null || news.length < 1)) {
+@if (state().isReady() && (news() == null || news().length < 1)) {
   <div>No news yet.</div>
 }
 
-@if (state.isLoading()) {
+@if (state().isLoading()) {
   <div>Loading news...</div>
 }
-@if (state.isFail()) {
-  <div>{{ errorMessage }}</div>
+@if (state().isFail()) {
+  <div>{{ errorMessage() }}</div>
 }
