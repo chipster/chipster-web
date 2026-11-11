@@ -166,6 +166,21 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
 
   dragStarted: boolean;
 
+  /*
+   * How many pixels the mouse can move before a press counts as a drag. With d3's default 0, a
+   * mouse that moves even one pixel between the press and the release makes a drag: d3 then
+   * swallows the click, so a file isn't selected, and a press on the background makes a tiny box
+   * selection instead of a background click.
+   */
+  private readonly clickDistance = 4;
+
+  /*
+   * Where the press of each drag gesture landed, by the gesture's identifier ("mouse" or the
+   * touch id), in the graph coordinates and in screen pixels. d3 reports the moves within the
+   * click distance too, so the handlers wait until the press has moved further.
+   */
+  private presses = new Map<string | number, { x: number; y: number; clientX: number; clientY: number }>();
+
   searchEnabled = false;
   selectionEnabled = false;
 
@@ -570,10 +585,17 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .call(
         d3
           .drag()
+          .clickDistance(this.clickDistance)
+          .on("start", (event) => this.rememberPress(event))
           .on("drag", (event) => {
-            this.dragBackground(event.x, event.dx, event.y, event.dy);
+            // the selection rectangle starts from the press, not from where the click distance was passed
+            const press = this.presses.get(event.identifier);
+            if (this.selectionRect != null || this.isBeyondClickDistance(event)) {
+              this.dragBackground(event.x, event.x - press.x, event.y, event.y - press.y);
+            }
           })
           .on("end", (event) => {
+            this.presses.delete(event.identifier);
             this.dragBackgroundEnd(event);
           }),
       );
@@ -896,15 +918,25 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
       .call(
         d3
           .drag()
+          .clickDistance(this.clickDistance)
+          .on("start", (event) => self.rememberPress(event))
           .on("drag", (event, d: DatasetNode) => {
             // don't allow datasets to be moved from the unselected dataset
-            if (self.isSelectedDataset(d.dataset)) {
+            if (!self.isSelectedDataset(d.dataset)) {
+              return;
+            }
+            if (self.dragStarted) {
+              self.dragNodes(event.x, event.dx, event.y, event.dy);
+            } else if (self.isBeyondClickDistance(event)) {
               self.dragStarted = true;
               self.hideTooltip(0);
-              self.dragNodes(event.x, event.dx, event.y, event.dy);
+              // the first move takes the datasets the whole way from the press
+              const press = self.presses.get(event.identifier);
+              self.dragNodes(event.x, event.x - press.x, event.y, event.y - press.y);
             }
           })
           .on("end", function (event, d: DatasetNode) {
+            self.presses.delete(event.identifier);
             // check the flag to differentiate between drag and click events
             if (self.dragStarted) {
               self.dragStarted = false;
@@ -941,6 +973,37 @@ export class WorkflowGraphComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.d3DatasetNodes.enter().empty() || !this.d3DatasetNodes.exit().empty()) {
       this.updateSvgSize();
     }
+  }
+
+  /*
+   * The press of a drag gesture, which the touch events carry in their changed touches, the mouse
+   * events in the event itself.
+   */
+  private static clientPoint(event: d3.D3DragEvent<Element, unknown, unknown>): { x: number; y: number } {
+    const source = event.sourceEvent;
+    const touch: Touch = source.changedTouches
+      ? Array.from(source.changedTouches as TouchList).find((t) => t.identifier === event.identifier)
+      : null;
+    const point = touch ?? source;
+    return { x: point.clientX, y: point.clientY };
+  }
+
+  private rememberPress(event: d3.D3DragEvent<Element, unknown, unknown>): void {
+    const client = WorkflowGraphComponent.clientPoint(event);
+    this.presses.set(event.identifier, { x: event.x, y: event.y, clientX: client.x, clientY: client.y });
+  }
+
+  /*
+   * Whether the gesture has moved further from its press than the click distance. Measured in the
+   * same screen pixels and in the same way as d3 decides whether to swallow the click, so that the
+   * two always agree: a gesture is either a drag or a click, never both.
+   */
+  private isBeyondClickDistance(event: d3.D3DragEvent<Element, unknown, unknown>): boolean {
+    const press = this.presses.get(event.identifier);
+    const client = WorkflowGraphComponent.clientPoint(event);
+    const dx = client.x - press.clientX;
+    const dy = client.y - press.clientY;
+    return dx * dx + dy * dy > this.clickDistance * this.clickDistance;
   }
 
   dragBackground(x: number, dx: number, y: number, dy: number): void {
