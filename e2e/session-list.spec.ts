@@ -30,6 +30,17 @@ async function clickRowButton(page: Page, name: string, title: string) {
   }).toPass();
 }
 
+/*
+ * In the default mode of the list, the session under the mouse is selected and
+ * its preview loaded after a while. A click on a modal or the menu leaves the
+ * mouse over the list, where the rows of the other tests' sessions move, and
+ * the preview of one that its test is deleting fails with an error. Move the
+ * mouse off the list right after such clicks.
+ */
+async function moveMouseOffList(page: Page) {
+  await page.mouse.move(0, 0);
+}
+
 async function openSessionMenu(page: Page, name: string) {
   await clickRowButton(page, name, "Actions");
 }
@@ -45,6 +56,7 @@ test("a session is renamed and its notes edited in the sessions list", async ({ 
   const modal = page.getByRole("dialog");
   await modal.getByRole("textbox").fill(newName);
   await modal.getByRole("button", { name: "Rename" }).click();
+  await moveMouseOffList(page);
   await expect(modal).toBeHidden();
   const renamed = sessionRow(page, newName);
   await expect(renamed).toBeVisible();
@@ -54,12 +66,14 @@ test("a session is renamed and its notes edited in the sessions list", async ({ 
   await page.getByRole("button", { name: /notes…/i }).click();
   await modal.locator("textarea").fill("first line\nsecond line");
   await modal.getByRole("button", { name: "Save" }).click();
+  await moveMouseOffList(page);
   await expect(modal).toBeHidden();
   // the preview of the hovered session shows the notes, and is closed when the row moves away from the mouse
   await expect(async () => {
     await renamed.hover();
     await expect(page.getByText("second line")).toBeVisible({ timeout: 2_000 });
   }).toPass();
+  await moveMouseOffList(page);
   await expect.poll(async () => (await getSession(api, sessionId)).notes).toBe("first line\nsecond line");
   await waitForDevCheck(page);
 });
@@ -79,12 +93,14 @@ test.describe(() => {
     await clickRowButton(page, name, "Delete");
     await expect(modal).toContainText(`Delete session ${name}?`);
     await modal.getByRole("button", { name: "Cancel" }).click();
+    await moveMouseOffList(page);
     await expect(modal).toBeHidden();
     await expect(row).toBeVisible();
     expect(await sessionStatus()).toBe(200);
 
     await clickRowButton(page, name, "Delete");
     await modal.getByRole("button", { name: "Delete" }).click();
+    await moveMouseOffList(page);
     await expect(modal).toBeHidden();
     await expect(row).toHaveCount(0);
     // the app deletes the user's rule, and session-db deletes a session that has no rules left
@@ -127,6 +143,7 @@ test("a session is duplicated with its files in the sessions list", async ({
     await expect(modal.getByRole("textbox")).toHaveValue(`${name}_copy`);
     await modal.getByRole("textbox").fill(copyName);
     await modal.getByRole("button", { name: "Duplicate" }).click();
+    await moveMouseOffList(page);
     /*
      * The copy is created in the IMPORT state and listed right away, and the
      * spinner modal opens only after the name modal has closed, so neither the
@@ -171,6 +188,7 @@ test("a session is downloaded as a session file in the sessions list", async ({ 
   await openSessionMenu(page, name);
   const downloadEvent = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download", exact: true }).click();
+  await moveMouseOffList(page);
   const download = await downloadEvent;
 
   expect(download.suggestedFilename()).toBe(`${name}.zip`);
