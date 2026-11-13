@@ -38,7 +38,7 @@
 
       @if (nonUniqueIncludedColumns.size > 0) {
         <div class="alert alert-warning p-1 mb-0 mt-2 text-sm">
-          <span>Selected columns have {{ nonUniqueIncludedColumns.size }} non-unique names including</span>
+          <span>Selected columns have {{ nonUniqueIncludedColumns.size }} non-unique names including&#32;</span>
           <span class="font-italic">{{ getNonUniquesString(nonUniqueIncludedColumns) }}</span>
         </div>
       }
