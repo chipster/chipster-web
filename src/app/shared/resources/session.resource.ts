@@ -9,6 +9,7 @@ import { catchError, defaultIfEmpty, map, mergeMap, tap, toArray } from "rxjs/op
 import { TokenService } from "../../core/authentication/token.service";
 import { SessionData } from "../../model/session/session-data";
 import { JobService } from "../../views/sessions/session/job.service";
+import { DEFAULT_LABELS } from "../../views/sessions/session/labels/label-palette";
 import { ConfigService } from "../services/config.service";
 import UtilsService from "../utilities/utils";
 import { FileState } from "chipster-js-common/lib/model/dataset";
@@ -553,6 +554,21 @@ export class SessionResource {
     );
   }
 
+  // Creates the DEFAULT_LABELS in the session, returns them with their ids.
+  createDefaultLabels(sessionId: string): Observable<Label[]> {
+    const drafts: Label[] = DEFAULT_LABELS.map((d) => ({
+      sessionId,
+      labelId: null,
+      name: d.name,
+      color: d.color,
+      created: null,
+    }));
+    return this.createLabels(sessionId, drafts).pipe(
+      // the bulk endpoint returns the assigned ids in the same order as the posted labels
+      map((created) => created.map((c, i) => ({ ...drafts[i], labelId: c.labelId }))),
+    );
+  }
+
   updateLabel(sessionId: string, label: Label): Observable<null> {
     return this.configService
       .getSessionDbUrl()
@@ -604,13 +620,50 @@ export class SessionResource {
       mergeMap((session) => {
         log.info("session copied, current state", session.state, temporary);
         if (temporary) {
-          session.state = SessionState.TemporaryUnmodified;
-        } else {
-          session.state = SessionState.Ready;
+          // the labels of the original were copied, if it had any
+          return this.setTemporaryUnmodified(session, sessionData.labelsMap().size === 0);
         }
+        session.state = SessionState.Ready;
         log.info("set to", session.state);
         return this.updateSession(session).pipe(map(() => session.sessionId));
       }),
+    );
+  }
+
+  // A new empty session that is deleted when the user leaves it without changes.
+  createTemporarySession(name: string): Observable<string> {
+    const session = new Session(name);
+    session.state = SessionState.Import;
+    return this.createSession(session).pipe(
+      mergeMap((sessionId) => this.getSession(sessionId)),
+      mergeMap((created) => this.setTemporaryUnmodified(created, true)),
+    );
+  }
+
+  /*
+   * The session view adds the default labels to a session that has none when
+   * it opens it. In a temporary session that would be a change, and
+   * session-db would mark the session modified. So a new temporary session
+   * gets them here, before it's set unmodified. Best-effort like in the
+   * session view: without them, the session works but is marked modified
+   * when it's opened.
+   */
+  private setTemporaryUnmodified(session: Session, addDefaultLabels: boolean): Observable<string> {
+    const labels$ = addDefaultLabels
+      ? this.createDefaultLabels(session.sessionId).pipe(
+          catchError((err) => {
+            log.warn("creating the default labels of a temporary session failed", err);
+            return of([]);
+          }),
+        )
+      : of([]);
+    return labels$.pipe(
+      mergeMap(() => {
+        session.state = SessionState.TemporaryUnmodified;
+        log.info("set to", session.state);
+        return this.updateSession(session);
+      }),
+      map(() => session.sessionId),
     );
   }
 

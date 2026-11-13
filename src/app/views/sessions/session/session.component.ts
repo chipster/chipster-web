@@ -1,18 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, signal } from "@angular/core";
 import { ActivatedRoute, ActivatedRouteSnapshot, RouterStateSnapshot, RouterLink } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import {
-  Dataset,
-  EventType,
-  Job,
-  JobState,
-  Label,
-  Module,
-  Rule,
-  Session,
-  SessionState,
-  Tool,
-} from "chipster-js-common";
+import { Dataset, EventType, Job, JobState, Module, Rule, Session, SessionState, Tool } from "chipster-js-common";
 import log from "loglevel";
 import { EMPTY, forkJoin, from, NEVER, Observable, of, Subject } from "rxjs";
 // New imports for rxjs v6
@@ -21,7 +10,6 @@ import { TokenService } from "../../../core/authentication/token.service";
 import { ErrorService } from "../../../core/errorhandler/error.service";
 import { RestErrorService } from "../../../core/errorhandler/rest-error.service";
 import { SessionData } from "../../../model/session/session-data";
-import { DEFAULT_LABELS } from "./labels/label-palette";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { ConfigService } from "../../../shared/services/config.service";
 import { RouteService } from "../../../shared/services/route.service";
@@ -435,26 +423,16 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   // Creates the four DEFAULT_LABELS in the session when it has none yet, so
   // first-time users see usable labels immediately. The session must be
-  // writable; the read-only path above never reaches this step (NEVER).
+  // writable; the read-only path above never reaches this step (NEVER). A
+  // temporary session has them already, see SessionResource.setTemporaryUnmodified().
   private seedDefaultLabelsIfEmpty(sessionData: SessionData): Observable<SessionData> {
     if (sessionData.labelsMap().size > 0) {
       return of(sessionData);
     }
-    const sessionId = sessionData.session().sessionId;
-    const drafts: Label[] = DEFAULT_LABELS.map((d) => ({
-      sessionId,
-      labelId: null,
-      name: d.name,
-      color: d.color,
-      created: null,
-    }));
-    return this.sessionResource.createLabels(sessionId, drafts).pipe(
-      // the bulk endpoint returns the assigned ids in the same order as the posted labels
-      tap((created: { labelId: string }[]) => {
+    return this.sessionResource.createDefaultLabels(sessionData.session().sessionId).pipe(
+      tap((created) => {
         const labelsMap = new Map(sessionData.labelsMap());
-        created.forEach((c, i) => {
-          labelsMap.set(c.labelId, { ...drafts[i], labelId: c.labelId });
-        });
+        created.forEach((label) => labelsMap.set(label.labelId, label));
         sessionData.labelsMap.set(labelsMap);
       }),
       map(() => sessionData),

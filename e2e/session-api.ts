@@ -47,9 +47,27 @@ export async function getApi(request: APIRequestContext, stateFile = USER_STATE)
     .flatMap((origin) => origin.localStorage)
     .find((entry) => entry.name === "ch-auth-token")?.value;
   expect(token, `no ch-auth-token in ${stateFile}`).toBeDefined();
-  const headers = { Authorization: "Basic " + Buffer.from("token:" + token).toString("base64") };
-  const userId = jwtDecode(token).sub;
+  return apiWithToken(request, await getServices(request), token);
+}
 
+/*
+ * Log in with a password like the login form of the app, for a user whose
+ * pages no test opens, e.g. example_session_owner. The auth service throttles
+ * password logins (see auth.setup.ts), so a test that needs one logs in once.
+ */
+export async function loginApi(request: APIRequestContext, username: string, password: string): Promise<Api> {
+  const services = await getServices(request);
+  const response = await request.post(services.get("auth") + "/tokens", { headers: basicAuth(username, password) });
+  expect(response.ok(), `log in as ${username}: ${response.status()}`).toBe(true);
+  return apiWithToken(request, services, await response.text());
+}
+
+function basicAuth(username: string, password: string) {
+  return { Authorization: "Basic " + Buffer.from(`${username}:${password}`).toString("base64") };
+}
+
+// the public address of each service, e.g. "/session-db" or "http://localhost:8004"
+async function getServices(request: APIRequestContext): Promise<Map<string, string>> {
   /*
    * The only address the app itself knows, from its configuration. It's
    * relative in the dev environment and on k3s, but a deployment can have
@@ -60,13 +78,18 @@ export async function getApi(request: APIRequestContext, stateFile = USER_STATE)
   const serviceLocator: string = parse(await confResponse.text())["service-locator"];
   const response = await request.get(serviceLocator.replace(/\/$/, "") + "/services");
   expect(response.ok()).toBe(true);
-  // the public address of each service, e.g. "/session-db" or "http://localhost:8004"
   const services = new Map<string, string>();
   for (const service of await response.json()) {
     if (service.publicUri) {
       services.set(service.role, service.publicUri.replace(/\/$/, ""));
     }
   }
+  return services;
+}
+
+function apiWithToken(request: APIRequestContext, services: Map<string, string>, token: string): Api {
+  const headers = basicAuth("token", token);
+  const userId = jwtDecode(token).sub;
 
   const address = (role: string) => {
     const service = services.get(role);
