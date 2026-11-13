@@ -1,6 +1,5 @@
 import { Injectable, inject } from "@angular/core";
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
-import { Session, SessionState } from "chipster-js-common";
 import log from "loglevel";
 import { Observable, of } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
@@ -43,8 +42,6 @@ export class AnalyzeGuard {
   }
 
   private createNewTempSession(): Observable<string> {
-    const s: Session = new Session("New session");
-    s.state = SessionState.TemporaryUnmodified;
-    return this.sessionResource.createSession(s);
+    return this.sessionResource.createTemporarySession("New session");
   }
 }
