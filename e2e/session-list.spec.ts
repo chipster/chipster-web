@@ -4,7 +4,16 @@ import { readFile } from "node:fs/promises";
 import { Page } from "@playwright/test";
 
 import { expect, test, waitForDevCheck } from "./fixtures";
-import { Api, createDataset, getDatasetContent, getDatasets, getSession } from "./session-api";
+import {
+  Api,
+  createDataset,
+  createSession,
+  datasetNode,
+  getDatasetContent,
+  getDatasets,
+  getSession,
+  loginApi,
+} from "./session-api";
 import { readZip } from "./zip";
 
 /*
@@ -203,4 +212,99 @@ test("a session is downloaded as a session file in the sessions list", async ({ 
   expect(file, `${datasetId} in ${paths}`).toBeDefined();
   expect(zip.get(file).toString("utf8")).toBe(content);
   await waitForDevCheck(page);
+});
+
+/*
+ * An example session is a session that example_session_owner shares to
+ * everyone. The user can only read it, so the app opens a temporary copy of
+ * it, and deletes the copy when the user leaves it without changes. The test
+ * creates the example session itself, and keeps it only for a moment,
+ * because it is listed in the sessions list of all the tests.
+ */
+test("an example session opens as a temporary copy in the sessions list", async ({
+  page,
+  pageErrors,
+  api,
+  playwright,
+  baseURL,
+}) => {
+  // a new connection for every request, see the api fixture
+  const request = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Connection: "close" } });
+  const owner = await loginApi(request, "example_session_owner", "example_session_owner");
+  // unique, so that the row and the cleanup find only the sessions of this test
+  const name = `e2e example ${randomUUID()}`;
+  const content = "gene\tvalue\ng1\t1\ng2\t2\n";
+  const exampleId = await createSession(owner, name);
+
+  try {
+    await createDataset(owner, exampleId, { name: "a.tsv", x: 100, y: 100 }, content);
+    const shared = await owner.post("session-db", `/sessions/${exampleId}/rules`, {
+      username: "everyone",
+      readWrite: false,
+    });
+    expect(shared.ok(), `share to everyone: ${shared.status()}`).toBe(true);
+    const { state } = await getSession(owner, exampleId);
+
+    await page.goto("/sessions");
+    const examples = page.locator(".session-list > div", {
+      has: page.getByRole("heading", { name: "Example sessions" }),
+    });
+    await examples.locator("tr.session-list-item", { hasText: name }).click();
+    await moveMouseOffList(page);
+
+    await page.waitForURL((url) => url.pathname.startsWith("/analyze/") && !url.pathname.endsWith(exampleId), {
+      timeout: 30_000,
+    });
+    const copyId = new URL(page.url()).pathname.split("/").pop();
+    const datasets = await getDatasets(api, copyId);
+    expect(datasets.map((d) => d.name)).toEqual(["a.tsv"]);
+    await expect(datasetNode(page, datasets[0].datasetId)).toBeVisible({ timeout: 30_000 });
+    // still unmodified after the view has opened it, also the labels that a session without them gets
+    expect(await getSession(api, copyId)).toMatchObject({ name, state: "TEMPORARY_UNMODIFIED" });
+    const labels = await api.get("session-db", `/sessions/${copyId}/labels`);
+    expect(labels.ok(), `get labels: ${labels.status()}`).toBe(true);
+    expect(((await labels.json()) as { name: string }[]).map((l) => l.name).sort()).toEqual([
+      "Label 1",
+      "Label 2",
+      "Label 3",
+      "Label 4",
+    ]);
+    expect(await getDatasetContent(api, copyId, datasets[0].datasetId)).toBe(content);
+    // the example session is unchanged
+    expect(await getSession(owner, exampleId)).toMatchObject({ name, state });
+    expect(await getDatasets(owner, exampleId)).toHaveLength(1);
+
+    // leaving the copy without changes deletes it
+    await page.locator("#navbar").getByRole("link", { name: "Sessions" }).click();
+    await expect(page).toHaveURL(/\/sessions$/);
+    await expect.poll(async () => (await api.get("session-db", `/sessions/${copyId}`)).status()).toBe(404);
+    await waitForDevCheck(page);
+  } finally {
+    // close the page first, the app would react to the deletion of the sessions it lists
+    await pageErrors.settle();
+    await page.close();
+    try {
+      // first and whatever happens to the copy, because all the users see it
+      const deleted = await owner.delete("session-db", `/sessions/${exampleId}`);
+      expect(deleted.ok(), `delete the example session: ${deleted.status()}`).toBe(true);
+      // gone also from the users that it was shared to, the rule for everyone doesn't keep it
+      expect((await api.get("session-db", `/sessions/${exampleId}`)).status()).toBe(404);
+    } finally {
+      try {
+        /*
+         * The app has deleted the copy, unless the test failed before leaving
+         * it. By the name, because the test may have failed before it knew the
+         * id of the copy.
+         */
+        for (const copy of await findSessions(api, name)) {
+          if (copy.sessionId !== exampleId) {
+            const deleted = await api.delete("session-db", `/sessions/${copy.sessionId}`);
+            expect([200, 204, 404], `delete the copy: ${deleted.status()}`).toContain(deleted.status());
+          }
+        }
+      } finally {
+        await request.dispose();
+      }
+    }
+  }
 });
