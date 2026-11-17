@@ -1,13 +1,20 @@
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 import { expect, Page } from "@playwright/test";
 
 /*
  * The browser states that auth.setup.ts saves after logging in. Absolute, so
  * that they land in the git-ignored directory wherever Playwright is run from.
+ *
+ * E2E_AUTH_DIR puts them in another directory, e.g. outside the checkout, so
+ * that a copy of it doesn't take the tokens along. That's for running against
+ * a deployment whose passwords aren't the defaults of auth.setup.ts: the
+ * states are saved there by other means, and the tests run with --no-deps,
+ * which skips the setup project.
  */
-export const USER_STATE = join(__dirname, "../playwright/.auth/chipster.json");
-export const ADMIN_STATE = join(__dirname, "../playwright/.auth/admin.json");
+const AUTH_DIR = process.env.E2E_AUTH_DIR ? resolve(process.env.E2E_AUTH_DIR) : join(__dirname, "../playwright/.auth");
+export const USER_STATE = join(AUTH_DIR, "chipster.json");
+export const ADMIN_STATE = join(AUTH_DIR, "admin.json");
 
 /*
  * Fill in the local login form and submit. The form is shown directly only
