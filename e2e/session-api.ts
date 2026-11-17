@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { APIRequestContext, APIResponse, expect, Page } from "@playwright/test";
-import type { Session } from "chipster-js-common";
+import type { Dataset, Session } from "chipster-js-common";
 import { jwtDecode } from "jwt-decode";
 import { parse } from "yaml";
 
@@ -133,7 +133,7 @@ export async function getDatasetContent(api: Api, sessionId: string, datasetId: 
   return response.text();
 }
 
-export async function getDatasets(api: Api, sessionId: string): Promise<{ datasetId: string; name: string }[]> {
+export async function getDatasets(api: Api, sessionId: string): Promise<Dataset[]> {
   const response = await api.get("session-db", `/sessions/${sessionId}/datasets`);
   expect(response.ok()).toBe(true);
   return response.json();

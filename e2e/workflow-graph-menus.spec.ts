@@ -95,7 +95,7 @@ async function graphAction(page: Page, item: string) {
 
 async function savedPositions(api: Api, sessionId: string): Promise<Record<string, { x: number; y: number }>> {
   const positions: Record<string, { x: number; y: number }> = {};
-  for (const { name, x, y } of (await getDatasets(api, sessionId)) as { name: string; x: number; y: number }[]) {
+  for (const { name, x, y } of await getDatasets(api, sessionId)) {
     positions[name] = { x, y };
   }
   return positions;
