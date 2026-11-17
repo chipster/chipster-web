@@ -1,6 +1,8 @@
+import { existsSync } from "node:fs";
+
 import { defineConfig, devices } from "@playwright/test";
 
-import { USER_STATE } from "./e2e/login";
+import { EXTERNAL_AUTH_DIR, USER_STATE } from "./e2e/login";
 
 /*
  * End-to-end tests, run against a full dev environment: the Angular dev
@@ -15,6 +17,16 @@ import { USER_STATE } from "./e2e/login";
 
 // set BASE_URL to run the tests against an already running deployment
 const baseURL = process.env.BASE_URL ?? "http://localhost:4200";
+
+/*
+ * With E2E_AUTH_DIR, the login states were saved there by other means, see
+ * e2e/login.ts, and the tests don't log in with the setup project: it would
+ * use the default passwords, and overwrite the states if they worked. The
+ * admin state is needed only by the admin specs.
+ */
+if (EXTERNAL_AUTH_DIR && !existsSync(USER_STATE)) {
+  throw new Error(`E2E_AUTH_DIR is set, but there is no login state ${USER_STATE}`);
+}
 
 const chromium = {
   ...devices["Desktop Chrome"],
@@ -62,6 +74,10 @@ export default defineConfig({
     // logs in once per user, see auth.setup.ts
     { name: "setup", testMatch: /\.setup\.ts$/, use: chromium },
     // the tests run as the logged-in user, the specs that need otherwise override this
-    { name: "chromium", use: { ...chromium, storageState: USER_STATE }, dependencies: ["setup"] },
+    {
+      name: "chromium",
+      use: { ...chromium, storageState: USER_STATE },
+      dependencies: EXTERNAL_AUTH_DIR ? [] : ["setup"],
+    },
   ],
 });

@@ -3,6 +3,7 @@
 The browser frontend for [Chipster](https://chipster.csc.fi), a platform for bioinformatics data analysis. An Angular single-page application that talks to the REST APIs in `chipster-web-server`.
 
 ## Development server
+
 Run `npm start` or `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Code scaffolding
@@ -19,7 +20,7 @@ Run `npm test` to execute the unit tests with the Angular CLI's unit-test builde
 
 ## Running end-to-end tests
 
-Run `npm run test:e2e` to execute the end-to-end tests via [Playwright](https://playwright.dev). They drive a real browser against a running dev environment, so start chipster-web-server first, in either the proxy or the direct mode (see CLAUDE.md). A dev server that is already running has to be in the same mode; if none is, Playwright starts one in the proxy mode, which works with a backend in either mode. Chromium comes from the dev container image, see PLAYWRIGHT_BROWSERS_PATH.
+Run `npm run test:e2e` to execute the end-to-end tests via [Playwright](https://playwright.dev). They drive a real browser against a running dev environment, so start chipster-web-server first, in either the proxy or the direct mode (see CLAUDE.md). A dev server that is already running has to be in the same mode; if none is, Playwright starts one in the proxy mode, which works with a backend in either mode. Chromium comes from the dev container image, see PLAYWRIGHT_BROWSERS_PATH. The tests log in once with the default passwords of the dev setup (`e2e/auth.setup.ts`) and save the tokens in `playwright/.auth`. For a deployment with other passwords, save the login states as `chipster.json` and `admin.json` (the format of Playwright's `storageState`) in a directory outside the checkout by other means, and give its absolute path in `E2E_AUTH_DIR`: the tests then use them and skip the setup. The traces of failed tests in `test-results/` contain the token as well.
 
 ## Formatting
 
