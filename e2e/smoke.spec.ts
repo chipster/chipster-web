@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { login } from "./login";
+import { EXTERNAL_AUTH_DIR, login } from "./login";
 
 /*
  * Smoke tests for the whole stack: the Angular app, chipster-web-server and
@@ -26,6 +26,8 @@ test("home page opens", async ({ page }) => {
 });
 
 test("logging in opens the session list", async ({ page }) => {
+  // the deployment of E2E_AUTH_DIR has other passwords, see login.ts
+  test.skip(!!EXTERNAL_AUTH_DIR, "logs in with the default password");
   await login(page, "chipster", "chipster");
 
   await expect(page).toHaveURL(/\/sessions$/);
