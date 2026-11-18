@@ -118,8 +118,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   readonly modulesArray = input<Module[]>(undefined); // stupid name, but modules used for internal copy
 
-  readonly modulesMap = input<Map<string, Module>>(undefined);
-
   readonly searchTool = viewChild<NgSelectComponent>("searchTool");
 
   private readonly unregisterHotkeys: Array<() => void> = [];
@@ -206,8 +204,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // TODO why the copies?
-    // this.tools = cloneDeep(this.toolsArray);
+    /*
+     * A copy, because the parameter values that the user changes are kept in the tool objects: the
+     * modules are cached for the whole app (ToolsService), and a session would get the values of the
+     * previous one. Every selection has to take the tool from this copy, also the ones by tool id
+     * (subscribeToToolEvents), or the values changed in one instance are missing from the other.
+     */
     this.modules = cloneDeep(this.modulesArray());
 
     this.toolSearchList = this.createToolSearchList();
@@ -411,10 +413,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((t: SelectedToolById) => {
         if (t != null) {
-          // get the tool from categroy based on the id
-          // other parts of the UI may have their own instances of tools,
-          // which don't have the saved parameter values
-          const module = this.modulesMap().get(t.moduleId);
+          // get the tool from this component's copy of the modules, the one the tool list shows, based
+          // on the id. Other parts of the UI may have their own instances of tools, which don't have
+          // the saved parameter values
+          const module = this.modules.find((m) => m.moduleId === t.moduleId);
 
           if (module == null) {
             this.errorService.showSimpleError(
@@ -423,7 +425,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
             );
             return;
           }
-          const category = module.categoriesMap.get(t.categoryName);
+          const category = module.categories.find((c) => c.name === t.categoryName);
           if (category == null) {
             this.errorService.showSimpleError(
               "Category not found",
@@ -465,15 +467,22 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
-          const uptodateDatasets = selectedDatasets.map((dataset): Dataset =>
-            this.sessionData().datasetsMap().get(dataset.datasetId),
-          );
+          /*
+           * The selection keeps the dataset objects that were selected, a dataset event replaces them
+           * in the session data, e.g. after a rename. The bindings and the selected datasets have to be
+           * the same objects, because the input selections of the parameters modal and the binding
+           * changes compare them as objects.
+           */
+          const uptodateDatasets = selectedDatasets
+            .map((dataset): Dataset => this.sessionData().datasetsMap().get(dataset.datasetId))
+            // a dataset deleted while it's selected, until the selection is updated
+            .filter((dataset) => dataset != null);
 
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,
             payload: {
               inputBindings: this.toolService.bindInputs(this.sessionData(), selectedTool.tool, uptodateDatasets),
-              selectedDatasets,
+              selectedDatasets: uptodateDatasets,
               ...selectedTool,
             },
           });
@@ -708,6 +717,13 @@ export class ToolsComponent implements OnInit, OnDestroy {
     modal.sessionData.set(this.sessionData());
     modal.origTool.set(origTool);
     modal.parametersChanged.subscribe(() => this.onParametersChanged());
+    /*
+     * ToolParametersComponent signals a change after a debounce, which the closing of the modal
+     * cancels. The values are already in the tool, so validate them when the modal closes, or a
+     * change made just before is never validated, and an invalid value could be run.
+     */
+    this.parametersModalRef.closed.subscribe(() => this.onParametersChanged());
+    this.parametersModalRef.dismissed.subscribe(() => this.onParametersChanged());
     modal.updateBindings.subscribe((toolWithInputs) => this.setBindings(toolWithInputs));
     modal.resourcesChanged.subscribe(() => this.onResourcesChanged());
   }
