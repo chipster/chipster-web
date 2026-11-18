@@ -55,14 +55,25 @@ export async function closeParametersModal(page: Page): Promise<void> {
 }
 
 /*
- * The row of a parameter or an input in the modal, by its display name. The first cell starts with
- * the name and continues with the description, so the name is matched at the start only.
+ * The row of a parameter or an input in the modal, by its display name. The first cell has the name
+ * as its first text node and the description in an element after it (tool-parameters and
+ * tool-inputs templates), so the name is compared with the first text node: the whole text would
+ * include the description, and a prefix match would also find a parameter whose name starts with
+ * the same words, e.g. "Column" and "Column separator in input file".
  */
 function row(section: Locator, name: string): Locator {
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return section
-    .locator("tbody > tr")
-    .filter({ has: section.page().locator("td:first-child", { hasText: new RegExp(`^\\s*${escaped}`) }) });
+  return section.locator(`xpath=.//tbody/tr[td[1][normalize-space(text()[1])=${xpathString(name)}]]`);
+}
+
+// a string literal of XPath 1.0, which has no escapes: concat() when the text has both quotes
+function xpathString(text: string): string {
+  if (!text.includes('"')) {
+    return `"${text}"`;
+  }
+  if (!text.includes("'")) {
+    return `'${text}'`;
+  }
+  return `concat("${text.split('"').join(`", '"', "`)}")`;
 }
 
 // the input or select of a parameter in the open parameters modal, by its display name
@@ -76,11 +87,11 @@ export function inputField(page: Page, name: string): Locator {
 }
 
 /*
- * ToolParametersComponent validates a change after a debounce of 500 ms. Closing the modal cancels
- * the debounce, and ToolsComponent validates the parameters when the modal closes instead, which a
- * test of tool-job.spec.ts checks. The other tests wait for the debounce, the usual way a change gets
- * validated. Nothing on the page tells when it's over: the warning icon may be there already before
- * the change, e.g. for a required column parameter without a default.
+ * ToolParametersComponent signals a change after a debounce of 500 ms, and a change still pending
+ * when the modal closes and destroys the component, which a test of tool-job.spec.ts checks. The
+ * other tests wait for the debounce, the usual way a change gets validated. Nothing on the page tells
+ * when it's over: the warning icon may be there already before the change, e.g. for a required
+ * column parameter without a default.
  */
 export const PARAMETER_DEBOUNCE = 500;
 
@@ -108,8 +119,8 @@ export async function setParameter(page: Page, name: string, value: string): Pro
 
 /*
  * What the parameters modal shows, by the display names: the value of each parameter, and the
- * names of the files selected for each input. A parameter without a value is an empty string,
- * like in the job. The modal has to be open.
+ * names of the files selected for each input. Like in a job, a parameter without a value is an
+ * empty string, and an input without a file isn't there. The modal has to be open.
  */
 export interface ShownState {
   parameters: Record<string, string>;
@@ -140,16 +151,28 @@ export async function readParametersModal(page: Page): Promise<ShownState> {
     const inputs: Record<string, string[]> = {};
     for (const tr of rows("ch-tool-inputs")) {
       const select = tr.querySelector("select");
+      // the rows of the phenodata table have no select
+      if (select == null) {
+        continue;
+      }
       // a disabled select only says "No files" or "No compatible files"
-      inputs[name(tr.cells[0])] = select.disabled
+      const files = select.disabled
         ? []
         : Array.from(select.selectedOptions).map((option) => option.textContent.trim());
+      if (files.length > 0) {
+        inputs[name(tr.cells[0])] = files;
+      }
     }
     return { parameters, inputs };
   });
 }
 
-// the same view of a job, to compare it with what the modal showed
+/*
+ * The same view of a job, to compare it with what the modal showed. The modal names a parameter or
+ * an input like ToolService.getDisplayName(): the display name, or the id without one. The files of
+ * a multi input (INPUT reads{...}.fq) are separate inputs of the job, reads001.fq, reads002.fq and
+ * so on (ToolService.getMultiInputId()), and the modal shows them as one input, reads.fq.
+ */
 export function shownStateOfJob(job: Job): ShownState {
   const parameters: Record<string, string> = {};
   for (const parameter of job.parameters) {
@@ -157,7 +180,7 @@ export function shownStateOfJob(job: Job): ShownState {
   }
   const inputs: Record<string, string[]> = {};
   for (const input of job.inputs) {
-    const key = input.displayName ?? input.inputId;
+    const key = input.displayName ?? input.inputId.replace(/\d{3,}(?=[^\d]*$)/, "");
     inputs[key] = [...(inputs[key] ?? []), input.datasetName];
   }
   return { parameters, inputs };

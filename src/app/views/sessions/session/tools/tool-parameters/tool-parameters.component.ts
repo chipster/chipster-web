@@ -24,6 +24,8 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   warningText: string;
 
   private parametersChangedThrottle = new Subject<any>();
+  // a change that the debounce hasn't signalled yet
+  private changePending = false;
 
   private unsubscribe: Subject<any> = new Subject();
 
@@ -32,6 +34,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
       .asObservable()
       .pipe(debounceTime(500), takeUntil(this.unsubscribe))
       .subscribe(() => {
+        this.changePending = false;
         this.parametersChanged.emit();
       });
   }
@@ -49,6 +52,16 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy() {
     this.unsubscribe.next(null);
     this.unsubscribe.complete();
+    /*
+     * The values are already in the tool, so signal a change that the debounce didn't get to, or a
+     * change made just before the parameters modal is closed would never be validated, and an invalid
+     * value could be run. The host still gets the output here: the listeners of an output are removed
+     * after the ngOnDestroy hooks, and the host's own view is destroyed after this one.
+     */
+    if (this.changePending) {
+      this.changePending = false;
+      this.parametersChanged.emit();
+    }
   }
 
   // closeDropDownDialog() {
@@ -56,6 +69,7 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
   // }
 
   onParametersChanged() {
+    this.changePending = true;
     this.parametersChangedThrottle.next(null);
   }
 

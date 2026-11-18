@@ -189,18 +189,22 @@ export class SessionEventService {
     return this.labelStream$;
   }
 
-  getSelectedDatasetsContentsUpdatedStream(): Observable<string> {
+  /*
+   * The ids of the selected datasets that were updated or deleted elsewhere. The selection keeps
+   * the dataset objects it was made with (the visualizations show the selected dataset, and
+   * replacing the object would render it again), so this tells when the session data has a newer
+   * one, or none. A delete made here clears the selection first (SessionDataService).
+   */
+  getSelectedDatasetsEventStream(): Observable<string> {
     return this.getDatasetStream().pipe(
       filter(
         (sessionEvent) =>
           sessionEvent != null &&
-          sessionEvent.event.type === EventType.Update &&
+          (sessionEvent.event.type === EventType.Update || sessionEvent.event.type === EventType.Delete) &&
           sessionEvent.event.resourceType === Resource.Dataset &&
-          this.selectionService.selectedDatasets.some(
-            (selectedDataset) => selectedDataset.datasetId === (sessionEvent.newValue as Dataset).datasetId,
-          ),
+          this.selectionService.isSelectedDatasetById(sessionEvent.event.resourceId),
       ),
-      map((sessionEvent) => (sessionEvent.newValue as Dataset).datasetId),
+      map((sessionEvent) => sessionEvent.event.resourceId),
     );
   }
 

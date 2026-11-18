@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, DOCUMENT, computed, inject, input, signal
 import { toSignal } from "@angular/core/rxjs-interop";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
-import { Category, Dataset, Module, SessionEvent, Tool } from "chipster-js-common";
+import { Category, Dataset, Module, Tool } from "chipster-js-common";
 import { NgSelectComponent, NgLabelTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
 import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
@@ -455,27 +455,24 @@ export class ToolsComponent implements OnInit, OnDestroy {
         }
       });
 
-    const selectedDatasetsContentsUpdated$ = this.sessionEventService
-      .getSelectedDatasetsContentsUpdatedStream()
-      .pipe(startWith(null as SessionEvent));
+    // the events of the selected datasets trigger the binding again, the data comes from the session data
+    const selectedDatasetsEvent$ = this.sessionEventService
+      .getSelectedDatasetsEventStream()
+      .pipe(startWith(null as string));
 
-    combineLatest([
-      this.store.select("selectedTool"),
-      this.store.select("selectedDatasets"),
-      selectedDatasetsContentsUpdated$, // triggers but data not
-    ])
+    combineLatest([this.store.select("selectedTool"), this.store.select("selectedDatasets"), selectedDatasetsEvent$])
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
           /*
            * The selection keeps the dataset objects that were selected, a dataset event replaces them
-           * in the session data, e.g. after a rename. The bindings and the selected datasets have to be
-           * the same objects, because the input selections of the parameters modal and the binding
-           * changes compare them as objects.
+           * in the session data, e.g. after a rename, or removes them. The bindings and the selected
+           * datasets have to be the same objects, because the input selections of the parameters modal
+           * and the binding changes compare them as objects.
            */
           const uptodateDatasets = selectedDatasets
             .map((dataset): Dataset => this.sessionData().datasetsMap().get(dataset.datasetId))
-            // a dataset deleted while it's selected, until the selection is updated
+            // a dataset deleted elsewhere while it's selected: the selection keeps it until it changes
             .filter((dataset) => dataset != null);
 
           this.store.dispatch({
@@ -717,13 +714,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
     modal.sessionData.set(this.sessionData());
     modal.origTool.set(origTool);
     modal.parametersChanged.subscribe(() => this.onParametersChanged());
-    /*
-     * ToolParametersComponent signals a change after a debounce, which the closing of the modal
-     * cancels. The values are already in the tool, so validate them when the modal closes, or a
-     * change made just before is never validated, and an invalid value could be run.
-     */
-    this.parametersModalRef.closed.subscribe(() => this.onParametersChanged());
-    this.parametersModalRef.dismissed.subscribe(() => this.onParametersChanged());
     modal.updateBindings.subscribe((toolWithInputs) => this.setBindings(toolWithInputs));
     modal.resourcesChanged.subscribe(() => this.onResourcesChanged());
   }

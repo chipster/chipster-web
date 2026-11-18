@@ -2,7 +2,7 @@ import { Page } from "@playwright/test";
 import type { Job } from "chipster-js-common";
 
 import { expect, test, waitForDevCheck } from "./fixtures";
-import { createDataset, datasetNode, openSession, updateDataset } from "./session-api";
+import { createDataset, datasetNode, deleteDataset, openSession, updateDataset } from "./session-api";
 import {
   CapturedJobs,
   captureJobs,
@@ -161,8 +161,9 @@ test.describe("the job is what the tool panel shows, whatever the order of the s
 
 /*
  * Changes a text parameter in the parameters modal and closes the modal in one go in the page, so
- * that the modal is closed well within the debounce of the change (500 ms in ToolParametersComponent).
- * Separate Playwright actions can take longer than that.
+ * that the modal is closed well within the debounce of the change (500 ms in ToolParametersComponent,
+ * which signals the pending change when the modal destroys it). Separate Playwright actions can take
+ * longer than that.
  */
 async function changeAndClose(page: Page, name: string, value: string): Promise<void> {
   await openParametersModal(page);
@@ -299,6 +300,21 @@ test.describe("the job is what the tool panel shows, also right after a change",
 
     const job = await runAsShown(page, captured);
     expect(job.inputs.map((i) => [i.datasetId, i.datasetName])).toEqual([[fileId, "renamed.tsv"]]);
+    await waitForDevCheck(page);
+  });
+
+  test("a file deleted elsewhere is no longer the input", async ({ page, api, sessionId }) => {
+    const fileId = await createDataset(api, sessionId, { name: "a.tsv", x: 100, y: 100 }, TABLE);
+    await openSession(page, sessionId, fileId);
+    await searchTool(page, TABLE_CONVERTER);
+    await datasetNode(page, fileId).click();
+    await expect(runButton(page)).toBeEnabled();
+
+    // the page learns about the delete from the dataset event: the file stays in the selection, but
+    // the tool can't be run with it (ToolsComponent binds the inputs again from the session data)
+    await deleteDataset(api, sessionId, fileId);
+    await expect(runButton(page)).toBeDisabled();
+    await expect(toolsPanel(page).locator(".fa-exclamation-circle.text-warning")).toBeVisible();
     await waitForDevCheck(page);
   });
 });
