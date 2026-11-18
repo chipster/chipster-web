@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures";
-import { submitLoginForm } from "./login";
+import { EXTERNAL_AUTH_DIR, submitLoginForm } from "./login";
 import { createDataset, datasetNode, getSession, openSession } from "./session-api";
 
 /*
@@ -13,6 +13,8 @@ test.describe("logged out", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
   test("a session link goes through the login and back to the session", async ({ page, api, sessionId }) => {
+    // the deployment of E2E_AUTH_DIR has other passwords, see login.ts
+    test.skip(!!EXTERNAL_AUTH_DIR, "logs in with the default password");
     const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "text\n");
 
     await page.goto(`/analyze/${sessionId}`);
