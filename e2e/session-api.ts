@@ -240,6 +240,17 @@ export function datasetNode(page: Page, datasetId: string) {
   return page.locator(`#d3DatasetNodesGroup rect[id$="_${datasetId}"]`);
 }
 
+// the graph draws a selected file with the primary color as its border, other files with the color of their tool
+const SELECTED_STROKE = "#006fe6";
+
+// the ids of the files that the workflow graph shows as selected, read in one go
+export async function selectedInGraph(page: Page): Promise<string[]> {
+  const strokes = await page
+    .locator("#d3DatasetNodesGroup rect")
+    .evaluateAll((rects) => rects.map((rect): [string, string] => [rect.id, rect.getAttribute("stroke")]));
+  return strokes.filter(([, stroke]) => stroke === SELECTED_STROKE).map(([id]) => id.replace(/^node_/, ""));
+}
+
 // the middle of the file in the page
 export async function nodeCenter(page: Page, datasetId: string) {
   const box = await datasetNode(page, datasetId).boundingBox();

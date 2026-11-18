@@ -1,6 +1,14 @@
 import { Page } from "@playwright/test";
 
-import { Api, createDataset, datasetNode, nodeCenter, openSession, pressMoveRelease } from "./session-api";
+import {
+  Api,
+  createDataset,
+  datasetNode,
+  nodeCenter,
+  openSession,
+  pressMoveRelease,
+  selectedInGraph,
+} from "./session-api";
 import { expect, test } from "./fixtures";
 
 /*
@@ -100,4 +108,54 @@ test("a click that moves the mouse a little on the background closes the context
   // the same click with the menu closed clears the selection
   await pressMoveRelease(page, background, 2, 1);
   await expect(selectedName).toBeHidden();
+});
+
+test("a drag moves all the selected files together and saves their positions", async ({ page, api, sessionId }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
+  const otherId = await createDataset(api, sessionId, { name: "b.txt", x: 200, y: 100 }, "b\n");
+  const unselectedId = await createDataset(api, sessionId, { name: "c.txt", x: 100, y: 200 }, "c\n");
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+  await datasetNode(page, otherId).click({ modifiers: ["ControlOrMeta"] });
+  await expect(page.locator("ch-selected-files .h6")).toHaveText("2 files");
+
+  // a drag of one of them; the graph is drawn at scale 1, so a pixel is a unit of the saved position
+  await pressMoveRelease(page, await nodeCenter(page, datasetId), 60, 40);
+  await expect.poll(async () => (await savedPosition(api, sessionId, otherId)).x).toBeGreaterThan(230);
+  const saved = await savedPosition(api, sessionId, datasetId);
+  const otherSaved = await savedPosition(api, sessionId, otherId);
+  expect(saved.x).toBeGreaterThan(130);
+  expect(saved.y).toBeGreaterThan(115);
+  // the same move for both
+  expect({ dx: otherSaved.x - 200, dy: otherSaved.y - 100 }).toEqual({ dx: saved.x - 100, dy: saved.y - 100 });
+  await expect(datasetNode(page, otherId)).toHaveAttribute("x", String(otherSaved.x));
+  await expect(datasetNode(page, otherId)).toHaveAttribute("y", String(otherSaved.y));
+
+  // the file that wasn't selected stays where it was, and the selection stays as it was
+  expect(await savedPosition(api, sessionId, unselectedId)).toEqual({ x: 100, y: 200 });
+  await expect(datasetNode(page, unselectedId)).toHaveAttribute("x", "100");
+  expect((await selectedInGraph(page)).sort()).toEqual([datasetId, otherId].sort());
+});
+
+test("a drag on the background selects the files in the rectangle instead of the selected ones", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const a = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
+  const b = await createDataset(api, sessionId, { name: "b.txt", x: 200, y: 100 }, "b\n");
+  const c = await createDataset(api, sessionId, { name: "c.txt", x: 100, y: 200 }, "c\n");
+  await openSession(page, sessionId, a);
+  await datasetNode(page, c).click();
+  await expect.poll(async () => selectedInGraph(page)).toEqual([c]);
+
+  // from the background above and left of a.txt to below b.txt, which leaves c.txt 100 px lower outside.
+  // With Ctrl the rectangle would add to the selection, but d3-drag ignores a press with Ctrl held on every
+  // platform, so that branch is only reachable with Cmd on macOS
+  const aCenter = await nodeCenter(page, a);
+  const bCenter = await nodeCenter(page, b);
+  await pressMoveRelease(page, { x: aCenter.x - 40, y: aCenter.y - 30 }, bCenter.x - aCenter.x + 80, 60);
+  await expect.poll(async () => (await selectedInGraph(page)).sort()).toEqual([a, b].sort());
+  await expect(page.locator("ch-selected-files .h6")).toHaveText("2 files");
+  await expect(page.locator("#selection-rect")).toHaveCount(0);
 });

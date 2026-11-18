@@ -10,6 +10,7 @@ import {
   nodeCenter,
   openSession,
   pressMoveRelease,
+  selectedInGraph,
   TEST_JOB,
 } from "./session-api";
 
@@ -72,20 +73,14 @@ async function createAnalysis(api: Api, sessionId: string, positioned: boolean):
   return { datasets, pcaJobId };
 }
 
-// the graph draws a selected file with the primary color as its border, other files with the color of their tool
-const SELECTED_STROKE = "#006fe6";
-
-// the names of the files that the graph shows as selected, in the order of FILES, read in one go
-async function selectedInGraph(page: Page, datasets: Record<FileName, string>): Promise<FileName[]> {
-  const strokes = await page
-    .locator("#d3DatasetNodesGroup rect")
-    .evaluateAll((rects) => rects.map((rect): [string, string] => [rect.id, rect.getAttribute("stroke")]));
-  const strokeById = new Map(strokes);
-  return FILES.filter((name) => strokeById.get(`node_${datasets[name]}`) === SELECTED_STROKE);
+// the names of the files that the graph shows as selected, in the order of FILES
+async function selectedNames(page: Page, datasets: Record<FileName, string>): Promise<FileName[]> {
+  const selected = new Set(await selectedInGraph(page));
+  return FILES.filter((name) => selected.has(datasets[name]));
 }
 
 async function expectSelected(page: Page, datasets: Record<FileName, string>, expected: FileName[]) {
-  await expect.poll(() => selectedInGraph(page, datasets)).toEqual(expected);
+  await expect.poll(() => selectedNames(page, datasets)).toEqual(expected);
   // the panel of the selected files agrees
   const header = page.locator("ch-selected-files .h6");
   if (expected.length === 0) {
@@ -190,12 +185,63 @@ test("show job in the graph's right-click menu opens the job that made the file"
   const { datasets, pcaJobId } = await createAnalysis(api, sessionId, true);
   await openSession(page, sessionId, datasets["pca.tsv"]);
 
-  // a right-click on a file that isn't selected selects it, and the menu is for it alone
+  // a right-click on a file that isn't selected selects it, and the menu is for it alone, with the single-file
+  // items. Their titles are HTML, e.g. "Rename&hellip;", which the menu draws as such
   await datasetNode(page, datasets["pca.tsv"]).click({ button: "right" });
   await expectSelected(page, datasets, ["pca.tsv"]);
+  await expect(page.locator(".d3-context-menu").getByText("Rename…", { exact: true })).toBeVisible();
   await contextMenuAction(page, "Show job");
 
   const modal = page.locator("ch-jobs-modal");
   await expect(modal.locator(`#job-id-${pcaJobId}`)).toHaveClass(/table-active/);
   await expect(modal.locator("ch-job")).toContainText("PCA");
+});
+
+test("the right-click menu of a selected file is for all selected files, and Ctrl+right-click adds the file", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const { datasets } = await createAnalysis(api, sessionId, true);
+  await openSession(page, sessionId, datasets["two-sample.tsv"]);
+  const menu = page.locator(".d3-context-menu");
+
+  // a right-click on one of the selected files keeps them all selected, and the menu has only the items for many
+  await datasetNode(page, datasets["a.cel"]).click();
+  await datasetNode(page, datasets["b.cel"]).click({ modifiers: ["ControlOrMeta"] });
+  await datasetNode(page, datasets["b.cel"]).click({ button: "right" });
+  await expect(menu).toBeVisible();
+  await expectSelected(page, datasets, ["a.cel", "b.cel"]);
+  await expect(menu.getByText("Delete 2 files", { exact: true })).toBeVisible();
+  // the single-file items are left out: the show job test checks that this text finds Rename in that menu
+  await expect(menu.getByText("Rename…", { exact: true })).toHaveCount(0);
+
+  // a click on the empty background below the files closes the menu and keeps the selection. The menu opens
+  // right of and below a right-click in the top left quarter of the page, like here, so the background below
+  // two-sample.tsv, left of b.cel, is clear of it
+  const twoSample = await nodeCenter(page, datasets["two-sample.tsv"]);
+  await page.mouse.click(twoSample.x, twoSample.y + 60);
+  await expect(menu).toBeHidden();
+  await expectSelected(page, datasets, ["a.cel", "b.cel"]);
+
+  // Ctrl+right-click on a file that isn't selected adds it, and the menu is for all three
+  const three: FileName[] = ["a.cel", "b.cel", "normalized.tsv"];
+  await datasetNode(page, datasets["normalized.tsv"]).click({ button: "right", modifiers: ["ControlOrMeta"] });
+  await expectSelected(page, datasets, three);
+  await contextMenuAction(page, "Delete 3 files");
+
+  // the confirmation lists the same three files. Cancel leaves them in the graph and selected. A delete would
+  // clear the selection and hide the files right away, before the modal is gone, and delete them on the
+  // server only after the undo time
+  const modal = page.locator(".modal-content");
+  await expect(modal).toContainText("Are you sure you want to delete 3 files?");
+  for (const name of three) {
+    await expect(modal.getByText(name, { exact: true })).toBeVisible();
+  }
+  await modal.getByRole("button", { name: "Cancel" }).click();
+  await expect(modal).toBeHidden();
+  await expectSelected(page, datasets, three);
+  for (const name of three) {
+    await expect(datasetNode(page, datasets[name])).toBeVisible();
+  }
 });
