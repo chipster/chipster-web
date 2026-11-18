@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { Api, createDataset, datasetNode, openSession } from "./session-api";
+import { Api, createDataset, datasetNode, nodeCenter, openSession, pressMoveRelease } from "./session-api";
 import { expect, test } from "./fixtures";
 
 /*
@@ -8,21 +8,6 @@ import { expect, test } from "./fixtures";
  * draggable with d3, which has to tell a click from a drag. A hand on a mouse or a trackpad often
  * moves a pixel or two during a click, and that must still be a click.
  */
-
-// the middle of the file in the page
-async function nodeCenter(page: Page, datasetId: string) {
-  const box = await datasetNode(page, datasetId).boundingBox();
-  expect(box, `file ${datasetId} has no bounding box`).not.toBeNull();
-  return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-}
-
-// a press at (x, y), a move by (dx, dy) pixels, and a release there
-async function pressMoveRelease(page: Page, { x, y }: { x: number; y: number }, dx: number, dy: number) {
-  await page.mouse.move(x, y);
-  await page.mouse.down();
-  await page.mouse.move(x + dx, y + dy, { steps: 2 });
-  await page.mouse.up();
-}
 
 async function savedPosition(api: Api, sessionId: string, datasetId: string) {
   const response = await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`);

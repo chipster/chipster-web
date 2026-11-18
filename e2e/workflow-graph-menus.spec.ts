@@ -1,7 +1,17 @@
 import { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures";
-import { Api, createDataset, createJob, datasetNode, getDatasets, openSession, TEST_JOB } from "./session-api";
+import {
+  Api,
+  createDataset,
+  createJob,
+  datasetNode,
+  getDatasets,
+  nodeCenter,
+  openSession,
+  pressMoveRelease,
+  TEST_JOB,
+} from "./session-api";
 
 /*
  * The menus of the workflow graph: the selection and layout actions of its Actions menu, and its
@@ -16,7 +26,7 @@ import { Api, createDataset, createJob, datasetNode, getDatasets, openSession, T
 const FILES = ["a.cel", "b.cel", "normalized.tsv", "pca.tsv", "variance.tsv", "two-sample.tsv"] as const;
 type FileName = (typeof FILES)[number];
 
-// the datasets by name, and the job that made each output
+// the datasets by name, and the PCA job for the Show job test
 interface Analysis {
   datasets: Record<FileName, string>;
   pcaJobId: string;
@@ -65,15 +75,13 @@ async function createAnalysis(api: Api, sessionId: string, positioned: boolean):
 // the graph draws a selected file with the primary color as its border, other files with the color of their tool
 const SELECTED_STROKE = "#006fe6";
 
-// the names of the files that the graph shows as selected, in the order of FILES
+// the names of the files that the graph shows as selected, in the order of FILES, read in one go
 async function selectedInGraph(page: Page, datasets: Record<FileName, string>): Promise<FileName[]> {
-  const selected: FileName[] = [];
-  for (const name of FILES) {
-    if ((await datasetNode(page, datasets[name]).getAttribute("stroke")) === SELECTED_STROKE) {
-      selected.push(name);
-    }
-  }
-  return selected;
+  const strokes = await page
+    .locator("#d3DatasetNodesGroup rect")
+    .evaluateAll((rects) => rects.map((rect): [string, string] => [rect.id, rect.getAttribute("stroke")]));
+  const strokeById = new Map(strokes);
+  return FILES.filter((name) => strokeById.get(`node_${datasets[name]}`) === SELECTED_STROKE);
 }
 
 async function expectSelected(page: Page, datasets: Record<FileName, string>, expected: FileName[]) {
@@ -87,10 +95,25 @@ async function expectSelected(page: Page, datasets: Record<FileName, string>, ex
   }
 }
 
-// an item of the graph's Actions menu, above the graph. A file's details have another button with the same id
+/*
+ * An item of the graph's Actions menu, above the graph. A file's details have another button with
+ * the same id. A disabled item doesn't take clicks, which would show as a timeout.
+ */
 async function graphAction(page: Page, item: string) {
   await page.locator("ch-session-panel #viewDropdownMenuButton").click();
-  await page.locator(".dropdown-menu.show").getByText(item, { exact: true }).click();
+  const button = page.locator(".dropdown-menu.show").getByText(item, { exact: true });
+  await expect(button).not.toHaveClass(/disabled/);
+  await button.click();
+}
+
+// an item of the graph's right-click menu, which a test has opened
+async function contextMenuAction(page: Page, item: string) {
+  const menu = page.locator(".d3-context-menu");
+  await expect(menu).toBeVisible();
+  const li = menu.getByText(item, { exact: true });
+  await expect(li).not.toHaveClass(/is-disabled/);
+  await li.click();
+  await expect(menu).toBeHidden();
 }
 
 async function savedPositions(api: Api, sessionId: string): Promise<Record<string, { x: number; y: number }>> {
@@ -111,9 +134,10 @@ test("select descendants follows the jobs, and select all selects every file", a
   await graphAction(page, "Select descendants of selected files");
   await expectSelected(page, datasets, ["pca.tsv", "variance.tsv", "two-sample.tsv"]);
 
-  // descendants of descendants too, from either input of the first job
-  await datasetNode(page, datasets["b.cel"]).click();
-  await graphAction(page, "Select descendants of selected files");
+  // descendants of descendants too, from either input of the first job, also from the right-click menu
+  await datasetNode(page, datasets["b.cel"]).click({ button: "right" });
+  await expectSelected(page, datasets, ["b.cel"]);
+  await contextMenuAction(page, "Select descendants");
   await expectSelected(page, datasets, ["normalized.tsv", "pca.tsv", "variance.tsv", "two-sample.tsv"]);
 
   // a leaf has none, although the line to two-sample.tsv goes through it, so nothing is left selected
@@ -126,11 +150,7 @@ test("select descendants follows the jobs, and select all selects every file", a
   await expectSelected(page, datasets, [...FILES]);
 });
 
-test("a dragged file is saved in its new position, and reset all positions lays it out again", async ({
-  page,
-  api,
-  sessionId,
-}) => {
+test("the resets of positions lay out the selected files, or all of them, again", async ({ page, api, sessionId }) => {
   const { datasets } = await createAnalysis(api, sessionId, false);
   await openSession(page, sessionId, datasets["two-sample.tsv"]);
 
@@ -140,26 +160,30 @@ test("a dragged file is saved in its new position, and reset all positions lays 
     .toBe(true);
   const layout = await savedPositions(api, sessionId);
 
-  // a drag far enough to be a drag, not a click
+  // a drag far enough to be a drag, not a click, moves the file (the drag itself is tested in workflow-graph.spec.ts)
+  const drag = async (name: FileName) => {
+    await datasetNode(page, datasets[name]).click();
+    await pressMoveRelease(page, await nodeCenter(page, datasets[name]), 100, 60);
+    await expect.poll(async () => (await savedPositions(api, sessionId))[name]).not.toEqual(layout[name]);
+    return (await savedPositions(api, sessionId))[name];
+  };
+  await drag("pca.tsv");
+  const movedTwoSample = await drag("two-sample.tsv");
+
+  // the reset of the selected files lays out only them, around the others: here pca.tsv gets its old spot back
   const pca = datasetNode(page, datasets["pca.tsv"]);
   await pca.click();
-  const box = await pca.boundingBox();
-  expect(box, "pca.tsv has no bounding box").not.toBeNull();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width / 2 + 100, box.y + box.height / 2 + 60, { steps: 5 });
-  await page.mouse.up();
-  await expect.poll(async () => (await savedPositions(api, sessionId))["pca.tsv"]).not.toEqual(layout["pca.tsv"]);
-  const moved = (await savedPositions(api, sessionId))["pca.tsv"];
-  expect(moved.x).toBeGreaterThan(layout["pca.tsv"].x + 50);
-  expect(moved.y).toBeGreaterThan(layout["pca.tsv"].y + 30);
-  await expect(pca).toHaveAttribute("x", String(moved.x));
-
-  // the reset lays out every file from scratch, the same way as when they had no positions
-  await graphAction(page, "Reset all positions");
-  await expect.poll(() => savedPositions(api, sessionId)).toEqual(layout);
+  await graphAction(page, "Reset positions of selected files");
+  await expect.poll(() => savedPositions(api, sessionId)).toEqual({ ...layout, "two-sample.tsv": movedTwoSample });
   await expect(pca).toHaveAttribute("x", String(layout["pca.tsv"].x));
   await expect(pca).toHaveAttribute("y", String(layout["pca.tsv"].y));
+
+  // the reset of all positions lays out every file from scratch, not only the selected one
+  const twoSample = datasetNode(page, datasets["two-sample.tsv"]);
+  await graphAction(page, "Reset all positions");
+  await expect.poll(() => savedPositions(api, sessionId)).toEqual(layout);
+  await expect(twoSample).toHaveAttribute("x", String(layout["two-sample.tsv"].x));
+  await expect(twoSample).toHaveAttribute("y", String(layout["two-sample.tsv"].y));
 });
 
 test("show job in the graph's right-click menu opens the job that made the file", async ({ page, api, sessionId }) => {
@@ -168,14 +192,9 @@ test("show job in the graph's right-click menu opens the job that made the file"
 
   // a right-click on a file that isn't selected selects it, and the menu is for it alone
   await datasetNode(page, datasets["pca.tsv"]).click({ button: "right" });
-  const menu = page.locator(".d3-context-menu");
-  await expect(menu).toBeVisible();
   await expectSelected(page, datasets, ["pca.tsv"]);
-  const showJob = menu.locator("li", { hasText: /^Show job$/ });
-  await expect(showJob).not.toHaveClass(/is-disabled/);
-  await showJob.click();
+  await contextMenuAction(page, "Show job");
 
-  await expect(menu).toBeHidden();
   const modal = page.locator("ch-jobs-modal");
   await expect(modal.locator(`#job-id-${pcaJobId}`)).toHaveClass(/table-active/);
   await expect(modal.locator("ch-job")).toContainText("PCA");
