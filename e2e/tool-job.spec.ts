@@ -537,24 +537,27 @@ test.describe("the job is what the parameters modal shows, also when the column 
     await searchTool(page, REMOVE_DUPLICATES);
     await setParameter(page, ID_COLUMN, "symbol");
 
-    // the columns are read only from .tsv files, and the tool can't be run with a column of a.txt
+    // the columns are read only from .tsv files, and the tool can't be run without a column
     await datasetNode(page, txt).click();
     await expect(page.locator("ch-selected-files")).toContainText("a.txt");
     await expect(runButton(page)).toBeDisabled();
     await openParametersModal(page);
     await expect.poll(() => parameterOptions(page, ID_COLUMN)).toEqual([]);
     await expect(parametersModal(page).locator("ch-tool-parameters")).toContainText(
-      "The file has no columns to choose from, only .tsv files have them.",
+      "Required parameter can not be empty",
     );
     await closeParametersModal(page);
 
-    // back on the .tsv file, the column chosen before is still there, as it is after no file at all
+    /*
+     * Back on the .tsv file, the column chosen before is gone: the .txt file cleared it
+     * (ToolSelectionService.populateParameter), and the default is used.
+     */
     await datasetNode(page, tsv).click();
     await expect(page.locator("ch-selected-files")).toContainText("a.tsv");
     await expect(runButton(page)).toBeEnabled();
     const job = await runAsShown(page, captured);
     expect(job.inputs.map((i) => i.datasetId)).toEqual([tsv]);
-    expect(shownStateOfJob(job).parameters).toEqual({ [ID_COLUMN]: "symbol" });
+    expect(shownStateOfJob(job).parameters).toEqual({ [ID_COLUMN]: "ensembl_id" });
     await waitForDevCheck(page);
   });
 });
@@ -762,6 +765,79 @@ test.describe("the jobs are what the Run menu and the run options say", () => {
     await expect(runOption(page, "Run Tool for Each File")).toHaveText(
       "The column x chosen for Column isn't in c.txt.",
     );
+    await closeParametersModal(page);
+    await expect(runButton(page)).toBeDisabled();
+    await waitForDevCheck(page);
+  });
+
+  test("Run tool for each sample isn't possible when the files of a sample don't have the chosen column", async ({
+    page,
+    api,
+    baseURL,
+    sessionId,
+  }) => {
+    // single end samples, defined like the samples modal does (DatasetService.setSampleData)
+    const sampleFile = (sample: string, x: number) => ({
+      name: `${sample}.tsv`,
+      x,
+      y: 100,
+      metadataFiles: [
+        { name: "sample.json", content: JSON.stringify({ sampleName: sample, sampleId: `id-${sample}` }) },
+      ],
+    });
+    const s1 = await createDataset(api, sessionId, sampleFile("s1", 100), "x\ty\n1\t2\n");
+    const s2 = await createDataset(api, sessionId, sampleFile("s2", 300), "x\tz\n1\t2\n");
+    await openSession(page, sessionId, s1);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await selectFiles(page, [s1, s2]);
+    await searchTool(page, FILTER_BY_COLUMN);
+    await setParameter(page, "Column", "y");
+
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText(
+      "The column y chosen for Column isn't in s2.tsv.",
+    );
+    await expect(runOption(page, "Run Tool for Each Sample")).toHaveText(
+      "The column y chosen for Column isn't in sample s2.",
+    );
+    await closeParametersModal(page);
+    await expect(runButton(page)).toBeDisabled();
+
+    await setParameter(page, "Column", "x");
+    const jobs = await runFromMenu(page, captured, "Run tool for each sample", 2);
+    expect(jobs.map((job) => [job.inputs[0].datasetId, shownStateOfJob(job).parameters["Column"]])).toEqual([
+      [s1, "x"],
+      [s2, "x"],
+    ]);
+    await waitForDevCheck(page);
+  });
+
+  test("Run tool for each file isn't possible when the columns of a file can't be read", async ({
+    page,
+    api,
+    sessionId,
+    pageErrors,
+  }) => {
+    const a = await createDataset(api, sessionId, { name: "a.tsv", x: 100, y: 100 }, "x\ty\n1\t2\n");
+    const b = await createDataset(api, sessionId, { name: "b.tsv", x: 300, y: 100 }, "x\ty\n1\t2\n");
+    await openSession(page, sessionId, a);
+    await datasetNode(page, a).click();
+    await searchTool(page, FILTER_BY_COLUMN);
+    await setParameter(page, "Column", "y");
+
+    // the request for the content of b.tsv, which the column headers are read from, fails
+    const path = `/sessions/${sessionId}/datasets/${b}`;
+    pageErrors.allowFailedRequest(500, "file-broker", path);
+    await page.route(
+      (url) => url.pathname.endsWith(path),
+      (route) => route.fulfill({ status: 500, body: "test failure" }),
+    );
+    await datasetNode(page, b).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files")).toContainText("2 files");
+
+    // b.tsv may well have the column, but that isn't known
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText("The columns of b.tsv couldn't be read.");
     await closeParametersModal(page);
     await expect(runButton(page)).toBeDisabled();
     await waitForDevCheck(page);
