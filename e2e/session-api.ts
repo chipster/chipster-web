@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { APIRequestContext, APIResponse, expect, Page } from "@playwright/test";
-import type { Session } from "chipster-js-common";
+import type { Dataset, Session } from "chipster-js-common";
 import { jwtDecode } from "jwt-decode";
 import { parse } from "yaml";
 
@@ -133,7 +133,7 @@ export async function getDatasetContent(api: Api, sessionId: string, datasetId: 
   return response.text();
 }
 
-export async function getDatasets(api: Api, sessionId: string): Promise<{ datasetId: string; name: string }[]> {
+export async function getDatasets(api: Api, sessionId: string): Promise<Dataset[]> {
   const response = await api.get("session-db", `/sessions/${sessionId}/datasets`);
   expect(response.ok()).toBe(true);
   return response.json();
@@ -238,6 +238,32 @@ export function visualizationTab(page: Page, name: string) {
 
 export function datasetNode(page: Page, datasetId: string) {
   return page.locator(`#d3DatasetNodesGroup rect[id$="_${datasetId}"]`);
+}
+
+// the graph draws a selected file with the primary color as its border, other files with the color of their tool
+const SELECTED_STROKE = "#006fe6";
+
+// the ids of the files that the workflow graph shows as selected, read in one go
+export async function selectedInGraph(page: Page): Promise<string[]> {
+  const strokes = await page
+    .locator("#d3DatasetNodesGroup rect")
+    .evaluateAll((rects) => rects.map((rect): [string, string] => [rect.id, rect.getAttribute("stroke")]));
+  return strokes.filter(([, stroke]) => stroke === SELECTED_STROKE).map(([id]) => id.replace(/^node_/, ""));
+}
+
+// the middle of the file in the page
+export async function nodeCenter(page: Page, datasetId: string) {
+  const box = await datasetNode(page, datasetId).boundingBox();
+  expect(box, `file ${datasetId} has no bounding box`).not.toBeNull();
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+}
+
+// a press at (x, y), a move by (dx, dy) pixels, and a release there: a click or a drag, depending on the distance
+export async function pressMoveRelease(page: Page, { x, y }: { x: number; y: number }, dx: number, dy: number) {
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + dx, y + dy, { steps: 2 });
+  await page.mouse.up();
 }
 
 /*
