@@ -110,6 +110,19 @@ export function inputField(page: Page, name: string): Locator {
 }
 
 /*
+ * The description of a run option in the Run Options section of the open parameters modal, by the
+ * name in its row: "Run Tool", "Run Tool for Each File" or "Run Tool for Each Sample". It is a
+ * warning that tells why when the option isn't possible.
+ */
+export function runOption(page: Page, name: string): Locator {
+  return parametersModal(page)
+    .locator("ch-run-options tbody > tr")
+    .filter({ has: page.locator("td", { hasText: new RegExp(`^\\s*${name}\\s*$`) }) })
+    .locator("td")
+    .last();
+}
+
+/*
  * ToolParametersComponent signals a change after a debounce of 500 ms, and a change still pending
  * when the modal closes and destroys the component, which a test of tool-job.spec.ts checks. The
  * other tests wait for the debounce, the usual way a change gets validated. Nothing on the page tells

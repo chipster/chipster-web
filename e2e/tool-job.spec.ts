@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Locator, Page } from "@playwright/test";
 import type { Job } from "chipster-js-common";
 
 import { expect, test, waitForDevCheck } from "./fixtures";
@@ -18,6 +18,7 @@ import {
   runButton,
   runIsMenu,
   runMenuItem,
+  runOption,
   searchTool,
   setParameter,
   shownStateOfJob,
@@ -59,6 +60,15 @@ const MERGE_TABLES = "merge-tables.R";
  */
 const AVERAGE_REPLICATES = "average-replicates.R";
 const EXPRESSIONS = "identifier\tchip.s1\tchip.s2\ng1\t1\t2\n";
+
+// Remove duplicate genes, a tool with one input and a column parameter with a default column
+const REMOVE_DUPLICATES = "remove-duplicate-genes.py";
+
+// a tool with two required inputs of any type, and parameters that don't depend on the files
+const SEQOR = "seqor.R";
+
+// Calculate md5sum, a tool with a required and an optional input of any type and no parameters
+const MD5SUM = "md5sum.R";
 
 /*
  * Opens the parameters modal, reads what it shows, closes it and runs the tool as one job with the
@@ -445,6 +455,378 @@ test.describe("the job is what the parameters modal shows, also with a multi inp
     expect(job.inputs.map((i) => i.datasetId)).toEqual([b]);
     expect(shownStateOfJob(job).parameters["Column"]).toBe("time");
     expect(job.metadataFiles).toEqual([{ name: "phenodata.tsv", content: phenodataB }]);
+    await waitForDevCheck(page);
+  });
+});
+
+// selects the files in the workflow graph in this order, the first one with a plain click
+async function selectFiles(page: Page, datasetIds: string[]): Promise<void> {
+  await datasetNode(page, datasetIds[0]).click();
+  for (const datasetId of datasetIds.slice(1)) {
+    await datasetNode(page, datasetId).click({ modifiers: ["ControlOrMeta"] });
+  }
+  if (datasetIds.length > 1) {
+    await expect(page.locator("ch-selected-files")).toContainText(`${datasetIds.length} files`);
+  }
+}
+
+// the selected files of the open parameters modal: the options shown as selected in each input
+function boundFiles(page: Page, input: string): Locator {
+  return inputField(page, input).locator("option:checked");
+}
+
+test.describe("the job is what the parameters modal shows, also when the column options follow the file", () => {
+  // the column parameter of Remove duplicate genes, with the default column ensembl_id
+  const ID_COLUMN = "ID column";
+
+  test("the columns and the default column follow the selected file", async ({ page, api, baseURL, sessionId }) => {
+    const files = {
+      a: await createDataset(api, sessionId, { name: "a.tsv", x: 100, y: 100 }, "ensembl_id\tsymbol\ne1\ts1\n"),
+      b: await createDataset(api, sessionId, { name: "b.tsv", x: 300, y: 100 }, "gene\tensembl_id\tvalue\ng\te1\t1\n"),
+      c: await createDataset(api, sessionId, { name: "c.tsv", x: 500, y: 100 }, "symbol\tvalue\ns1\t1\n"),
+    };
+    await openSession(page, sessionId, files.a);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await datasetNode(page, files.a).click();
+    await searchTool(page, REMOVE_DUPLICATES);
+
+    const expectColumns = async (options: string[], value: string) => {
+      await openParametersModal(page);
+      await expect.poll(() => parameterOptions(page, ID_COLUMN)).toEqual(options);
+      await expect(parameterField(page, ID_COLUMN)).toHaveValue(value);
+      await closeParametersModal(page);
+    };
+    const select = async (name: keyof typeof files) => {
+      await datasetNode(page, files[name]).click();
+      await expect(page.locator("ch-selected-files")).toContainText(`${name}.tsv`);
+    };
+
+    // the columns of a.tsv, which has the default column
+    await expectColumns(["ensembl_id", "symbol"], "ensembl_id");
+    await setParameter(page, ID_COLUMN, "symbol");
+
+    // b.tsv doesn't have the chosen column, so the default is used again
+    await select("b");
+    await expectColumns(["gene", "ensembl_id", "value"], "ensembl_id");
+    await expect(runButton(page)).toBeEnabled();
+
+    // c.tsv has neither, and the user has to choose
+    await select("c");
+    await expectColumns(["symbol", "value"], "");
+    await expect(runButton(page)).toBeDisabled();
+    await setParameter(page, ID_COLUMN, "symbol");
+    await expect(runButton(page)).toBeEnabled();
+
+    // a.tsv has the column chosen for c.tsv, and keeps it
+    await select("a");
+    await expectColumns(["ensembl_id", "symbol"], "symbol");
+
+    const job = await runAsShown(page, captured);
+    expect(job.inputs.map((i) => i.datasetId)).toEqual([files.a]);
+    expect(shownStateOfJob(job).parameters).toEqual({ [ID_COLUMN]: "symbol" });
+    await waitForDevCheck(page);
+  });
+
+  test("a file that isn't a .tsv table has no columns to choose from", async ({ page, api, baseURL, sessionId }) => {
+    const table = "ensembl_id\tsymbol\ne1\ts1\n";
+    const tsv = await createDataset(api, sessionId, { name: "a.tsv", x: 100, y: 100 }, table);
+    const txt = await createDataset(api, sessionId, { name: "a.txt", x: 300, y: 100 }, table);
+    await openSession(page, sessionId, tsv);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await datasetNode(page, tsv).click();
+    await searchTool(page, REMOVE_DUPLICATES);
+    await setParameter(page, ID_COLUMN, "symbol");
+
+    // the columns are read only from .tsv files, and the tool can't be run with a column of a.txt
+    await datasetNode(page, txt).click();
+    await expect(page.locator("ch-selected-files")).toContainText("a.txt");
+    await expect(runButton(page)).toBeDisabled();
+    await openParametersModal(page);
+    await expect.poll(() => parameterOptions(page, ID_COLUMN)).toEqual([]);
+    await expect(parametersModal(page).locator("ch-tool-parameters")).toContainText(
+      "The file has no columns to choose from, only .tsv files have them.",
+    );
+    await closeParametersModal(page);
+
+    // back on the .tsv file, the column chosen before is still there, as it is after no file at all
+    await datasetNode(page, tsv).click();
+    await expect(page.locator("ch-selected-files")).toContainText("a.tsv");
+    await expect(runButton(page)).toBeEnabled();
+    const job = await runAsShown(page, captured);
+    expect(job.inputs.map((i) => i.datasetId)).toEqual([tsv]);
+    expect(shownStateOfJob(job).parameters).toEqual({ [ID_COLUMN]: "symbol" });
+    await waitForDevCheck(page);
+  });
+});
+
+test.describe("the job is what the parameters modal shows, also when the user binds the inputs", () => {
+  test("the files swapped between two inputs in the modal stay swapped", async ({ page, api, baseURL, sessionId }) => {
+    const a = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "ACGT\n");
+    const b = await createDataset(api, sessionId, { name: "b.txt", x: 300, y: 100 }, "TTTT\n");
+    await openSession(page, sessionId, a);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await selectFiles(page, [a, b]);
+    await searchTool(page, SEQOR);
+
+    // the files are bound in the order of the selection
+    await openParametersModal(page);
+    await expect(boundFiles(page, "First sequence set")).toHaveText(["a.txt"]);
+    await expect(boundFiles(page, "Second sequence set")).toHaveText(["b.txt"]);
+
+    // choosing b.txt for the first input moves a.txt to the second
+    await inputField(page, "First sequence set").selectOption({ label: "b.txt" });
+    await expect(boundFiles(page, "First sequence set")).toHaveText(["b.txt"]);
+    await expect(boundFiles(page, "Second sequence set")).toHaveText(["a.txt"]);
+    // the tool takes two inputs, so it can only be run once with them
+    await expect(runOption(page, "Run Tool")).toHaveText(
+      "Runs the tool once. Uses all the 2 selected files as the tool inputs.",
+    );
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText(
+      "Not possible for tools that require more than one inputs.",
+    );
+    await closeParametersModal(page);
+    expect(await runIsMenu(page)).toBe(false);
+
+    // a parameter changed after the swap validates the tool again, and the files stay swapped
+    await setParameter(page, "Logical operator for merging", "AND");
+
+    const job = await runAsShown(page, captured);
+    expect(job.inputs.map((i) => [i.inputId, i.datasetId])).toEqual([
+      ["sequences1.txt", b],
+      ["sequences2.txt", a],
+    ]);
+    expect(shownStateOfJob(job).parameters).toEqual({
+      "Logical operator for merging": "AND",
+      "Collect a log file": "no",
+    });
+    await waitForDevCheck(page);
+  });
+
+  test("an optional input without a file isn't in the job", async ({ page, api, baseURL, sessionId }) => {
+    const data = await createDataset(api, sessionId, { name: "data.txt", x: 100, y: 100 }, "data\n");
+    const md5 = await createDataset(api, sessionId, { name: "data.txt.md5", x: 300, y: 100 }, "0  data.txt\n");
+    await openSession(page, sessionId, data);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await datasetNode(page, data).click();
+    await searchTool(page, MD5SUM);
+
+    // one file: the optional input has none, which is fine
+    await openParametersModal(page);
+    await expect(boundFiles(page, "File")).toHaveText(["data.txt"]);
+    await expect(boundFiles(page, "MD5 file")).toHaveCount(0);
+    await expect(parametersModal(page).locator("ch-tool-inputs")).not.toContainText("Input file required");
+    await closeParametersModal(page);
+    const job = await runAsShown(page, captured);
+    expect(job.inputs.map((i) => [i.inputId, i.datasetId])).toEqual([["file", data]]);
+
+    // with two files, the second goes to the optional input
+    await datasetNode(page, md5).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files")).toContainText("2 files");
+    const both = await runAsShown(page, captured);
+    expect(both.inputs.map((i) => [i.inputId, i.datasetId])).toEqual([
+      ["file", data],
+      ["md5file", md5],
+    ]);
+    await waitForDevCheck(page);
+  });
+});
+
+/*
+ * Runs the tool with an item of the Run menu, and returns the jobs of the request. Run tool for each
+ * file and for each sample post all their jobs in one request.
+ */
+async function runFromMenu(page: Page, captured: CapturedJobs, item: string, jobs: number): Promise<Job[]> {
+  const n = captured.posts.length + 1;
+  await runButton(page).click();
+  await expect(runMenuItem(page, item)).toContainText(`${jobs} job`);
+  await runMenuItem(page, item).click();
+  const posted = await captured.waitForPost(n);
+  expect(posted, `the jobs of ${item}`).toHaveLength(jobs);
+  return posted;
+}
+
+test.describe("the jobs are what the Run menu and the run options say", () => {
+  test("Run tool for each file runs the tool with each file and the parameters shown", async ({
+    page,
+    api,
+    baseURL,
+    sessionId,
+  }) => {
+    const ids = await Promise.all(
+      ["a", "b", "c"].map((name, i) =>
+        createDataset(api, sessionId, { name: `${name}.tsv`, x: 100 + 200 * i, y: 100 }, TABLE),
+      ),
+    );
+    await openSession(page, sessionId, ids[0]);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await selectFiles(page, ids);
+    await searchTool(page, TABLE_CONVERTER);
+    await setParameter(page, "Column list", "2,1");
+
+    // the tool takes one file, so three can only be run for each file
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool")).toHaveText(
+      "Too many files selected. Tool takes 1 input, 3 files selected.",
+    );
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText(
+      "Runs the tool 3 times. Each time one of the selected 3 files is used as a single input for the tool.",
+    );
+    await expect(runOption(page, "Run Tool for Each Sample")).toHaveText(
+      "Selected files don't include any files defined as sample files.",
+    );
+    const shown = await readParametersModal(page);
+    await closeParametersModal(page);
+    await runButton(page).click();
+    await expect(runMenuItem(page, "Run tool")).toBeDisabled();
+    await expect(runMenuItem(page, "Run tool for each sample")).toBeDisabled();
+    await page.keyboard.press("Escape");
+
+    const jobs = await runFromMenu(page, captured, "Run tool for each file", 3);
+    expect(jobs.map((job) => job.inputs.map((i) => [i.inputId, i.datasetId]))).toEqual(
+      ids.map((id) => [["input", id]]),
+    );
+    for (const job of jobs) {
+      expect(job.toolId).toBe(TABLE_CONVERTER);
+      expect(shownStateOfJob(job).parameters).toEqual(shown.parameters);
+    }
+    expect(shown.parameters).toEqual({ ...TABLE_CONVERTER_DEFAULTS, "Column list": "2,1" });
+    await waitForDevCheck(page);
+  });
+
+  test("Run tool for each file leaves the optional input out", async ({ page, api, baseURL, sessionId }) => {
+    const data = await createDataset(api, sessionId, { name: "data.txt", x: 100, y: 100 }, "data\n");
+    const md5 = await createDataset(api, sessionId, { name: "data.txt.md5", x: 300, y: 100 }, "0  data.txt\n");
+    await openSession(page, sessionId, data);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await selectFiles(page, [data, md5]);
+    await searchTool(page, MD5SUM);
+
+    // both options are possible: the files in the two inputs, or each file in the required one
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool")).toHaveText(
+      "Runs the tool once. Uses all the 2 selected files as the tool inputs.",
+    );
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText(
+      "Runs the tool 2 times. Each time one of the selected 2 files is used as a single input for the tool.",
+    );
+    await closeParametersModal(page);
+
+    const jobs = await runFromMenu(page, captured, "Run tool for each file", 2);
+    expect(jobs.map((job) => job.inputs.map((i) => [i.inputId, i.datasetId]))).toEqual([
+      [["file", data]],
+      [["file", md5]],
+    ]);
+    await waitForDevCheck(page);
+  });
+
+  /*
+   * The column options come from the first file, and the jobs for each file got the column chosen
+   * from them, also the job of a file that doesn't have it.
+   */
+  test("Run tool for each file isn't possible when a file doesn't have the chosen column", async ({
+    page,
+    api,
+    baseURL,
+    sessionId,
+  }) => {
+    const a = await createDataset(api, sessionId, { name: "a.tsv", x: 100, y: 100 }, "x\ty\n1\t2\n");
+    const b = await createDataset(api, sessionId, { name: "b.tsv", x: 300, y: 100 }, "x\tz\n1\t2\n");
+    const c = await createDataset(api, sessionId, { name: "c.txt", x: 500, y: 100 }, "x\ty\n1\t2\n");
+    await openSession(page, sessionId, a);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await selectFiles(page, [a, b]);
+    await searchTool(page, FILTER_BY_COLUMN);
+    await setParameter(page, "Column", "y");
+
+    // b.tsv doesn't have y, and the tool can't be run at all: two files are too many for one job
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText(
+      "The column y chosen for Column isn't in b.tsv.",
+    );
+    await closeParametersModal(page);
+    expect(await runIsMenu(page)).toBe(false);
+    await expect(runButton(page)).toBeDisabled();
+
+    // a column that both files have
+    await setParameter(page, "Column", "x");
+    const jobs = await runFromMenu(page, captured, "Run tool for each file", 2);
+    expect(jobs.map((job) => [job.inputs[0].datasetId, shownStateOfJob(job).parameters["Column"]])).toEqual([
+      [a, "x"],
+      [b, "x"],
+    ]);
+
+    // only .tsv files have columns (ToolSelectionService.populateParameter)
+    await datasetNode(page, c).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files")).toContainText("3 files");
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText(
+      "The column x chosen for Column isn't in c.txt.",
+    );
+    await closeParametersModal(page);
+    await expect(runButton(page)).toBeDisabled();
+    await waitForDevCheck(page);
+  });
+
+  test("Run tool for each sample runs the tool with the two files of each sample", async ({
+    page,
+    api,
+    baseURL,
+    sessionId,
+  }) => {
+    // paired end samples, defined like the samples modal does (DatasetService.setSampleData)
+    const sampleFile = (sample: string, direction: "R1" | "R2", x: number) => ({
+      name: `${sample}_${direction}.fq`,
+      x,
+      y: 100,
+      metadataFiles: [
+        {
+          name: "sample.json",
+          content: JSON.stringify({
+            sampleName: sample,
+            sampleId: `id-${sample}`,
+            pairId: `pair-${sample}`,
+            direction,
+          }),
+        },
+      ],
+    });
+    const reads = "@r\nACGT\n+\nIIII\n";
+    // R2 before R1 in the selection, the binding has to follow the direction, not the order
+    const s1r2 = await createDataset(api, sessionId, sampleFile("s1", "R2", 100), reads);
+    const s1r1 = await createDataset(api, sessionId, sampleFile("s1", "R1", 300), reads);
+    const s2r1 = await createDataset(api, sessionId, sampleFile("s2", "R1", 500), reads);
+    const s2r2 = await createDataset(api, sessionId, sampleFile("s2", "R2", 700), reads);
+    await openSession(page, sessionId, s1r2);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await selectFiles(page, [s1r2, s1r1, s2r1, s2r2]);
+    await searchTool(page, SEQOR);
+    await setParameter(page, "Logical operator for merging", "XOR");
+
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool")).toHaveText(
+      "Too many files selected. Tool takes 2 inputs, 4 files selected.",
+    );
+    await expect(runOption(page, "Run Tool for Each Sample")).toHaveText(
+      "Runs the tool 2 times. Each time the two paired files of a one sample are used as the tool inputs.",
+    );
+    const shown = await readParametersModal(page);
+    await closeParametersModal(page);
+
+    const jobs = await runFromMenu(page, captured, "Run tool for each sample", 2);
+    expect(jobs.map((job) => job.inputs.map((i) => [i.inputId, i.datasetName]))).toEqual([
+      [
+        ["sequences1.txt", "s1_R1.fq"],
+        ["sequences2.txt", "s1_R2.fq"],
+      ],
+      [
+        ["sequences1.txt", "s2_R1.fq"],
+        ["sequences2.txt", "s2_R2.fq"],
+      ],
+    ]);
+    for (const job of jobs) {
+      expect(shownStateOfJob(job).parameters).toEqual(shown.parameters);
+    }
+    expect(shown.parameters["Logical operator for merging"]).toBe("XOR");
     await waitForDevCheck(page);
   });
 });

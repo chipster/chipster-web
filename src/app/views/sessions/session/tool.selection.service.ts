@@ -4,7 +4,7 @@ import { Category, Dataset, InputBinding, Module, Tool, ToolParameter } from "ch
 import { flatten } from "lodash-es";
 import log from "loglevel";
 import { Observable, forkJoin, forkJoin as observableForkJoin, of } from "rxjs";
-import { map, take } from "rxjs/operators";
+import { catchError, map, take } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
 import { JobQuota, SchedulerResource } from "../../../shared/resources/scheduler-resource";
@@ -109,8 +109,13 @@ export class ToolSelectionService {
       toolWithValidatedInputs.tool.parameters &&
       toolWithValidatedInputs.tool.parameters.length > 0
     ) {
+      const hasBoundFiles = toolWithValidatedInputs.inputBindings.some((binding) => binding.datasets.length > 0);
       toolWithValidatedInputs.tool.parameters.forEach((parameter: ToolParameter) => {
-        parametersValidations.set(parameter.name.id, this.validateParameter(parameter));
+        const result = this.validateParameter(parameter);
+        parametersValidations.set(
+          parameter.name.id,
+          result.valid && hasBoundFiles ? this.validateColumnOfFile(parameter) : result,
+        );
       });
     }
 
@@ -126,6 +131,29 @@ export class ToolSelectionService {
       parametersValidationResults: parametersValidations,
       ...toolWithValidatedInputs,
     };
+  }
+
+  /**
+   * A column chosen for a file has to be one of the columns of the bound file. populateParameter()
+   * keeps the chosen column when the file isn't a .tsv table and has no columns, so that the choice
+   * isn't lost when the user goes back to a table that has the column, as it keeps it when no file
+   * is selected. The tool can't be run with that file and the column.
+   */
+  private validateColumnOfFile(parameter: ToolParameter): ValidationResult {
+    if (
+      parameter.type === "COLUMN_SEL" &&
+      parameter.value != null &&
+      !this.toolService.selectionOptionsContains(parameter.selectionOptions ?? [], parameter.value)
+    ) {
+      return {
+        valid: false,
+        message:
+          parameter.selectionOptions?.length > 0
+            ? "The file doesn't have the column " + parameter.value + "."
+            : "The file has no columns to choose from, only .tsv files have them.",
+      };
+    }
+    return { valid: true };
   }
 
   validateParameter(parameter: ToolParameter): ValidationResult {
@@ -251,9 +279,46 @@ export class ToolSelectionService {
       const populateParameterObservables = selectedToolWithInputs.tool.parameters.map((parameter: ToolParameter) =>
         this.populateParameter(parameter, boundDatasets, boundPhenodatas, sessionData),
       );
-      return forkJoin(populateParameterObservables).pipe(map(() => selectedToolWithInputs));
+      return forkJoin([
+        forkJoin(populateParameterObservables),
+        this.readColumnsForRunForEach(selectedToolWithInputs, boundDatasets, sessionData),
+      ]).pipe(map(() => selectedToolWithInputs));
     }
     return of(selectedToolWithInputs);
+  }
+
+  /**
+   * The column options come from the bound files only, but Run tool for each file runs the tool
+   * with each selected file, and validateRunForEach() checks that each of them has the chosen
+   * column. Read the columns of the other selected .tsv files into the cache for that, as
+   * populateParameter() does for the bound ones. A file whose columns can't be read is left out of
+   * the cache, and validateRunForEach() then counts it as missing the column.
+   */
+  private readColumnsForRunForEach(
+    selectedToolWithInputs: SelectedToolWithValidatedInputs,
+    boundDatasets: Dataset[],
+    sessionData: SessionData,
+  ): Observable<unknown> {
+    const hasColumnParameter = selectedToolWithInputs.tool.parameters.some(
+      (parameter) => parameter.type === "COLUMN_SEL",
+    );
+    const otherTsvDatasets = (selectedToolWithInputs.selectedDatasets ?? []).filter(
+      (dataset) => dataset.name.endsWith(".tsv") && !boundDatasets.includes(dataset),
+    );
+    if (!hasColumnParameter || selectedToolWithInputs.selectedDatasets.length < 2 || otherTsvDatasets.length === 0) {
+      // forkJoin of nothing would complete without a value
+      return of(null);
+    }
+    return forkJoin(
+      this.toolService.getDatasetHeadersForParameter(otherTsvDatasets, sessionData).map((headers) =>
+        headers.pipe(
+          catchError((error) => {
+            log.warn("failed to read the columns for run for each file", error);
+            return of(null);
+          }),
+        ),
+      ),
+    );
   }
 
   /**
@@ -288,9 +353,9 @@ export class ToolSelectionService {
         // populate column_sel only for tsv files
         // FIXME should check type tag instead of name, atm would need sessionData for that
         // FIXME we have session data here these days
+        // keep the value for a table selected later, validateParameters() doesn't accept it for this file
         if (!datasets[0].name.endsWith(".tsv")) {
           parameter.selectionOptions = [];
-          parameter.value = null;
           return of(parameter);
         }
 
@@ -510,19 +575,87 @@ export class ToolSelectionService {
       this.rebindWithNewDatasetsAndValidate([dataset], toolWithInputs, sessionData),
     );
 
-    const allValid = validatedToolsForEachFile.every((validatedTool) => validatedTool.singleJobValidation.valid);
-
-    if (allValid) {
-      return { valid: true };
-    }
     const failCount = validatedToolsForEachFile.filter(
       (validatedTool) => !validatedTool.singleJobValidation.valid,
     ).length;
+    if (failCount > 0) {
+      return {
+        valid: false,
+        message: "Parameter or input checks failed for " + UtilsService.getCountAndUnit(failCount, "file") + ".",
+      };
+    }
 
-    return {
-      valid: false,
-      message: "Parameter or input checks failed for " + UtilsService.getCountAndUnit(failCount, "file") + ".",
-    };
+    const missingColumnMessage = this.getMissingColumnMessage(
+      toolWithInputs.tool,
+      validatedToolsForEachFile,
+      sessionData,
+    );
+    if (missingColumnMessage != null) {
+      return { valid: false, message: missingColumnMessage };
+    }
+    return { valid: true };
+  }
+
+  /**
+   * The parameters are not populated again for each file (rebindWithNewDatasetsAndValidate()), so
+   * each job would get the column chosen from the options of the first file. Tells which files don't
+   * have it, or null when all of them do.
+   *
+   * Only the columns of the files (COLUMN_SEL), not those of the phenodata (METACOLUMN_SEL): with
+   * several files selected, a tool that takes one file has no phenodata bound, so a phenodata column
+   * has no options and stays empty, which validateParameter() already refuses.
+   */
+  private getMissingColumnMessage(
+    tool: Tool,
+    validatedToolsForEachFile: ValidatedTool[],
+    sessionData: SessionData,
+  ): string | null {
+    for (const parameter of tool.parameters) {
+      if (parameter.type !== "COLUMN_SEL" || parameter.value == null) {
+        continue;
+      }
+      const filesWithout = validatedToolsForEachFile
+        .filter((validatedTool) => {
+          const options = this.getColumnOptions(validatedTool, sessionData);
+          return options != null && !this.toolService.selectionOptionsContains(options, parameter.value);
+        })
+        .map((validatedTool) => validatedTool.selectedDatasets[0].name);
+
+      if (filesWithout.length > 0) {
+        const shown = filesWithout.slice(0, 3).join(", ");
+        const more = filesWithout.length > 3 ? " and " + (filesWithout.length - 3) + " more" : "";
+        return (
+          "The column " +
+          parameter.value +
+          " chosen for " +
+          this.toolService.getDisplayName(parameter) +
+          " isn't in " +
+          shown +
+          more +
+          "."
+        );
+      }
+    }
+    return null;
+  }
+
+  /**
+   * The options that populateParameter() would give a COLUMN_SEL parameter with these bindings, from
+   * the cache of the column headers, or null when there are no files to take them from.
+   */
+  private getColumnOptions(
+    toolWithInputs: SelectedToolWithValidatedInputs,
+    sessionData: SessionData,
+  ): SelectionOption[] | null {
+    const datasets: Dataset[] = flatten(toolWithInputs.inputBindings.map((binding) => binding.datasets));
+    if (datasets.length === 0) {
+      return null;
+    }
+    // like populateParameter(), only .tsv files have columns
+    if (!datasets[0].name.endsWith(".tsv")) {
+      return [];
+    }
+    return flatten(datasets.map((dataset) => sessionData.cachedFileHeaders.get(dataset.datasetId) ?? []));
   }
 
   validateRunForEachSample(
