@@ -2,10 +2,11 @@ import { Component, OnDestroy, OnInit, DOCUMENT, computed, inject, input, signal
 import { toSignal } from "@angular/core/rxjs-interop";
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { Store } from "@ngrx/store";
-import { Category, Dataset, Module, SessionEvent, Tool } from "chipster-js-common";
+import { Category, Dataset, Module, Tool } from "chipster-js-common";
 import { NgSelectComponent, NgLabelTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
 import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
+import log from "loglevel";
 import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
 import { filter, map, startWith, switchMap, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -118,8 +119,6 @@ export class ToolsComponent implements OnInit, OnDestroy {
 
   readonly modulesArray = input<Module[]>(undefined); // stupid name, but modules used for internal copy
 
-  readonly modulesMap = input<Map<string, Module>>(undefined);
-
   readonly searchTool = viewChild<NgSelectComponent>("searchTool");
 
   private readonly unregisterHotkeys: Array<() => void> = [];
@@ -206,8 +205,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // TODO why the copies?
-    // this.tools = cloneDeep(this.toolsArray);
+    /*
+     * A copy, because the parameter values that the user changes are kept in the tool objects: the
+     * modules are cached for the whole app (ToolsService), and a session would get the values of the
+     * previous one. Every selection has to take the tool from this copy, also the ones by tool id
+     * (subscribeToToolEvents), or the values changed in one instance are missing from the other.
+     */
     this.modules = cloneDeep(this.modulesArray());
 
     this.toolSearchList = this.createToolSearchList();
@@ -411,10 +414,10 @@ export class ToolsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe))
       .subscribe((t: SelectedToolById) => {
         if (t != null) {
-          // get the tool from categroy based on the id
-          // other parts of the UI may have their own instances of tools,
-          // which don't have the saved parameter values
-          const module = this.modulesMap().get(t.moduleId);
+          // get the tool from this component's copy of the modules, the one the tool list shows, based
+          // on the id. Other parts of the UI may have their own instances of tools, which don't have
+          // the saved parameter values
+          const module = this.modules.find((m) => m.moduleId === t.moduleId);
 
           if (module == null) {
             this.errorService.showSimpleError(
@@ -423,7 +426,7 @@ export class ToolsComponent implements OnInit, OnDestroy {
             );
             return;
           }
-          const category = module.categoriesMap.get(t.categoryName);
+          const category = module.categories.find((c) => c.name === t.categoryName);
           if (category == null) {
             this.errorService.showSimpleError(
               "Category not found",
@@ -453,27 +456,37 @@ export class ToolsComponent implements OnInit, OnDestroy {
         }
       });
 
-    const selectedDatasetsContentsUpdated$ = this.sessionEventService
-      .getSelectedDatasetsContentsUpdatedStream()
-      .pipe(startWith(null as SessionEvent));
+    // an update of a selected dataset triggers the binding again, the data comes from the session data
+    const selectedDatasetsUpdated$ = this.sessionEventService
+      .getSelectedDatasetsUpdatedStream()
+      .pipe(startWith(null as string));
 
-    combineLatest([
-      this.store.select("selectedTool"),
-      this.store.select("selectedDatasets"),
-      selectedDatasetsContentsUpdated$, // triggers but data not
-    ])
+    combineLatest([this.store.select("selectedTool"), this.store.select("selectedDatasets"), selectedDatasetsUpdated$])
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
-          const uptodateDatasets = selectedDatasets.map((dataset): Dataset =>
-            this.sessionData().datasetsMap().get(dataset.datasetId),
-          );
+          /*
+           * The selection keeps the dataset objects that were selected, a dataset event replaces them
+           * in the session data, e.g. after a rename, or removes them. The bindings and the selected
+           * datasets have to be the same objects, because the input selections of the parameters modal
+           * and the binding changes compare them as objects.
+           */
+          const uptodateDatasets: Dataset[] = [];
+          for (const dataset of selectedDatasets) {
+            const latest = this.sessionData().datasetsMap().get(dataset.datasetId);
+            if (latest != null) {
+              uptodateDatasets.push(latest);
+            } else {
+              // a deleted dataset is dropped from the selection (SessionEventService), so this shouldn't happen
+              log.warn("selected dataset isn't in the session data, left out of the inputs", dataset.datasetId);
+            }
+          }
 
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,
             payload: {
               inputBindings: this.toolService.bindInputs(this.sessionData(), selectedTool.tool, uptodateDatasets),
-              selectedDatasets,
+              selectedDatasets: uptodateDatasets,
               ...selectedTool,
             },
           });
