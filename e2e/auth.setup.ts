@@ -1,6 +1,6 @@
 import { expect, test as setup } from "@playwright/test";
 
-import { ADMIN_STATE, login, USER_STATE } from "./login";
+import { ADMIN_STATE, EXAMPLE_OWNER_STATE, login, USER_STATE } from "./login";
 
 /*
  * Log in once per user and save the browser state, which holds the token, for
@@ -20,4 +20,10 @@ setup("log in as an admin", async ({ page }) => {
   await login(page, "admin", "admin");
   await expect(page).toHaveURL(/\/sessions$/);
   await page.context().storageState({ path: ADMIN_STATE });
+});
+
+setup("log in as the owner of the example sessions", async ({ page }) => {
+  await login(page, "example_session_owner", "example_session_owner");
+  await expect(page).toHaveURL(/\/sessions$/);
+  await page.context().storageState({ path: EXAMPLE_OWNER_STATE });
 });
