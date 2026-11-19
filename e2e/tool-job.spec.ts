@@ -123,9 +123,9 @@ test.describe("the job is what the tool panel shows, whatever the order of the s
     },
     {
       /*
-       * The tool list and the tool search can give different instances of the same tool: the tool
-       * list starts from a copy of the modules (ToolsComponent.ngOnInit), the search takes the tool
-       * from the modules map. A changed parameter value is kept in the tool instance.
+       * A changed parameter value is kept in the tool instance, so the tool list and the tool search
+       * have to give the same instance. They didn't: the tool list started from a copy of the modules
+       * (ToolsComponent.ngOnInit), the search took the tool from the modules map.
        */
       name: "parameter with the tool from the tool list, then the tool again with the search",
       steps: async (s) => {
@@ -330,10 +330,12 @@ test.describe("the job is what the tool panel shows, also right after a change",
     await datasetNode(page, fileId).click();
     await expect(runButton(page)).toBeEnabled();
 
-    // the page learns about the delete from the dataset event: the file stays in the selection, but
-    // the tool can't be run with it (ToolsComponent binds the inputs again from the session data)
+    // the page learns about the delete from the dataset event: the file is dropped from the selection
+    // (SessionEventService), and the tool can't be run without it
     await deleteDataset(api, sessionId, fileId);
     await expect(runButton(page)).toBeDisabled();
+    // the selected files panel is gone, or stays without the file in the layout with the tools panel
+    await expect(page.locator("ch-selected-files", { hasText: "a.tsv" })).toHaveCount(0);
     await expect(toolsPanel(page).locator(".fa-exclamation-circle.text-warning")).toBeVisible();
     await waitForDevCheck(page);
   });

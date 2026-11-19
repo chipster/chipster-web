@@ -6,6 +6,7 @@ import { Category, Dataset, Module, Tool } from "chipster-js-common";
 import { NgSelectComponent, NgLabelTemplateDirective, NgOptionTemplateDirective } from "@ng-select/ng-select";
 import { HotkeyService } from "../../../../shared/services/hotkey.service";
 import { cloneDeep } from "lodash-es";
+import log from "loglevel";
 import { BehaviorSubject, Subject, combineLatest, of } from "rxjs";
 import { filter, map, startWith, switchMap, takeUntil } from "rxjs/operators";
 import { ErrorService } from "../../../../core/errorhandler/error.service";
@@ -455,12 +456,12 @@ export class ToolsComponent implements OnInit, OnDestroy {
         }
       });
 
-    // the events of the selected datasets trigger the binding again, the data comes from the session data
-    const selectedDatasetsEvent$ = this.sessionEventService
-      .getSelectedDatasetsEventStream()
+    // an update of a selected dataset triggers the binding again, the data comes from the session data
+    const selectedDatasetsUpdated$ = this.sessionEventService
+      .getSelectedDatasetsUpdatedStream()
       .pipe(startWith(null as string));
 
-    combineLatest([this.store.select("selectedTool"), this.store.select("selectedDatasets"), selectedDatasetsEvent$])
+    combineLatest([this.store.select("selectedTool"), this.store.select("selectedDatasets"), selectedDatasetsUpdated$])
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(([selectedTool, selectedDatasets]) => {
         if (selectedTool) {
@@ -470,10 +471,16 @@ export class ToolsComponent implements OnInit, OnDestroy {
            * datasets have to be the same objects, because the input selections of the parameters modal
            * and the binding changes compare them as objects.
            */
-          const uptodateDatasets = selectedDatasets
-            .map((dataset): Dataset => this.sessionData().datasetsMap().get(dataset.datasetId))
-            // a dataset deleted elsewhere while it's selected: the selection keeps it until it changes
-            .filter((dataset) => dataset != null);
+          const uptodateDatasets: Dataset[] = [];
+          for (const dataset of selectedDatasets) {
+            const latest = this.sessionData().datasetsMap().get(dataset.datasetId);
+            if (latest != null) {
+              uptodateDatasets.push(latest);
+            } else {
+              // a deleted dataset is dropped from the selection (SessionEventService), so this shouldn't happen
+              log.warn("selected dataset isn't in the session data, left out of the inputs", dataset.datasetId);
+            }
+          }
 
           this.store.dispatch({
             type: SET_SELECTED_TOOL_WITH_INPUTS,

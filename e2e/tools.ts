@@ -37,7 +37,11 @@ export function parametersModal(page: Page): Locator {
   return page.locator("ch-parameters-modal");
 }
 
-// selects a tool with the tool search, by its id, which is unique unlike the display names
+/*
+ * Selects a tool with the tool search, by its id: display names repeat within a module, e.g.
+ * "Table converter" is in two categories of NGS. The same id can be in several modules too, and
+ * then this selects the first one in the module order, as the search lists them.
+ */
 export async function searchTool(page: Page, toolId: string): Promise<void> {
   const search = toolsPanel(page).locator("#searchTool input");
   await search.fill(toolId);
@@ -164,8 +168,11 @@ export async function readParametersModal(page: Page): Promise<ShownState> {
 
     const parameters: Record<string, string> = {};
     for (const tr of rows("ch-tool-parameters")) {
-      const field = tr.querySelector("input, select") as HTMLInputElement | HTMLSelectElement;
-      parameters[name(tr.cells[0])] = field.value;
+      // the template has no field for a parameter of another type (INPUT_SEL): see shownStateOfJob()
+      const field = tr.querySelector("input, select") as HTMLInputElement | HTMLSelectElement | null;
+      if (field != null) {
+        parameters[name(tr.cells[0])] = field.value;
+      }
     }
     const inputs: Record<string, string[]> = {};
     for (const tr of rows("ch-tool-inputs")) {
@@ -190,16 +197,22 @@ export async function readParametersModal(page: Page): Promise<ShownState> {
  * The same view of a job, to compare it with what the modal showed. The modal names a parameter or
  * an input like ToolService.getDisplayName(): the display name, or the id without one. The files of
  * a multi input (INPUT reads{...}.fq) are separate inputs of the job, reads001.fq, reads002.fq and
- * so on (ToolService.getMultiInputId()), and the modal shows them as one input, reads.fq.
+ * so on (ToolService.getMultiInputId()), and the modal shows them as one input, reads.fq. The job
+ * doesn't tell which inputs are multi inputs, so the last run of three or more digits is taken as
+ * the number of one: an input without a display name whose id has three digits in a row anyway
+ * wouldn't match. The parameters that the modal shows no field for (INPUT_SEL) are left out, like
+ * readParametersModal() leaves them out.
  */
 export function shownStateOfJob(job: Job): ShownState {
   const parameters: Record<string, string> = {};
   for (const parameter of job.parameters) {
-    parameters[parameter.displayName ?? parameter.parameterId] = String(parameter.value);
+    if (parameter.type !== "INPUT_SEL") {
+      parameters[parameter.displayName ?? parameter.parameterId] = String(parameter.value);
+    }
   }
   const inputs: Record<string, string[]> = {};
   for (const input of job.inputs) {
-    const key = input.displayName ?? input.inputId.replace(/\d{3,}(?=[^\d]*$)/, "");
+    const key = input.displayName ?? input.inputId.replace(/\d{3,}(?!.*\d{3,})/, "");
     inputs[key] = [...(inputs[key] ?? []), input.datasetName];
   }
   return { parameters, inputs };

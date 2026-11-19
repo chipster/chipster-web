@@ -19,6 +19,7 @@ import { ErrorService } from "../../../core/errorhandler/error.service";
 import { SessionData } from "../../../model/session/session-data";
 import { SessionResource } from "../../../shared/resources/session.resource";
 import { WebSocketService } from "../../../shared/services/websocket.service";
+import { SelectionHandlerService } from "./selection-handler.service";
 import { SelectionService } from "./selection.service";
 import { FileState } from "chipster-js-common/lib/model/dataset";
 import UtilsService from "../../../shared/utilities/utils";
@@ -29,6 +30,7 @@ export class SessionEventService {
   private websocketService = inject(WebSocketService);
   private errorService = inject(ErrorService);
   private selectionService = inject(SelectionService);
+  private selectionHandlerService = inject(SelectionHandlerService);
 
   sessionId: string;
 
@@ -190,17 +192,17 @@ export class SessionEventService {
   }
 
   /*
-   * The ids of the selected datasets that were updated or deleted elsewhere. The selection keeps
-   * the dataset objects it was made with (the visualizations show the selected dataset, and
-   * replacing the object would render it again), so this tells when the session data has a newer
-   * one, or none. A delete made here clears the selection first (SessionDataService).
+   * The ids of the selected datasets that were updated elsewhere. The selection keeps the dataset
+   * objects it was made with (the visualizations show the selected dataset, and replacing the object
+   * would render it again), so this tells when the session data has a newer one. A deleted dataset is
+   * dropped from the selection instead (handleDatasetEvent()), which changes the selection itself.
    */
-  getSelectedDatasetsEventStream(): Observable<string> {
+  getSelectedDatasetsUpdatedStream(): Observable<string> {
     return this.getDatasetStream().pipe(
       filter(
         (sessionEvent) =>
           sessionEvent != null &&
-          (sessionEvent.event.type === EventType.Update || sessionEvent.event.type === EventType.Delete) &&
+          sessionEvent.event.type === EventType.Update &&
           sessionEvent.event.resourceType === Resource.Dataset &&
           this.selectionService.isSelectedDatasetById(sessionEvent.event.resourceId),
       ),
@@ -323,6 +325,15 @@ export class SessionEventService {
     if (event.type === EventType.Delete) {
       const localCopy = sessionData.datasetsMap().get(event.resourceId);
       sessionData.datasetsMap.update((m) => UtilsService.mapWithout(m, event.resourceId));
+      /*
+       * A dataset deleted elsewhere while it's selected: drop it from the selection, as a delete made
+       * here does before its event (SessionDataService), so that the rest of the UI doesn't keep it as
+       * selected. Done here, before the event reaches anyone, so the selection has changed by then.
+       */
+      const deleted = this.selectionService.selectedDatasets.filter((d) => d.datasetId === event.resourceId);
+      if (deleted.length > 0) {
+        this.selectionHandlerService.toggleDatasetSelection(deleted);
+      }
       return this.createEvent(event, localCopy, null);
     }
     log.warn("unknown event type", event);

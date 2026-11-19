@@ -89,6 +89,8 @@ export class ToolParametersComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       parameter.value = defaultValue;
     }
+    // signalled right away, nothing for the debounce or the destroy to flush
+    this.changePending = false;
     this.parametersChanged.emit();
   }
 
