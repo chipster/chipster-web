@@ -20,6 +20,8 @@ export const EXTERNAL_AUTH_DIR = process.env.E2E_AUTH_DIR;
 const AUTH_DIR = EXTERNAL_AUTH_DIR || join(__dirname, "../playwright/.auth");
 export const USER_STATE = join(AUTH_DIR, "chipster.json");
 export const ADMIN_STATE = join(AUTH_DIR, "admin.json");
+// the owner of the example sessions, whose pages no test opens
+export const EXAMPLE_OWNER_STATE = join(AUTH_DIR, "example_session_owner.json");
 
 /*
  * Refuse an E2E_AUTH_DIR that can't work, before any test starts: called from
@@ -29,9 +31,9 @@ export const ADMIN_STATE = join(AUTH_DIR, "admin.json");
  * - The directory has to be an absolute path: a relative one would be resolved
  *   against the directory Playwright is run in, and a ~ in quotes isn't
  *   expanded, both of which could put the tokens in the checkout after all.
- * - Both states have to be there. Without the setup project nothing creates
- *   them, and a missing admin state would fail the admin specs only when they
- *   open their admin context, in the middle of the run.
+ * - All the states have to be there. Without the setup project nothing
+ *   creates them, and a missing one would fail the tests that use it only when
+ *   they open their context, in the middle of the run.
  * - The states have to be for the origin of baseURL: Playwright puts the
  *   localStorage of a state only into pages of the origin the state was saved
  *   for, so with another origin (a different host, scheme or port, or a
@@ -46,7 +48,7 @@ export function validateExternalAuthDir(baseURL: string): void {
     throw new Error(`E2E_AUTH_DIR has to be an absolute path, not "${EXTERNAL_AUTH_DIR}"`);
   }
   const origin = new URL(baseURL).origin;
-  for (const state of [USER_STATE, ADMIN_STATE]) {
+  for (const state of [USER_STATE, ADMIN_STATE, EXAMPLE_OWNER_STATE]) {
     if (!existsSync(state)) {
       throw new Error(`E2E_AUTH_DIR is set, but there is no login state ${state}`);
     }

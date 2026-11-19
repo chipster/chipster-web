@@ -10,10 +10,11 @@ import {
   createSession,
   datasetNode,
   getDatasetContent,
+  getApi,
   getDatasets,
   getSession,
-  loginApi,
 } from "./session-api";
+import { EXAMPLE_OWNER_STATE } from "./login";
 import { readZip } from "./zip";
 
 /*
@@ -230,7 +231,7 @@ test("an example session opens as a temporary copy in the sessions list", async 
 }) => {
   // a new connection for every request, see the api fixture
   const request = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Connection: "close" } });
-  const owner = await loginApi(request, "example_session_owner", "example_session_owner");
+  const owner = await getApi(request, EXAMPLE_OWNER_STATE);
   // unique, so that the row and the cleanup find only the sessions of this test
   const name = `e2e example ${randomUUID()}`;
   const content = "gene\tvalue\ng1\t1\ng2\t2\n";
