@@ -12,9 +12,12 @@ import {
   inputField,
   openParametersModal,
   parameterField,
+  parameterOptions,
   parametersModal,
   readParametersModal,
   runButton,
+  runIsMenu,
+  runMenuItem,
   searchTool,
   setParameter,
   shownStateOfJob,
@@ -46,15 +49,32 @@ const TABLE_CONVERTER_DEFAULTS = {
 // a tool with a column parameter, whose options are the column headers of the input file
 const FILTER_BY_COLUMN = "filter-by-column-value.R";
 
+// Merge tables, a tool with one multi input (INPUT table{...}.tsv) and one parameter
+const MERGE_TABLES = "merge-tables.R";
+
 /*
- * Opens the parameters modal, reads what it shows, closes it and runs the tool with the Run button.
- * Returns the posted job, after checking that it's what the modal showed.
+ * Average replicate chips, a tool with a phenodata input and a column parameter whose options are
+ * the columns of the phenodata (METACOLUMN_SEL), with the default column group. Its input has to be
+ * a table of gene expressions, i.e. have columns with the prefix chip. (type-service).
  */
-async function runAsShown(page: Page, captured: CapturedJobs, n = captured.posts.length + 1): Promise<Job> {
+const AVERAGE_REPLICATES = "average-replicates.R";
+const EXPRESSIONS = "identifier\tchip.s1\tchip.s2\ng1\t1\t2\n";
+
+/*
+ * Opens the parameters modal, reads what it shows, closes it and runs the tool as one job with the
+ * Run button, or with Run tool in its menu, which it is when the tool could also be run for each file
+ * or sample. Returns the posted job, after checking that it's what the modal showed.
+ */
+async function runAsShown(page: Page, captured: CapturedJobs): Promise<Job> {
   await openParametersModal(page);
   const shown = await readParametersModal(page);
   await closeParametersModal(page);
+  const n = captured.posts.length + 1;
+  const menu = await runIsMenu(page);
   await runButton(page).click();
+  if (menu) {
+    await runMenuItem(page, "Run tool").click();
+  }
   const [job] = await captured.waitForPost(n);
   expect(shownStateOfJob(job), "the job compared with the parameters modal").toEqual(shown);
   return job;
@@ -315,6 +335,114 @@ test.describe("the job is what the tool panel shows, also right after a change",
     await deleteDataset(api, sessionId, fileId);
     await expect(runButton(page)).toBeDisabled();
     await expect(toolsPanel(page).locator(".fa-exclamation-circle.text-warning")).toBeVisible();
+    await waitForDevCheck(page);
+  });
+});
+
+test.describe("the job is what the parameters modal shows, also with a multi input and phenodata", () => {
+  test("a multi input takes every selected file, and can't run as one job with one left out", async ({
+    page,
+    api,
+    baseURL,
+    sessionId,
+  }) => {
+    const [a, b, c] = await Promise.all(
+      ["a", "b", "c"].map((name, i) =>
+        createDataset(api, sessionId, { name: `${name}.tsv`, x: 100 + 200 * i, y: 100 }, TABLE),
+      ),
+    );
+    await openSession(page, sessionId, a);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await datasetNode(page, a).click();
+    await datasetNode(page, b).click({ modifiers: ["ControlOrMeta"] });
+    await searchTool(page, MERGE_TABLES);
+
+    const input = () => inputField(page, "Tables to merge").locator("option:checked");
+    await openParametersModal(page);
+    await expect(input()).toHaveText(["a.tsv", "b.tsv"]);
+    await closeParametersModal(page);
+
+    // a file added to the selection is bound too
+    await datasetNode(page, c).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files")).toContainText("3 files");
+    await openParametersModal(page);
+    await expect(input()).toHaveText(["a.tsv", "b.tsv", "c.tsv"]);
+
+    /*
+     * The user leaves b.tsv out in the modal. A tool has to take every selected file
+     * (ToolSelectionService.validateInputs), so it can't be run as one job then, only for each file.
+     */
+    await inputField(page, "Tables to merge").selectOption([{ label: "a.tsv" }, { label: "c.tsv" }]);
+    await expect(input()).toHaveText(["a.tsv", "c.tsv"]);
+    await closeParametersModal(page);
+    await runButton(page).click();
+    await expect(runMenuItem(page, "Run tool")).toBeDisabled();
+    await expect(runMenuItem(page, "Run tool for each file")).toContainText("3 jobs");
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".dropdown-menu.show")).toBeHidden();
+
+    // b.tsv taken out of the file selection instead: the input gets the rest of the files
+    await datasetNode(page, b).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files")).toContainText("2 files");
+    await openParametersModal(page);
+    await expect(input()).toHaveText(["a.tsv", "c.tsv"]);
+    await closeParametersModal(page);
+    await setParameter(page, "Include all the rows in the result file", "yes");
+
+    /*
+     * The files of a multi input are separate inputs of the job, numbered like the tool reads them.
+     * Run is a menu with several files, and runAsShown() runs the tool as one job from it.
+     */
+    const job = await runAsShown(page, captured);
+    expect(job.inputs.map((i) => [i.inputId, i.datasetId])).toEqual([
+      ["table001.tsv", a],
+      ["table002.tsv", c],
+    ]);
+    expect(shownStateOfJob(job).parameters).toEqual({ "Include all the rows in the result file": "yes" });
+    await waitForDevCheck(page);
+  });
+
+  test("the phenodata column follows the phenodata of the selected file", async ({ page, api, baseURL, sessionId }) => {
+    const phenodataA = "sample\tgroup\ttreatment\nchip.s1\t1\tx\nchip.s2\t2\ty\n";
+    const phenodataB = "sample\ttime\tdescription\nchip.s1\t0\tfirst\nchip.s2\t1\tsecond\n";
+    const withPhenodata = (name: string, x: number, phenodata: string) => ({
+      name,
+      x,
+      y: 100,
+      metadataFiles: [{ name: "phenodata.tsv", content: phenodata }],
+    });
+    const a = await createDataset(api, sessionId, withPhenodata("a.tsv", 100, phenodataA), EXPRESSIONS);
+    const b = await createDataset(api, sessionId, withPhenodata("b.tsv", 300, phenodataB), EXPRESSIONS);
+    await openSession(page, sessionId, a);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await datasetNode(page, a).click();
+    await searchTool(page, AVERAGE_REPLICATES);
+
+    // the options are the columns of a.tsv's phenodata, and the default column is one of them
+    const modal = await openParametersModal(page);
+    await expect.poll(() => parameterOptions(page, "Column")).toEqual(["sample", "group", "treatment"]);
+    await expect(parameterField(page, "Column")).toHaveValue("group");
+    await expect(modal.locator("ch-tool-inputs")).toContainText("Using phenodata of a.tsv");
+    await closeParametersModal(page);
+    await setParameter(page, "Column", "treatment");
+
+    // b.tsv's phenodata has neither the chosen column nor the default, so the user has to choose
+    await datasetNode(page, b).click();
+    await expect(page.locator("ch-selected-files")).toContainText("b.tsv");
+    await expect(runButton(page)).toBeDisabled();
+    await openParametersModal(page);
+    await expect.poll(() => parameterOptions(page, "Column")).toEqual(["sample", "time", "description"]);
+    await expect(parameterField(page, "Column")).toHaveValue("");
+    await expect(modal.locator("ch-tool-inputs")).toContainText("Using phenodata of b.tsv");
+    await closeParametersModal(page);
+    await setParameter(page, "Column", "time");
+    await expect(runButton(page)).toBeEnabled();
+
+    // the job gets the phenodata of the file it runs on
+    const job = await runAsShown(page, captured);
+    expect(job.inputs.map((i) => i.datasetId)).toEqual([b]);
+    expect(shownStateOfJob(job).parameters["Column"]).toBe("time");
+    expect(job.metadataFiles).toEqual([{ name: "phenodata.tsv", content: phenodataB }]);
     await waitForDevCheck(page);
   });
 });

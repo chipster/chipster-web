@@ -19,6 +19,20 @@ export function runButton(page: Page): Locator {
   return toolsPanel(page).locator(".run-button");
 }
 
+// whether the Run button opens a menu: when the tool could be run for each file or sample too
+export async function runIsMenu(page: Page): Promise<boolean> {
+  return (await toolsPanel(page).locator("#runDropdownButton").count()) > 0;
+}
+
+/*
+ * An item of the open menu of the Run button, by its name without the job count that it shows when
+ * it's enabled: "Run tool", "Run tool for each file" or "Run tool for each sample". The menu is in
+ * the body, not in the tool panel.
+ */
+export function runMenuItem(page: Page, name: string): Locator {
+  return page.locator(".dropdown-menu.show").getByRole("button", { name: new RegExp(`^${name}( \\d+ jobs?)?$`) });
+}
+
 export function parametersModal(page: Page): Locator {
   return page.locator("ch-parameters-modal");
 }
@@ -79,6 +93,11 @@ function xpathString(text: string): string {
 // the input or select of a parameter in the open parameters modal, by its display name
 export function parameterField(page: Page, name: string): Locator {
   return row(parametersModal(page).locator("ch-tool-parameters"), name).locator("input, select");
+}
+
+// the options of a selection parameter in the open parameters modal, by their texts
+export async function parameterOptions(page: Page, name: string): Promise<string[]> {
+  return (await parameterField(page, name).locator("option").allTextContents()).map((text) => text.trim());
 }
 
 // the file selection of a tool input in the open parameters modal, by its display name
