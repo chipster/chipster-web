@@ -24,6 +24,8 @@ export class SessionData {
   readonly labelsMap = signal<ReadonlyMap<string, Label>>(new Map());
   readonly datasetTypeTags = signal<ReadonlyMap<string, Map<string, string>>>(new Map());
   cachedFileHeaders = new Map<string, Array<SelectionOption>>();
+  // the datasets whose latest read of the column headers failed, to tell that from a read still running
+  failedFileHeaders = new Set<string>();
 
   /**
    * The latest copies of the datasets from datasetsMap: the datasets of the selection aren't

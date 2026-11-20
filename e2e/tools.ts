@@ -115,9 +115,10 @@ export function inputField(page: Page, name: string): Locator {
  * warning that tells why when the option isn't possible.
  */
 export function runOption(page: Page, name: string): Locator {
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return parametersModal(page)
     .locator("ch-run-options tbody > tr")
-    .filter({ has: page.locator("td", { hasText: new RegExp(`^\\s*${name}\\s*$`) }) })
+    .filter({ has: page.locator("td", { hasText: new RegExp(`^\\s*${escapedName}\\s*$`) }) })
     .locator("td")
     .last();
 }

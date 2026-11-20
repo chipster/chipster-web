@@ -843,6 +843,109 @@ test.describe("the jobs are what the Run menu and the run options say", () => {
     await waitForDevCheck(page);
   });
 
+  test("a file whose columns can't be read doesn't stop the parameters of the next selection", async ({
+    page,
+    api,
+    baseURL,
+    sessionId,
+    pageErrors,
+  }) => {
+    const a = await createDataset(api, sessionId, { name: "a.tsv", x: 100, y: 100 }, "x\ty\n1\t2\n");
+    const b = await createDataset(api, sessionId, { name: "b.tsv", x: 300, y: 100 }, "x\ty\n1\t2\n");
+    await openSession(page, sessionId, b);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+
+    // the request for the content of b.tsv fails, now when it's the file the options come from
+    const path = `/sessions/${sessionId}/datasets/${b}`;
+    pageErrors.allowFailedRequest(500, "file-broker", path);
+    // the visualization of the selected b.tsv can't load it either
+    pageErrors.allowErrorMessage("Loading data failed");
+    await page.route(
+      (url) => url.pathname.endsWith(path),
+      (route) => route.fulfill({ status: 500, body: "test failure" }),
+    );
+    await datasetNode(page, b).click();
+    await searchTool(page, FILTER_BY_COLUMN);
+    await openParametersModal(page);
+    await expect.poll(() => parameterOptions(page, "Column")).toEqual([]);
+    await closeParametersModal(page);
+    await expect(runButton(page)).toBeDisabled();
+
+    // the columns of the next file are still read
+    await datasetNode(page, a).click();
+    await expect(page.locator("ch-selected-files")).toContainText("a.tsv");
+    await setParameter(page, "Column", "y");
+    const job = await runAsShown(page, captured);
+    expect(job.inputs.map((input) => input.datasetId)).toEqual([a]);
+    expect(shownStateOfJob(job).parameters["Column"]).toBe("y");
+    await waitForDevCheck(page);
+  });
+
+  test("the parameters don't wait for the columns of the other selected files", async ({
+    page,
+    api,
+    baseURL,
+    sessionId,
+  }) => {
+    const a = await createDataset(api, sessionId, { name: "a.tsv", x: 100, y: 100 }, "x\ty\n1\t2\n");
+    const b = await createDataset(api, sessionId, { name: "b.tsv", x: 300, y: 100 }, "x\ty\n1\t2\n");
+    await openSession(page, sessionId, a);
+    const captured = await captureJobs(page, api, baseURL, sessionId);
+    await datasetNode(page, a).click();
+    await searchTool(page, FILTER_BY_COLUMN);
+    await setParameter(page, "Column", "y");
+
+    // the columns of b.tsv are needed only for Run tool for each file
+    const headers = await delayFile(page, api, baseURL, sessionId, b);
+    await datasetNode(page, b).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files")).toContainText("2 files");
+    await expectHeld(headers.held, "the content of b.tsv");
+
+    // the run options are already those of the two files
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText("Reading the columns of b.tsv…");
+    await closeParametersModal(page);
+    headers.release();
+
+    await openParametersModal(page);
+    await expect(runOption(page, "Run Tool for Each File")).toContainText("Runs the tool 2 times.");
+    await closeParametersModal(page);
+    const jobs = await runFromMenu(page, captured, "Run tool for each file", 2);
+    expect(jobs.map((job) => [job.inputs[0].datasetId, shownStateOfJob(job).parameters["Column"]])).toEqual([
+      [a, "y"],
+      [b, "y"],
+    ]);
+    await waitForDevCheck(page);
+  });
+
+  test("Run tool for each sample isn't possible when a parameter is invalid", async ({ page, api, sessionId }) => {
+    // single end samples, defined like the samples modal does (DatasetService.setSampleData)
+    const sampleFile = (sample: string, x: number) => ({
+      name: `${sample}.tsv`,
+      x,
+      y: 100,
+      metadataFiles: [
+        { name: "sample.json", content: JSON.stringify({ sampleName: sample, sampleId: `id-${sample}` }) },
+      ],
+    });
+    const s1 = await createDataset(api, sessionId, sampleFile("s1", 100), "x\ty\n1\t2\n");
+    const s2 = await createDataset(api, sessionId, sampleFile("s2", 300), "x\ty\n1\t2\n");
+    await openSession(page, sessionId, s1);
+    await selectFiles(page, [s1, s2]);
+
+    // Column is required and has no default, so it stays empty
+    await searchTool(page, FILTER_BY_COLUMN);
+    await openParametersModal(page);
+    await expect(parameterField(page, "Column")).toHaveValue("");
+    await expect(runOption(page, "Run Tool for Each File")).toHaveText("Parameter or input checks failed for 2 files.");
+    await expect(runOption(page, "Run Tool for Each Sample")).toHaveText(
+      "Parameter or input checks failed for 2 samples.",
+    );
+    await closeParametersModal(page);
+    await expect(runButton(page)).toBeDisabled();
+    await waitForDevCheck(page);
+  });
+
   test("Run tool for each sample runs the tool with the two files of each sample", async ({
     page,
     api,

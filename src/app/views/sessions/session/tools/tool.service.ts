@@ -1,7 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { Dataset, InputBinding, Job, Tool, ToolInput, ToolParameter } from "chipster-js-common";
 import { difference } from "lodash-es";
-import { Observable, of } from "rxjs";
+import { Observable, defer, of } from "rxjs";
 import { map, tap } from "rxjs/operators";
 import { PhenodataBinding } from "../../../../model/session/phenodata-binding";
 import { SessionData } from "../../../../model/session/session-data";
@@ -255,9 +255,15 @@ export class ToolService {
         return of(sessionData.cachedFileHeaders.get(dataset.datasetId));
       }
 
-      return this.tsvService
-        .getTSV2FileHeaders(dataset, sessionData)
-        .pipe(tap((headers) => sessionData.cachedFileHeaders.set(dataset.datasetId, headers)));
+      return defer(() => {
+        sessionData.failedFileHeaders.delete(dataset.datasetId);
+        return this.tsvService.getTSV2FileHeaders(dataset, sessionData);
+      }).pipe(
+        tap({
+          next: (headers) => sessionData.cachedFileHeaders.set(dataset.datasetId, headers),
+          error: () => sessionData.failedFileHeaders.add(dataset.datasetId),
+        }),
+      );
     });
   }
 

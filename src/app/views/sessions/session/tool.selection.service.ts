@@ -1,10 +1,10 @@
 import { Injectable, inject } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, InputBinding, Module, Tool, ToolParameter } from "chipster-js-common";
-import { flatten, uniq } from "lodash-es";
+import { flatten, uniqBy } from "lodash-es";
 import log from "loglevel";
-import { Observable, forkJoin, forkJoin as observableForkJoin, of } from "rxjs";
-import { catchError, map, take } from "rxjs/operators";
+import { Observable, concat, forkJoin, forkJoin as observableForkJoin, from, of } from "rxjs";
+import { catchError, map, mergeAll, take, toArray } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
 import { JobQuota, SchedulerResource } from "../../../shared/resources/scheduler-resource";
@@ -28,6 +28,9 @@ import { ToolService } from "./tools/tool.service";
 
 @Injectable({ providedIn: "root" })
 export class ToolSelectionService {
+  // how many of the other selected files readColumnsOfOtherFiles() reads at a time
+  private static readonly CONCURRENT_COLUMN_READS = 4;
+
   private toolService = inject(ToolService);
   private getSessionDataService = inject(GetSessionDataService);
   private datasetService = inject(DatasetService);
@@ -251,10 +254,14 @@ export class ToolSelectionService {
       const populateParameterObservables = selectedToolWithInputs.tool.parameters.map((parameter: ToolParameter) =>
         this.populateParameter(parameter, boundDatasets, boundPhenodatas, sessionData),
       );
-      return forkJoin([
-        forkJoin(populateParameterObservables),
-        this.readColumnsOfOtherFiles(selectedToolWithInputs, boundDatasets, sessionData),
-      ]).pipe(map(() => selectedToolWithInputs));
+      const populated = forkJoin(populateParameterObservables).pipe(map(() => selectedToolWithInputs));
+      const otherColumnsRead = this.readColumnsOfOtherFiles(selectedToolWithInputs, boundDatasets, sessionData);
+      if (otherColumnsRead == null) {
+        return populated;
+      }
+      // the parameters don't wait for the other files: emit again when their columns have been read,
+      // as a new object, so that the store passes it on and the run options are validated again
+      return concat(populated, otherColumnsRead.pipe(map(() => ({ ...selectedToolWithInputs }))));
     }
     return of(selectedToolWithInputs);
   }
@@ -264,14 +271,16 @@ export class ToolSelectionService {
    * sample run the tool with the other selected files too, and getMissingColumnMessage() checks that
    * each of them has the chosen column. Read the columns of the other selected .tsv files into the
    * cache for that, as populateParameter() does for the bound ones, but only when the tool could be
-   * run for each file (at most one required input) or for each sample (sample files selected): the
-   * parameters wait for these reads.
+   * run for each file (at most one required input) or for each sample (sample files selected).
+   *
+   * Emits once when all have been read or failed, or returns null when there is nothing to read. With
+   * dozens of files selected, a few are read at a time.
    */
   private readColumnsOfOtherFiles(
     selectedToolWithInputs: SelectedToolWithValidatedInputs,
     boundDatasets: Dataset[],
     sessionData: SessionData,
-  ): Observable<unknown> {
+  ): Observable<unknown> | null {
     const selectedDatasets = selectedToolWithInputs.selectedDatasets ?? [];
     const tool = selectedToolWithInputs.tool;
     const hasColumnParameter = tool.parameters.some((parameter) => parameter.type === "COLUMN_SEL");
@@ -280,29 +289,31 @@ export class ToolSelectionService {
       (dataset) => this.datasetService.getMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME) != null,
     );
     const boundIds = boundDatasets.map((dataset) => dataset.datasetId);
-    const otherTables = selectedDatasets.filter(
-      (dataset) => this.hasColumns(dataset) && !boundIds.includes(dataset.datasetId),
+    const unreadTables = selectedDatasets.filter(
+      (dataset) =>
+        this.hasColumns(dataset) &&
+        !boundIds.includes(dataset.datasetId) &&
+        !sessionData.cachedFileHeaders.has(dataset.datasetId),
     );
     if (
       !hasColumnParameter ||
       selectedDatasets.length < 2 ||
       !(runForEachFilePossible || runForEachSamplePossible) ||
-      otherTables.length === 0
+      unreadTables.length === 0
     ) {
-      // forkJoin of nothing would complete without a value
-      return of(null);
+      return null;
     }
-    return forkJoin(
-      this.toolService.getDatasetHeadersForParameter(otherTables, sessionData).map((headers) =>
-        headers.pipe(
-          // not cached then, and getMissingColumnMessage() tells that the columns couldn't be read
-          catchError((error) => {
-            log.warn("failed to read the columns for run for each file or sample", error);
-            return of(null);
-          }),
-        ),
+    const reads = this.toolService.getDatasetHeadersForParameter(unreadTables, sessionData).map((headers) =>
+      headers.pipe(
+        // not cached then, and getMissingColumnMessage() tells that the columns couldn't be read
+        catchError((error) => {
+          log.warn("failed to read the columns for run for each file or sample", error);
+          return of(null);
+        }),
       ),
     );
+    // toArray() emits once, also when the reads complete without a value
+    return from(reads).pipe(mergeAll(ToolSelectionService.CONCURRENT_COLUMN_READS), toArray());
   }
 
   /**
@@ -357,6 +368,14 @@ export class ToolSelectionService {
             parameter.selectionOptions = selectionOptions;
             this.setColumnSelectionParameterValueAfterPopulate(parameter);
             return parameter;
+          }),
+          // an error would end the subscription that populates the parameters of every later
+          // selection: no options then, as for a file that isn't a table
+          catchError((error) => {
+            log.warn("failed to read the columns of the bound files", error);
+            parameter.selectionOptions = [];
+            parameter.value = null;
+            return of(parameter);
           }),
         );
       }
@@ -609,14 +628,19 @@ export class ToolSelectionService {
       if (parameter.type !== "COLUMN_SEL" || parameter.value == null) {
         continue;
       }
-      // the tables whose columns readColumnsOfOtherFiles() couldn't read
-      const unread = uniq(
-        flatten(reboundTools.map((reboundTool) => this.getBoundDatasets(reboundTool)))
-          .filter((dataset) => this.hasColumns(dataset) && !sessionData.cachedFileHeaders.has(dataset.datasetId))
-          .map((dataset) => dataset.name),
+      // the tables whose columns readColumnsOfOtherFiles() couldn't read, or is still reading
+      const unread = uniqBy(
+        flatten(reboundTools.map((reboundTool) => this.getBoundDatasets(reboundTool))).filter(
+          (dataset) => this.hasColumns(dataset) && !sessionData.cachedFileHeaders.has(dataset.datasetId),
+        ),
+        (dataset) => dataset.datasetId,
       );
+      const failed = unread.filter((dataset) => sessionData.failedFileHeaders.has(dataset.datasetId));
+      if (failed.length > 0) {
+        return "The columns of " + list(failed.map((dataset) => dataset.name)) + " couldn't be read.";
+      }
       if (unread.length > 0) {
-        return "The columns of " + list(unread) + " couldn't be read.";
+        return "Reading the columns of " + list(unread.map((dataset) => dataset.name)) + "…";
       }
 
       const without = names.filter((_name, i) => {
@@ -711,9 +735,10 @@ export class ToolSelectionService {
     const validatedToolsForSamples = this.getValidatedToolForEachSample(toolWithInputs, sampleGroups, sessionData);
 
     // check that all rebound validatedTools are valid, every returns true for empty array
+    // the parameters and phenodata too, as JobService.runForEachSample() and validateRunForEach() do
     const runForEachSampleValid =
       validatedToolsForSamples.length > 0 &&
-      validatedToolsForSamples.every((sampleValidatedTool) => sampleValidatedTool.singleJobInputsValidation.valid);
+      validatedToolsForSamples.every((sampleValidatedTool) => sampleValidatedTool.singleJobValidation.valid);
 
     const failCount: number = validatedToolsForSamples.filter(
       (validatedTool) => !validatedTool.singleJobValidation.valid,
