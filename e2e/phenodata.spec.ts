@@ -4,9 +4,11 @@ import { expect, test, waitForDevCheck } from "./fixtures";
 import {
   Api,
   createDataset,
+  createJob,
   datasetNode,
   getPhenodataRows,
   openSession,
+  TEST_JOB,
   updateDataset,
   visualizationTab,
 } from "./session-api";
@@ -14,8 +16,9 @@ import {
 /*
  * The phenodata editor: a Handsontable table of the phenodata.tsv of the selected
  * dataset. Each edit is saved to the dataset on the server, and the table follows
- * the changes that others make to it. The column headers, adding and removing
- * columns and Reset's "Delete columns" are tested in escape-user-text.spec.ts.
+ * the changes that others make to it. Headers as text, where an added column
+ * goes, removing a column with its values, undo and Reset's "Delete columns" are
+ * tested in escape-user-text.spec.ts.
  */
 
 const EXPR = "identifier\tchip.a\tchip.b\ng1\t1\t2\ng2\t3\t4\n";
@@ -153,5 +156,100 @@ test("the phenodata table follows a change that someone else makes", async ({ pa
     ["chip.b", "b.cel", "2", "second", "y"],
   ]);
   await expect(table.getByText("Group column contains empty values")).toBeHidden();
+  await waitForDevCheck(page);
+});
+
+test("sample and original_name can't be edited or removed, and a missing group column is shown", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const phenodata = "sample\toriginal_name\tdescription\nchip.a\ta.cel\tfirst\nchip.b\tb.cel\tsecond\n";
+  const [datasetId, table] = await openPhenodata(page, api, sessionId, phenodata);
+  await expect(table.getByText("Group column is missing")).toBeVisible();
+  await expect(table.getByText("Group column contains empty values")).toBeHidden();
+
+  // only the editable column has the remove button
+  const headers = table.locator(".ht_clone_top thead th");
+  await expect(headers).toHaveText(["sample", "original_name", "description"]);
+  await expect(headers.filter({ hasText: "description" }).locator("#phenodata-header-button")).toHaveCount(1);
+  await expect(headers.locator("#phenodata-header-button")).toHaveCount(1);
+
+  // typing in the read-only cells does nothing, Delete neither
+  await cell(table, 0, 0).dblclick();
+  await page.keyboard.type("x");
+  await page.keyboard.press("Enter");
+  await cell(table, 1, 1).click();
+  await page.keyboard.press("Delete");
+  // an edit after them, to know when they would have been saved too
+  await cell(table, 0, 2).click();
+  await page.keyboard.type("changed");
+  await page.keyboard.press("Enter");
+  await expect
+    .poll(async () => getPhenodataRows(api, sessionId, datasetId))
+    .toEqual([
+      ["sample", "original_name", "description"],
+      ["chip.a", "a.cel", "changed"],
+      ["chip.b", "b.cel", "second"],
+    ]);
+  await expectTable(table, [
+    ["chip.a", "a.cel", "changed"],
+    ["chip.b", "b.cel", "second"],
+  ]);
+
+  // a group column without values is an empty one
+  await table.getByRole("button", { name: "Add column" }).click();
+  await page.locator(".modal-content input").fill("group");
+  await page.locator(".modal-content").getByRole("button", { name: "Add" }).click();
+  await expect(table.getByText("Group column contains empty values")).toBeVisible();
+  await expect(table.getByText("Group column is missing")).toBeHidden();
+  await waitForDevCheck(page);
+});
+
+test("the phenodata view shows the phenodata of an ancestor, or that there is none", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const parentId = await createDataset(
+    api,
+    sessionId,
+    { name: "expr.tsv", x: 100, y: 100, metadataFiles: [{ name: "phenodata.tsv", content: PHENODATA }] },
+    EXPR,
+  );
+  const jobId = await createJob(api, sessionId, {
+    ...TEST_JOB,
+    state: "COMPLETED",
+    inputs: [{ inputId: "input0", displayName: "expr.tsv", datasetId: parentId }],
+  });
+  // a file made from expr.tsv, without phenodata of its own
+  const childId = await createDataset(api, sessionId, { name: "filtered.tsv", x: 100, y: 200, sourceJob: jobId }, EXPR);
+  // an expression file that has no phenodata, nor ancestors
+  const otherId = await createDataset(api, sessionId, { name: "other.tsv", x: 300, y: 100 }, EXPR);
+  const view = page.locator("ch-phenodata-visualization");
+
+  // selecting another file leaves the phenodata tab, so it's opened again for each
+  await openSession(page, sessionId, childId);
+  await datasetNode(page, childId).click();
+  await visualizationTab(page, "Phenodata").click();
+  await expect(view.getByText("Using phenodata of")).toBeVisible();
+  await expect(view.locator("i").filter({ hasText: "expr.tsv" })).toBeVisible();
+  // shown, not edited here
+  await expect(view.locator(".htCore")).toHaveCount(0);
+  await expect(view.getByRole("button", { name: "Add column" })).toBeHidden();
+
+  await datasetNode(page, otherId).click();
+  await visualizationTab(page, "Phenodata").click();
+  await expect(view.getByText("No phenodata available")).toBeVisible();
+  await expect(view.locator(".htCore")).toHaveCount(0);
+
+  // the parent itself has the table
+  await datasetNode(page, parentId).click();
+  await visualizationTab(page, "Phenodata").click();
+  await expectTable(view, [
+    ["chip.a", "a.cel", "", "first"],
+    ["chip.b", "b.cel", "", "second"],
+  ]);
+  await expect(view.getByText("Using phenodata of")).toBeHidden();
   await waitForDevCheck(page);
 });
