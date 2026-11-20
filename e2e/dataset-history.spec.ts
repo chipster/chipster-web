@@ -37,13 +37,17 @@ test("the history shows the steps oldest first and exports the chosen fields", a
   const secondJobId = await createJob(api, sessionId, {
     ...completed,
     toolName: "Second tool",
-    // a parameter with a name, and one without
+    // a parameter with a name, one without, and one without a value
     parameters: [
       { parameterId: "method", displayName: "Method", value: "fast" },
       { parameterId: "seed", value: "42" },
+      { parameterId: "comment", displayName: "Comment" },
     ],
-    // a job from before 11/2023 has the file name in displayName and no datasetName
-    inputs: [{ inputId: "input", displayName: "c.txt", datasetId: cId }],
+    // a job from before 11/2023 has the file name in displayName and no datasetName, or no name at all
+    inputs: [
+      { inputId: "input", displayName: "c.txt", datasetId: cId },
+      { inputId: "extra", datasetId: cId },
+    ],
   });
   const dId = await createDataset(api, sessionId, { name: "d.txt", x: 150, y: 300, sourceJob: secondJobId }, "d\n");
 
@@ -91,7 +95,8 @@ test("the history shows the steps oldest first and exports the chosen fields", a
   await expect(value("Tool:", 3)).toHaveText("Test / Second tool");
   await expect(rows("Parameters:", 3).locator("tr").nth(0).locator("td")).toHaveText(["Method", "fast"]);
   await expect(rows("Parameters:", 3).locator("tr").nth(1).locator("td")).toHaveText(["seed", "42"]);
-  await expect(rows("Input files:", 3).locator("td tr").locator("td")).toHaveText(["input", "c.txt"]);
+  await expect(rows("Parameters:", 3).locator("tr").nth(2).locator("td")).toHaveText(["Comment", ""]);
+  await expect(rows("Input files:", 3).locator("td tr").locator("td")).toHaveText(["input", "c.txt", "extra", ""]);
 
   const exportText = async () => {
     await modal.getByRole("button", { name: "Export" }).click();
@@ -125,8 +130,8 @@ test("the history shows the steps oldest first and exports the chosen fields", a
   expect(exported[2]).toContain("Parameters:\n\tThreshold: 0.5\n");
   expect(exported[2]).toContain(`Date: ${created}\n`);
   expect(exported[3]).toContain("Tool: Test / Second tool\n");
-  expect(exported[3]).toContain("\tinput: c.txt\n");
-  expect(exported[3]).toContain("Parameters:\n\tMethod: fast\n\tseed: 42\n");
+  expect(exported[3]).toContain("\tinput: c.txt\n\textra: \n");
+  expect(exported[3]).toContain("Parameters:\n\tMethod: fast\n\tseed: 42\n\tComment: \n");
 
   // fields turned off are left out of the steps and of the export
   await modal.getByLabel("Parameters").uncheck();

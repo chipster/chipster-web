@@ -117,7 +117,7 @@ export class DatasetHistoryModalComponent implements OnInit {
           inputFilesString += step.sourceJob.inputs.reduce((inputs: string, input: JobInput) => {
             // jobs until 11/2023 have datasetName in input.displayName
             if (input.datasetName == null) {
-              return inputs + "\t" + input.inputId + ": " + input.displayName + "\n";
+              return inputs + "\t" + input.inputId + ": " + (input.displayName ?? "") + "\n";
             }
             // the name of the input from the tool, or its id like in the modal
             return inputs + "\t" + (input.displayName || input.inputId) + ": " + input.datasetName + "\n";
@@ -135,7 +135,7 @@ export class DatasetHistoryModalComponent implements OnInit {
             step.parameterList.reduce(
               // the id of a parameter without a name, like in the modal
               (params: string, param: JobParameter) =>
-                params + "\t" + (param.displayName ?? param.parameterId) + ": " + param.value + "\n",
+                params + "\t" + (param.displayName ?? param.parameterId) + ": " + (param.value ?? "") + "\n",
               "",
             )
           : "") + "\n";
