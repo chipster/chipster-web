@@ -12,6 +12,8 @@ import {
   pressMoveRelease,
   selectedInGraph,
   TEST_JOB,
+  updateDataset,
+  visualizationTab,
 } from "./session-api";
 
 /*
@@ -244,4 +246,81 @@ test("the right-click menu of a selected file is for all selected files, and Ctr
   for (const name of three) {
     await expect(datasetNode(page, datasets[name])).toBeVisible();
   }
+});
+
+test("rename in the graph's right-click menu renames the file and keeps its notes changed elsewhere", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const { datasets } = await createAnalysis(api, sessionId, true);
+  await openSession(page, sessionId, datasets["pca.tsv"]);
+  const datasetOnServer = async () => {
+    const response = await api.get("session-db", `/sessions/${sessionId}/datasets/${datasets["pca.tsv"]}`);
+    expect(response.ok(), `get dataset ${response.status()}`).toBe(true);
+    return response.json();
+  };
+
+  // the menu item saves a copy of the whole dataset, so it has to be the latest one, with the notes
+  // that another client saved after the session was opened
+  await datasetNode(page, datasets["pca.tsv"]).click();
+  await visualizationTab(page, "Details").click();
+  await updateDataset(api, sessionId, datasets["pca.tsv"], { notes: "my note" });
+  await expect(page.locator("ch-single-dataset textarea")).toHaveValue("my note");
+
+  await datasetNode(page, datasets["pca.tsv"]).click({ button: "right" });
+  await contextMenuAction(page, "Rename…");
+  const modal = page.locator(".modal-content");
+  await expect(modal.getByText("Rename file")).toBeVisible();
+  const input = modal.locator("input");
+  await expect(input).toHaveValue("pca.tsv");
+  await input.fill("components.tsv");
+  await modal.getByRole("button", { name: "Rename" }).click();
+  await expect(modal).toBeHidden();
+
+  await expect.poll(async () => (await datasetOnServer()).name).toBe("components.tsv");
+  expect((await datasetOnServer()).notes).toBe("my note");
+  await expect(page.locator("ch-selected-files .h6")).toHaveText("components.tsv");
+  // only the file of the menu
+  const names = (await getDatasets(api, sessionId)).map(({ name }) => name).sort();
+  expect(names).toEqual(FILES.map((name) => (name === "pca.tsv" ? "components.tsv" : name)).sort());
+});
+
+test("the zoom buttons scale the graph within their limits, and reset view restores the scale", async ({
+  page,
+  api,
+  sessionId,
+}) => {
+  const { datasets } = await createAnalysis(api, sessionId, true);
+  await openSession(page, sessionId, datasets["pca.tsv"]);
+  const panel = page.locator("ch-session-panel");
+  const zoomGroup = page.locator("#workflowvisualization svg > g").first();
+  // the drawn width of a file, its border included, relative to the default scale 1
+  const width = async () => {
+    const box = await datasetNode(page, datasets["pca.tsv"]).boundingBox();
+    expect(box, "pca.tsv has no bounding box").not.toBeNull();
+    return box.width;
+  };
+  await expect(zoomGroup).toHaveAttribute("transform", "translate(0, 0) scale(1)");
+  const defaultWidth = await width();
+
+  // each step is 20 %, up to twice the size
+  await panel.getByTitle("Zoom in").click();
+  await expect(zoomGroup).toHaveAttribute("transform", "translate(0, 0) scale(1.2)");
+  for (let i = 0; i < 5; i++) {
+    await panel.getByTitle("Zoom in").click();
+  }
+  await expect(zoomGroup).toHaveAttribute("transform", "translate(0, 0) scale(2)");
+  expect((await width()) / defaultWidth).toBeCloseTo(2, 1);
+
+  // and down to a fifth
+  for (let i = 0; i < 12; i++) {
+    await panel.getByTitle("Zoom out").click();
+  }
+  await expect(zoomGroup).toHaveAttribute("transform", "translate(0, 0) scale(0.2)");
+  expect((await width()) / defaultWidth).toBeCloseTo(0.2, 1);
+
+  await graphAction(page, "Reset view");
+  await expect(zoomGroup).toHaveAttribute("transform", "translate(0, 0) scale(1)");
+  expect(await width()).toBeCloseTo(defaultWidth, 1);
 });
