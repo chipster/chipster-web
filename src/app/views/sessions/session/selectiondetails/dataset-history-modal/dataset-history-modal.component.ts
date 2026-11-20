@@ -160,10 +160,11 @@ export class DatasetHistoryModalComponent implements OnInit {
             (step.sourceCode != null ? step.sourceCode : "not available").replace(/^/gm, "\t")
           : "") + "\n";
 
+      // step title, the line separates the steps also without it
+      const stepTitleString = this.historyOptionsMap.get("stepTitle").enabled ? "Step " + (i + 1) + "\n" : "";
+
       const stepString =
-        "Step " +
-        (i + 1) +
-        "\n" +
+        stepTitleString +
         line +
         toolString +
         inputFilesString +
