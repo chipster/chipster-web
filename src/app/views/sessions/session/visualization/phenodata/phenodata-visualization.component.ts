@@ -84,6 +84,14 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
   nonEditableColumns = ["sample", "original_name"];
   private originalPhenodataString: string | null = null;
   private originalDatasetId: string | null = null;
+  /*
+   The phenodata strings this component has saved and whose dataset events
+   haven't arrived yet. The event of a save that comes after a later edit has
+   changed phenodataString would otherwise look like someone else's change and
+   rebuild the table, dropping a cell editor that is open at that moment. The
+   event handler removes the string it finds here.
+   */
+  private readonly sentPhenodata = new Set<string>();
 
   /**
    * The column headers as text, derived from escapedHeaders
@@ -168,7 +176,9 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
             return;
           }
 
-          if (this.datasetService.getOwnPhenodata(updatedDataset) === this.phenodataString) {
+          // the event of an own save, see sentPhenodata, or no change
+          const phenodata = this.datasetService.getOwnPhenodata(updatedDataset);
+          if (this.sentPhenodata.delete(phenodata) || phenodata === this.phenodataString) {
             return;
           }
 
@@ -347,6 +357,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
       )
       .then(
         (action: number) => {
+          // the rebuilds below take the dataset as it was just saved, see updateView()
           if (action === 1) {
             const headers = this.headers;
             const keepIndices = headers
@@ -356,7 +367,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
             this.rows = this.rows.map((row) => keepIndices.map((i) => row[i]));
             this.updateDataset();
             // right away: the table still has all the columns, but its headers not
-            this.updateView();
+            this.updateView(this.currentDataset());
           } else if (action === 2) {
             const removableIndices = this.headers
               .map((h, i) => (this.nonEditableColumns.includes(h) ? -1 : i))
@@ -367,16 +378,11 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
               });
             });
             this.updateDataset();
-            this.updateViewAfterDelay();
-            this.updateWarnings();
+            this.updateView(this.currentDataset());
           } else if (action === 3 && this.originalPhenodataString != null) {
-            this.datasetService.setPhenodata(this.currentDataset(), this.originalPhenodataString);
             this.phenodataString = this.originalPhenodataString;
-            this.sessionDataService.updateDataset(this.currentDataset()).subscribe({
-              next: () => log.info("dataset phenodata updated"),
-              error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
-            });
-            this.updateViewAfterDelay();
+            this.savePhenodata(this.originalPhenodataString);
+            this.updateView(this.currentDataset());
           }
         },
         () => {},
@@ -390,12 +396,20 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     this.phenodataString = phenodataString;
 
     if (phenodataString !== this.datasetService.getOwnPhenodata(this.currentDataset())) {
-      this.datasetService.setPhenodata(this.currentDataset(), phenodataString);
-      this.sessionDataService.updateDataset(this.currentDataset()).subscribe({
-        next: () => log.info("dataset phenodata updated"),
-        error: (err) => this.restErrorService.showError("dataset phenodata update failed", err),
-      });
+      this.savePhenodata(phenodataString);
     }
+  }
+
+  private savePhenodata(phenodataString: string) {
+    this.sentPhenodata.add(phenodataString);
+    this.datasetService.setPhenodata(this.currentDataset(), phenodataString);
+    this.sessionDataService.updateDataset(this.currentDataset()).subscribe({
+      next: () => log.info("dataset phenodata updated"),
+      error: (err) => {
+        this.sentPhenodata.delete(phenodataString);
+        this.restErrorService.showError("dataset phenodata update failed", err);
+      },
+    });
   }
 
   private updateViewAfterDelay() {
@@ -413,7 +427,12 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     this.groupColumnMissing = !this.datasetService.hasGroupColumn(this.currentDataset());
   }
 
-  private updateView() {
+  /*
+   * Rebuilds the view from the latest copy of the dataset in datasetsMap, or from the given
+   * one. The map gets a save of this component only with its event, so a rebuild right after
+   * a save has to take the dataset that the component changed.
+   */
+  private updateView(dataset?: Dataset) {
     // see updateWarnings()
     this.changeDetectorRef.markForCheck();
     this.ready = false;
@@ -454,7 +473,7 @@ export class PhenodataVisualizationComponent implements OnInit, OnChanges, OnDes
     }
     // get the latest datasets from the sessionData, because websocket events
     // don't update selectedDatasets at the moment
-    const updatedDataset = this.sessionData().datasetsMap().get(this.currentDataset().datasetId);
+    const updatedDataset = dataset ?? this.sessionData().datasetsMap().get(this.currentDataset().datasetId);
     if (updatedDataset == null) {
       this.phenodataState = PhenodataState.DATASET_NULL;
       this.ready = true;
