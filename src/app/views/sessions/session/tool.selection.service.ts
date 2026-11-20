@@ -1,10 +1,10 @@
 import { Injectable, inject } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Category, Dataset, InputBinding, Module, Tool, ToolParameter } from "chipster-js-common";
-import { flatten } from "lodash-es";
+import { flatten, uniqBy } from "lodash-es";
 import log from "loglevel";
-import { Observable, forkJoin, forkJoin as observableForkJoin, of } from "rxjs";
-import { map, take } from "rxjs/operators";
+import { Observable, combineLatest, forkJoin, forkJoin as observableForkJoin, from, of } from "rxjs";
+import { catchError, map, mergeAll, startWith, take, toArray } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
 import { JobQuota, SchedulerResource } from "../../../shared/resources/scheduler-resource";
@@ -28,6 +28,9 @@ import { ToolService } from "./tools/tool.service";
 
 @Injectable({ providedIn: "root" })
 export class ToolSelectionService {
+  // how many of the other selected files readColumnsOfOtherFiles() reads at a time
+  private static readonly CONCURRENT_COLUMN_READS = 4;
+
   private toolService = inject(ToolService);
   private getSessionDataService = inject(GetSessionDataService);
   private datasetService = inject(DatasetService);
@@ -251,9 +254,75 @@ export class ToolSelectionService {
       const populateParameterObservables = selectedToolWithInputs.tool.parameters.map((parameter: ToolParameter) =>
         this.populateParameter(parameter, boundDatasets, boundPhenodatas, sessionData),
       );
-      return forkJoin(populateParameterObservables).pipe(map(() => selectedToolWithInputs));
+      const populated = forkJoin(populateParameterObservables).pipe(map(() => selectedToolWithInputs));
+      const otherColumnsRead = this.readColumnsOfOtherFiles(selectedToolWithInputs, boundDatasets, sessionData);
+      if (otherColumnsRead == null) {
+        return populated;
+      }
+      // the parameters don't wait for the other files, which are read at the same time: emit again
+      // when their columns have been read, so that the run options are validated again (the reducer
+      // copies the object, so the store passes it on). Once only if the reads finish first.
+      return combineLatest([populated, otherColumnsRead.pipe(startWith(null))]).pipe(map(() => selectedToolWithInputs));
     }
     return of(selectedToolWithInputs);
+  }
+
+  /**
+   * The column options come from the bound files only, but Run tool for each file and for each
+   * sample run the tool with the other selected files too, and getMissingColumnMessage() checks that
+   * each of them has the chosen column. Read the columns of the other selected .tsv files into the
+   * cache for that, as populateParameter() does for the bound ones, but only when the tool could be
+   * run for each file (at most one required input) or for each sample (sample files selected).
+   *
+   * Emits once when all have been read or failed, or returns null when there is nothing to read. With
+   * dozens of files selected, a few are read at a time.
+   */
+  private readColumnsOfOtherFiles(
+    selectedToolWithInputs: SelectedToolWithValidatedInputs,
+    boundDatasets: Dataset[],
+    sessionData: SessionData,
+  ): Observable<unknown> | null {
+    const selectedDatasets = selectedToolWithInputs.selectedDatasets ?? [];
+    const tool = selectedToolWithInputs.tool;
+    const hasColumnParameter = tool.parameters.some((parameter) => parameter.type === "COLUMN_SEL");
+    const runForEachFilePossible = tool.inputs.filter((input) => !input.optional && !input.meta).length <= 1;
+    const runForEachSamplePossible = selectedDatasets.some(
+      (dataset) => this.datasetService.getMetadataFile(dataset, DatasetService.SAMPLE_DATA_FILENAME) != null,
+    );
+    const boundIds = boundDatasets.map((dataset) => dataset.datasetId);
+    const unreadTables = selectedDatasets.filter(
+      (dataset) =>
+        this.hasColumns(dataset) &&
+        !boundIds.includes(dataset.datasetId) &&
+        !sessionData.cachedFileHeaders.has(dataset.datasetId),
+    );
+    if (
+      !hasColumnParameter ||
+      selectedDatasets.length < 2 ||
+      !(runForEachFilePossible || runForEachSamplePossible) ||
+      unreadTables.length === 0
+    ) {
+      return null;
+    }
+    const reads = this.toolService.getDatasetHeadersForParameter(unreadTables, sessionData).map((headers) =>
+      headers.pipe(
+        // not cached then, and getMissingColumnMessage() tells that the columns couldn't be read
+        catchError((error) => {
+          log.warn("failed to read the columns for run for each file or sample", error);
+          return of(null);
+        }),
+      ),
+    );
+    // toArray() emits once, also when the reads complete without a value
+    return from(reads).pipe(mergeAll(ToolSelectionService.CONCURRENT_COLUMN_READS), toArray());
+  }
+
+  /**
+   * Only .tsv files have columns for the COLUMN_SEL parameters.
+   * FIXME should check type tag instead of name, we have session data here these days
+   */
+  private hasColumns(dataset: Dataset): boolean {
+    return dataset.name.endsWith(".tsv");
   }
 
   /**
@@ -286,9 +355,7 @@ export class ToolSelectionService {
       // COLUMN_SEL, getting headers is async
       if (parameter.type === "COLUMN_SEL") {
         // populate column_sel only for tsv files
-        // FIXME should check type tag instead of name, atm would need sessionData for that
-        // FIXME we have session data here these days
-        if (!datasets[0].name.endsWith(".tsv")) {
+        if (!this.hasColumns(datasets[0])) {
           parameter.selectionOptions = [];
           parameter.value = null;
           return of(parameter);
@@ -302,6 +369,14 @@ export class ToolSelectionService {
             parameter.selectionOptions = selectionOptions;
             this.setColumnSelectionParameterValueAfterPopulate(parameter);
             return parameter;
+          }),
+          // an error would end the subscription that populates the parameters of every later
+          // selection: no options then, as for a file that isn't a table
+          catchError((error) => {
+            log.warn("failed to read the columns of the bound files", error);
+            parameter.selectionOptions = [];
+            parameter.value = null;
+            return of(parameter);
           }),
         );
       }
@@ -510,19 +585,101 @@ export class ToolSelectionService {
       this.rebindWithNewDatasetsAndValidate([dataset], toolWithInputs, sessionData),
     );
 
-    const allValid = validatedToolsForEachFile.every((validatedTool) => validatedTool.singleJobValidation.valid);
-
-    if (allValid) {
-      return { valid: true };
-    }
     const failCount = validatedToolsForEachFile.filter(
       (validatedTool) => !validatedTool.singleJobValidation.valid,
     ).length;
+    if (failCount > 0) {
+      return {
+        valid: false,
+        message: "Parameter or input checks failed for " + UtilsService.getCountAndUnit(failCount, "file") + ".",
+      };
+    }
 
-    return {
-      valid: false,
-      message: "Parameter or input checks failed for " + UtilsService.getCountAndUnit(failCount, "file") + ".",
-    };
+    const missingColumnMessage = this.getMissingColumnMessage(
+      toolWithInputs.tool,
+      validatedToolsForEachFile,
+      toolWithInputs.selectedDatasets.map((dataset) => dataset.name),
+      sessionData,
+    );
+    if (missingColumnMessage != null) {
+      return { valid: false, message: missingColumnMessage };
+    }
+    return { valid: true };
+  }
+
+  /**
+   * The parameters are not populated again for each file or sample (rebindWithNewDatasetsAndValidate()),
+   * so each job would get the column chosen from the options of the first file. Tells which of the
+   * jobs, by their names, would get a column that its files don't have, or null when none would.
+   *
+   * Only the columns of the files (COLUMN_SEL), not those of the phenodata (METACOLUMN_SEL): with
+   * several files selected, a tool that takes one file has no phenodata bound, so a phenodata column
+   * has no options and stays empty, which validateParameter() already refuses.
+   */
+  private getMissingColumnMessage(
+    tool: Tool,
+    reboundTools: ValidatedTool[],
+    names: string[],
+    sessionData: SessionData,
+  ): string | null {
+    const list = (items: string[]) =>
+      items.slice(0, 3).join(", ") + (items.length > 3 ? " and " + (items.length - 3) + " more" : "");
+
+    for (const parameter of tool.parameters) {
+      if (parameter.type !== "COLUMN_SEL" || parameter.value == null) {
+        continue;
+      }
+      // the tables whose columns readColumnsOfOtherFiles() couldn't read, or is still reading
+      const unread = uniqBy(
+        flatten(reboundTools.map((reboundTool) => this.getBoundDatasets(reboundTool))).filter(
+          (dataset) => this.hasColumns(dataset) && !sessionData.cachedFileHeaders.has(dataset.datasetId),
+        ),
+        (dataset) => dataset.datasetId,
+      );
+      const failed = unread.filter((dataset) => sessionData.failedFileHeaders.has(dataset.datasetId));
+      if (failed.length > 0) {
+        return "The columns of " + list(failed.map((dataset) => dataset.name)) + " couldn't be read.";
+      }
+      if (unread.length > 0) {
+        return "Reading the columns of " + list(unread.map((dataset) => dataset.name)) + "…";
+      }
+
+      const without = names.filter((_name, i) => {
+        const options = this.getColumnOptions(reboundTools[i], sessionData);
+        return options != null && !this.toolService.selectionOptionsContains(options, parameter.value);
+      });
+      if (without.length > 0) {
+        return (
+          "The column " +
+          parameter.value +
+          " chosen for " +
+          this.toolService.getDisplayName(parameter) +
+          " isn't in " +
+          list(without) +
+          "."
+        );
+      }
+    }
+    return null;
+  }
+
+  private getBoundDatasets(toolWithInputs: SelectedToolWithInputs): Dataset[] {
+    return flatten(toolWithInputs.inputBindings.map((binding) => binding.datasets));
+  }
+
+  /**
+   * The options that populateParameter() would give a COLUMN_SEL parameter with these bindings, from
+   * the cache of the column headers, or null when there are no files to take them from.
+   */
+  private getColumnOptions(toolWithInputs: SelectedToolWithInputs, sessionData: SessionData): SelectionOption[] | null {
+    const datasets = this.getBoundDatasets(toolWithInputs);
+    if (datasets.length === 0) {
+      return null;
+    }
+    if (!this.hasColumns(datasets[0])) {
+      return [];
+    }
+    return flatten(datasets.map((dataset) => sessionData.cachedFileHeaders.get(dataset.datasetId) ?? []));
   }
 
   validateRunForEachSample(
@@ -579,13 +736,29 @@ export class ToolSelectionService {
     const validatedToolsForSamples = this.getValidatedToolForEachSample(toolWithInputs, sampleGroups, sessionData);
 
     // check that all rebound validatedTools are valid, every returns true for empty array
+    // the parameters and phenodata too, as JobService.runForEachSample() and validateRunForEach() do
     const runForEachSampleValid =
       validatedToolsForSamples.length > 0 &&
-      validatedToolsForSamples.every((sampleValidatedTool) => sampleValidatedTool.singleJobInputsValidation.valid);
+      validatedToolsForSamples.every((sampleValidatedTool) => sampleValidatedTool.singleJobValidation.valid);
 
     const failCount: number = validatedToolsForSamples.filter(
       (validatedTool) => !validatedTool.singleJobValidation.valid,
     ).length;
+
+    if (runForEachSampleValid) {
+      // in the order of getValidatedToolForEachSample()
+      const samples =
+        sampleGroups.singleEndSamples.length > 0 ? sampleGroups.singleEndSamples : sampleGroups.pairedEndSamples;
+      const missingColumnMessage = this.getMissingColumnMessage(
+        toolWithInputs.tool,
+        validatedToolsForSamples,
+        samples.map((sample) => "sample " + sample.sampleName),
+        sessionData,
+      );
+      if (missingColumnMessage != null) {
+        return { valid: false, message: missingColumnMessage };
+      }
+    }
 
     return {
       valid: runForEachSampleValid,
