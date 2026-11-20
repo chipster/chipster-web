@@ -3,8 +3,8 @@ import { Store } from "@ngrx/store";
 import { Category, Dataset, InputBinding, Module, Tool, ToolParameter } from "chipster-js-common";
 import { flatten, uniqBy } from "lodash-es";
 import log from "loglevel";
-import { Observable, concat, forkJoin, forkJoin as observableForkJoin, from, of } from "rxjs";
-import { catchError, map, mergeAll, take, toArray } from "rxjs/operators";
+import { Observable, combineLatest, forkJoin, forkJoin as observableForkJoin, from, of } from "rxjs";
+import { catchError, map, mergeAll, startWith, take, toArray } from "rxjs/operators";
 import { PhenodataBinding } from "../../../model/session/phenodata-binding";
 import { SessionData } from "../../../model/session/session-data";
 import { JobQuota, SchedulerResource } from "../../../shared/resources/scheduler-resource";
@@ -259,9 +259,10 @@ export class ToolSelectionService {
       if (otherColumnsRead == null) {
         return populated;
       }
-      // the parameters don't wait for the other files: emit again when their columns have been read,
-      // as a new object, so that the store passes it on and the run options are validated again
-      return concat(populated, otherColumnsRead.pipe(map(() => ({ ...selectedToolWithInputs }))));
+      // the parameters don't wait for the other files, which are read at the same time: emit again
+      // when their columns have been read, so that the run options are validated again (the reducer
+      // copies the object, so the store passes it on). Once only if the reads finish first.
+      return combineLatest([populated, otherColumnsRead.pipe(startWith(null))]).pipe(map(() => selectedToolWithInputs));
     }
     return of(selectedToolWithInputs);
   }
