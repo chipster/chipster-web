@@ -1,7 +1,15 @@
 import { readFile } from "node:fs/promises";
 
 import { expect, test } from "./fixtures";
-import { createDataset, createJob, datasetNode, openSession, TEST_JOB, visualizationTab } from "./session-api";
+import {
+  createDataset,
+  createJob,
+  datasetNode,
+  getDatasets,
+  openSession,
+  TEST_JOB,
+  visualizationTab,
+} from "./session-api";
 
 /*
  * The history of a file, from Show history in the file details: the steps from the uploaded files
@@ -19,17 +27,21 @@ test("the history shows the steps oldest first and exports the chosen fields", a
     ...completed,
     toolName: "First tool",
     parameters: [{ parameterId: "threshold", displayName: "Threshold", value: "0.5" }],
-    // the name of the input from the tool, and an input without one
+    // the name of the input from the tool, and an input with an empty one
     inputs: [
       { inputId: "input1", displayName: "First input", datasetId: aId, datasetName: "a.txt" },
-      { inputId: "input2", datasetId: bId, datasetName: "b.txt" },
+      { inputId: "input2", displayName: "", datasetId: bId, datasetName: "b.txt" },
     ],
   });
   const cId = await createDataset(api, sessionId, { name: "c.txt", x: 150, y: 200, sourceJob: firstJobId }, "c\n");
   const secondJobId = await createJob(api, sessionId, {
     ...completed,
     toolName: "Second tool",
-    parameters: [{ parameterId: "method", displayName: "Method", value: "fast" }],
+    // a parameter with a name, and one without
+    parameters: [
+      { parameterId: "method", displayName: "Method", value: "fast" },
+      { parameterId: "seed", value: "42" },
+    ],
     // a job from before 11/2023 has the file name in displayName and no datasetName
     inputs: [{ inputId: "input", displayName: "c.txt", datasetId: cId }],
   });
@@ -51,15 +63,7 @@ test("the history shows the steps oldest first and exports the chosen fields", a
   // a date as the modal shows it, formatted in the browser for its locale and time zone
   const shownDate = (date: string) =>
     page.evaluate((d) => new Date(d).toLocaleDateString() + " " + new Date(d).toLocaleTimeString(), date);
-  const uploadedCreated: Record<string, string> = {};
-  for (const [name, id] of [
-    ["a.txt", aId],
-    ["b.txt", bId],
-  ]) {
-    uploadedCreated[name] = (
-      await (await api.get("session-db", `/sessions/${sessionId}/datasets/${id}`)).json()
-    ).created;
-  }
+  const uploadedCreated = Object.fromEntries((await getDatasets(api, sessionId)).map((d) => [d.name, d.created]));
 
   // the uploaded files first, then the job steps. In this chain each job's step comes after the steps
   // of its inputs, but the modal only reverses a breadth-first search of the ancestors, which doesn't
@@ -85,7 +89,8 @@ test("the history shows the steps oldest first and exports the chosen fields", a
   await expect(firstInputs.nth(1).locator("td")).toHaveText(["input2", "b.txt"]);
   await expect(value("Date:", 2)).toHaveText(await shownDate(created));
   await expect(value("Tool:", 3)).toHaveText("Test / Second tool");
-  await expect(rows("Parameters:", 3)).toContainText("fast");
+  await expect(rows("Parameters:", 3).locator("tr").nth(0).locator("td")).toHaveText(["Method", "fast"]);
+  await expect(rows("Parameters:", 3).locator("tr").nth(1).locator("td")).toHaveText(["seed", "42"]);
   await expect(rows("Input files:", 3).locator("td tr").locator("td")).toHaveText(["input", "c.txt"]);
 
   const exportText = async () => {
@@ -99,15 +104,9 @@ test("the history shows the steps oldest first and exports the chosen fields", a
   // the steps of the export, separated by a line of dashes whether they have titles or not
   const exportedSteps = (text: string) => text.split(/^-{10,}\n/m).slice(1);
 
-  // a field turned off is left out of the steps and of the export
-  await modal.getByLabel("Parameters").uncheck();
-  await expect(rows("Parameters:")).toHaveCount(0);
-  await expect(rows("Tool:", 3)).toBeVisible();
-
+  // all the fields that are shown, with the step titles
   const text = await exportText();
   expect(text).toMatch(/^History of d\.txt\n/);
-  expect(text).not.toContain("Parameters:");
-  expect(text).not.toContain("Threshold");
   expect(text.match(/^Step \d+$/gm)).toEqual(["Step 1", "Step 2", "Step 3", "Step 4"]);
   const exported = exportedSteps(text);
   expect(exported).toHaveLength(4);
@@ -117,21 +116,31 @@ test("the history shows the steps oldest first and exports the chosen fields", a
   }
   for (const uploaded of [0, 1]) {
     expect(exported[uploaded]).toContain("Tool: not available\n");
+    expect(exported[uploaded]).toContain("Parameters:\n\n");
     expect(exported[uploaded]).toContain(`Date: ${uploadedCreated[resultFiles[uploaded]]}\n`);
   }
   expect(exported[2]).toContain("Tool: Test / First tool\n");
   expect(exported[2]).toContain("\tFirst input: a.txt\n");
   expect(exported[2]).toContain("\tinput2: b.txt\n");
+  expect(exported[2]).toContain("Parameters:\n\tThreshold: 0.5\n");
   expect(exported[2]).toContain(`Date: ${created}\n`);
   expect(exported[3]).toContain("Tool: Test / Second tool\n");
   expect(exported[3]).toContain("\tinput: c.txt\n");
+  expect(exported[3]).toContain("Parameters:\n\tMethod: fast\n\tseed: 42\n");
 
-  // without the step titles, in the modal and in the export
+  // fields turned off are left out of the steps and of the export
+  await modal.getByLabel("Parameters").uncheck();
+  await expect(rows("Parameters:")).toHaveCount(0);
+  await expect(rows("Tool:", 3)).toBeVisible();
   await modal.getByLabel("Step title").uncheck();
   await expect(steps.locator(".step-header")).toHaveCount(0);
   await expect(steps).toHaveCount(4);
-  const untitled = await exportText();
-  expect(untitled).not.toMatch(/^Step \d+$/m);
-  expect(exportedSteps(untitled)).toHaveLength(4);
-  expect(exportedSteps(untitled)[3]).toContain("Result file: d.txt\n");
+
+  const reduced = await exportText();
+  expect(reduced).not.toContain("Parameters:");
+  expect(reduced).not.toContain("Threshold");
+  expect(reduced).not.toMatch(/^Step \d+$/m);
+  expect(exportedSteps(reduced)).toHaveLength(4);
+  expect(exportedSteps(reduced)[3]).toContain("Tool: Test / Second tool\n");
+  expect(exportedSteps(reduced)[3]).toContain("Result file: d.txt\n");
 });
