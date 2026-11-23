@@ -1,5 +1,15 @@
-import { expect, test, waitForDevCheck } from "./fixtures";
-import { createDataset, createLabel, datasetNode, openSession, updateDataset, visualizationTab } from "./session-api";
+import { Page, Route } from "@playwright/test";
+
+import { expect, PageErrors, test, waitForDevCheck } from "./fixtures";
+import {
+  Api,
+  createDataset,
+  createLabel,
+  datasetNode,
+  openSession,
+  updateDataset,
+  visualizationTab,
+} from "./session-api";
 
 /*
  * The Details tab of the selected files: one file, or the list of several.
@@ -156,4 +166,85 @@ test("the sample metadata of a failed Define samples doesn't leak into the next 
   await expect.poll(async () => (await datasetOnServer()).notes).toBe("my note");
   await waitForDevCheck(page);
   expect((await datasetOnServer()).metadataFiles ?? []).toHaveLength(0);
+});
+
+// opens the details of a file with the notes "old note" and types "new note" into them while the server
+// fails the saves of the file. Returns the notes box, the file on the server, and a function that lets the
+// saves through again.
+async function failNotesSave(
+  {
+    page,
+    api,
+    baseURL,
+    sessionId,
+    pageErrors,
+  }: { page: Page; api: Api; baseURL: string; sessionId: string; pageErrors: PageErrors },
+  datasetId: string,
+) {
+  await openSession(page, sessionId, datasetId);
+  await datasetNode(page, datasetId).click();
+  await visualizationTab(page, "Details").click();
+  const textarea = page.locator("ch-single-dataset textarea");
+  await expect(textarea).toHaveValue("old note");
+  const datasetOnServer = async () =>
+    (await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`)).json();
+
+  // the address is relative in the proxy mode and absolute in the direct mode
+  const datasetPath = `/sessions/${sessionId}/datasets/${datasetId}`;
+  const datasetUrl = new URL(api.address("session-db") + datasetPath, baseURL).href;
+  pageErrors.allowFailedRequest(500, "session-db", datasetPath);
+  pageErrors.allowErrorMessage("saving notes failed");
+  const failSave = (route: Route) =>
+    route.request().method() === "PUT" ? route.fulfill({ status: 500, body: "e2e failure" }) : route.fallback();
+  await page.route(datasetUrl, failSave);
+
+  await textarea.click();
+  await textarea.fill("new note");
+  await textarea.blur();
+  await expect(page.locator("ch-toasts .toast").filter({ hasText: "saving notes failed" })).toBeVisible();
+  // the typed text stays for a retry or a copy
+  await expect(textarea).toHaveValue("new note");
+  expect((await datasetOnServer()).notes).toBe("old note");
+
+  return { textarea, datasetOnServer, allowSaves: () => page.unroute(datasetUrl, failSave) };
+}
+
+test("notes that fail to save stay in the box but don't leak into the next save", async ({
+  page,
+  api,
+  baseURL,
+  sessionId,
+  pageErrors,
+}) => {
+  // the details put the notes into the session's copy of the file before the save, so that a change sent
+  // right after it carries them too. A failed save has to put the old notes back there, or the next
+  // whole-object update (here a label) sends the notes after all.
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100, notes: "old note" }, "a\n");
+  await createLabel(api, sessionId, "my-label");
+  const { datasetOnServer, allowSaves } = await failNotesSave({ page, api, baseURL, sessionId, pageErrors }, datasetId);
+
+  // the next save of the file sends the old notes
+  await allowSaves();
+  await page.locator("ch-session-panel").getByTitle("Labels menu").click();
+  await page.locator(".dropdown-menu.show button", { hasText: "my-label" }).click();
+  await expect.poll(async () => (await datasetOnServer()).labelIds).toHaveLength(1);
+  expect((await datasetOnServer()).notes).toBe("old note");
+  await expect(page.locator("ch-single-dataset ch-label-pill")).toContainText("my-label");
+  await waitForDevCheck(page);
+});
+
+test("notes that failed to save can be saved again", async ({ page, api, baseURL, sessionId, pageErrors }) => {
+  const datasetId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100, notes: "old note" }, "a\n");
+  const { textarea, datasetOnServer, allowSaves } = await failNotesSave(
+    { page, api, baseURL, sessionId, pageErrors },
+    datasetId,
+  );
+
+  // leaving the box again saves the kept text, without typing it again
+  await allowSaves();
+  await textarea.click();
+  await textarea.blur();
+  await expect.poll(async () => (await datasetOnServer()).notes).toBe("new note");
+  await expect(textarea).toHaveValue("new note");
+  await waitForDevCheck(page);
 });
