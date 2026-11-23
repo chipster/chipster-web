@@ -646,24 +646,31 @@ test("the download is cancelled when another file is selected", async ({ page, a
   await openSession(page, sessionId, largeId);
   await selectDataset(page, largeId);
   const cancelled = page.waitForEvent("requestfailed", (request) => request.url().includes(largeFile));
-  const workerScript = page.waitForResponse((response) => response.url().includes("pdf.worker"), {
-    timeout: 30_000,
-  });
-  await pdfVisualization(page).getByRole("button", { name: "Show here" }).click();
   // slow enough to select another file in the middle of the download, the file is about 11 MB.
-  // Only after the worker script, the last thing pdf.js loads before it requests the file:
-  // throttling the libraries too would make the start of the download depend on how big the
-  // dev server serves them
-  await (await workerScript).finished();
+  // The request of the file waits until the throttling is on: started any later, a busy machine
+  // may have downloaded the whole file from a local backend already. Not before the request,
+  // because throttling the libraries too would make the start of the download depend on how big
+  // the dev server serves them. The throttling stays on, so only the first request needs to wait
   const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Network.emulateNetworkConditions", {
-    offline: false,
-    latency: 0,
-    downloadThroughput: 1024 * 1024,
-    uploadThroughput: -1,
-  });
+  await page.route(
+    (url) => url.href.includes(largeFile),
+    async (route) => {
+      await cdp.send("Network.emulateNetworkConditions", {
+        offline: false,
+        latency: 0,
+        downloadThroughput: 1024 * 1024,
+        uploadThroughput: -1,
+      });
+      await route.continue();
+    },
+    { times: 1 },
+  );
+  await pdfVisualization(page).getByRole("button", { name: "Show here" }).click();
+  // pdf.js and its worker are loaded first
   await expect
-    .poll(async () => Number(await pdfVisualization(page).locator("progress").getAttribute("value")))
+    .poll(async () => Number(await pdfVisualization(page).locator("progress").getAttribute("value")), {
+      timeout: 30_000,
+    })
     .toBeGreaterThan(0);
 
   await selectDataset(page, smallId);
