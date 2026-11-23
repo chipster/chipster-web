@@ -150,6 +150,24 @@ export async function getDatasets(api: Api, sessionId: string): Promise<Dataset[
   return response.json();
 }
 
+/*
+ * The rows of the own phenodata of a dataset on the server, split into cells.
+ */
+export async function getPhenodataRows(api: Api, sessionId: string, datasetId: string): Promise<string[][]> {
+  const response = await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`);
+  expect(response.ok(), `get dataset ${response.status()}`).toBe(true);
+  const dataset: Dataset = await response.json();
+  const phenodata = dataset.metadataFiles?.find((f) => f.name === "phenodata.tsv");
+  if (phenodata == null) {
+    throw new Error(`dataset ${datasetId} has no phenodata.tsv`);
+  }
+  // only the final newline, trimEnd() would take the empty cells of the last row too
+  return phenodata.content
+    .replace(/\n$/, "")
+    .split("\n")
+    .map((line) => line.split("\t"));
+}
+
 // changes some fields of the dataset, which the page learns about from the dataset event
 export async function updateDataset(api: Api, sessionId: string, datasetId: string, changes: object): Promise<void> {
   const current = await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`);

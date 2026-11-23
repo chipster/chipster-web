@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures";
-import { Api, createDataset, datasetNode, deleteDatasetFromMenu, openSession } from "./session-api";
+import { createDataset, datasetNode, deleteDatasetFromMenu, getPhenodataRows, openSession } from "./session-api";
 
 /*
  * Dataset names and the headers of a file are user input, and a session can be
@@ -13,17 +13,6 @@ import { Api, createDataset, datasetNode, deleteDatasetFromMenu, openSession } f
 const PAYLOAD = `<img src="x" onerror="window.xssCount = (window.xssCount || 0) + 1">`;
 // label names are limited to 30 characters
 const SHORT_PAYLOAD = `<img src="x" onerror="z()">`;
-
-async function getPhenodataRows(api: Api, sessionId: string, datasetId: string): Promise<string[][]> {
-  const response = await api.get("session-db", `/sessions/${sessionId}/datasets/${datasetId}`);
-  const dataset = await response.json();
-  const content: string = dataset.metadataFiles.find((f) => f.name === "phenodata.tsv").content;
-  // only the final newline, trimEnd() would take the empty cells of the last row too
-  return content
-    .replace(/\n$/, "")
-    .split("\n")
-    .map((line) => line.split("\t"));
-}
 
 async function expectNotParsed(page: Page) {
   expect(await page.evaluate(() => (window as unknown as { xssCount?: number }).xssCount)).toBeUndefined();
