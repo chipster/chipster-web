@@ -17,7 +17,6 @@ export class DatasetHistoryStep {
   sourceJob: Job;
   tool: Tool;
   parameterList: JobParameter[];
-  inputFileNamesString: string;
   sourceCode: string;
 }
 
@@ -99,7 +98,8 @@ export class DatasetHistoryModalComponent implements OnInit {
 
     const header = "History of " + this.dataset().name + "\n" + doubleLine + "\n";
 
-    const steps: string = this.getHistoryData().reduce((s: string, step: DatasetHistoryStep, i) => {
+    // the steps that the modal shows
+    const steps: string = this.datasetHistorySteps.reduce((s: string, step: DatasetHistoryStep, i) => {
       // tool
       const toolString =
         (this.historyOptionsMap.get("sourceJobName").enabled
@@ -115,15 +115,12 @@ export class DatasetHistoryModalComponent implements OnInit {
         // sourceJob is null for uploaded files
         if (step.sourceJob) {
           inputFilesString += step.sourceJob.inputs.reduce((inputs: string, input: JobInput) => {
-            console.log("input", input);
             // jobs until 11/2023 have datasetName in input.displayName
             if (input.datasetName == null) {
-              return inputs + "\t" + input.inputId + ": " + input.displayName + "\n";
+              return inputs + "\t" + input.inputId + ": " + (input.displayName ?? "") + "\n";
             }
-            if (input.displayName != null) {
-              return inputs + "\t" + input.displayName + ": " + input.datasetName + "\n";
-            }
-            return inputs + "\t" + input.inputId + ": " + input.datasetName + "\n";
+            // the name of the input from the tool, or its id like in the modal
+            return inputs + "\t" + (input.displayName || input.inputId) + ": " + input.datasetName + "\n";
           }, "");
         }
 
@@ -136,7 +133,9 @@ export class DatasetHistoryModalComponent implements OnInit {
           ? this.historyOptionsMap.get("parameters").name +
             ":\n" +
             step.parameterList.reduce(
-              (params: string, param: JobParameter) => params + "\t" + param.displayName + ": " + param.value + "\n",
+              // the id of a parameter without a name, like in the modal
+              (params: string, param: JobParameter) =>
+                params + "\t" + (param.displayName ?? param.parameterId) + ": " + (param.value ?? "") + "\n",
               "",
             )
           : "") + "\n";
@@ -160,10 +159,11 @@ export class DatasetHistoryModalComponent implements OnInit {
             (step.sourceCode != null ? step.sourceCode : "not available").replace(/^/gm, "\t")
           : "") + "\n";
 
+      // step title, the line separates the steps also without it
+      const stepTitleString = this.historyOptionsMap.get("stepTitle").enabled ? "Step " + (i + 1) + "\n" : "";
+
       const stepString =
-        "Step " +
-        (i + 1) +
-        "\n" +
+        stepTitleString +
         line +
         toolString +
         inputFilesString +
@@ -190,8 +190,6 @@ export class DatasetHistoryModalComponent implements OnInit {
           sourceJobName: sourceJob != null ? sourceJob.toolCategory + " / " + sourceJob.toolName : "not available",
           sourceJob,
           parameterList: sourceJob != null ? sourceJob.parameters : [],
-          inputFileNamesString:
-            sourceJob != null ? sourceJob.inputs.map((jobInput: JobInput) => jobInput.displayName).join(" ") : "",
           sourceCode: sourceJob != null ? sourceJob.sourceCode : null,
           tool: this.toolService.getLiveToolForSourceJob(sourceJob, this.tools()),
         };
