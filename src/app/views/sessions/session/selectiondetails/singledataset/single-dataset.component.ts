@@ -53,8 +53,19 @@ export class SingleDatasetComponent {
   readonly toolCategory = computed(() => this.sourceJob()?.toolCategory ?? "");
   readonly toolName = computed(() => this.sourceJob()?.toolName ?? "");
   readonly tool = computed<Tool>(() => this.toolService.getLiveToolForSourceJob(this.sourceJob(), this.tools()));
+  // a signal of its own, so that the kept text below goes only when the notes change, not on every new
+  // copy of the file
+  private readonly savedNotes = computed(() => this.latestDataset().notes ?? "");
+  // the typed notes whose save failed, kept in the box for a retry or a copy until the user leaves the
+  // box or the saved notes change, e.g. elsewhere
+  private readonly unsavedNotes = linkedSignal<string, string | null>({
+    source: this.savedNotes,
+    computation: () => null,
+  });
   // the text of the notes textarea: the latest notes, or the typed text when its save failed
-  readonly notesText = linkedSignal(() => this.latestDataset().notes ?? "");
+  readonly notesText = computed(() => this.unsavedNotes() ?? this.savedNotes());
+  // the number of the latest save, to tell its failure from an older save's
+  private saves = 0;
 
   notesPlaceholderInactive = "click to edit";
   notesPlaceholderActive = "";
@@ -66,20 +77,28 @@ export class SingleDatasetComponent {
   saveNotes(notesInput: HTMLTextAreaElement) {
     this.notesArea().nativeElement.scrollTop = 0;
     notesInput.placeholder = this.notesPlaceholderInactive;
+    // leaving the box ends the kept text, whether it is saved or changed back
+    this.unsavedNotes.set(null);
 
-    if (notesInput.value === (this.latestDataset().notes ?? "")) {
+    const savedNotes = this.savedNotes();
+    if (notesInput.value === savedNotes) {
       return;
     }
 
     // the copy in datasetsMap at once, so that an update of the dataset sent before the save's event
     // arrives, e.g. a label applied with the next click, carries the new notes
+    const save = ++this.saves;
     const dataset = { ...this.latestDataset(), notes: notesInput.value };
     const restore = this.sessionData().setDatasets([dataset]);
     this.sessionDataService.updateDataset(dataset).subscribe({
       error: (err) => {
         restore();
-        // keep the typed text for a retry or a copy
-        this.notesText.set(dataset.notes);
+        // keep the text unless a newer save replaced it, or the notes changed during the save: a label
+        // applied meanwhile that sent these notes after all, or a change made elsewhere
+        const latestNotes = this.sessionData().datasetsMap().get(dataset.datasetId)?.notes ?? "";
+        if (save === this.saves && latestNotes === savedNotes) {
+          this.unsavedNotes.set(dataset.notes);
+        }
         this.restErrorService.showError("saving notes failed", err);
       },
     });

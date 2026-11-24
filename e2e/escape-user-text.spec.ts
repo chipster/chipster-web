@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { expect, test } from "./fixtures";
+import { expect, fillWhenRendered, test } from "./fixtures";
 import { createDataset, datasetNode, deleteDatasetFromMenu, getPhenodataRows, openSession } from "./session-api";
 
 /*
@@ -102,8 +102,10 @@ test("phenodata headers are shown as text and columns can be added and removed",
       .getByRole("button", { name: /column/i })
       .first()
       .click();
-    await page.locator(".modal-content input").fill(name);
+    await fillWhenRendered(page.locator(".modal-content input"), name);
     await page.locator(".modal-content").getByRole("button", { name: "Add" }).click();
+    // gone before the next one opens, while it fades out the locators above would find two
+    await expect(page.locator(".modal-content")).toHaveCount(0);
   }
 
   // group goes right after the columns that can't be edited, others to the end

@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 import { parse } from "yaml";
 
-import { expect, test } from "./fixtures";
+import { expect, fillWhenRendered, test } from "./fixtures";
 import { ADMIN_STATE } from "./login";
 import { createDataset, datasetNode, getDatasets, getSession, openSession } from "./session-api";
 
@@ -54,7 +54,7 @@ test("a dropdown menu opens a modal that renames a file (ng-bootstrap)", async (
 
   const modal = page.getByRole("dialog");
   await expect(modal.getByText("Rename file")).toBeVisible();
-  await modal.getByRole("textbox").fill("after.txt");
+  await fillWhenRendered(modal.getByRole("textbox"), "after.txt");
   await modal.getByRole("button", { name: "Rename" }).click();
   await expect(modal).toBeHidden();
 

@@ -3,12 +3,13 @@ import { readFile } from "node:fs/promises";
 
 import { BrowserContext, Locator, Page } from "@playwright/test";
 
-import { expect, test, waitForDevCheck } from "./fixtures";
+import { expect, fillWhenRendered, test, waitForDevCheck } from "./fixtures";
 import {
   Api,
   createDataset,
   createSession,
   datasetNode,
+  findSessions,
   getDatasetContent,
   getApi,
   getDatasets,
@@ -67,7 +68,7 @@ test("a session is renamed and its notes edited in the sessions list", async ({ 
   await openSessionMenu(page, name);
   await page.getByRole("button", { name: "Rename…" }).click();
   const modal = page.getByRole("dialog");
-  await modal.getByRole("textbox").fill(newName);
+  await fillWhenRendered(modal.getByRole("textbox"), newName);
   await modal.getByRole("button", { name: "Rename" }).click();
   await moveMouseOffList(page);
   await expect(modal).toBeHidden();
@@ -77,7 +78,7 @@ test("a session is renamed and its notes edited in the sessions list", async ({ 
 
   await openSessionMenu(page, newName);
   await page.getByRole("button", { name: /notes…/i }).click();
-  await modal.locator("textarea").fill("first line\nsecond line");
+  await fillWhenRendered(modal.locator("textarea"), "first line\nsecond line");
   await modal.getByRole("button", { name: "Save" }).click();
   await moveMouseOffList(page);
   await expect(modal).toBeHidden();
@@ -121,18 +122,6 @@ test.describe(() => {
     await waitForDevCheck(page);
   });
 });
-
-/*
- * The app creates the copy, so the test deletes it, by its name. The name is
- * unique, so that the cleanup finds only the copy of this test.
- */
-async function findSessions(api: Api, name: string) {
-  const response = await api.get("session-db", "/sessions/");
-  expect(response.ok()).toBe(true);
-  return ((await response.json()) as { sessionId: string; name: string; state: string }[]).filter(
-    (s) => s.name === name,
-  );
-}
 
 test("a session is duplicated with its files in the sessions list", async ({
   page,

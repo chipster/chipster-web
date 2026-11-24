@@ -8,6 +8,7 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
+import { JobService } from "../job.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 import { LabelsModalComponent } from "../labels/labels-modal.component";
@@ -180,8 +181,10 @@ export class DatasetModalService {
             "Select",
           );
         }),
-        // we only need datasets and sessionId, not jobs
-        mergeMap((selectedKey) => this.sessionResource.loadSession(selectedKey, false)),
+        // as a preview, without the jobs: the copy needs the target's datasets (for the positions)
+        // and labels, not its type tags or jobs, and the app opens the target after the copy, which
+        // updates its access date
+        mergeMap((selectedKey) => this.sessionResource.loadSession(selectedKey, true, false)),
         mergeMap((targetSessionData) => {
           log.info("copying selected datasets and jobs");
 
@@ -272,19 +275,52 @@ export class DatasetModalService {
     });
   }
 
-  getSessionDataOfSelection(selectedDatasets: any, sessionData: SessionData): SessionData {
-    const sourceJobIds = selectedDatasets.map((dataset) => dataset.sourceJob).filter((sourceJob) => sourceJob != null);
+  getSessionDataOfSelection(datasets: Dataset[], sessionData: SessionData): SessionData {
+    /*
+     * The latest copies: the selection's datasets don't have the notes and labels saved since. A
+     * file deleted while the modal was open is left out, its copy would fail without the file,
+     * and a selection that has no files left isn't copied at all.
+     */
+    const datasetsMap = sessionData.datasetsMap();
+    const selectedDatasets = sessionData.latestDatasets(datasets.filter((d) => datasetsMap.has(d.datasetId)));
+    if (selectedDatasets.length < datasets.length) {
+      log.info("not copying", datasets.length - selectedDatasets.length, "selected files that have been deleted");
+    }
+    if (selectedDatasets.length === 0) {
+      throw new Error("the selected files have been deleted");
+    }
+    const selectedDatasetIds = new Set(selectedDatasets.map((dataset) => dataset.datasetId));
+    /*
+     * A job that isn't in the session, e.g. deleted through the API, isn't copied, and neither is a
+     * running one, which copyToExistingSession() leaves out
+     */
+    const jobsMap = sessionData.jobsMap();
+    const isCopied = (jobId: string) => jobsMap.has(jobId) && !JobService.isRunning(jobsMap.get(jobId));
+    const sourceJobIds = selectedDatasets
+      .map((dataset) => dataset.sourceJob)
+      .filter((sourceJob) => sourceJob != null && isCopied(sourceJob));
 
     // clone objects in case we wan't to modify them (change ID and location of selected datasets when merging to existing session)
     const sourceJobs: Map<string, Job> = new Map(
       sourceJobIds.map((jobId: string) => {
-        const jobClone = cloneDeep(sessionData.jobsMap().get(jobId));
+        const jobClone = cloneDeep(jobsMap.get(jobId));
+        // the copy of the job lists its outputs, but refers only to the files that are copied with it,
+        // like a job whose output file has been deleted
+        jobClone.outputs?.forEach((output) => {
+          if (output.datasetId != null && !selectedDatasetIds.has(output.datasetId)) {
+            output.datasetId = null;
+          }
+        });
         return [jobId, jobClone];
       }),
     );
     const selectedDatasetsMap: Map<string, Dataset> = new Map(
       selectedDatasets.map((dataset: Dataset) => {
         const datasetClone = cloneDeep(dataset);
+        // and the copy of its file has no job, like an uploaded file, instead of a reference to nothing
+        if (datasetClone.sourceJob != null && !isCopied(datasetClone.sourceJob)) {
+          datasetClone.sourceJob = null;
+        }
         return [dataset.datasetId, datasetClone];
       }),
     );
