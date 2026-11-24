@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
-import { Locator, Page } from "@playwright/test";
+import { BrowserContext, Locator, Page } from "@playwright/test";
 
 import { expect, test, waitForDevCheck } from "./fixtures";
 import {
@@ -361,17 +361,8 @@ const shareTest = test.extend<{ sharedSession: SharedSession; shareReadWrite: bo
     { page, pageErrors, api, browser, playwright, baseURL, shareReadWrite, sharerLeaves, sessionDeletedByTest },
     use,
   ) => {
-    // a new connection for every request, see the api fixture
-    const request = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Connection: "close" } });
-    const sharer = await getApi(request, ADMIN_STATE);
-    // unique, so that the rows are only this test's
-    const name = `e2e share ${randomUUID()}`;
-    const sharerContext = await browser.newContext({ storageState: ADMIN_STATE });
-    pageErrors.watch(sharerContext);
-    // last before the try, whose finally deletes it
-    const sessionId = await createSession(sharer, name);
-
-    try {
+    // the share and what the tests see of it, between the setup and the cleanup below
+    async function useSharedSession(sharer: Api, sessionId: string, name: string) {
       const datasetId = await createDataset(sharer, sessionId, { name: "a.tsv", x: 100, y: 100 }, "gene\tvalue\n");
       const shared = await sharer.post("session-db", `/sessions/${sessionId}/rules`, {
         username: api.userId,
@@ -398,29 +389,54 @@ const shareTest = test.extend<{ sharedSession: SharedSession; shareReadWrite: bo
         ownSession: section(page, "Your sessions").locator("tr.session-list-item", { hasText: name }),
         sharerOwnSession: section(sharerPage, "Your sessions").locator("tr.session-list-item", { hasText: name }),
       });
-    } finally {
-      // close the pages first, the app would react to the deletion of the session
-      await pageErrors.settle();
-      await page.close();
-      await sharerContext.close();
+    }
+
+    // a new connection for every request, see the api fixture
+    const request = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Connection: "close" } });
+    let sharerContext: BrowserContext | undefined;
+    try {
+      const sharer = await getApi(request, ADMIN_STATE);
+      sharerContext = await browser.newContext({ storageState: ADMIN_STATE });
+      pageErrors.watch(sharerContext);
+      // unique, so that the rows are only this test's
+      const name = `e2e share ${randomUUID()}`;
+      const sessionId = await createSession(sharer, name);
       try {
-        // a read-write rule deletes the session from everyone
-        const deleted = await (sharerLeaves ? api : sharer).delete("session-db", `/sessions/${sessionId}`);
-        if (sessionDeletedByTest) {
-          expect(deleted.status(), "delete the session").toBe(404);
-        } else {
-          expect(deleted.ok(), `delete the session: ${deleted.status()}`).toBe(true);
-        }
+        await useSharedSession(sharer, sessionId, name);
       } finally {
-        await request.dispose();
+        try {
+          // close the pages first, the app would react to the deletion of the session
+          await pageErrors.settle();
+          await page.close();
+          await sharerContext.close();
+        } finally {
+          // a read-write rule deletes the session from everyone
+          const deleted = await (sharerLeaves ? api : sharer).delete("session-db", `/sessions/${sessionId}`);
+          if (sessionDeletedByTest) {
+            expect(deleted.status(), "delete the session").toBe(404);
+          } else {
+            expect(deleted.ok(), `delete the session: ${deleted.status()}`).toBe(true);
+          }
+        }
       }
+    } finally {
+      // closed above unless the setup failed, closing again does nothing
+      await sharerContext?.close();
+      await request.dispose();
     }
   },
 });
 
-// the app logs when its WebSocket has opened, start waiting before the page is loaded
-function eventsOpened(page: Page) {
-  return page.waitForEvent("console", (message) => message.text().startsWith("websocket open"));
+/*
+ * Open the sessions list and wait until it follows its events: the app logs
+ * when its WebSocket has opened (WebSocketService). The wait starts with the
+ * page load, and Promise.all keeps a failed load from leaving it unhandled.
+ */
+async function openListWithEvents(page: Page) {
+  await Promise.all([
+    page.waitForEvent("console", (message) => message.text().startsWith("websocket open")),
+    page.goto("/sessions"),
+  ]);
 }
 
 // the usernames of the rules of the session, as the sharer sees them
@@ -437,15 +453,11 @@ async function ruleOfUser(api: Api, shared: SharedSession) {
 
 // both lists show the share as pending, and follow the events
 async function openLists(page: Page, api: Api, shared: SharedSession) {
-  const sharerEvents = eventsOpened(shared.sharerPage);
-  await shared.sharerPage.goto("/sessions");
-  await sharerEvents;
+  await openListWithEvents(shared.sharerPage);
   await expect(shared.pendingShare).toBeVisible();
   await expect(shared.pendingShare).toContainText(api.userId);
 
-  const userEvents = eventsOpened(page);
-  await page.goto("/sessions");
-  await userEvents;
+  await openListWithEvents(page);
   await expect(shared.sharedToUser).toBeVisible();
   await expect(shared.ownSession).toHaveCount(0);
 }
