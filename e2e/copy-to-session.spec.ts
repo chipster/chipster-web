@@ -10,12 +10,14 @@ import {
   createLabel,
   createSession,
   datasetNode,
+  deleteDataset,
   findSessions,
   getDatasetContent,
   getDatasets,
   getLabels,
   openSession,
   TEST_JOB,
+  updateJob,
   visualizationTab,
 } from "./session-api";
 
@@ -308,11 +310,21 @@ async function createFilesWithJobs(api: Api, sessionId: string, labelId: string)
   return { madeId, orphanId, runningId };
 }
 
-// the tool name of the job of each file in the session, null for a file without one
-async function jobsOfFiles(api: Api, sessionId: string): Promise<Record<string, string[]>> {
+interface TestJob {
+  jobId: string;
+  toolName: string;
+  outputs: { outputId: string; datasetId: string }[];
+}
+
+async function getJobs(api: Api, sessionId: string): Promise<TestJob[]> {
   const response = await api.get("session-db", `/sessions/${sessionId}/jobs`);
   expect(response.ok()).toBe(true);
-  const jobs = new Map(((await response.json()) as { jobId: string; toolName: string }[]).map((j) => [j.jobId, j]));
+  return response.json();
+}
+
+// the tool name of the job of each file in the session, null for a file without one
+async function jobsOfFiles(api: Api, sessionId: string): Promise<Record<string, string[]>> {
+  const jobs = new Map((await getJobs(api, sessionId)).map((j) => [j.jobId, j]));
   const files: Record<string, string[]> = {};
   for (const dataset of await getDatasets(api, sessionId)) {
     // a job id that the session doesn't have shows as undefined
@@ -398,6 +410,93 @@ test("a file whose job is gone is copied to an existing session without the job"
     });
     const copyOfOrphan = (await getDatasets(api, targetId)).find((d) => d.name === "orphan.txt").datasetId;
     await expectLabelShown(page, targetId, copyOfOrphan, "label-a");
+    await waitForDevCheck(page);
+  } finally {
+    await deleteSessions(page, pageErrors, api, async () => [targetId]);
+  }
+});
+
+/*
+ * A job made two files, and only one of them is selected. The copy of the job lists both outputs,
+ * but refers only to the copied file: the other output doesn't point at the file of the source
+ * session, which the target doesn't have.
+ */
+test("the copy of a job refers only to the outputs that are copied with it", async ({
+  page,
+  pageErrors,
+  api,
+  sessionId,
+}) => {
+  const targetName = `e2e copy target ${randomUUID()}`;
+  // the outputs need the files' ids, and a finished job can't be changed: the job finishes last
+  const jobId = await createJob(api, sessionId, { ...TEST_JOB, toolName: "Two outputs" });
+  const out1Id = await createDataset(api, sessionId, { name: "out1.txt", x: 100, y: 100, sourceJob: jobId }, "1\n");
+  const out2Id = await createDataset(api, sessionId, { name: "out2.txt", x: 300, y: 100, sourceJob: jobId }, "2\n");
+  await updateJob(api, sessionId, jobId, {
+    state: "COMPLETED",
+    outputs: [
+      { outputId: "out1", displayName: "out1.txt", datasetId: out1Id },
+      { outputId: "out2", displayName: "out2.txt", datasetId: out2Id },
+    ],
+  });
+  const targetId = await createSession(api, targetName);
+
+  try {
+    await openSession(page, sessionId, out1Id);
+    await datasetNode(page, out1Id).click();
+    await expect(page.locator("ch-selected-files .h6")).toHaveText("out1.txt");
+    await contextMenuAction(page, out1Id, "Copy to existing session…");
+    await copyToExistingSession(page, targetName);
+
+    await expect
+      .poll(async () => jobsOfFiles(api, targetId), { timeout: 30_000 })
+      .toEqual({ "out1.txt": ["Two outputs"] });
+    const copyOfOut1 = (await getDatasets(api, targetId)).find((d) => d.name === "out1.txt").datasetId;
+    expect((await getJobs(api, targetId)).map((j) => j.outputs)).toEqual([
+      [
+        { outputId: "out1", displayName: "out1.txt", datasetId: copyOfOut1 },
+        { outputId: "out2", displayName: "out2.txt", datasetId: null },
+      ],
+    ]);
+    await expect(page).toHaveURL(new RegExp(`/analyze/${targetId}$`), { timeout: 30_000 });
+    await expect(datasetNode(page, copyOfOut1)).toBeVisible({ timeout: 30_000 });
+    await waitForDevCheck(page);
+  } finally {
+    await deleteSessions(page, pageErrors, api, async () => [targetId]);
+  }
+});
+
+/*
+ * A selected file that is deleted while the session list of Copy to existing session is open,
+ * e.g. by a collaborator, is left out of the copy, whose file would be gone.
+ */
+test("a file deleted while the copy modal is open is left out of the copy", async ({
+  page,
+  pageErrors,
+  api,
+  sessionId,
+}) => {
+  const targetName = `e2e copy target ${randomUUID()}`;
+  const aId = await createDataset(api, sessionId, { name: "a.txt", x: 100, y: 100 }, "a\n");
+  const bId = await createDataset(api, sessionId, { name: "b.txt", x: 300, y: 100 }, "b\n");
+  const targetId = await createSession(api, targetName);
+
+  try {
+    await openSession(page, sessionId, aId);
+    await datasetNode(page, aId).click();
+    await datasetNode(page, bId).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files .h6")).toHaveText("2 files");
+    await contextMenuAction(page, bId, "Copy to existing session…");
+    await expect(page.getByRole("dialog")).toContainText("Copy selected files to an existing session");
+    await deleteDataset(api, sessionId, bId);
+    // the app has heard of the deletion
+    await expect(datasetNode(page, bId)).toBeHidden();
+    await copyToExistingSession(page, targetName);
+
+    await expect(page).toHaveURL(new RegExp(`/analyze/${targetId}$`), { timeout: 30_000 });
+    expect((await getDatasets(api, targetId)).map((d) => d.name)).toEqual(["a.txt"]);
+    const copyOfA = (await getDatasets(api, targetId))[0].datasetId;
+    await expect(datasetNode(page, copyOfA)).toBeVisible({ timeout: 30_000 });
     await waitForDevCheck(page);
   } finally {
     await deleteSessions(page, pageErrors, api, async () => [targetId]);

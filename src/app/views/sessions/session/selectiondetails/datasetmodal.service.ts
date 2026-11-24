@@ -275,8 +275,20 @@ export class DatasetModalService {
   }
 
   getSessionDataOfSelection(datasets: Dataset[], sessionData: SessionData): SessionData {
-    // the latest copies: the selection's datasets don't have the notes and labels saved since
-    const selectedDatasets = sessionData.latestDatasets(datasets);
+    /*
+     * The latest copies: the selection's datasets don't have the notes and labels saved since. A
+     * file deleted while the modal was open is left out, its copy would fail without the file,
+     * and a selection that has no files left isn't copied at all.
+     */
+    const datasetsMap = sessionData.datasetsMap();
+    const selectedDatasets = sessionData.latestDatasets(datasets.filter((d) => datasetsMap.has(d.datasetId)));
+    if (selectedDatasets.length < datasets.length) {
+      log.info("not copying", datasets.length - selectedDatasets.length, "selected files that have been deleted");
+    }
+    if (selectedDatasets.length === 0) {
+      throw new Error("the selected files have been deleted");
+    }
+    const selectedDatasetIds = new Set(selectedDatasets.map((dataset) => dataset.datasetId));
     /*
      * A job that isn't in the session, e.g. deleted through the API, isn't copied, and neither is a
      * running one, which copyToExistingSession() leaves out
@@ -291,6 +303,13 @@ export class DatasetModalService {
     const sourceJobs: Map<string, Job> = new Map(
       sourceJobIds.map((jobId: string) => {
         const jobClone = cloneDeep(jobsMap.get(jobId));
+        // the copy of the job lists its outputs, but refers only to the files that are copied with it,
+        // like a job whose output file has been deleted
+        jobClone.outputs?.forEach((output) => {
+          if (output.datasetId != null && !selectedDatasetIds.has(output.datasetId)) {
+            output.datasetId = null;
+          }
+        });
         return [jobId, jobClone];
       }),
     );
