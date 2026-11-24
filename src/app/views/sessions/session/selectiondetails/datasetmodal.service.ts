@@ -8,7 +8,6 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
-import { JobService } from "../job.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 import { LabelsModalComponent } from "../labels/labels-modal.component";
@@ -291,14 +290,14 @@ export class DatasetModalService {
     }
     const selectedDatasetIds = new Set(selectedDatasets.map((dataset) => dataset.datasetId));
     /*
-     * A job that isn't in the session, e.g. deleted through the API, isn't copied, and neither is a
-     * running one, which copyToExistingSession() leaves out
+     * A job that isn't in the session, e.g. deleted through the API, can't be copied.
+     * copyToExistingSession() leaves out the running jobs too, and copies the files of the jobs
+     * that it leaves out without a job.
      */
     const jobsMap = sessionData.jobsMap();
-    const isCopied = (jobId: string) => jobsMap.has(jobId) && !JobService.isRunning(jobsMap.get(jobId));
     const sourceJobIds = selectedDatasets
       .map((dataset) => dataset.sourceJob)
-      .filter((sourceJob) => sourceJob != null && isCopied(sourceJob));
+      .filter((sourceJob) => sourceJob != null && jobsMap.has(sourceJob));
 
     // clone objects in case we wan't to modify them (change ID and location of selected datasets when merging to existing session)
     const sourceJobs: Map<string, Job> = new Map(
@@ -315,14 +314,7 @@ export class DatasetModalService {
       }),
     );
     const selectedDatasetsMap: Map<string, Dataset> = new Map(
-      selectedDatasets.map((dataset: Dataset) => {
-        const datasetClone = cloneDeep(dataset);
-        // and the copy of its file has no job, like an uploaded file, instead of a reference to nothing
-        if (datasetClone.sourceJob != null && !isCopied(datasetClone.sourceJob)) {
-          datasetClone.sourceJob = null;
-        }
-        return [dataset.datasetId, datasetClone];
-      }),
+      selectedDatasets.map((dataset: Dataset) => [dataset.datasetId, cloneDeep(dataset)]),
     );
 
     // narrow labelsMap to only labels referenced by the selected datasets
@@ -364,13 +356,10 @@ export class DatasetModalService {
     datasetIdMap.forEach((newId, oldId) => {
       const dataset = sessionData.datasetsMap().get(oldId);
       dataset.datasetId = newId;
-      if (dataset.sourceJob != null) {
-        const newSourceJobId = jobIdMap.get(dataset.sourceJob);
-        if (newSourceJobId == null) {
-          console.log("source job not found for dataset " + dataset.name);
-        } else {
-          dataset.sourceJob = newSourceJobId;
-        }
+      // a job that isn't in the session, e.g. deleted through the API, keeps its id: copyToExistingSession()
+      // copies the file without a job
+      if (dataset.sourceJob != null && jobIdMap.has(dataset.sourceJob)) {
+        dataset.sourceJob = jobIdMap.get(dataset.sourceJob);
       }
       newDatasetsMap.set(dataset.datasetId, dataset);
     });

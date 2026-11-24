@@ -689,11 +689,26 @@ export class SessionResource {
 
     const createLabelsRequest = labelsToCreate.length > 0 ? this.createLabels(targetSessionId, labelsToCreate) : of([]);
 
+    // a running job isn't copied, its results aren't there yet
+    const copiedJobIds = new Set(
+      Array.from(sessionData.jobsMap())
+        .filter(([, job]) => !JobService.isRunning(job))
+        .map(([jobId]) => jobId),
+    );
+
     // datasets keep their labelIds verbatim -- they now resolve in the destination
     const oldDatasets = Array.from(sessionData.datasetsMap().values());
     const clones = oldDatasets.map((dataset: Dataset) => {
       const _clone = clone(dataset);
       _clone.sessionId = null;
+      /*
+       * The copy of a file whose job isn't copied, because the job is running or isn't in the
+       * session (e.g. deleted through the API), has no job, like an uploaded file, instead of a
+       * reference to a job that the destination doesn't have
+       */
+      if (_clone.sourceJob != null && !copiedJobIds.has(_clone.sourceJob)) {
+        _clone.sourceJob = null;
+      }
       return _clone;
     });
 
@@ -712,10 +727,9 @@ export class SessionResource {
         }, new Map());
 
         // create jobs
-        const oldJobs: Job[] = Array.from(sessionData.jobsMap().values());
-        const jobCopies = oldJobs
-          .filter((oldJob) => !JobService.isRunning(oldJob))
-          .map((oldJob: Job) => {
+        const jobCopies = Array.from(sessionData.jobsMap())
+          .filter(([jobId]) => copiedJobIds.has(jobId))
+          .map(([, oldJob]) => {
             const jobCopy = clone(oldJob);
             jobCopy.sessionId = null;
             this.nullifyMissingInputs(jobCopy, newDatasetsMap);
