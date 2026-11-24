@@ -33,7 +33,10 @@ function sessionRow(page: Page, name: string) {
  * hides its buttons again. Then the button is hovered again and clicked.
  */
 async function clickRowButton(page: Page, name: string, title: string) {
-  const row = sessionRow(page, name);
+  await clickButtonOfRow(sessionRow(page, name), title);
+}
+
+async function clickButtonOfRow(row: Locator, title: string) {
   await expect(async () => {
     await row.hover();
     await row.getByTitle(title, { exact: true }).click({ timeout: 2_000 });
@@ -335,10 +338,29 @@ interface SharedSession {
   // the session in the user's "Shared to you by <sharer>", and in "Your sessions"
   sharedToUser: Locator;
   ownSession: Locator;
+  // the session in the sharer's "Your sessions"
+  sharerOwnSession: Locator;
 }
 
-const shareTest = test.extend<{ sharedSession: SharedSession }>({
-  sharedSession: async ({ page, pageErrors, api, browser, playwright, baseURL }, use) => {
+const shareTest = test.extend<{ sharedSession: SharedSession; shareReadWrite: boolean; sharerLeaves: boolean }>({
+  // a read-only share with test.use({ shareReadWrite: false })
+  shareReadWrite: [true, { option: true }],
+
+  /*
+   * The sharer deletes the session in the list, which deletes only the
+   * sharer's rule, so the user deletes the session after the test. Otherwise
+   * the sharer has to be able to delete it.
+   */
+  sharerLeaves: [false, { option: true }],
+
+  /*
+   * The session of the share, deleted after the test. A test that deletes the
+   * session itself sets sessionDeletedByTest, like for the sessionId fixture.
+   */
+  sharedSession: async (
+    { page, pageErrors, api, browser, playwright, baseURL, shareReadWrite, sharerLeaves, sessionDeletedByTest },
+    use,
+  ) => {
     // a new connection for every request, see the api fixture
     const request = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Connection: "close" } });
     const sharer = await getApi(request, ADMIN_STATE);
@@ -353,14 +375,14 @@ const shareTest = test.extend<{ sharedSession: SharedSession }>({
       const datasetId = await createDataset(sharer, sessionId, { name: "a.tsv", x: 100, y: 100 }, "gene\tvalue\n");
       const shared = await sharer.post("session-db", `/sessions/${sessionId}/rules`, {
         username: api.userId,
-        readWrite: true,
+        readWrite: shareReadWrite,
       });
       expect(shared.ok(), `share: ${shared.status()}`).toBe(true);
 
       const sharerPage = await sharerContext.newPage();
       const sharerName = sharer.userId.replace(/^.*?\//, "");
-      const section = (heading: string) =>
-        page.locator(".session-list > div", { has: page.getByRole("heading", { name: heading }) });
+      const section = (p: Page, heading: string) =>
+        p.locator(".session-list > div", { has: p.getByRole("heading", { name: heading }) });
       await use({
         sharer,
         name,
@@ -370,8 +392,11 @@ const shareTest = test.extend<{ sharedSession: SharedSession }>({
         pendingShare: sharerPage
           .locator(".row", { has: sharerPage.getByRole("heading", { name: "Sent pending shares" }) })
           .locator("tr.session-list-item", { hasText: name }),
-        sharedToUser: section(`Shared to you by ${sharerName}`).locator("tr.session-list-item", { hasText: name }),
-        ownSession: section("Your sessions").locator("tr.session-list-item", { hasText: name }),
+        sharedToUser: section(page, `Shared to you by ${sharerName}`).locator("tr.session-list-item", {
+          hasText: name,
+        }),
+        ownSession: section(page, "Your sessions").locator("tr.session-list-item", { hasText: name }),
+        sharerOwnSession: section(sharerPage, "Your sessions").locator("tr.session-list-item", { hasText: name }),
       });
     } finally {
       // close the pages first, the app would react to the deletion of the session
@@ -379,9 +404,13 @@ const shareTest = test.extend<{ sharedSession: SharedSession }>({
       await page.close();
       await sharerContext.close();
       try {
-        // the sharer's read-write rule deletes the session from the user too
-        const deleted = await sharer.delete("session-db", `/sessions/${sessionId}`);
-        expect(deleted.ok(), `delete the session: ${deleted.status()}`).toBe(true);
+        // a read-write rule deletes the session from everyone
+        const deleted = await (sharerLeaves ? api : sharer).delete("session-db", `/sessions/${sessionId}`);
+        if (sessionDeletedByTest) {
+          expect(deleted.status(), "delete the session").toBe(404);
+        } else {
+          expect(deleted.ok(), `delete the session: ${deleted.status()}`).toBe(true);
+        }
       } finally {
         await request.dispose();
       }
@@ -504,3 +533,83 @@ shareTest(
     await waitForDevCheck(page);
   },
 );
+
+/*
+ * Deleting a session in the list deletes only the user's own rule, so a
+ * session that the sharer deletes after the user has accepted it stays with
+ * the user.
+ */
+shareTest.describe(() => {
+  shareTest.use({ sharerLeaves: true });
+
+  shareTest(
+    "an accepted session stays with the user when the sharer deletes it",
+    async ({ page, api, sharedSession: shared }) => {
+      await openLists(page, api, shared);
+      await clickRowButton(page, shared.name, "Accept");
+      await moveMouseOffList(page);
+      await expect(shared.ownSession).toBeVisible();
+      await expect(shared.pendingShare).toHaveCount(0);
+
+      await clickButtonOfRow(shared.sharerOwnSession, "Delete");
+      const modal = shared.sharerPage.getByRole("dialog");
+      await expect(modal).toContainText(`Delete session ${shared.name}?`);
+      await modal.getByRole("button", { name: "Delete" }).click();
+      await moveMouseOffList(shared.sharerPage);
+      await expect(modal).toBeHidden();
+      await expect(shared.sharerOwnSession).toHaveCount(0);
+      await expect
+        .poll(async () => (await getSession(api, shared.sessionId)).rules.map((r) => r.username))
+        .toEqual([api.userId]);
+      expect((await shared.sharer.get("session-db", `/sessions/${shared.sessionId}`)).status()).toBe(403);
+      await waitForDevCheck(shared.sharerPage);
+
+      // the user's list has followed the event of the sharer's rule, and the session still opens
+      await expect(shared.ownSession).toBeVisible();
+      await shared.ownSession.click();
+      await page.waitForURL(`**/analyze/${shared.sessionId}`, { timeout: 30_000 });
+      await expect(datasetNode(page, shared.datasetId)).toBeVisible({ timeout: 30_000 });
+      await waitForDevCheck(page);
+    },
+  );
+});
+
+/*
+ * session-db keeps a session only while it has a read-write rule left, pending
+ * or not. So when the sharer deletes a session whose only other rule is a
+ * pending read-only share, the session is deleted, and the share with it.
+ */
+shareTest.describe(() => {
+  shareTest.use({ shareReadWrite: false, sessionDeletedByTest: true });
+
+  shareTest(
+    "a pending read-only share is gone when the sharer deletes the session",
+    async ({ page, api, sharedSession: shared }) => {
+      await openLists(page, api, shared);
+      expect((await ruleOfUser(api, shared)).readWrite).toBe(false);
+
+      await clickButtonOfRow(shared.sharerOwnSession, "Delete");
+      const modal = shared.sharerPage.getByRole("dialog");
+      await expect(modal).toContainText(`Delete session ${shared.name}?`);
+      await modal.getByRole("button", { name: "Delete" }).click();
+      await moveMouseOffList(shared.sharerPage);
+      await expect(modal).toBeHidden();
+      await expect(shared.sharerOwnSession).toHaveCount(0);
+      await expect(shared.pendingShare).toHaveCount(0);
+      await expect.poll(async () => (await api.get("session-db", `/sessions/${shared.sessionId}`)).status()).toBe(404);
+
+      // the user's list has followed the event of the user's rule
+      await expect(shared.sharedToUser).toHaveCount(0);
+      await expect(shared.ownSession).toHaveCount(0);
+      await waitForDevCheck(page);
+
+      // and the share is gone from the sharer's list for good, not only until a reload
+      await shared.sharerPage.reload();
+      await expect(shared.sharerPage.getByRole("heading", { name: "Sent pending shares" })).toBeVisible();
+      await expect(shared.sharerPage.getByRole("heading", { name: "Your sessions" })).toBeVisible();
+      await expect(shared.pendingShare).toHaveCount(0);
+      await expect(shared.sharerOwnSession).toHaveCount(0);
+      await waitForDevCheck(shared.sharerPage);
+    },
+  );
+});
