@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { APIRequestContext, APIResponse, expect, Page } from "@playwright/test";
-import type { Dataset, Session } from "chipster-js-common";
+import type { Dataset, Label, Session } from "chipster-js-common";
 import { jwtDecode } from "jwt-decode";
 import { parse } from "yaml";
 
@@ -107,6 +107,16 @@ export async function createSession(api: Api, name: string, state?: string): Pro
   return (await response.json()).sessionId;
 }
 
+/*
+ * The sessions of the user with this name. A session that the app creates, like a copy, is found
+ * by its name for the checks and the cleanup, so the test gives it a unique name.
+ */
+export async function findSessions(api: Api, name: string): Promise<Session[]> {
+  const response = await api.get("session-db", "/sessions/");
+  expect(response.ok()).toBe(true);
+  return ((await response.json()) as Session[]).filter((s) => s.name === name);
+}
+
 export async function getSession(api: Api, sessionId: string): Promise<Session> {
   const response = await api.get("session-db", `/sessions/${sessionId}`);
   expect(response.ok()).toBe(true);
@@ -206,6 +216,12 @@ export async function createLabel(api: Api, sessionId: string, name: string, col
   const response = await api.post("session-db", `/sessions/${sessionId}/labels`, { sessionId, name, color });
   expect(response.ok(), `create label ${response.status()}`).toBe(true);
   return (await response.json()).labelId;
+}
+
+export async function getLabels(api: Api, sessionId: string): Promise<Label[]> {
+  const response = await api.get("session-db", `/sessions/${sessionId}/labels`);
+  expect(response.ok(), `get labels ${response.status()}`).toBe(true);
+  return response.json();
 }
 
 export async function renameLabel(api: Api, sessionId: string, labelId: string, name: string): Promise<void> {

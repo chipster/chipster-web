@@ -22,7 +22,12 @@ export class SessionResource {
   private tokenService = inject(TokenService);
   private schedulerResource = inject(SchedulerResource);
 
-  loadSession(sessionId: string, preview = false): Observable<SessionData> {
+  /**
+   * Load a session's data. A preview skips the type tags and doesn't update the session's access
+   * date. A session with many jobs takes long to load, which a caller that doesn't need them
+   * avoids with withJobs = false: the jobsMap is then empty.
+   */
+  loadSession(sessionId: string, preview = false, withJobs = true): Observable<SessionData> {
     return this.configService.getSessionDbUrl().pipe(
       mergeMap((url: string) => {
         let sessionUrl = `${url}/sessions/${sessionId}`;
@@ -101,7 +106,7 @@ export class SessionResource {
         return this.forkJoinWithoutCancel({
           session: session$,
           datasets: sessionDatasets$,
-          jobs: sessionJobs$,
+          jobs: withJobs ? sessionJobs$ : observableOf([] as Job[]),
           labels: sessionLabels$,
           types: types$,
           jobQuota: jobQuota,

@@ -5,10 +5,10 @@ import { Page } from "@playwright/test";
 
 import { expect, fillWhenRendered, test, waitForDevCheck } from "./fixtures";
 import {
-  Api,
   createDataset,
   createSession,
   datasetNode,
+  findSessions,
   getDatasetContent,
   getApi,
   getDatasets,
@@ -118,18 +118,6 @@ test.describe(() => {
     await waitForDevCheck(page);
   });
 });
-
-/*
- * The app creates the copy, so the test deletes it, by its name. The name is
- * unique, so that the cleanup finds only the copy of this test.
- */
-async function findSessions(api: Api, name: string) {
-  const response = await api.get("session-db", "/sessions/");
-  expect(response.ok()).toBe(true);
-  return ((await response.json()) as { sessionId: string; name: string; state: string }[]).filter(
-    (s) => s.name === name,
-  );
-}
 
 test("a session is duplicated with its files in the sessions list", async ({
   page,
