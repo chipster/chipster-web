@@ -1,6 +1,6 @@
 import { Route } from "@playwright/test";
 
-import { expect, test, waitForDevCheck } from "./fixtures";
+import { expect, fillWhenRendered, test, waitForDevCheck } from "./fixtures";
 import { getSession, openSession } from "./session-api";
 
 /*
@@ -32,7 +32,7 @@ test("a session is renamed and its notes edited in the session details", async (
   await details.getByTitle("Actions").click();
   await details.getByRole("button", { name: "Rename…" }).click();
   const modal = page.getByRole("dialog");
-  await modal.getByRole("textbox").fill("renamed in the details");
+  await fillWhenRendered(modal.getByRole("textbox"), "renamed in the details");
   await modal.getByRole("button", { name: "Rename" }).click();
   await expect(modal).toBeHidden();
   await expect(details.locator(".h6")).toHaveText("renamed in the details");
@@ -40,7 +40,7 @@ test("a session is renamed and its notes edited in the session details", async (
 
   await details.getByTitle("Actions").click();
   await details.getByRole("button", { name: "Edit notes…" }).click();
-  await modal.locator("textarea").fill("first line\nsecond line");
+  await fillWhenRendered(modal.locator("textarea"), "first line\nsecond line");
   await modal.getByRole("button", { name: "Save" }).click();
   await expect(modal).toBeHidden();
   await expect(details.getByText("second line")).toBeVisible();
@@ -72,7 +72,7 @@ test("the open session is shared and the share removed in the sharing modal", as
   await expect(modal.getByRole("row").filter({ hasText: "owner" })).toBeVisible();
 
   await modal.getByRole("button", { name: "Add rule" }).click();
-  await modal.getByRole("textbox").fill(username);
+  await fillWhenRendered(modal.getByRole("textbox"), username);
   await modal.getByRole("button", { name: "Add", exact: true }).click();
   await expect(shareRow).toBeVisible();
   await expect(shareRow).toContainText("read-write");
@@ -112,7 +112,7 @@ test.describe("temporary session", () => {
     await details.getByTitle("Actions").click();
     await details.getByRole("button", { name: "Rename…" }).click();
     const modal = page.getByRole("dialog");
-    await modal.getByRole("textbox").fill("renamed temporary session");
+    await fillWhenRendered(modal.getByRole("textbox"), "renamed temporary session");
     await modal.getByRole("button", { name: "Rename" }).click();
     await expect(modal).toBeHidden();
     await expect.poll(() => held.some((route) => route.request().method() === "PUT")).toBe(true);

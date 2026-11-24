@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { expect, test } from "./fixtures";
+import { expect, fillWhenRendered, test } from "./fixtures";
 import { EXTERNAL_AUTH_DIR, submitLoginForm } from "./login";
 import { createDataset, datasetNode, getSession, openSession } from "./session-api";
 
@@ -60,7 +60,7 @@ test.describe("modified temporary session", () => {
     await expect(page).toHaveURL(new RegExp(`/analyze/${sessionId}$`));
 
     await leaveSession(page);
-    await modal.getByRole("textbox").fill("e2e route guards saved");
+    await fillWhenRendered(modal.getByRole("textbox"), "e2e route guards saved");
     await modal.getByRole("button", { name: "Save new session" }).click();
     await expect(page).toHaveURL(/\/sessions$/);
     expect(await getSession(api, sessionId)).toMatchObject({ name: "e2e route guards saved", state: "READY" });

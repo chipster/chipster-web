@@ -1,4 +1,4 @@
-import { test as base, BrowserContext, expect, Page } from "@playwright/test";
+import { test as base, BrowserContext, expect, Locator, Page } from "@playwright/test";
 
 import { Api, createSession, getApi } from "./session-api";
 
@@ -198,6 +198,20 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
  */
 export async function waitForDevCheck(page: Page) {
   await page.waitForTimeout(3000);
+}
+
+/*
+ * Fills a field of a dialog that has just opened. ng-bootstrap puts the content of a
+ * dialog in the page before Angular renders it in the next change detection, so for a
+ * moment the fields are there, but empty. Without zone.js that moment is a timer away,
+ * and on a fast machine fill() comes first: the first render then writes the field's
+ * starting value over the filled one. No one types that fast, so the app is fine, but a
+ * test has to wait for the render. Angular's forms mark a field ng-pristine when they
+ * first render it.
+ */
+export async function fillWhenRendered(field: Locator, value: string) {
+  await expect(field).toHaveClass(/ng-pristine/);
+  await field.fill(value);
 }
 
 export { expect };

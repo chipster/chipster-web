@@ -1,6 +1,6 @@
 import { Locator, Page } from "@playwright/test";
 
-import { expect, test, waitForDevCheck } from "./fixtures";
+import { expect, fillWhenRendered, test, waitForDevCheck } from "./fixtures";
 import {
   Api,
   createDataset,
@@ -199,7 +199,7 @@ test("sample and original_name can't be edited or removed, and a missing group c
 
   // a group column without values is an empty one
   await table.getByRole("button", { name: "Add column" }).click();
-  await page.locator(".modal-content input").fill("group");
+  await fillWhenRendered(page.locator(".modal-content input"), "group");
   await page.locator(".modal-content").getByRole("button", { name: "Add" }).click();
   await expect(table.getByText("Group column contains empty values")).toBeVisible();
   await expect(table.getByText("Group column is missing")).toBeHidden();
