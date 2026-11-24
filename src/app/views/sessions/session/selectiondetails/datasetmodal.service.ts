@@ -181,9 +181,10 @@ export class DatasetModalService {
             "Select",
           );
         }),
-        // as a preview: the copy needs the target's datasets (for the positions) and labels, not its
-        // type tags, and the app opens the target after the copy, which updates its access date
-        mergeMap((selectedKey) => this.sessionResource.loadSession(selectedKey, true)),
+        // as a preview, without the jobs: the copy needs the target's datasets (for the positions)
+        // and labels, not its type tags or jobs, and the app opens the target after the copy, which
+        // updates its access date
+        mergeMap((selectedKey) => this.sessionResource.loadSession(selectedKey, true, false)),
         mergeMap((targetSessionData) => {
           log.info("copying selected datasets and jobs");
 

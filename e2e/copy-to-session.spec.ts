@@ -30,9 +30,9 @@ import {
 
 // the label names of each file of the session, by file name, one array per file of that name, e.g.
 // { "a.tsv": [["label-a"]] }
-async function labelsOfFiles(api: Api, sessionId: string): Promise<Record<string, string[][]>> {
+async function labelsOfFiles(api: Api, sessionId: string): Promise<Record<string, (string | undefined)[][]>> {
   const labels = new Map((await getLabels(api, sessionId)).map((l) => [l.labelId, l.name]));
-  const files: Record<string, string[][]> = {};
+  const files: Record<string, (string | undefined)[][]> = {};
   for (const dataset of await getDatasets(api, sessionId)) {
     // a label id that the session doesn't have shows as undefined, so that a broken copy fails the check
     const names = (dataset.labelIds ?? []).map((id) => labels.get(id)).sort();
@@ -323,9 +323,9 @@ async function getJobs(api: Api, sessionId: string): Promise<TestJob[]> {
 }
 
 // the tool name of the job of each file in the session, null for a file without one
-async function jobsOfFiles(api: Api, sessionId: string): Promise<Record<string, string[]>> {
+async function jobsOfFiles(api: Api, sessionId: string): Promise<Record<string, (string | null | undefined)[]>> {
   const jobs = new Map((await getJobs(api, sessionId)).map((j) => [j.jobId, j]));
-  const files: Record<string, string[]> = {};
+  const files: Record<string, (string | null | undefined)[]> = {};
   for (const dataset of await getDatasets(api, sessionId)) {
     // a job id that the session doesn't have shows as undefined
     const toolName = dataset.sourceJob == null ? null : jobs.get(dataset.sourceJob)?.toolName;
