@@ -14,7 +14,7 @@ import {
   getDatasets,
   getSession,
 } from "./session-api";
-import { EXAMPLE_OWNER_STATE } from "./login";
+import { ADMIN_STATE, EXAMPLE_OWNER_STATE } from "./login";
 import { readZip } from "./zip";
 
 /*
@@ -306,6 +306,111 @@ test("an example session opens as a temporary copy in the sessions list", async 
       } finally {
         await request.dispose();
       }
+    }
+  }
+});
+
+/*
+ * A session that another user shares to the user is listed under "Shared to
+ * you by <sharer>" until the user accepts it, and the sharer lists it under
+ * "Sent pending shares" until then. Accepting moves it to the user's own
+ * sessions and removes it from the sharer's pending shares, both lists
+ * following the rule events. The sharer is the admin, because the shares of
+ * example_session_owner are example sessions, which have nothing to accept.
+ *
+ * A list connects to its events only after it has loaded and shown its rows,
+ * and an event that comes before that is missed. So the share is made before
+ * the lists are opened, and the test waits for each list's WebSocket to open
+ * before it changes anything that the list has to follow.
+ * All the tests run as the same user, so the lists of the other tests show the
+ * shared session for a moment too.
+ */
+// the app logs when its WebSocket has opened, start waiting before the page is loaded
+function eventsOpened(page: Page) {
+  return page.waitForEvent("console", (message) => message.text().startsWith("websocket open"));
+}
+
+test("a session shared by another user is accepted in the sessions list", async ({
+  page,
+  pageErrors,
+  api,
+  browser,
+  playwright,
+  baseURL,
+}) => {
+  // a new connection for every request, see the api fixture
+  const request = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Connection: "close" } });
+  const sharer = await getApi(request, ADMIN_STATE);
+  // unique, so that the rows are only this test's
+  const name = `e2e share ${randomUUID()}`;
+  const sharerContext = await browser.newContext({ storageState: ADMIN_STATE });
+  pageErrors.watch(sharerContext);
+  // last before the try, whose finally deletes it
+  const sessionId = await createSession(sharer, name);
+
+  try {
+    const datasetId = await createDataset(sharer, sessionId, { name: "a.tsv", x: 100, y: 100 }, "gene\tvalue\n");
+    const shared = await sharer.post("session-db", `/sessions/${sessionId}/rules`, {
+      username: api.userId,
+      readWrite: true,
+    });
+    expect(shared.ok(), `share: ${shared.status()}`).toBe(true);
+    const ruleOfUser = async () => {
+      const rule = (await getSession(api, sessionId)).rules.find((r) => r.username === api.userId);
+      expect(rule, `the rule of ${api.userId}`).toBeDefined();
+      return rule;
+    };
+    expect((await ruleOfUser()).sharedBy).toBe(sharer.userId);
+
+    // the sharer's pending share, the session is in the sharer's own sessions too
+    const sharerPage = await sharerContext.newPage();
+    const sharerEvents = eventsOpened(sharerPage);
+    await sharerPage.goto("/sessions");
+    await sharerEvents;
+    const pendingShare = sharerPage
+      .locator(".row", { has: sharerPage.getByRole("heading", { name: "Sent pending shares" }) })
+      .locator("tr.session-list-item", { hasText: name });
+    await expect(pendingShare).toBeVisible();
+    await expect(pendingShare).toContainText(api.userId);
+
+    const sharerName = sharer.userId.replace(/^.*?\//, "");
+    const section = (heading: string) =>
+      page.locator(".session-list > div", { has: page.getByRole("heading", { name: heading }) });
+    const sharedToUser = section(`Shared to you by ${sharerName}`).locator("tr.session-list-item", { hasText: name });
+    const ownSession = section("Your sessions").locator("tr.session-list-item", { hasText: name });
+
+    const userEvents = eventsOpened(page);
+    await page.goto("/sessions");
+    await userEvents;
+    await expect(sharedToUser).toBeVisible();
+    await expect(ownSession).toHaveCount(0);
+
+    await clickRowButton(page, name, "Accept");
+    await moveMouseOffList(page);
+    await expect(ownSession).toBeVisible();
+    await expect(sharedToUser).toHaveCount(0);
+    await expect.poll(async () => (await ruleOfUser()).sharedBy ?? null).toBeNull();
+    // only the pending share is gone from the sharer's list
+    await expect(pendingShare).toHaveCount(0);
+    await expect(sharerPage.locator("tr.session-list-item", { hasText: name })).toHaveCount(1);
+    await waitForDevCheck(sharerPage);
+
+    // the accepted session opens like the user's own
+    await ownSession.click();
+    await page.waitForURL(`**/analyze/${sessionId}`, { timeout: 30_000 });
+    await expect(datasetNode(page, datasetId)).toBeVisible({ timeout: 30_000 });
+    await waitForDevCheck(page);
+  } finally {
+    // close the pages first, the app would react to the deletion of the session
+    await pageErrors.settle();
+    await page.close();
+    await sharerContext.close();
+    try {
+      // the sharer's read-write rule deletes the session from the user too
+      const deleted = await sharer.delete("session-db", `/sessions/${sessionId}`);
+      expect(deleted.ok(), `delete the session: ${deleted.status()}`).toBe(true);
+    } finally {
+      await request.dispose();
     }
   }
 });
