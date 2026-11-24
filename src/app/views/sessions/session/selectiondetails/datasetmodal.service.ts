@@ -272,7 +272,9 @@ export class DatasetModalService {
     });
   }
 
-  getSessionDataOfSelection(selectedDatasets: any, sessionData: SessionData): SessionData {
+  getSessionDataOfSelection(datasets: Dataset[], sessionData: SessionData): SessionData {
+    // the latest copies: the selection's datasets don't have the notes and labels saved since
+    const selectedDatasets = sessionData.latestDatasets(datasets);
     const sourceJobIds = selectedDatasets.map((dataset) => dataset.sourceJob).filter((sourceJob) => sourceJob != null);
 
     // clone objects in case we wan't to modify them (change ID and location of selected datasets when merging to existing session)
