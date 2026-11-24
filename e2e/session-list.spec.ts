@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 
 import { Page } from "@playwright/test";
 
-import { expect, test, waitForDevCheck } from "./fixtures";
+import { expect, fillWhenRendered, test, waitForDevCheck } from "./fixtures";
 import {
   createDataset,
   createSession,
@@ -64,7 +64,7 @@ test("a session is renamed and its notes edited in the sessions list", async ({ 
   await openSessionMenu(page, name);
   await page.getByRole("button", { name: "Rename…" }).click();
   const modal = page.getByRole("dialog");
-  await modal.getByRole("textbox").fill(newName);
+  await fillWhenRendered(modal.getByRole("textbox"), newName);
   await modal.getByRole("button", { name: "Rename" }).click();
   await moveMouseOffList(page);
   await expect(modal).toBeHidden();
@@ -74,7 +74,7 @@ test("a session is renamed and its notes edited in the sessions list", async ({ 
 
   await openSessionMenu(page, newName);
   await page.getByRole("button", { name: /notes…/i }).click();
-  await modal.locator("textarea").fill("first line\nsecond line");
+  await fillWhenRendered(modal.locator("textarea"), "first line\nsecond line");
   await modal.getByRole("button", { name: "Save" }).click();
   await moveMouseOffList(page);
   await expect(modal).toBeHidden();
