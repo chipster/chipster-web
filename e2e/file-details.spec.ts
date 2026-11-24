@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { expect, PageErrors, test, waitForDevCheck } from "./fixtures";
+import { expect, fillWhenRendered, PageErrors, test, waitForDevCheck } from "./fixtures";
 import {
   Api,
   createDataset,
@@ -111,7 +111,7 @@ test("notes and a label saved from the details survive a rename from the toolbar
   await page.locator("ch-selected-files").getByTitle("Actions").locator("visible=true").first().click();
   await page.locator(".dropdown-menu.show").getByText("Rename").click();
   const modal = page.locator(".modal-content");
-  await modal.locator("input").fill("b.txt");
+  await fillWhenRendered(modal.locator("input"), "b.txt");
   await modal.getByRole("button", { name: "Rename" }).click();
   await expect(modal).toBeHidden();
   await expect.poll(async () => (await datasetOnServer()).name).toBe("b.txt");
