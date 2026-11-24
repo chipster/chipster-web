@@ -399,6 +399,13 @@ async function ruleUsernames(shared: SharedSession) {
   return (await getSession(shared.sharer, shared.sessionId)).rules.map((rule) => rule.username);
 }
 
+// the user's rule of the session, as the user sees it
+async function ruleOfUser(api: Api, shared: SharedSession) {
+  const rule = (await getSession(api, shared.sessionId)).rules.find((r) => r.username === api.userId);
+  expect(rule, `the rule of ${api.userId}`).toBeDefined();
+  return rule;
+}
+
 // both lists show the share as pending, and follow the events
 async function openLists(page: Page, api: Api, shared: SharedSession) {
   const sharerEvents = eventsOpened(shared.sharerPage);
@@ -417,19 +424,14 @@ async function openLists(page: Page, api: Api, shared: SharedSession) {
 shareTest(
   "a session shared by another user is accepted in the sessions list",
   async ({ page, api, sharedSession: shared }) => {
-    const ruleOfUser = async () => {
-      const rule = (await getSession(api, shared.sessionId)).rules.find((r) => r.username === api.userId);
-      expect(rule, `the rule of ${api.userId}`).toBeDefined();
-      return rule;
-    };
-    expect((await ruleOfUser()).sharedBy).toBe(shared.sharer.userId);
+    expect((await ruleOfUser(api, shared)).sharedBy).toBe(shared.sharer.userId);
     await openLists(page, api, shared);
 
     await clickRowButton(page, shared.name, "Accept");
     await moveMouseOffList(page);
     await expect(shared.ownSession).toBeVisible();
     await expect(shared.sharedToUser).toHaveCount(0);
-    await expect.poll(async () => (await ruleOfUser()).sharedBy ?? null).toBeNull();
+    await expect.poll(async () => (await ruleOfUser(api, shared)).sharedBy ?? null).toBeNull();
     // only the pending share is gone from the sharer's list
     await expect(shared.pendingShare).toHaveCount(0);
     await expect(shared.sharerPage.locator("tr.session-list-item", { hasText: shared.name })).toHaveCount(1);
@@ -475,6 +477,30 @@ shareTest(
     await expect(shared.pendingShare).toHaveCount(0);
     await expect(shared.sharerPage.locator("tr.session-list-item", { hasText: shared.name })).toHaveCount(1);
     await waitForDevCheck(shared.sharerPage);
+    await waitForDevCheck(page);
+  },
+);
+
+/*
+ * The user can open a share before answering it: session-db gives the access
+ * by the rule, whether the share is accepted or not. Opening doesn't accept
+ * it, the share stays pending in both lists.
+ */
+shareTest(
+  "a session shared by another user opens before it is accepted",
+  async ({ page, api, sharedSession: shared }) => {
+    await openLists(page, api, shared);
+
+    await shared.sharedToUser.click();
+    await page.waitForURL(`**/analyze/${shared.sessionId}`, { timeout: 30_000 });
+    await expect(datasetNode(page, shared.datasetId)).toBeVisible({ timeout: 30_000 });
+
+    await page.locator("#navbar").getByRole("link", { name: "Sessions" }).click();
+    await expect(page).toHaveURL(/\/sessions$/);
+    await expect(shared.sharedToUser).toBeVisible();
+    await expect(shared.ownSession).toHaveCount(0);
+    expect((await ruleOfUser(api, shared)).sharedBy).toBe(shared.sharer.userId);
+    await expect(shared.pendingShare).toBeVisible();
     await waitForDevCheck(page);
   },
 );
