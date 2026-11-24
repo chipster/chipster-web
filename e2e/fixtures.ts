@@ -207,7 +207,11 @@ export async function waitForDevCheck(page: Page) {
  * and on a fast machine fill() comes first: the first render then writes the field's
  * starting value over the filled one. No one types that fast, so the app is fine, but a
  * test has to wait for the render. Angular's forms mark a field ng-pristine when they
- * first render it.
+ * first render it, so the field has to have ngModel or a form control, and must not have
+ * been edited yet.
+ *
+ * A field that appears later in a dialog that is already open, e.g. with @if, doesn't
+ * need this: it's created in the same render that sets its value.
  */
 export async function fillWhenRendered(field: Locator, value: string) {
   await expect(field).toHaveClass(/ng-pristine/);

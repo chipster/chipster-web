@@ -72,7 +72,7 @@ test("the open session is shared and the share removed in the sharing modal", as
   await expect(modal.getByRole("row").filter({ hasText: "owner" })).toBeVisible();
 
   await modal.getByRole("button", { name: "Add rule" }).click();
-  await fillWhenRendered(modal.getByRole("textbox"), username);
+  await modal.getByRole("textbox").fill(username);
   await modal.getByRole("button", { name: "Add", exact: true }).click();
   await expect(shareRow).toBeVisible();
   await expect(shareRow).toContainText("read-write");
