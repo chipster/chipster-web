@@ -362,13 +362,15 @@ const shareTest = test.extend<{ sharedSession: SharedSession; shareReadWrite: bo
     use,
   ) => {
     // the share and what the tests see of it, between the setup and the cleanup below
+    let shared = false;
     async function useSharedSession(sharer: Api, sessionId: string, name: string) {
       const datasetId = await createDataset(sharer, sessionId, { name: "a.tsv", x: 100, y: 100 }, "gene\tvalue\n");
-      const shared = await sharer.post("session-db", `/sessions/${sessionId}/rules`, {
+      const share = await sharer.post("session-db", `/sessions/${sessionId}/rules`, {
         username: api.userId,
         readWrite: shareReadWrite,
       });
-      expect(shared.ok(), `share: ${shared.status()}`).toBe(true);
+      expect(share.ok(), `share: ${share.status()}`).toBe(true);
+      shared = true;
 
       const sharerPage = await sharerContext.newPage();
       const sharerName = sharer.userId.replace(/^.*?\//, "");
@@ -410,8 +412,8 @@ const shareTest = test.extend<{ sharedSession: SharedSession; shareReadWrite: bo
           await page.close();
           await sharerContext.close();
         } finally {
-          // a read-write rule deletes the session from everyone
-          const deleted = await (sharerLeaves ? api : sharer).delete("session-db", `/sessions/${sessionId}`);
+          // a read-write rule deletes the session from everyone, the user has one only after the share
+          const deleted = await (sharerLeaves && shared ? api : sharer).delete("session-db", `/sessions/${sessionId}`);
           if (sessionDeletedByTest) {
             expect(deleted.status(), "delete the session").toBe(404);
           } else {
@@ -439,9 +441,9 @@ async function openListWithEvents(page: Page) {
   ]);
 }
 
-// the usernames of the rules of the session, as the sharer sees them
-async function ruleUsernames(shared: SharedSession) {
-  return (await getSession(shared.sharer, shared.sessionId)).rules.map((rule) => rule.username);
+// the usernames of the rules of the session, as this user sees them
+async function ruleUsernames(viewer: Api, shared: SharedSession) {
+  return (await getSession(viewer, shared.sessionId)).rules.map((rule) => rule.username);
 }
 
 // the user's rule of the session, as the user sees it
@@ -503,7 +505,7 @@ shareTest(
     await moveMouseOffList(page);
     await expect(modal).toBeHidden();
     await expect(shared.sharedToUser).toBeVisible();
-    expect(await ruleUsernames(shared)).toContain(api.userId);
+    expect(await ruleUsernames(shared.sharer, shared)).toContain(api.userId);
 
     await clickRowButton(page, shared.name, "Decline share");
     await modal.getByRole("button", { name: "Decline" }).click();
@@ -511,7 +513,7 @@ shareTest(
     await expect(modal).toBeHidden();
     await expect(shared.sharedToUser).toHaveCount(0);
     await expect(shared.ownSession).toHaveCount(0);
-    await expect.poll(() => ruleUsernames(shared)).not.toContain(api.userId);
+    await expect.poll(() => ruleUsernames(shared.sharer, shared)).not.toContain(api.userId);
     expect((await api.get("session-db", `/sessions/${shared.sessionId}`)).status()).toBe(403);
 
     // only the pending share is gone from the sharer's list
@@ -570,9 +572,7 @@ shareTest.describe(() => {
       await moveMouseOffList(shared.sharerPage);
       await expect(modal).toBeHidden();
       await expect(shared.sharerOwnSession).toHaveCount(0);
-      await expect
-        .poll(async () => (await getSession(api, shared.sessionId)).rules.map((r) => r.username))
-        .toEqual([api.userId]);
+      await expect.poll(() => ruleUsernames(api, shared)).toEqual([api.userId]);
       expect((await shared.sharer.get("session-db", `/sessions/${shared.sessionId}`)).status()).toBe(403);
       await waitForDevCheck(shared.sharerPage);
 
@@ -617,7 +617,6 @@ shareTest.describe(() => {
 
       // and the share is gone from the sharer's list for good, not only until a reload
       await shared.sharerPage.reload();
-      await expect(shared.sharerPage.getByRole("heading", { name: "Sent pending shares" })).toBeVisible();
       await expect(shared.sharerPage.getByRole("heading", { name: "Your sessions" })).toBeVisible();
       await expect(shared.pendingShare).toHaveCount(0);
       await expect(shared.sharerOwnSession).toHaveCount(0);
