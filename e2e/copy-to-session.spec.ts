@@ -26,7 +26,8 @@ import {
  * only those), and the copies refer to them.
  */
 
-// the label names of each file of the session, by file name, e.g. { "a.tsv": ["label-a"] }
+// the label names of each file of the session, by file name, one array per file of that name, e.g.
+// { "a.tsv": [["label-a"]] }
 async function labelsOfFiles(api: Api, sessionId: string): Promise<Record<string, string[][]>> {
   const labels = new Map((await getLabels(api, sessionId)).map((l) => [l.labelId, l.name]));
   const files: Record<string, string[][]> = {};
@@ -82,7 +83,7 @@ async function expectLabelShown(page: Page, sessionId: string, datasetId: string
   await expect(datasetNode(page, datasetId)).toBeVisible({ timeout: 30_000 });
   await datasetNode(page, datasetId).click();
   await visualizationTab(page, "Details").click();
-  await expect(page.locator("ch-single-dataset ch-label-pill")).toContainText(label);
+  await expect(page.locator("ch-single-dataset ch-label-pill").filter({ hasText: label })).toHaveCount(1);
 }
 
 /*
