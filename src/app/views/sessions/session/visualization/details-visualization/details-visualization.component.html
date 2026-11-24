@@ -1,6 +1,8 @@
-@if (datasets().length === 1) {
+<!-- a new component for each file, so that the box of the next file doesn't keep text typed into the
+  previous one's notes, which the value binding doesn't rewrite when the files have the same notes -->
+@for (dataset of datasets().length === 1 ? datasets() : []; track dataset.datasetId) {
   <ch-single-dataset
-    [dataset]="datasets()[0]"
+    [dataset]="dataset"
     [jobs]="sessionData().jobsMap()"
     [sessionData]="sessionData()"
     [tools]="tools()"
