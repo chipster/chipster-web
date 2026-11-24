@@ -275,18 +275,26 @@ export class DatasetModalService {
   getSessionDataOfSelection(datasets: Dataset[], sessionData: SessionData): SessionData {
     // the latest copies: the selection's datasets don't have the notes and labels saved since
     const selectedDatasets = sessionData.latestDatasets(datasets);
-    const sourceJobIds = selectedDatasets.map((dataset) => dataset.sourceJob).filter((sourceJob) => sourceJob != null);
+    // a job that isn't in the session, e.g. deleted through the API, isn't copied
+    const jobsMap = sessionData.jobsMap();
+    const sourceJobIds = selectedDatasets
+      .map((dataset) => dataset.sourceJob)
+      .filter((sourceJob) => sourceJob != null && jobsMap.has(sourceJob));
 
     // clone objects in case we wan't to modify them (change ID and location of selected datasets when merging to existing session)
     const sourceJobs: Map<string, Job> = new Map(
       sourceJobIds.map((jobId: string) => {
-        const jobClone = cloneDeep(sessionData.jobsMap().get(jobId));
+        const jobClone = cloneDeep(jobsMap.get(jobId));
         return [jobId, jobClone];
       }),
     );
     const selectedDatasetsMap: Map<string, Dataset> = new Map(
       selectedDatasets.map((dataset: Dataset) => {
         const datasetClone = cloneDeep(dataset);
+        // and the copy of its file has no job, like an uploaded file, instead of a reference to nothing
+        if (datasetClone.sourceJob != null && !jobsMap.has(datasetClone.sourceJob)) {
+          datasetClone.sourceJob = null;
+        }
         return [dataset.datasetId, datasetClone];
       }),
     );
