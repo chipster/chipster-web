@@ -5,14 +5,24 @@ import { Page } from "@playwright/test";
 
 import { expect, fillWhenRendered, test, waitForDevCheck } from "./fixtures";
 import {
+  COPIED_JOBS_OF_FILES,
+  COPIED_LABELS,
+  COPIED_LABELS_OF_FILES,
   createDataset,
+  createLabelledFilesWithJobs,
   createSession,
   datasetNode,
+  deleteSessions,
   findSessions,
   getDatasetContent,
   getApi,
   getDatasets,
   getSession,
+  jobsOfFiles,
+  labelNamesAndColors,
+  labelsOfFiles,
+  renameSession,
+  SOURCE_JOBS_OF_FILES,
 } from "./session-api";
 import { EXAMPLE_OWNER_STATE } from "./login";
 import { readZip } from "./zip";
@@ -119,19 +129,27 @@ test.describe(() => {
   });
 });
 
-test("a session is duplicated with its files in the sessions list", async ({
+/*
+ * The copy gets the files with their contents and labels, and the labels once each. A file made by
+ * a completed job refers to the copy of the job. A file whose job was deleted or is still running
+ * has no job, like an uploaded file, because the copy doesn't have that job.
+ */
+test("a session is duplicated with its files, labels and jobs in the sessions list", async ({
   page,
   pageErrors,
   api,
   sessionId,
-}, testInfo) => {
-  const name = `e2e ${testInfo.title}`;
-  // not starting with the name of the original, so that the row of the original matches only the original
+}) => {
+  /*
+   * Unique, so that the row matches only this session when the test runs more than once at a
+   * time. The copy's name doesn't start with it, so the row of the original matches only the
+   * original.
+   */
+  const name = `e2e duplicate source ${randomUUID()}`;
   const copyName = `e2e copy ${randomUUID()}`;
-  const files = { "a.tsv": "gene\tvalue\ng1\t1\ng2\t2\n", "b.txt": "some text\n" };
-  for (const [datasetName, content] of Object.entries(files)) {
-    await createDataset(api, sessionId, { name: datasetName }, content);
-  }
+  await renameSession(api, sessionId, name);
+  await createLabelledFilesWithJobs(api, sessionId);
+  const originals = await getDatasets(api, sessionId);
 
   try {
     await page.goto("/sessions");
@@ -139,14 +157,14 @@ test("a session is duplicated with its files in the sessions list", async ({
     await page.getByRole("button", { name: "Duplicate…" }).click();
     const modal = page.getByRole("dialog");
     await expect(modal.getByRole("textbox")).toHaveValue(`${name}_copy`);
-    await modal.getByRole("textbox").fill(copyName);
+    await fillWhenRendered(modal.getByRole("textbox"), copyName);
     await modal.getByRole("button", { name: "Duplicate" }).click();
     await moveMouseOffList(page);
     /*
      * The copy is created in the IMPORT state and listed right away, and the
      * spinner modal opens only after the name modal has closed, so neither the
      * row nor a hidden modal means that the files are copied. The app sets the
-     * copy READY last, after its files.
+     * copy READY last, after its files, jobs and labels.
      */
     await expect
       .poll(async () => (await findSessions(api, copyName)).map((s) => s.state), { timeout: 30_000 })
@@ -158,22 +176,27 @@ test("a session is duplicated with its files in the sessions list", async ({
     const copyId = (await findSessions(api, copyName))[0].sessionId;
     expect(copyId).not.toBe(sessionId);
     const datasets = await getDatasets(api, copyId);
-    expect(datasets.map((d) => d.name).sort()).toEqual(Object.keys(files));
+    expect(datasets.map((d) => d.name).sort()).toEqual(originals.map((d) => d.name).sort());
     for (const dataset of datasets) {
-      expect(await getDatasetContent(api, copyId, dataset.datasetId)).toBe(files[dataset.name]);
+      const original = originals.find((d) => d.name === dataset.name);
+      expect(await getDatasetContent(api, copyId, dataset.datasetId)).toBe(
+        await getDatasetContent(api, sessionId, original.datasetId),
+      );
     }
+    expect(await labelNamesAndColors(api, copyId)).toEqual(COPIED_LABELS);
+    expect(await labelsOfFiles(api, copyId)).toEqual(COPIED_LABELS_OF_FILES);
+    expect(await jobsOfFiles(api, copyId)).toEqual(COPIED_JOBS_OF_FILES);
+
     // the original is unchanged
     expect((await getSession(api, sessionId)).name).toBe(name);
-    expect(await getDatasets(api, sessionId)).toHaveLength(2);
+    expect(await labelNamesAndColors(api, sessionId)).toEqual(COPIED_LABELS);
+    expect(await labelsOfFiles(api, sessionId)).toEqual(COPIED_LABELS_OF_FILES);
+    expect(await jobsOfFiles(api, sessionId)).toEqual(SOURCE_JOBS_OF_FILES);
     await waitForDevCheck(page);
   } finally {
-    // close the page first, the app would react to the deletion of the session it lists
-    await pageErrors.settle();
-    await page.close();
-    for (const copy of await findSessions(api, copyName)) {
-      const deleted = await api.delete("session-db", `/sessions/${copy.sessionId}`);
-      expect(deleted.ok(), `delete session: ${deleted.status()}`).toBe(true);
-    }
+    await deleteSessions(page, pageErrors, api, async () =>
+      (await findSessions(api, copyName)).map((s) => s.sessionId),
+    );
   }
 });
 
