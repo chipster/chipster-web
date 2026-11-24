@@ -8,6 +8,7 @@ import { ErrorService } from "../../../../core/errorhandler/error.service";
 import { SessionData } from "../../../../model/session/session-data";
 import { Tags, TypeTagService } from "../../../../shared/services/typetag.service";
 import { DialogModalService } from "../dialogmodal/dialogmodal.service";
+import { JobService } from "../job.service";
 import { SamplesModalComponent } from "../samples-modal/samples-modal.component";
 import { DatasetHistoryModalComponent } from "./dataset-history-modal/dataset-history-modal.component";
 import { LabelsModalComponent } from "../labels/labels-modal.component";
@@ -275,11 +276,15 @@ export class DatasetModalService {
   getSessionDataOfSelection(datasets: Dataset[], sessionData: SessionData): SessionData {
     // the latest copies: the selection's datasets don't have the notes and labels saved since
     const selectedDatasets = sessionData.latestDatasets(datasets);
-    // a job that isn't in the session, e.g. deleted through the API, isn't copied
+    /*
+     * A job that isn't in the session, e.g. deleted through the API, isn't copied, and neither is a
+     * running one, which copyToExistingSession() leaves out
+     */
     const jobsMap = sessionData.jobsMap();
+    const isCopied = (jobId: string) => jobsMap.has(jobId) && !JobService.isRunning(jobsMap.get(jobId));
     const sourceJobIds = selectedDatasets
       .map((dataset) => dataset.sourceJob)
-      .filter((sourceJob) => sourceJob != null && jobsMap.has(sourceJob));
+      .filter((sourceJob) => sourceJob != null && isCopied(sourceJob));
 
     // clone objects in case we wan't to modify them (change ID and location of selected datasets when merging to existing session)
     const sourceJobs: Map<string, Job> = new Map(
@@ -292,7 +297,7 @@ export class DatasetModalService {
       selectedDatasets.map((dataset: Dataset) => {
         const datasetClone = cloneDeep(dataset);
         // and the copy of its file has no job, like an uploaded file, instead of a reference to nothing
-        if (datasetClone.sourceJob != null && !jobsMap.has(datasetClone.sourceJob)) {
+        if (datasetClone.sourceJob != null && !isCopied(datasetClone.sourceJob)) {
           datasetClone.sourceJob = null;
         }
         return [dataset.datasetId, datasetClone];

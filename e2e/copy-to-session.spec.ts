@@ -85,11 +85,15 @@ async function expectLabelShown(page: Page, sessionId: string, datasetId: string
   await expect(page.locator("ch-single-dataset ch-label-pill")).toContainText(label);
 }
 
-// close the page first, the app would react to the deletion of the session it shows
-async function deleteSessions(page: Page, pageErrors: PageErrors, api: Api, sessionIds: string[]) {
+/*
+ * Close the page first, the app would react to the deletion of the session it shows. The sessions
+ * are looked up only after that: if the test failed during a copy, the app may still have been
+ * creating the copy.
+ */
+async function deleteSessions(page: Page, pageErrors: PageErrors, api: Api, sessionIds: () => Promise<string[]>) {
   await pageErrors.settle();
   await page.close();
-  for (const sessionId of sessionIds) {
+  for (const sessionId of await sessionIds()) {
     const deleted = await api.delete("session-db", `/sessions/${sessionId}`);
     expect(deleted.ok(), `delete session: ${deleted.status()}`).toBe(true);
   }
@@ -161,10 +165,7 @@ test("selected files are copied with their labels to a new session from the Sele
     });
     await waitForDevCheck(page);
   } finally {
-    await deleteSessions(
-      page,
-      pageErrors,
-      api,
+    await deleteSessions(page, pageErrors, api, async () =>
       (await findSessions(api, copyName)).map((s) => s.sessionId),
     );
   }
@@ -230,7 +231,7 @@ test("a file is copied with its label to an existing session twice from the grap
     expect(await labelsOfFiles(api, sessionId)).toEqual({ "a.tsv": [["label-a"]], "b.txt": [[]] });
     await waitForDevCheck(page);
   } finally {
-    await deleteSessions(page, pageErrors, api, [targetId]);
+    await deleteSessions(page, pageErrors, api, async () => [targetId]);
   }
 });
 
@@ -270,19 +271,17 @@ test("a label applied in the app after selecting the file goes along to the new 
     await expectLabelShown(page, copyId, copyOfA, "my-label");
     await waitForDevCheck(page);
   } finally {
-    await deleteSessions(
-      page,
-      pageErrors,
-      api,
+    await deleteSessions(page, pageErrors, api, async () =>
       (await findSessions(api, copyName)).map((s) => s.sessionId),
     );
   }
 });
 
 /*
- * Two files made by jobs: the job of made.txt is in the session, but the one of orphan.txt has
- * been deleted, e.g. through the API. The copy takes the job that is there, and leaves the file
- * whose job is gone without one, like an uploaded file.
+ * Three files made by jobs: the job of made.txt is in the session, the one of orphan.txt has
+ * been deleted, e.g. through the API, and the one of running.txt is still running, which the copy
+ * leaves out too. The copy takes the completed job, and leaves the other two files without one,
+ * like uploaded files.
  */
 async function createFilesWithJobs(api: Api, sessionId: string, labelId: string) {
   const job = { ...TEST_JOB, toolName: "Kept tool", state: "COMPLETED" };
@@ -297,7 +296,15 @@ async function createFilesWithJobs(api: Api, sessionId: string, labelId: string)
   );
   const deleted = await api.delete("session-db", `/sessions/${sessionId}/jobs/${goneJob}`);
   expect(deleted.ok(), `delete job: ${deleted.status()}`).toBe(true);
-  return { madeId, orphanId };
+  // TEST_JOB is RUNNING, and the tool is run nowhere
+  const runningJob = await createJob(api, sessionId, { ...TEST_JOB, toolName: "Running tool" });
+  const runningId = await createDataset(
+    api,
+    sessionId,
+    { name: "running.txt", x: 500, y: 100, sourceJob: runningJob },
+    "r\n",
+  );
+  return { madeId, orphanId, runningId };
 }
 
 // the tool name of the job of each file in the session, null for a file without one
@@ -323,13 +330,14 @@ test("a file whose job is gone is copied to a new session without the job", asyn
   const name = `e2e ${testInfo.title}`;
   const copyName = `e2e copy ${randomUUID()}`;
   const labelId = await createLabel(api, sessionId, "label-a", "#ff0000");
-  const { madeId, orphanId } = await createFilesWithJobs(api, sessionId, labelId);
+  const { madeId, orphanId, runningId } = await createFilesWithJobs(api, sessionId, labelId);
 
   try {
     await openSession(page, sessionId, madeId);
     await datasetNode(page, madeId).click();
     await datasetNode(page, orphanId).click({ modifiers: ["ControlOrMeta"] });
-    await expect(page.locator("ch-selected-files .h6")).toHaveText("2 files");
+    await datasetNode(page, runningId).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files .h6")).toHaveText("3 files");
     await selectedFilesAction(page, "Copy to new session…");
     await copyToNewSession(page, `${name}_part`, copyName);
 
@@ -338,16 +346,21 @@ test("a file whose job is gone is copied to a new session without the job", asyn
       .poll(async () => (await findSessions(api, copyName)).map((s) => s.state), { timeout: 30_000 })
       .toEqual(["READY"]);
     const copyId = (await findSessions(api, copyName))[0].sessionId;
-    expect(await jobsOfFiles(api, copyId)).toEqual({ "made.txt": ["Kept tool"], "orphan.txt": [null] });
-    expect(await labelsOfFiles(api, copyId)).toEqual({ "made.txt": [[]], "orphan.txt": [["label-a"]] });
+    expect(await jobsOfFiles(api, copyId)).toEqual({
+      "made.txt": ["Kept tool"],
+      "orphan.txt": [null],
+      "running.txt": [null],
+    });
+    expect(await labelsOfFiles(api, copyId)).toEqual({
+      "made.txt": [[]],
+      "orphan.txt": [["label-a"]],
+      "running.txt": [[]],
+    });
     const copyOfOrphan = (await getDatasets(api, copyId)).find((d) => d.name === "orphan.txt").datasetId;
     await expectLabelShown(page, copyId, copyOfOrphan, "label-a");
     await waitForDevCheck(page);
   } finally {
-    await deleteSessions(
-      page,
-      pageErrors,
-      api,
+    await deleteSessions(page, pageErrors, api, async () =>
       (await findSessions(api, copyName)).map((s) => s.sessionId),
     );
   }
@@ -361,24 +374,31 @@ test("a file whose job is gone is copied to an existing session without the job"
 }) => {
   const targetName = `e2e copy target ${randomUUID()}`;
   const labelId = await createLabel(api, sessionId, "label-a", "#ff0000");
-  const { madeId, orphanId } = await createFilesWithJobs(api, sessionId, labelId);
+  const { madeId, orphanId, runningId } = await createFilesWithJobs(api, sessionId, labelId);
   const targetId = await createSession(api, targetName);
 
   try {
     await openSession(page, sessionId, madeId);
     await datasetNode(page, madeId).click();
     await datasetNode(page, orphanId).click({ modifiers: ["ControlOrMeta"] });
-    await expect(page.locator("ch-selected-files .h6")).toHaveText("2 files");
+    await datasetNode(page, runningId).click({ modifiers: ["ControlOrMeta"] });
+    await expect(page.locator("ch-selected-files .h6")).toHaveText("3 files");
     await contextMenuAction(page, orphanId, "Copy to existing session…");
     await copyToExistingSession(page, targetName);
 
-    await expect.poll(async () => (await getDatasets(api, targetId)).length, { timeout: 30_000 }).toBe(2);
-    expect(await jobsOfFiles(api, targetId)).toEqual({ "made.txt": ["Kept tool"], "orphan.txt": [null] });
-    expect(await labelsOfFiles(api, targetId)).toEqual({ "made.txt": [[]], "orphan.txt": [["label-a"]] });
+    // the app creates the jobs in a request of their own after the files
+    await expect
+      .poll(async () => jobsOfFiles(api, targetId), { timeout: 30_000 })
+      .toEqual({ "made.txt": ["Kept tool"], "orphan.txt": [null], "running.txt": [null] });
+    expect(await labelsOfFiles(api, targetId)).toEqual({
+      "made.txt": [[]],
+      "orphan.txt": [["label-a"]],
+      "running.txt": [[]],
+    });
     const copyOfOrphan = (await getDatasets(api, targetId)).find((d) => d.name === "orphan.txt").datasetId;
     await expectLabelShown(page, targetId, copyOfOrphan, "label-a");
     await waitForDevCheck(page);
   } finally {
-    await deleteSessions(page, pageErrors, api, [targetId]);
+    await deleteSessions(page, pageErrors, api, async () => [targetId]);
   }
 });
