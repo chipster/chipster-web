@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { Page } from "@playwright/test";
 
-import { expect, PageErrors, test, waitForDevCheck } from "./fixtures";
+import { expect, fillWhenRendered, PageErrors, test, waitForDevCheck } from "./fixtures";
 import {
   Api,
   createDataset,
@@ -61,7 +61,7 @@ async function contextMenuAction(page: Page, datasetId: string, item: string) {
 async function copyToNewSession(page: Page, defaultName: string, copyName: string) {
   const modal = page.getByRole("dialog");
   await expect(modal.getByRole("textbox")).toHaveValue(defaultName);
-  await modal.getByRole("textbox").fill(copyName);
+  await fillWhenRendered(modal.getByRole("textbox"), copyName);
   await modal.getByRole("button", { name: "Copy", exact: true }).click();
 }
 
