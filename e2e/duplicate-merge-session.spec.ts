@@ -66,9 +66,9 @@ test("a session is duplicated with its labels and jobs from the session menu", a
     await duplicateWithName(page, `${name}_copy`, copyName);
 
     // the app sets the copy READY last, after its files, jobs and labels
-    await expect
-      .poll(async () => (await findSessions(api, copyName)).map((s) => s.state), { timeout: 30_000 })
-      .toEqual(["READY"]);
+    await expect(async () => {
+      expect((await findSessions(api, copyName)).map((s) => s.state)).toEqual(["READY"]);
+    }).toPass({ timeout: 30_000 });
     const copyId = (await findSessions(api, copyName))[0].sessionId;
     expect(copyId).not.toBe(sessionId);
     expect(await labelNamesAndColors(api, copyId)).toEqual(COPIED_LABELS);
@@ -109,9 +109,9 @@ test.describe("temporary session", () => {
     await sessionMenuAction(page, "Duplicate…");
     await duplicateWithName(page, `${temporaryName}_copy`, newName);
 
-    await expect
-      .poll(async () => (await findSessions(api, newName)).map((s) => [s.sessionId, s.state]), { timeout: 30_000 })
-      .toEqual([[sessionId, "READY"]]);
+    await expect(async () => {
+      expect((await findSessions(api, newName)).map((s) => [s.sessionId, s.state])).toEqual([[sessionId, "READY"]]);
+    }).toPass({ timeout: 30_000 });
     await expect(page.locator("ch-session-details .h6")).toHaveText(newName);
     expect((await getDatasets(api, sessionId)).map((d) => d.name)).toEqual(["a.txt"]);
 
@@ -149,9 +149,9 @@ test("a session is merged twice with its labels and jobs from the session menu",
     await pickSession(page, MERGE_TITLE, sourceName, "Merge");
 
     // the app creates the jobs in a request of their own after the files
-    await expect
-      .poll(async () => jobsOfFiles(api, sessionId), { timeout: 30_000 })
-      .toEqual({ "own.txt": [null], ...COPIED_JOBS_OF_FILES });
+    await expect(async () => {
+      expect(await jobsOfFiles(api, sessionId)).toEqual({ "own.txt": [null], ...COPIED_JOBS_OF_FILES });
+    }).toPass({ timeout: 30_000 });
     const datasets = await getDatasets(api, sessionId);
     const own = datasets.find((d) => d.datasetId === ownId);
     const merged = datasets.filter((d) => d.datasetId !== ownId);
@@ -180,14 +180,14 @@ test("a session is merged twice with its labels and jobs from the session menu",
     await sessionMenuAction(page, "Merge session…");
     await pickSession(page, MERGE_TITLE, sourceName, "Merge");
 
-    await expect
-      .poll(async () => jobsOfFiles(api, sessionId), { timeout: 30_000 })
-      .toEqual({
+    await expect(async () => {
+      expect(await jobsOfFiles(api, sessionId)).toEqual({
         "own.txt": [null],
         "made.txt": ["Kept tool", "Kept tool"],
         "orphan.txt": [null, null],
         "running.txt": [null, null],
       });
+    }).toPass({ timeout: 30_000 });
     const twice = await getDatasets(api, sessionId);
     expect(new Set(twice.map((d) => d.datasetId)).size).toBe(7);
     expect(await labelNamesAndColors(api, sessionId)).toEqual([

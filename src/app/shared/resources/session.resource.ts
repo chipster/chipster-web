@@ -689,12 +689,14 @@ export class SessionResource {
 
     const createLabelsRequest = labelsToCreate.length > 0 ? this.createLabels(targetSessionId, labelsToCreate) : of([]);
 
-    // a running job isn't copied, its results aren't there yet
-    const copiedJobIds = new Set(
-      Array.from(sessionData.jobsMap())
-        .filter(([, job]) => !JobService.isRunning(job))
-        .map(([jobId]) => jobId),
-    );
+    /*
+     * The jobs are read once: for Duplicate in the session view sessionData is the live session,
+     * which the events keep changing while the requests below are in flight. A job that's deleted
+     * in between is either copied with the files that refer to it or left out, not half done.
+     * A running job isn't copied, its results aren't there yet.
+     */
+    const jobs = Array.from(sessionData.jobsMap().values());
+    const copiedJobIds = new Set(jobs.filter((job) => !JobService.isRunning(job)).map((job) => job.jobId));
 
     // datasets keep their labelIds verbatim -- they now resolve in the destination
     const oldDatasets = Array.from(sessionData.datasetsMap().values());
@@ -727,9 +729,9 @@ export class SessionResource {
         }, new Map());
 
         // create jobs
-        const jobCopies = Array.from(sessionData.jobsMap())
-          .filter(([jobId]) => copiedJobIds.has(jobId))
-          .map(([, oldJob]) => {
+        const jobCopies = jobs
+          .filter((job) => copiedJobIds.has(job.jobId))
+          .map((oldJob) => {
             const jobCopy = clone(oldJob);
             jobCopy.sessionId = null;
             this.nullifyMissingInputs(jobCopy, newDatasetsMap);
