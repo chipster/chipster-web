@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { APIRequestContext, APIResponse, expect, Page } from "@playwright/test";
-import type { Dataset, Session } from "chipster-js-common";
+import type { Dataset, Job, Session } from "chipster-js-common";
 import { jwtDecode } from "jwt-decode";
 import { parse } from "yaml";
 
@@ -234,6 +234,12 @@ export async function createJob(api: Api, sessionId: string, job: object = TEST_
   const response = await api.post("session-db", `/sessions/${sessionId}/jobs`, job);
   expect(response.ok(), `create job ${response.status()} ${await response.text()}`).toBe(true);
   return (await response.json()).jobId;
+}
+
+export async function getJobs(api: Api, sessionId: string): Promise<Job[]> {
+  const response = await api.get("session-db", `/sessions/${sessionId}/jobs`);
+  expect(response.ok()).toBe(true);
+  return response.json();
 }
 
 export async function updateJob(api: Api, sessionId: string, jobId: string, changes: object): Promise<void> {
