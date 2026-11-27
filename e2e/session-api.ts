@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { APIRequestContext, APIResponse, expect, Page } from "@playwright/test";
-import type { Dataset, Label, Session } from "chipster-js-common";
+import type { Dataset, Job, Label, Session } from "chipster-js-common";
 import { jwtDecode } from "jwt-decode";
 import { parse } from "yaml";
 
@@ -262,6 +262,12 @@ export async function createJob(api: Api, sessionId: string, job: object = TEST_
   return (await response.json()).jobId;
 }
 
+export async function getJobs(api: Api, sessionId: string): Promise<Job[]> {
+  const response = await api.get("session-db", `/sessions/${sessionId}/jobs`);
+  expect(response.ok()).toBe(true);
+  return response.json();
+}
+
 export async function updateJob(api: Api, sessionId: string, jobId: string, changes: object): Promise<void> {
   const current = await api.get("session-db", `/sessions/${sessionId}/jobs/${jobId}`);
   expect(current.ok()).toBe(true);
@@ -367,18 +373,6 @@ export async function labelNamesAndColors(api: Api, sessionId: string) {
   return (await getLabels(api, sessionId))
     .map(({ name, color }) => ({ name, color }))
     .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-export interface TestJob {
-  jobId: string;
-  toolName: string;
-  outputs: { outputId: string; datasetId: string }[];
-}
-
-export async function getJobs(api: Api, sessionId: string): Promise<TestJob[]> {
-  const response = await api.get("session-db", `/sessions/${sessionId}/jobs`);
-  expect(response.ok()).toBe(true);
-  return response.json();
 }
 
 // the tool name of the job of each file in the session, one per file of that name, null for a file without one
