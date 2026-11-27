@@ -22,9 +22,8 @@ import { runButton, searchTool } from "./tools";
  * Not every backend can run jobs, e.g. one without the runtimes, so a probe job of each tool tries
  * first and the test of a tool is skipped if its probe doesn't complete, with the reason in the
  * report. The probe gets the same time as the job of a test, so that a skip means the test couldn't
- * have passed either. In the dev container the backend needs the process-classpath scripts, see
- * chipster-web-server/CLAUDE.md: with the default process scripts, the probe would start a
- * "./gradlew clean" under the running backend.
+ * have passed either. In the dev container the backend runs the jobs as processes with its own
+ * classpath, see chipster-web-server/CLAUDE.md.
  */
 
 const CONTENT = "real job\n";
