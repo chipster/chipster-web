@@ -141,6 +141,13 @@ export class UserEventService {
     }
     if (event.type === EventType.Delete) {
       const oldSession = userEventData.sessions.get(sessionId);
+      if (!oldSession) {
+        /*
+         * A session that the list doesn't have, e.g. shared to us after the list was loaded but
+         * before its WebSocket was open, so that it missed the create event. Nothing to remove.
+         */
+        return of(event);
+      }
       const rule = oldSession.rules.find((r) => r.ruleId === event.resourceId);
       const newRules = oldSession.rules.filter((r) => r.ruleId !== event.resourceId);
 
