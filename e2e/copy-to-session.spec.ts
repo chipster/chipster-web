@@ -2,20 +2,26 @@ import { randomUUID } from "node:crypto";
 
 import { Page } from "@playwright/test";
 
-import { expect, fillWhenRendered, PageErrors, test, waitForDevCheck } from "./fixtures";
+import { expect, fillWhenRendered, test, waitForDevCheck } from "./fixtures";
 import {
-  Api,
   createDataset,
+  createFilesWithJobs,
   createJob,
   createLabel,
   createSession,
   datasetNode,
   deleteDataset,
+  deleteSessions,
+  expectLabelShown,
   findSessions,
   getDatasetContent,
   getDatasets,
-  getLabels,
+  getJobs,
+  jobsOfFiles,
+  labelNamesAndColors,
+  labelsOfFiles,
   openSession,
+  pickSession,
   TEST_JOB,
   updateJob,
   visualizationTab,
@@ -27,26 +33,6 @@ import {
  * modals. A file takes its labels along: the destination gets the labels of the copied files (and
  * only those), and the copies refer to them.
  */
-
-// the label names of each file of the session, by file name, one array per file of that name, e.g.
-// { "a.tsv": [["label-a"]] }
-async function labelsOfFiles(api: Api, sessionId: string): Promise<Record<string, (string | undefined)[][]>> {
-  const labels = new Map((await getLabels(api, sessionId)).map((l) => [l.labelId, l.name]));
-  const files: Record<string, (string | undefined)[][]> = {};
-  for (const dataset of await getDatasets(api, sessionId)) {
-    // a label id that the session doesn't have shows as undefined, so that a broken copy fails the check
-    const names = (dataset.labelIds ?? []).map((id) => labels.get(id)).sort();
-    (files[dataset.name] ??= []).push(names);
-  }
-  return files;
-}
-
-// the labels of the session, without the ids and times
-async function labelNamesAndColors(api: Api, sessionId: string) {
-  return (await getLabels(api, sessionId))
-    .map(({ name, color }) => ({ name, color }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
 
 async function selectedFilesAction(page: Page, item: string) {
   await page.locator("ch-selected-files").getByTitle("Actions").locator("visible=true").first().click();
@@ -72,34 +58,7 @@ async function copyToNewSession(page: Page, defaultName: string, copyName: strin
 
 // the session list modal of Copy to existing session, which then copies and opens the session
 async function copyToExistingSession(page: Page, targetName: string) {
-  const modal = page.getByRole("dialog");
-  await expect(modal).toContainText("Copy selected files to an existing session");
-  await modal.locator("#value").click();
-  await modal.getByRole("button", { name: targetName, exact: true }).click();
-  await modal.getByRole("button", { name: "Copy", exact: true }).click();
-}
-
-// a copied file shows its label in the details, in the session that the app opened after the copy
-async function expectLabelShown(page: Page, sessionId: string, datasetId: string, label: string) {
-  await expect(page).toHaveURL(new RegExp(`/analyze/${sessionId}$`), { timeout: 30_000 });
-  await expect(datasetNode(page, datasetId)).toBeVisible({ timeout: 30_000 });
-  await datasetNode(page, datasetId).click();
-  await visualizationTab(page, "Details").click();
-  await expect(page.locator("ch-single-dataset ch-label-pill").filter({ hasText: label })).toHaveCount(1);
-}
-
-/*
- * Close the page first, the app would react to the deletion of the session it shows. The sessions
- * are looked up only after that: if the test failed during a copy, the app may still have been
- * creating the copy.
- */
-async function deleteSessions(page: Page, pageErrors: PageErrors, api: Api, sessionIds: () => Promise<string[]>) {
-  await pageErrors.settle();
-  await page.close();
-  for (const sessionId of await sessionIds()) {
-    const deleted = await api.delete("session-db", `/sessions/${sessionId}`);
-    expect(deleted.ok(), `delete session: ${deleted.status()}`).toBe(true);
-  }
+  await pickSession(page, "Copy selected files to an existing session", targetName, "Copy");
 }
 
 test("selected files are copied with their labels to a new session from the Selected Files menu", async ({
@@ -279,60 +238,6 @@ test("a label applied in the app after selecting the file goes along to the new 
     );
   }
 });
-
-/*
- * Three files made by jobs: the job of made.txt is in the session, the one of orphan.txt has
- * been deleted, e.g. through the API, and the one of running.txt is still running, which the copy
- * leaves out too. The copy takes the completed job, and leaves the other two files without one,
- * like uploaded files.
- */
-async function createFilesWithJobs(api: Api, sessionId: string, labelId: string) {
-  const job = { ...TEST_JOB, toolName: "Kept tool", state: "COMPLETED" };
-  const keptJob = await createJob(api, sessionId, job);
-  const madeId = await createDataset(api, sessionId, { name: "made.txt", x: 100, y: 100, sourceJob: keptJob }, "m\n");
-  const goneJob = await createJob(api, sessionId, { ...job, toolName: "Gone tool" });
-  const orphanId = await createDataset(
-    api,
-    sessionId,
-    { name: "orphan.txt", x: 300, y: 100, sourceJob: goneJob, labelIds: [labelId] },
-    "o\n",
-  );
-  const deleted = await api.delete("session-db", `/sessions/${sessionId}/jobs/${goneJob}`);
-  expect(deleted.ok(), `delete job: ${deleted.status()}`).toBe(true);
-  // TEST_JOB is RUNNING, and the tool is run nowhere
-  const runningJob = await createJob(api, sessionId, { ...TEST_JOB, toolName: "Running tool" });
-  const runningId = await createDataset(
-    api,
-    sessionId,
-    { name: "running.txt", x: 500, y: 100, sourceJob: runningJob },
-    "r\n",
-  );
-  return { madeId, orphanId, runningId };
-}
-
-interface TestJob {
-  jobId: string;
-  toolName: string;
-  outputs: { outputId: string; datasetId: string }[];
-}
-
-async function getJobs(api: Api, sessionId: string): Promise<TestJob[]> {
-  const response = await api.get("session-db", `/sessions/${sessionId}/jobs`);
-  expect(response.ok()).toBe(true);
-  return response.json();
-}
-
-// the tool name of the job of each file in the session, null for a file without one
-async function jobsOfFiles(api: Api, sessionId: string): Promise<Record<string, (string | null | undefined)[]>> {
-  const jobs = new Map((await getJobs(api, sessionId)).map((j) => [j.jobId, j]));
-  const files: Record<string, (string | null | undefined)[]> = {};
-  for (const dataset of await getDatasets(api, sessionId)) {
-    // a job id that the session doesn't have shows as undefined
-    const toolName = dataset.sourceJob == null ? null : jobs.get(dataset.sourceJob)?.toolName;
-    (files[dataset.name] ??= []).push(toolName);
-  }
-  return files;
-}
 
 test("a file whose job is gone is copied to a new session without the job", async ({
   page,

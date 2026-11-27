@@ -5,6 +5,7 @@ import type { Dataset, Label, Session } from "chipster-js-common";
 import { jwtDecode } from "jwt-decode";
 import { parse } from "yaml";
 
+import type { PageErrors } from "./fixtures";
 import { USER_STATE } from "./login";
 
 /*
@@ -121,6 +122,15 @@ export async function getSession(api: Api, sessionId: string): Promise<Session> 
   const response = await api.get("session-db", `/sessions/${sessionId}`);
   expect(response.ok()).toBe(true);
   return response.json();
+}
+
+// renames the session through the API, e.g. to give the session of the sessionId fixture a unique name
+export async function renameSession(api: Api, sessionId: string, name: string): Promise<void> {
+  const response = await api.put("session-db", `/sessions/${sessionId}`, {
+    ...(await getSession(api, sessionId)),
+    name,
+  });
+  expect(response.ok(), `rename session ${response.status()}`).toBe(true);
 }
 
 export async function createDataset(
@@ -332,4 +342,160 @@ export async function deleteDatasetFromMenu(page: Page, datasetId: string) {
   await page.locator("ch-selected-files").getByTitle("Actions").locator("visible=true").first().click();
   await page.locator(".dropdown-menu.show").getByText("Delete", { exact: true }).click();
   await page.locator(".modal-footer").getByRole("button", { name: "Delete" }).click();
+}
+
+/*
+ * Helpers of the specs that copy files from one session to another: copying the selected files,
+ * Duplicate and Merge session.
+ */
+
+// the label names of each file of the session, by file name, one array per file of that name, e.g.
+// { "a.tsv": [["label-a"]] }
+export async function labelsOfFiles(api: Api, sessionId: string): Promise<Record<string, (string | undefined)[][]>> {
+  const labels = new Map((await getLabels(api, sessionId)).map((l) => [l.labelId, l.name]));
+  const files: Record<string, (string | undefined)[][]> = {};
+  for (const dataset of await getDatasets(api, sessionId)) {
+    // a label id that the session doesn't have shows as undefined, so that a broken copy fails the check
+    const names = (dataset.labelIds ?? []).map((id) => labels.get(id)).sort();
+    (files[dataset.name] ??= []).push(names);
+  }
+  return files;
+}
+
+// the labels of the session, without the ids and times
+export async function labelNamesAndColors(api: Api, sessionId: string) {
+  return (await getLabels(api, sessionId))
+    .map(({ name, color }) => ({ name, color }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export interface TestJob {
+  jobId: string;
+  toolName: string;
+  outputs: { outputId: string; datasetId: string }[];
+}
+
+export async function getJobs(api: Api, sessionId: string): Promise<TestJob[]> {
+  const response = await api.get("session-db", `/sessions/${sessionId}/jobs`);
+  expect(response.ok()).toBe(true);
+  return response.json();
+}
+
+// the tool name of the job of each file in the session, one per file of that name, null for a file without one
+export async function jobsOfFiles(api: Api, sessionId: string): Promise<Record<string, (string | null | undefined)[]>> {
+  const jobs = new Map((await getJobs(api, sessionId)).map((j) => [j.jobId, j]));
+  const files: Record<string, (string | null | undefined)[]> = {};
+  for (const dataset of await getDatasets(api, sessionId)) {
+    // a job id that the session doesn't have shows as undefined
+    const toolName = dataset.sourceJob == null ? null : jobs.get(dataset.sourceJob)?.toolName;
+    (files[dataset.name] ??= []).push(toolName);
+  }
+  return files;
+}
+
+/*
+ * Three files made by jobs: the job of made.txt is in the session, the one of orphan.txt has
+ * been deleted, e.g. through the API, and the one of running.txt is still running, which a copy
+ * leaves out too. A copy takes the completed job, and leaves the other two files without one,
+ * like uploaded files. orphan.txt has the label labelId, and made.txt and orphan.txt share the
+ * label sharedLabelId, if it's given.
+ */
+export async function createFilesWithJobs(api: Api, sessionId: string, labelId: string, sharedLabelId?: string) {
+  const shared = sharedLabelId == null ? [] : [sharedLabelId];
+  const job = { ...TEST_JOB, toolName: "Kept tool", state: "COMPLETED" };
+  const keptJob = await createJob(api, sessionId, job);
+  const madeId = await createDataset(
+    api,
+    sessionId,
+    { name: "made.txt", x: 100, y: 100, sourceJob: keptJob, labelIds: shared },
+    "m\n",
+  );
+  const goneJob = await createJob(api, sessionId, { ...job, toolName: "Gone tool" });
+  const orphanId = await createDataset(
+    api,
+    sessionId,
+    { name: "orphan.txt", x: 300, y: 100, sourceJob: goneJob, labelIds: [labelId, ...shared] },
+    "o\n",
+  );
+  const deleted = await api.delete("session-db", `/sessions/${sessionId}/jobs/${goneJob}`);
+  expect(deleted.ok(), `delete job: ${deleted.status()}`).toBe(true);
+  // TEST_JOB is RUNNING, and the tool is run nowhere
+  const runningJob = await createJob(api, sessionId, { ...TEST_JOB, toolName: "Running tool" });
+  const runningId = await createDataset(
+    api,
+    sessionId,
+    { name: "running.txt", x: 500, y: 100, sourceJob: runningJob },
+    "r\n",
+  );
+  return { madeId, orphanId, runningId };
+}
+
+/*
+ * The source session of the Duplicate and Merge tests: the files of createFilesWithJobs() with two
+ * labels, label-a on orphan.txt, and label-b on made.txt and orphan.txt. The checks of a copy of
+ * it, and of the source after the copy, are below.
+ */
+export async function createLabelledFilesWithJobs(api: Api, sessionId: string) {
+  const labelA = await createLabel(api, sessionId, "label-a", "#ff0000");
+  const labelB = await createLabel(api, sessionId, "label-b", "#00ff00");
+  return createFilesWithJobs(api, sessionId, labelA, labelB);
+}
+
+export const COPIED_LABELS = [
+  { name: "label-a", color: "#ff0000" },
+  { name: "label-b", color: "#00ff00" },
+];
+export const COPIED_LABELS_OF_FILES = {
+  "made.txt": [["label-b"]],
+  "orphan.txt": [["label-a", "label-b"]],
+  "running.txt": [[]],
+};
+// the completed job is copied, the other two files have no job
+export const COPIED_JOBS_OF_FILES = { "made.txt": ["Kept tool"], "orphan.txt": [null], "running.txt": [null] };
+// the source still refers to the deleted job, which shows as undefined
+export const SOURCE_JOBS_OF_FILES = {
+  "made.txt": ["Kept tool"],
+  "orphan.txt": [undefined],
+  "running.txt": ["Running tool"],
+};
+
+/*
+ * The session list modal of Copy to existing session and Merge session: picks the session by its
+ * name, which has to be unique, because the tests run in parallel as the same user and the list
+ * has the sessions of all of them, and then clicks the button.
+ */
+export async function pickSession(page: Page, title: string, sessionName: string, button: string) {
+  const modal = page.getByRole("dialog");
+  await expect(modal).toContainText(title);
+  await modal.locator("#value").click();
+  await modal.getByRole("button", { name: sessionName, exact: true }).click();
+  await modal.getByRole("button", { name: button, exact: true }).click();
+}
+
+// a copied file shows its label in the details, in the session that the app opened after the copy
+export async function expectLabelShown(page: Page, sessionId: string, datasetId: string, label: string) {
+  await expect(page).toHaveURL(new RegExp(`/analyze/${sessionId}$`), { timeout: 30_000 });
+  await expect(datasetNode(page, datasetId)).toBeVisible({ timeout: 30_000 });
+  await datasetNode(page, datasetId).click();
+  await visualizationTab(page, "Details").click();
+  await expect(page.locator("ch-single-dataset ch-label-pill").filter({ hasText: label })).toHaveCount(1);
+}
+
+/*
+ * Close the page first, the app would react to the deletion of the session it shows. The sessions
+ * are looked up only after that: if the test failed during a copy, the app may still have been
+ * creating the copy.
+ */
+export async function deleteSessions(
+  page: Page,
+  pageErrors: PageErrors,
+  api: Api,
+  sessionIds: () => Promise<string[]>,
+) {
+  await pageErrors.settle();
+  await page.close();
+  for (const sessionId of await sessionIds()) {
+    const deleted = await api.delete("session-db", `/sessions/${sessionId}`);
+    expect(deleted.ok(), `delete session: ${deleted.status()}`).toBe(true);
+  }
 }
